@@ -1,0 +1,145 @@
+/* Service pages shared styles — verbatim from prototypes. D59 */
+
+/* ---------- PAGE HERO ---------- */
+.pageHero{min-height:calc(100vh - 76px);display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 0;}
+.crumb{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--neutral-600);margin-bottom:28px;}
+.crumb a{color:var(--neutral-600);transition:color .15s;}
+.crumb a:hover{color:var(--accent-green);}
+.sep{color:var(--neutral-200);}
+.crumb [aria-current="page"]{color:var(--primary-navy);font-weight:600;}
+.pageHero h1{max-width:22ch;margin:0 auto 20px;}
+.sub{font-size:20px;line-height:1.55;color:var(--neutral-600);max-width:58ch;margin:0 auto 32px;}
+.heroCta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:36px;}
+.heroRef{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.04em;color:var(--neutral-600);text-transform:uppercase;margin-bottom:14px;}
+.heroRef::before{content:"";display:inline-block;width:24px;height:1px;background:var(--neutral-200);}
+.heroRef::after{content:"";display:inline-block;width:24px;height:1px;background:var(--neutral-200);}
+
+/* ---------- AMBER ALERT ---------- */
+.amberAlert{display:flex;align-items:flex-start;gap:14px;max-width:760px;margin:0 auto;text-align:left;background:rgba(217,118,6,.10);border:1px solid var(--warning-amber);border-radius:var(--r-card);padding:18px 22px;}
+.amberAlert .icWrap{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-btn);background:rgba(217,118,6,.18);color:var(--warning-amber);display:flex;align-items:center;justify-content:center;}
+.amberAlert .alertBody{flex:1;}
+.amberAlert .alertLbl{display:block;font-size:13px;font-weight:700;color:var(--warning-amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.amberAlert p{font-size:15px;color:var(--neutral-900);line-height:1.55;}
+
+/* ---------- PRE-DEPOSIT INFO (hero) ---------- */
+.predepositInfo{display:flex;align-items:flex-start;gap:14px;max-width:760px;margin:0 auto;text-align:left;background:var(--neutral-50);border:1.5px solid var(--primary-deep-blue);border-radius:var(--r-card);padding:18px 22px;}
+.predepositInfo .icWrap{flex:0 0 auto;width:36px;height:36px;border-radius:var(--r-btn);background:rgba(27,58,107,.12);color:var(--primary-deep-blue);display:flex;align-items:center;justify-content:center;}
+.predepositInfo .piBody{flex:1;}
+.predepositInfo .piLbl{display:block;font-size:13px;font-weight:700;color:var(--primary-deep-blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.predepositInfo p{font-size:15px;color:var(--neutral-900);line-height:1.6;}
+.predepositInfo strong{color:var(--primary-navy);}
+
+/* ---------- WHAT IS — 2-col text + callout ---------- */
+.whatisGrid{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:start;}
+.whatisText p{font-size:16px;color:var(--neutral-900);line-height:1.7;}
+.whatisText p + p{margin-top:18px;}
+.whatisText strong{color:var(--primary-navy);font-weight:600;}
+.callout{padding:28px;background:#fff;}
+.callout .calloutLbl{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--primary-deep-blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;}
+.callout .calloutLbl::before{content:"";width:6px;height:6px;border-radius:1px;background:var(--accent-green);}
+.refRow{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--neutral-600);margin-bottom:14px;padding-bottom:14px;border-bottom:1px dashed var(--neutral-200);}
+.callout p{font-size:15px;color:var(--neutral-900);line-height:1.65;}
+.callout p + p{margin-top:12px;}
+
+/* ---------- DO CARDS ---------- */
+.doGrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.doGrid4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+.doGrid5{display:grid;grid-template-columns:repeat(6,1fr);gap:24px;}
+.doGrid5 .doCard{grid-column:span 2;}
+.doGrid5 .doCard:nth-child(4),.doGrid5 .doCard:nth-child(5){grid-column:span 3;}
+.doCard{padding:28px;display:flex;flex-direction:column;gap:14px;}
+.doCard .icWrap{width:48px;height:48px;border-radius:var(--r-btn);background:var(--neutral-50);color:var(--primary-deep-blue);display:flex;align-items:center;justify-content:center;}
+.doCard h3{font-size:20px;}
+.doCard p{font-size:15px;color:var(--neutral-600);line-height:1.6;}
+
+/* ---------- DOCUMENTS REQUIRED ---------- */
+.docChecklist{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:14px 32px;max-width:880px;margin:0 auto;padding:6px 0;}
+.docChecklist li{display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:16px 18px;}
+.docChecklist .ic{width:22px;height:22px;flex:0 0 auto;color:var(--accent-green);margin-top:1px;}
+.docChecklist .docItemBody{display:flex;flex-direction:column;gap:3px;}
+.docChecklist .nm{font-size:16px;font-weight:600;color:var(--primary-navy);line-height:1.3;}
+.docChecklist .fmt{font-size:13px;color:var(--neutral-600);line-height:1.45;}
+.docReassure{display:flex;align-items:center;justify-content:center;gap:8px;max-width:880px;margin:24px auto 0;font-size:14px;color:var(--neutral-600);}
+.docReassure .ic{width:16px;height:16px;color:var(--accent-green);flex:0 0 auto;}
+.docNote{display:flex;align-items:flex-start;gap:12px;max-width:880px;margin:20px auto 0;background:rgba(217,119,6,.07);border:1px solid #F0D9B5;border-radius:var(--r-card);padding:14px 18px;}
+.docNote .ic{width:18px;height:18px;flex:0 0 auto;color:var(--warning-amber);margin-top:2px;}
+.docNote p{font-size:14px;color:var(--neutral-900);line-height:1.55;}
+
+/* ---------- HOW IT WORKS ---------- */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;position:relative;}
+.steps::before{content:"";position:absolute;top:24px;left:12.5%;right:12.5%;height:2px;background:var(--neutral-200);}
+.step{display:flex;flex-direction:column;align-items:flex-start;gap:14px;position:relative;}
+.step .num{width:48px;height:48px;border-radius:50%;background:var(--primary-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;z-index:1;}
+.step h3{font-size:19px;}
+.step p{font-size:14px;color:var(--neutral-600);line-height:1.5;}
+.sla{margin-top:4px;display:inline-flex;align-items:center;gap:5px;}
+.stepBody{flex:1;display:flex;flex-direction:column;gap:8px;padding-top:2px;}
+
+/* ---------- PRICING & CTA ---------- */
+.pricingBlock{text-align:center;color:#fff;max-width:680px;margin:0 auto;}
+.pricingBlock h2{color:#fff;margin-bottom:14px;}
+.lede{color:rgba(255,255,255,.78);font-size:18px;margin-bottom:40px;}
+.priceCard{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.14);border-radius:var(--r-card);padding:40px 32px;margin-bottom:32px;}
+.priceCard .amt{font-size:64px;font-weight:700;color:#fff;line-height:1;letter-spacing:-.02em;}
+.amtMeta{display:block;font-size:15px;font-weight:500;color:#C7D2E0;margin-top:14px;}
+.priceCard .divider{height:1px;background:rgba(255,255,255,.14);margin:32px auto;max-width:280px;}
+.incLabel{font-size:12px;font-weight:600;color:#9FB0C4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:18px;}
+.priceCard ul{list-style:none;display:flex;flex-direction:column;gap:13px;text-align:left;max-width:380px;margin:0 auto;}
+.priceCard ul li{display:flex;align-items:flex-start;gap:10px;font-size:15px;color:#fff;line-height:1.5;}
+.priceCard ul li .ic{width:18px;height:18px;flex:0 0 auto;color:#3FCB85;margin-top:2px;}
+.ctaRow{display:flex;justify-content:center;margin-bottom:18px;}
+.payNote{font-size:14px;color:rgba(255,255,255,.7);line-height:1.55;max-width:46ch;margin:0 auto;}
+
+/* Pre-deposit amber box inside pricing */
+.predepositBox{display:flex;align-items:flex-start;gap:12px;border:1px solid var(--warning-amber);border-radius:var(--r-btn);background:rgba(217,119,6,.10);padding:14px 16px;margin-top:24px;max-width:420px;margin-left:auto;margin-right:auto;text-align:left;}
+.predepositBox .ic{width:18px;height:18px;flex:0 0 auto;color:var(--warning-amber);margin-top:2px;}
+.pdLabel{display:block;font-size:12px;font-weight:700;color:var(--warning-amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.predepositBox p{font-size:14px;color:rgba(255,255,255,.88);line-height:1.5;}
+
+/* ---------- RELATED SERVICES ---------- */
+.relatedGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+.relatedSingle{max-width:560px;margin:0 auto;}
+.relatedCard{padding:28px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:border-color .15s,box-shadow .15s;text-decoration:none;}
+.relatedCard:hover{border-color:var(--accent-green);box-shadow:var(--shadow-md);}
+.relatedCard:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);border-radius:var(--r-card);}
+.relatedSingle .relatedCard{justify-content:flex-start;}
+.rcLeft{display:flex;flex-direction:column;gap:8px;flex:1;}
+.rcLabel{font-size:12px;font-weight:600;color:var(--accent-green);text-transform:uppercase;letter-spacing:.08em;}
+.relatedCard h3{font-size:20px;color:var(--primary-navy);line-height:1.25;}
+.rcDesc{font-size:14px;color:var(--neutral-600);line-height:1.5;}
+.rcPrice{font-size:22px;font-weight:700;color:var(--primary-navy);margin-top:4px;}
+.rcArrow{flex:0 0 40px;height:40px;border-radius:var(--r-btn);background:var(--neutral-50);display:flex;align-items:center;justify-content:center;color:var(--primary-navy);transition:background .15s,color .15s;}
+.relatedCard:hover .rcArrow{background:var(--accent-green);color:#fff;}
+.relatedSingle .rcArrow{flex:0 0 44px;height:44px;}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:1024px){
+  .whatisGrid{grid-template-columns:1fr;gap:32px;}
+  .doGrid3{grid-template-columns:1fr;gap:18px;}
+  .doGrid4{grid-template-columns:repeat(2,1fr);gap:18px;}
+  .doGrid5{grid-template-columns:repeat(2,1fr);}
+  .doGrid5 .doCard{grid-column:span 1 !important;}
+  .steps{grid-template-columns:repeat(2,1fr);}
+  .steps::before{display:none;}
+  .docChecklist{grid-template-columns:1fr;gap:12px;}
+  .relatedGrid{grid-template-columns:1fr;}
+}
+@media (max-width:640px){
+  .pageHero{min-height:auto;padding:40px 0 48px;}
+  .sub{font-size:17px;}
+  .heroCta{flex-direction:column;gap:12px;}
+  .heroCta :global(.btn){width:100%;}
+  .amberAlert{margin:0 -4px;padding:16px;border-radius:var(--r-card);}
+  .predepositInfo{padding:16px;border-radius:var(--r-card);}
+  .whatisGrid{display:flex;flex-direction:column;}
+  .whatisGrid .callout{order:-1;}
+  .doGrid4{grid-template-columns:1fr;}
+  .doGrid5{grid-template-columns:1fr;}
+  .steps{grid-template-columns:1fr;gap:28px;}
+  .steps::before{display:block;content:"";top:24px;bottom:24px;left:23px;right:auto;width:2px;height:auto;}
+  .step{flex-direction:row;align-items:flex-start;gap:16px;}
+  .step .num{flex:0 0 48px;}
+  .priceCard{padding:32px 22px;}
+  .priceCard .amt{font-size:52px;}
+  .relatedCard{flex-direction:column;align-items:flex-start;}
+}
