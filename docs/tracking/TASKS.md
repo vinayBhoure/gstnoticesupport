@@ -1,0 +1,92 @@
+# Task Board — gstnoticesupport.in
+
+> Updated after every completed task. Format: `[status] Phase · Layer · Priority — Description`
+> Status: `✅ done` · `🔄 in progress` · `⬚ pending` · `⛔ blocked`
+> Priority: P1 = must ship · P2 = should ship · P3 = nice to have
+
+---
+
+## Phase 1 — Marketing Site (Launch: 15–16 June 2026)
+
+### EP1 — Project Scaffold, Tooling & Design System
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | Monorepo scaffold — `client/` (Next.js 16) + `server/` (Express + TS) | Independent packages, no shared node_modules |
+| ✅ | Tailwind v4 wired to `tokens.css` via `@theme inline` | `client/src/styles/tokens.css` copied from resources |
+| ✅ | Inter + JetBrains Mono fonts via `next/font/google` | CSS variables `--font-inter`, `--font-jetbrains-mono` |
+| ✅ | UI primitives: `Button`, `Input`, `Card`, `Badge` | `client/src/components/ui/` — tokens.css CSS classes, no hex |
+| ✅ | Primitives showcase page (`/`) — SSG verified | EP1 DoD page at `localhost:3000` |
+| ✅ | Express server: Helmet, CORS, cookie-parser, `/health` endpoint | Middleware chain per HLD §6.2 |
+| ✅ | Server utilities: `ApiError`, `asyncHandler`, `envelope`, `errorHandler` | `server/src/utils/` + `server/src/middleware/` |
+| ✅ | `server/.env.example` with `PORT` and `CLIENT_URL` | Phase 1 vars only |
+
+### EP2 — Public Marketing Pages
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Homepage — all 12 sections (SSG) | Reference: `resources/ui/Homepage.html` |
+| ⬚ | Service page — GSTAT Appeal | Reference: `resources/ui/GSTAT Appeal Service.html` |
+| ⬚ | Service page — Commissioner Appeal | Reference: `resources/ui/Commissioner Appeal Service.html` |
+| ⬚ | Service page — SCN Reply | Reference: `resources/ui/SCN Reply Service.html` |
+| ⬚ | Service page — ASMT-10 Reply | Reference: `resources/ui/ASMT-10 Reply Service.html` |
+| ⬚ | Pricing page (with pre-deposit disclosure for GSTAT + Commissioner) | Reference: `resources/ui/Pricing.html` |
+| ⬚ | About page | Reference: `resources/ui/About.html` |
+| ⬚ | FAQ page | Reference: `resources/ui/FAQ.html` |
+| ⬚ | Contact page | Reference: `resources/ui/Contact.html` |
+| ⬚ | Shared Navbar component (sticky, services dropdown, mobile drawer) | Per `components.md → Navbar` |
+| ⬚ | Shared Footer component (4-column, trust signals, legal identity) | Per `components.md → Footer` |
+| ⬚ | WhatsApp floating button (appears after first scroll, mobile) | Per `components.md → WhatsApp Floating Button` |
+| ⬚ | Sticky mobile bottom bar (Call + Book Service) | Per `components.md → Sticky Mobile Bottom Bar` |
+
+### EP3 — Lead Capture & Phase 1 Integrations
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Shared Zod `contactSchema` in `server/src/schemas/contact.schema.ts` | |
+| ⬚ | POST `/api/v1/contact` endpoint — Resend email to admin | Blocked: Resend API key pending |
+| ⬚ | Contact form (React Hook Form + zodResolver) with field-level errors | Blocked: endpoint needed |
+| ⬚ | Rate limit: 3 requests / 60 min / IP on contact endpoint | `express-rate-limit` |
+| ⬚ | Calendly popup widget integration | Blocked: Calendly URL pending |
+| ⬚ | WhatsApp click-to-chat redirect | Deep-link: `https://wa.me/919343297622?text=Hi%2C+I+want+to+know+more+about+the+service.` |
+
+### EP4 — SEO, Performance & Legal Pages
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Metadata API — unique title + description per page | Next.js `generateMetadata` |
+| ⬚ | OG + Twitter card tags on all public pages | |
+| ⬚ | Schema.org JSON-LD: `Service`, `Organization`, `FAQPage` | |
+| ⬚ | `sitemap.xml` — all public routes | Disallow: /dashboard, /admin, /payment |
+| ⬚ | `robots.txt` | |
+| ⬚ | `<Image>` optimization audit — all `<img>` → `next/image` with `priority` on hero | |
+| ⬚ | Privacy Policy page | Blocked: legal content pending |
+| ⬚ | Terms & Conditions page | Blocked: legal content pending |
+| ⬚ | Google Analytics GA4 integration | Blocked: Measurement ID pending |
+| ⬚ | Google Search Console setup | Blocked: access pending |
+
+### EP5 — Phase 1 Hardening & Launch
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Vercel project setup + env vars for staging | |
+| ⬚ | Railway project setup + env vars for staging | Confirmed: Railway for Phase 1 |
+| ⬚ | Cloudflare DNS + SSL "Full (strict)" | Blocked: Cloudflare account pending |
+| ⬚ | Trust signals (legal name, CIN, GSTIN, address, grievance officer) | Blocked: content pending via env |
+| ⬚ | Production phone number visible in header | |
+| ⬚ | `/deploy staging` pre + post smoke tests | |
+| ⬚ | `staging → main` PR + production deploy | |
+
+---
+
+## Phase 2 — Platform (Launch: 5–6 July 2026)
+
+> Tasks will be added as Phase 1 ships. See README §Roadmap for full Phase 2 scope (EP6–EP15).
+
+---
+
+## Blocked Items (waiting on external input)
+
+| Blocker | Required For | Owner |
+|---|---|---|
+| Resend API key + verified sender domain | EP3 contact email | Client |
+| Calendly account + event URL | EP3 popup | Client |
+| Trust signals: legal name, CIN, GSTIN, address, grievance officer, phone | EP2 Footer, EP5 | Client |
+| Cloudflare account access | EP5 DNS/SSL | Client |
+| GA4 Measurement ID | EP4 analytics | Client |
+| Google Search Console access | EP4 | Client |
