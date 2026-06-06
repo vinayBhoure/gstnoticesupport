@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { Search, X, ChevronDown, HelpCircle } from 'lucide-react';
 import styles from '@/app/(public)/faq/faq.module.css';
@@ -253,6 +253,7 @@ function highlightText(text: string, query: string): React.ReactNode {
 export function FaqSection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [openItemId, setOpenItemId] = useState<string | null>(null);
+  const bodyRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const trimmedQuery = searchQuery.trim();
 
@@ -377,15 +378,22 @@ export function FaqSection() {
                             aria-hidden="true"
                           />
                         </button>
-                        {isOpen && (
-                          <div
-                            className={styles.faqBody}
-                            id={`faq-body-${item.id}`}
-                            role="region"
-                          >
-                            {item.answerJsx}
+                        <div
+                          className={styles.faqBody}
+                          id={`faq-body-${item.id}`}
+                          role="region"
+                          style={{
+                            maxHeight: isOpen && bodyRefs.current[item.id]
+                              ? `${bodyRefs.current[item.id]!.scrollHeight}px`
+                              : '0',
+                            overflow: 'hidden',
+                            transition: 'max-height 0.28s cubic-bezier(0.4,0,0.2,1)',
+                          }}
+                          ref={el => { bodyRefs.current[item.id] = el; }}
+                        >
+                          <div style={{ padding: '0 0 20px' }}>{item.answerJsx}
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })}

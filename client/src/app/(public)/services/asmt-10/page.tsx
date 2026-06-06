@@ -5,6 +5,7 @@ import {
   CheckCircle2, ShieldCheck, Clock, Check, AlertTriangle,
 } from 'lucide-react';
 import styles from '../service.module.css';
+import { AnimateIn } from '@/components/ui/AnimateIn';
 
 export const dynamic = 'force-static';
 
@@ -82,21 +83,27 @@ export default function Asmt10Page() {
             <p>Every ASMT-10 is reviewed by an ICAI-registered CA — no junior triage queue.</p>
           </div>
           <div className={styles.doGrid3}>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><FileSearch size={24} /></div>
-              <h3>Legal Analysis of Discrepancy</h3>
-              <p>We map each flagged item to its source — returns, ledgers, invoices — and prepare a defensible position grounded in the CGST Act and relevant CBIC circulars.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><FilePenLine size={24} /></div>
-              <h3>Structured Written Reply</h3>
-              <p>A clear, paragraph-numbered ASMT-11 reply with a reconciliation working annexed — the format scrutiny officers expect and act on quickly.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><UploadCloud size={24} /></div>
-              <h3>Portal Filing Support</h3>
-              <p>We file your reply in FORM GST ASMT-11 on the GST portal, attach supporting documents, and share the acknowledgement with you.</p>
-            </div>
+            <AnimateIn delay={0}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><FileSearch size={24} /></div>
+                <h3>Legal Analysis of Discrepancy</h3>
+                <p>We map each flagged item to its source — returns, ledgers, invoices — and prepare a defensible position grounded in the CGST Act and relevant CBIC circulars.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={100}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><FilePenLine size={24} /></div>
+                <h3>Structured Written Reply</h3>
+                <p>A clear, paragraph-numbered ASMT-11 reply with a reconciliation working annexed — the format scrutiny officers expect and act on quickly.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={200}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><UploadCloud size={24} /></div>
+                <h3>Portal Filing Support</h3>
+                <p>We file your reply in FORM GST ASMT-11 on the GST portal, attach supporting documents, and share the acknowledgement with you.</p>
+              </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -154,37 +161,45 @@ export default function Asmt10Page() {
             <h2>Your ASMT-10 Reply in 4 Steps</h2>
           </div>
           <div className={styles.steps}>
-            <div className={styles.step}>
-              <div className={styles.num}>1</div>
-              <div className={styles.stepBody}>
-                <h3>Upload Your ASMT-10</h3>
-                <p>Share your notice, returns, and reconciliation through our encrypted upload — you&#39;ll get a case reference number immediately.</p>
+            <AnimateIn delay={0}>
+              <div className={styles.step}>
+                <div className={styles.num}>1</div>
+                <div className={styles.stepBody}>
+                  <h3>Upload Your ASMT-10</h3>
+                  <p>Share your notice, returns, and reconciliation through our encrypted upload — you&#39;ll get a case reference number immediately.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>2</div>
-              <div className={styles.stepBody}>
-                <h3>CA Reviews &amp; Drafts the Reply</h3>
-                <p>An ICAI-registered CA analyses the flagged discrepancy and prepares your ASMT-11 reply with a reconciliation working.</p>
-                <span className={`badge badge-amber ${styles.sla}`}>
-                  <Clock size={13} />Draft prepared within 48 hours of document receipt
-                </span>
+            </AnimateIn>
+            <AnimateIn delay={120}>
+              <div className={styles.step}>
+                <div className={styles.num}>2</div>
+                <div className={styles.stepBody}>
+                  <h3>CA Reviews &amp; Drafts the Reply</h3>
+                  <p>An ICAI-registered CA analyses the flagged discrepancy and prepares your ASMT-11 reply with a reconciliation working.</p>
+                  <span className={`badge badge-amber ${styles.sla}`}>
+                    <Clock size={13} />Draft prepared within 48 hours of document receipt
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>3</div>
-              <div className={styles.stepBody}>
-                <h3>You Review &amp; Confirm</h3>
-                <p>Read the draft, raise questions, and confirm. One round of revision is included before anything is filed.</p>
+            </AnimateIn>
+            <AnimateIn delay={240}>
+              <div className={styles.step}>
+                <div className={styles.num}>3</div>
+                <div className={styles.stepBody}>
+                  <h3>You Review &amp; Confirm</h3>
+                  <p>Read the draft, raise questions, and confirm. One round of revision is included before anything is filed.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>4</div>
-              <div className={styles.stepBody}>
-                <h3>We File ASMT-11 on the Portal</h3>
-                <p>We submit your reply in FORM GST ASMT-11 on the GST portal and share the acknowledgement with you.</p>
+            </AnimateIn>
+            <AnimateIn delay={360}>
+              <div className={styles.step}>
+                <div className={styles.num}>4</div>
+                <div className={styles.stepBody}>
+                  <h3>We File ASMT-11 on the Portal</h3>
+                  <p>We submit your reply in FORM GST ASMT-11 on the GST portal and share the acknowledgement with you.</p>
+                </div>
               </div>
-            </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -213,7 +228,7 @@ export default function Asmt10Page() {
             </div>
 
             <div className={styles.ctaRow}>
-              <Link className="btn btn-primary" href="#book">
+              <Link className="btn btn-primary" href="/contact#callback">
                 <FileCheck2 size={18} />Book ASMT-10 Reply Now
               </Link>
             </div>

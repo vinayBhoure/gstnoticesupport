@@ -6,6 +6,7 @@ import {
   ArrowLeft, ArrowRight,
 } from 'lucide-react';
 import styles from '../service.module.css';
+import { AnimateIn } from '@/components/ui/AnimateIn';
 
 export const dynamic = 'force-static';
 
@@ -83,31 +84,41 @@ export default function CommissionerAppealPage() {
             <p>A complete, court-ready APL-01 bundle — every element drafted by a CA and Advocate working together.</p>
           </div>
           <div className={styles.doGrid5}>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><FileText size={24} /></div>
-              <h3>APL-01 Application</h3>
-              <p>The formal appeal application in the prescribed format, accurately completed with all required particulars.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><BookOpen size={24} /></div>
-              <h3>Statement of Facts</h3>
-              <p>A clear, chronological account of the transaction history and proceedings that led to the impugned order.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><Scale size={24} /></div>
-              <h3>Grounds of Appeal</h3>
-              <p>Legally reasoned grounds citing the CGST Act, CBIC circulars, and relevant tribunal / High Court decisions.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><Gavel size={24} /></div>
-              <h3>Prayer / Relief Sought</h3>
-              <p>Precise prayer clause specifying the relief — full quashing, partial reduction, or remand — appropriate to your case.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><Info size={24} /></div>
-              <h3>Pre-deposit Guidance</h3>
-              <p>We explain the Section 107(6) pre-deposit calculation and portal payment process — we do not collect or process government payments.</p>
-            </div>
+            <AnimateIn delay={0}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><FileText size={24} /></div>
+                <h3>APL-01 Application</h3>
+                <p>The formal appeal application in the prescribed format, accurately completed with all required particulars.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={70}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><BookOpen size={24} /></div>
+                <h3>Statement of Facts</h3>
+                <p>A clear, chronological account of the transaction history and proceedings that led to the impugned order.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={140}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><Scale size={24} /></div>
+                <h3>Grounds of Appeal</h3>
+                <p>Legally reasoned grounds citing the CGST Act, CBIC circulars, and relevant tribunal / High Court decisions.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={210}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><Gavel size={24} /></div>
+                <h3>Prayer / Relief Sought</h3>
+                <p>Precise prayer clause specifying the relief — full quashing, partial reduction, or remand — appropriate to your case.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={280}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><Info size={24} /></div>
+                <h3>Pre-deposit Guidance</h3>
+                <p>We explain the Section 107(6) pre-deposit calculation and portal payment process — we do not collect or process government payments.</p>
+              </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -165,37 +176,45 @@ export default function CommissionerAppealPage() {
             <h2>Your Commissioner Appeal in 4 Steps</h2>
           </div>
           <div className={styles.steps}>
-            <div className={styles.step}>
-              <div className={styles.num}>1</div>
-              <div className={styles.stepBody}>
-                <h3>Upload the Order &amp; Documents</h3>
-                <p>Share the demand order (OIO), SCN, SCN reply, and supporting documents through our encrypted portal. You&#39;ll receive a case reference number immediately.</p>
+            <AnimateIn delay={0}>
+              <div className={styles.step}>
+                <div className={styles.num}>1</div>
+                <div className={styles.stepBody}>
+                  <h3>Upload the Order &amp; Documents</h3>
+                  <p>Share the demand order (OIO), SCN, SCN reply, and supporting documents through our encrypted portal. You&#39;ll receive a case reference number immediately.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>2</div>
-              <div className={styles.stepBody}>
-                <h3>Appeal Bundle Drafted</h3>
-                <p>A CA and Advocate jointly draft the APL-01 application, Statement of Facts, Grounds of Appeal, and Prayer — with case-law research included.</p>
-                <span className={`badge badge-amber ${styles.sla}`}>
-                  <Clock size={13} />Draft prepared within 48 hours of document receipt
-                </span>
+            </AnimateIn>
+            <AnimateIn delay={120}>
+              <div className={styles.step}>
+                <div className={styles.num}>2</div>
+                <div className={styles.stepBody}>
+                  <h3>Appeal Bundle Drafted</h3>
+                  <p>A CA and Advocate jointly draft the APL-01 application, Statement of Facts, Grounds of Appeal, and Prayer — with case-law research included.</p>
+                  <span className={`badge badge-amber ${styles.sla}`}>
+                    <Clock size={13} />Draft prepared within 48 hours of document receipt
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>3</div>
-              <div className={styles.stepBody}>
-                <h3>You Review &amp; Pre-deposit</h3>
-                <p>Confirm the appeal bundle. You make the statutory pre-deposit (10% of disputed tax) directly on the GST portal before we file.</p>
+            </AnimateIn>
+            <AnimateIn delay={240}>
+              <div className={styles.step}>
+                <div className={styles.num}>3</div>
+                <div className={styles.stepBody}>
+                  <h3>You Review &amp; Pre-deposit</h3>
+                  <p>Confirm the appeal bundle. You make the statutory pre-deposit (10% of disputed tax) directly on the GST portal before we file.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>4</div>
-              <div className={styles.stepBody}>
-                <h3>We File APL-01 on the Portal</h3>
-                <p>We submit the complete appeal in FORM GST APL-01 on the portal and share the filing acknowledgement with you.</p>
+            </AnimateIn>
+            <AnimateIn delay={360}>
+              <div className={styles.step}>
+                <div className={styles.num}>4</div>
+                <div className={styles.stepBody}>
+                  <h3>We File APL-01 on the Portal</h3>
+                  <p>We submit the complete appeal in FORM GST APL-01 on the portal and share the filing acknowledgement with you.</p>
+                </div>
               </div>
-            </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -233,7 +252,7 @@ export default function CommissionerAppealPage() {
             </div>
 
             <div className={styles.ctaRow}>
-              <Link className="btn btn-primary" href="#book">
+              <Link className="btn btn-primary" href="/contact#callback">
                 <FileCheck2 size={18} />Book Commissioner Appeal Now
               </Link>
             </div>

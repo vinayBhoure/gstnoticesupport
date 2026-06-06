@@ -6,6 +6,7 @@ import {
 import { PricingScrollButton } from '@/components/pricing/PricingScrollButton';
 import { PricingFaqAccordion } from '@/components/pricing/PricingFaqAccordion';
 import styles from './pricing.module.css';
+import { AnimateIn } from '@/components/ui/AnimateIn';
 
 export const dynamic = 'force-static';
 
@@ -43,87 +44,95 @@ export default function PricingPage() {
           <div className={styles.pricingGrid}>
 
             {/* ASMT-10 */}
-            <div className={styles.pCard}>
-              <span className={styles.noticeTag}>Section 61 CGST Act scrutiny</span>
-              <h3>ASMT-10 Reply</h3>
-              <div className={styles.price}>₹2,999</div>
-              <p className={styles.priceSub}>One-time professional fee</p>
-              <ul className={styles.incList}>
-                <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Structured reply draft</li>
-                <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
-              </ul>
-              <div className={styles.cardBottom}>
-                <div className={styles.pdSpacer} aria-hidden="true" />
-                <Link className="btn btn-primary" href="/services/asmt-10">Book ASMT-10 Reply</Link>
+            <AnimateIn delay={0}>
+              <div className={styles.pCard}>
+                <span className={styles.noticeTag}>Section 61 CGST Act scrutiny</span>
+                <h3>ASMT-10 Reply</h3>
+                <div className={styles.price}>₹2,999</div>
+                <p className={styles.priceSub}>One-time professional fee</p>
+                <ul className={styles.incList}>
+                  <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Structured reply draft</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
+                </ul>
+                <div className={styles.cardBottom}>
+                  <div className={styles.pdSpacer} aria-hidden="true" />
+                  <Link className="btn btn-primary" href="/services/asmt-10">Book ASMT-10 Reply</Link>
+                </div>
               </div>
-            </div>
+            </AnimateIn>
 
             {/* SCN Reply — Most Popular */}
-            <div className={`${styles.pCard} ${styles.popular}`}>
-              <span className={styles.popularBadge} aria-label="Most popular service">Most Popular</span>
-              <span className={styles.noticeTag}>DRC-01 / DRC-01A demand notice</span>
-              <h3>SCN Reply</h3>
-              <div className={styles.price}>₹5,999</div>
-              <p className={styles.priceSub}>One-time professional fee</p>
-              <ul className={styles.incList}>
-                <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Structured reply draft</li>
-                <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
-              </ul>
-              <div className={styles.cardBottom}>
-                <div className={styles.pdSpacer} aria-hidden="true" />
-                <Link className="btn btn-primary" href="/services/scn-reply">Book SCN Reply</Link>
+            <AnimateIn delay={80}>
+              <div className={`${styles.pCard} ${styles.popular}`}>
+                <span className={styles.popularBadge} aria-label="Most popular service">Most Popular</span>
+                <span className={styles.noticeTag}>DRC-01 / DRC-01A demand notice</span>
+                <h3>SCN Reply</h3>
+                <div className={styles.price}>₹5,999</div>
+                <p className={styles.priceSub}>One-time professional fee</p>
+                <ul className={styles.incList}>
+                  <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Structured reply draft</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
+                </ul>
+                <div className={styles.cardBottom}>
+                  <div className={styles.pdSpacer} aria-hidden="true" />
+                  <Link className="btn btn-primary" href="/services/scn-reply">Book SCN Reply</Link>
+                </div>
               </div>
-            </div>
+            </AnimateIn>
 
             {/* Commissioner Appeal */}
-            <div className={styles.pCard}>
-              <span className={styles.noticeTag}>APL-01 first appeal</span>
-              <h3>Commissioner Appeal</h3>
-              <div className={styles.price}>₹9,999</div>
-              <p className={styles.priceSub}>One-time professional fee</p>
-              <ul className={styles.incList}>
-                <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Complete appeal bundle draft</li>
-                <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
-              </ul>
-              <div className={styles.cardBottom}>
-                <div className={styles.pdNote} role="note" aria-label="Government pre-deposit note">
-                  <AlertTriangle className={styles.ic} aria-hidden="true" />
-                  <p><strong>Govt. pre-deposit:</strong> 10% of disputed tax — paid by you to GST portal. Not our fee.</p>
+            <AnimateIn delay={160}>
+              <div className={styles.pCard}>
+                <span className={styles.noticeTag}>APL-01 first appeal</span>
+                <h3>Commissioner Appeal</h3>
+                <div className={styles.price}>₹9,999</div>
+                <p className={styles.priceSub}>One-time professional fee</p>
+                <ul className={styles.incList}>
+                  <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Complete appeal bundle draft</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
+                </ul>
+                <div className={styles.cardBottom}>
+                  <div className={styles.pdNote} role="note" aria-label="Government pre-deposit note">
+                    <AlertTriangle className={styles.ic} aria-hidden="true" />
+                    <p><strong>Govt. pre-deposit:</strong> 10% of disputed tax — paid by you to GST portal. Not our fee.</p>
+                  </div>
+                  <Link className="btn btn-primary" href="/services/commissioner-appeal">Book Commissioner Appeal</Link>
                 </div>
-                <Link className="btn btn-primary" href="/services/commissioner-appeal">Book Commissioner Appeal</Link>
               </div>
-            </div>
+            </AnimateIn>
 
             {/* GSTAT Appeal */}
-            <div className={styles.pCard}>
-              <span className={styles.noticeTag}>APL-05 second appeal</span>
-              <h3>GSTAT Appeal</h3>
-              <div className={styles.price}>₹14,999</div>
-              <p className={styles.priceSub}>One-time professional fee</p>
-              <ul className={styles.incList}>
-                <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Complete APL-05 bundle draft</li>
-                <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
-                <li><Check className={styles.ic} aria-hidden="true" />Draft within 72 hours</li>
-              </ul>
-              <div className={styles.cardBottom}>
-                <div className={styles.pdNote} role="note" aria-label="Government pre-deposit note">
-                  <AlertTriangle className={styles.ic} aria-hidden="true" />
-                  <p><strong>Govt. pre-deposit:</strong> 20% of disputed tax — paid by you to GST portal. Not our fee.</p>
+            <AnimateIn delay={240}>
+              <div className={styles.pCard}>
+                <span className={styles.noticeTag}>APL-05 second appeal</span>
+                <h3>GSTAT Appeal</h3>
+                <div className={styles.price}>₹14,999</div>
+                <p className={styles.priceSub}>One-time professional fee</p>
+                <ul className={styles.incList}>
+                  <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Complete APL-05 bundle draft</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
+                  <li><Check className={styles.ic} aria-hidden="true" />Draft within 72 hours</li>
+                </ul>
+                <div className={styles.cardBottom}>
+                  <div className={styles.pdNote} role="note" aria-label="Government pre-deposit note">
+                    <AlertTriangle className={styles.ic} aria-hidden="true" />
+                    <p><strong>Govt. pre-deposit:</strong> 20% of disputed tax — paid by you to GST portal. Not our fee.</p>
+                  </div>
+                  <Link className="btn btn-primary" href="/services/gstat-appeal">Book GSTAT Appeal</Link>
                 </div>
-                <Link className="btn btn-primary" href="/services/gstat-appeal">Book GSTAT Appeal</Link>
               </div>
-            </div>
+            </AnimateIn>
 
           </div>
         </div>
@@ -198,7 +207,7 @@ export default function PricingPage() {
             <Link className="btn btn-primary" href="/contact">
               <Upload size={18} />Upload Your Notice
             </Link>
-            <Link className="btn btn-secondary on-dark" href="tel:+919800000000">
+            <Link className="btn btn-secondary on-dark" href="/contact#callback">
               <Phone size={18} />Request a Callback
             </Link>
           </div>

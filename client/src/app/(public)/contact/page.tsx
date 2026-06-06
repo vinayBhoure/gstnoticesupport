@@ -48,13 +48,13 @@ export default function ContactPage() {
                   </p>
                 </div>
                 <div className={styles.channelShortcuts}>
-                  <a className={styles.shortcutRow} href="tel:+919800000000" aria-label="Call GST Notice Support">
+                  <a className={styles.shortcutRow} href="tel:+919343297622" aria-label="Call GST Notice Support">
                     <Phone size={20} className={styles.scIc} aria-hidden="true" />
-                    Call +91 98000 00000
+                    Call +91 93432 97622
                   </a>
                   <a
                     className={styles.btnWaShortcut}
-                    href="https://wa.me/919800000000?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
+                    href="https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Open WhatsApp chat with GST Notice Support"
@@ -84,7 +84,7 @@ export default function ContactPage() {
                   <div className={styles.channelBody}>
                     <span className={styles.channelLabel}>Phone</span>
                     <span className={styles.channelValue}>
-                      <a href="tel:+919800000000">+91 98000 00000</a>
+                      <a href="tel:+919343297622">+91 93432 97622</a>
                     </span>
                     <span className={styles.channelHours}>Tap to call · Mon–Sat, 9 AM–7 PM IST</span>
                   </div>
@@ -103,7 +103,7 @@ export default function ContactPage() {
                     <span className={styles.channelLabel}>WhatsApp</span>
                     <a
                       className={styles.btnWaChannel}
-                      href="https://wa.me/919800000000?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
+                      href="https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="Chat on WhatsApp — opens WhatsApp"
@@ -175,7 +175,7 @@ export default function ContactPage() {
                   <strong>Prefer a callback?</strong>
                   <span>Leave your number and a convenient time — we will call you.</span>
                 </div>
-                <a className="btn btn-secondary" href="tel:+919800000000" aria-label="Request a callback">
+                <a className="btn btn-secondary" href="tel:+919343297622" aria-label="Request a callback">
                   <PhoneIncoming size={17} aria-hidden="true" />
                   Request a Callback
                 </a>

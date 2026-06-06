@@ -6,6 +6,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import styles from '../service.module.css';
+import { AnimateIn } from '@/components/ui/AnimateIn';
 
 export const dynamic = 'force-static';
 
@@ -83,26 +84,34 @@ export default function ScnReplyPage() {
             <p>CAs and Advocates work together on every SCN — legal drafting plus factual reconciliation in one team.</p>
           </div>
           <div className={styles.doGrid4}>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><Scale size={24} /></div>
-              <h3>Legal Analysis of Demand</h3>
-              <p>We review each ground of the demand under Section 73/74, assess limitation, and map the officer&#39;s allegations to the facts and applicable law.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><FilePenLine size={24} /></div>
-              <h3>Structured Reply Draft</h3>
-              <p>A point-by-point reply to every ground raised in the DRC-01, supported by case law citations and CBIC circulars where relevant.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><Folders size={24} /></div>
-              <h3>Evidence Compilation Guidance</h3>
-              <p>Your assigned expert tells you exactly which invoices, ledgers, or returns to annexe — no guesswork, no over-disclosure.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><UploadCloud size={24} /></div>
-              <h3>Portal Filing</h3>
-              <p>We upload and submit your reply on the GST portal, attach supporting documents, and share the filing acknowledgement.</p>
-            </div>
+            <AnimateIn delay={0}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><Scale size={24} /></div>
+                <h3>Legal Analysis of Demand</h3>
+                <p>We review each ground of the demand under Section 73/74, assess limitation, and map the officer&#39;s allegations to the facts and applicable law.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={80}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><FilePenLine size={24} /></div>
+                <h3>Structured Reply Draft</h3>
+                <p>A point-by-point reply to every ground raised in the DRC-01, supported by case law citations and CBIC circulars where relevant.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={160}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><Folders size={24} /></div>
+                <h3>Evidence Compilation Guidance</h3>
+                <p>Your assigned expert tells you exactly which invoices, ledgers, or returns to annexe — no guesswork, no over-disclosure.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={240}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><UploadCloud size={24} /></div>
+                <h3>Portal Filing</h3>
+                <p>We upload and submit your reply on the GST portal, attach supporting documents, and share the filing acknowledgement.</p>
+              </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -167,37 +176,45 @@ export default function ScnReplyPage() {
             <h2>Your SCN Reply in 4 Steps</h2>
           </div>
           <div className={styles.steps}>
-            <div className={styles.step}>
-              <div className={styles.num}>1</div>
-              <div className={styles.stepBody}>
-                <h3>Upload Your DRC-01</h3>
-                <p>Share the notice and supporting documents through our encrypted portal — you&#39;ll receive a case reference number immediately.</p>
+            <AnimateIn delay={0}>
+              <div className={styles.step}>
+                <div className={styles.num}>1</div>
+                <div className={styles.stepBody}>
+                  <h3>Upload Your DRC-01</h3>
+                  <p>Share the notice and supporting documents through our encrypted portal — you&#39;ll receive a case reference number immediately.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>2</div>
-              <div className={styles.stepBody}>
-                <h3>Expert Legal Analysis &amp; Draft</h3>
-                <p>A CA and Advocate review the demand, research applicable law and circulars, and prepare a structured point-by-point reply.</p>
-                <span className={`badge badge-amber ${styles.sla}`}>
-                  <Clock size={13} />Draft prepared within 48 hours of document receipt
-                </span>
+            </AnimateIn>
+            <AnimateIn delay={120}>
+              <div className={styles.step}>
+                <div className={styles.num}>2</div>
+                <div className={styles.stepBody}>
+                  <h3>Expert Legal Analysis &amp; Draft</h3>
+                  <p>A CA and Advocate review the demand, research applicable law and circulars, and prepare a structured point-by-point reply.</p>
+                  <span className={`badge badge-amber ${styles.sla}`}>
+                    <Clock size={13} />Draft prepared within 48 hours of document receipt
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>3</div>
-              <div className={styles.stepBody}>
-                <h3>You Review &amp; Confirm</h3>
-                <p>Read the draft, ask questions, and confirm. One round of revision is included before anything is filed.</p>
+            </AnimateIn>
+            <AnimateIn delay={240}>
+              <div className={styles.step}>
+                <div className={styles.num}>3</div>
+                <div className={styles.stepBody}>
+                  <h3>You Review &amp; Confirm</h3>
+                  <p>Read the draft, ask questions, and confirm. One round of revision is included before anything is filed.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>4</div>
-              <div className={styles.stepBody}>
-                <h3>We File on the GST Portal</h3>
-                <p>We submit your SCN reply on the GST portal, attach the supporting evidence, and share the filing acknowledgement.</p>
+            </AnimateIn>
+            <AnimateIn delay={360}>
+              <div className={styles.step}>
+                <div className={styles.num}>4</div>
+                <div className={styles.stepBody}>
+                  <h3>We File on the GST Portal</h3>
+                  <p>We submit your SCN reply on the GST portal, attach the supporting evidence, and share the filing acknowledgement.</p>
+                </div>
               </div>
-            </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -226,7 +243,7 @@ export default function ScnReplyPage() {
             </div>
 
             <div className={styles.ctaRow}>
-              <Link className="btn btn-primary" href="#book">
+              <Link className="btn btn-primary" href="/contact#callback">
                 <FileCheck2 size={18} />Book SCN Reply Now
               </Link>
             </div>

@@ -87,7 +87,7 @@ export default function AboutPage() {
                 <span className={styles.teamReg} aria-label="ICAI Registration number">ICAI Reg: M[PLACEHOLDER]</span>
                 <p className={styles.teamSpec}>Specialises in GST litigation, SCN replies, and appellate proceedings before Appellate Authorities.</p>
                 <div className={styles.teamFooter}>
-                  <a className={styles.teamLinkedin} href="#" aria-label="Rajesh Kumar Sharma on LinkedIn" rel="noopener" target="_blank">
+                  <a className={styles.teamLinkedin} href="https://linkedin.com/company/gstnoticesupport" aria-label="GST Notice Support on LinkedIn" rel="noopener noreferrer" target="_blank">
                     <LinkedInIcon />
                   </a>
                 </div>
@@ -109,7 +109,7 @@ export default function AboutPage() {
                 <span className={styles.teamReg} aria-label="Bar Council enrolment number">Bar No: KAR/[PLACEHOLDER]/2016</span>
                 <p className={styles.teamSpec}>Specialises in GST appellate representation, GSTAT filings, and departmental hearings across Karnataka and Tamil Nadu.</p>
                 <div className={styles.teamFooter}>
-                  <a className={styles.teamLinkedin} href="#" aria-label="Priya Venkataraman on LinkedIn" rel="noopener" target="_blank">
+                  <a className={styles.teamLinkedin} href="https://linkedin.com/company/gstnoticesupport" aria-label="GST Notice Support on LinkedIn" rel="noopener noreferrer" target="_blank">
                     <LinkedInIcon />
                   </a>
                 </div>
@@ -131,7 +131,7 @@ export default function AboutPage() {
                 <span className={styles.teamReg} aria-label="ICAI Registration number">ICAI Reg: M[PLACEHOLDER]</span>
                 <p className={styles.teamSpec}>Specialises in ASMT-10 scrutiny responses, ITC reconciliation disputes, and DRC-01A reply strategy.</p>
                 <div className={styles.teamFooter}>
-                  <a className={styles.teamLinkedin} href="#" aria-label="Anil Mehta on LinkedIn" rel="noopener" target="_blank">
+                  <a className={styles.teamLinkedin} href="https://linkedin.com/company/gstnoticesupport" aria-label="GST Notice Support on LinkedIn" rel="noopener noreferrer" target="_blank">
                     <LinkedInIcon />
                   </a>
                 </div>

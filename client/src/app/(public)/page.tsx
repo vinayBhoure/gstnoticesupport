@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { Testimonials } from '@/components/home/Testimonials';
 import { FaqAccordion } from '@/components/home/FaqAccordion';
+import { AnimateIn } from '@/components/ui/AnimateIn';
+import { CountUp } from '@/components/ui/CountUp';
 import styles from './page.module.css';
 
 export const dynamic = 'force-static';
@@ -17,7 +19,7 @@ export default function HomePage() {
       <section className={`${styles.hero} bg-white`}>
         <div className="container">
           <div className={styles.grid}>
-              <div>
+              <AnimateIn delay={0} distance={32}>
                 <span className="badge badge-outline">
                   <MapPin style={{ width: 14, height: 14, color: 'var(--accent-green)' }} />
                   Trusted GST Litigation Experts · Pan-India
@@ -39,9 +41,9 @@ export default function HomePage() {
                   <span><Check className="ic" />Pan-India service</span>
                   <span><Check className="ic" />Documents encrypted</span>
                 </div>
-              </div>
+              </AnimateIn>
 
-              <div className={styles.heroArt} aria-hidden="true">
+              <AnimateIn delay={150} distance={32} className={styles.heroArt} aria-hidden="true">
                 <div className={styles.doc}>
                   <div className={styles.docHead}>
                     <span className={styles.tag}>GST NOTICE</span>
@@ -59,7 +61,7 @@ export default function HomePage() {
                   <path d="M50 4 L92 20 V58 C92 86 72 104 50 112 C28 104 8 86 8 58 V20 Z" fill="#0A2540" />
                   <path d="M34 58 L46 70 L68 44" stroke="#0B8B4E" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </div>
+              </AnimateIn>
           </div>
         </div>
       </section>
@@ -73,37 +75,45 @@ export default function HomePage() {
             <p>Select your notice type to begin. Fixed professional fee shown for each.</p>
           </div>
           <div className={styles.noticeGrid}>
-            <Link className={`card ${styles.noticeCard}`} href="/services/asmt-10">
-              <div className={styles.icWrap}><FileSearch style={{ width: 23, height: 23 }} /></div>
-              <h3>ASMT-10 Scrutiny Notice</h3>
-              <p className={styles.desc}>Section 61 CGST Act — discrepancies in your return.</p>
-              <div className={styles.price}>₹2,999 <small>fixed fee</small></div>
-              <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
-            </Link>
-            <Link className={`card ${styles.noticeCard}`} href="/services/scn-reply">
-              <div className={styles.icWrap}><FileWarning style={{ width: 23, height: 23 }} /></div>
-              <h3>Show Cause Notice (SCN)</h3>
-              <p className={styles.desc}>DRC-01 / DRC-01A — demand for tax, interest, penalty.</p>
-              <div className={styles.price}>₹5,999 <small>fixed fee</small></div>
-              <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
-            </Link>
-            <Link className={`card ${styles.noticeCard}`} href="/services/commissioner-appeal">
-              <div className={styles.icWrap}><Gavel style={{ width: 23, height: 23 }} /></div>
-              <h3>Commissioner Appeal</h3>
-              <p className={styles.desc}>APL-01 — first appeal after adjudicating authority order.</p>
-              <div className={styles.price}>₹9,999 <small>fixed fee</small></div>
-              <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
-            </Link>
-            <Link className={`card ${styles.noticeCard}`} href="/services/gstat-appeal">
-              <div className={styles.icWrap}><Landmark style={{ width: 23, height: 23 }} /></div>
-              <h3>GSTAT Appeal</h3>
-              <p className={styles.desc}>APL-05 — appellate tribunal filing.</p>
-              <div className={styles.price}>₹14,999 <small>fixed fee</small></div>
-              <span className={`badge badge-amber ${styles.badgeAmber}`}>
-                <AlertTriangle style={{ width: 13, height: 13 }} />Pre-deposit required by law
-              </span>
-              <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
-            </Link>
+            <AnimateIn delay={0}>
+              <Link className={`card ${styles.noticeCard}`} href="/services/asmt-10">
+                <div className={styles.icWrap}><FileSearch style={{ width: 23, height: 23 }} /></div>
+                <h3>ASMT-10 Scrutiny Notice</h3>
+                <p className={styles.desc}>Section 61 CGST Act — discrepancies in your return.</p>
+                <div className={styles.price}>₹2,999 <small>fixed fee</small></div>
+                <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
+              </Link>
+            </AnimateIn>
+            <AnimateIn delay={100}>
+              <Link className={`card ${styles.noticeCard}`} href="/services/scn-reply">
+                <div className={styles.icWrap}><FileWarning style={{ width: 23, height: 23 }} /></div>
+                <h3>Show Cause Notice (SCN)</h3>
+                <p className={styles.desc}>DRC-01 / DRC-01A — demand for tax, interest, penalty.</p>
+                <div className={styles.price}>₹5,999 <small>fixed fee</small></div>
+                <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
+              </Link>
+            </AnimateIn>
+            <AnimateIn delay={200}>
+              <Link className={`card ${styles.noticeCard}`} href="/services/commissioner-appeal">
+                <div className={styles.icWrap}><Gavel style={{ width: 23, height: 23 }} /></div>
+                <h3>Commissioner Appeal</h3>
+                <p className={styles.desc}>APL-01 — first appeal after adjudicating authority order.</p>
+                <div className={styles.price}>₹9,999 <small>fixed fee</small></div>
+                <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
+              </Link>
+            </AnimateIn>
+            <AnimateIn delay={300}>
+              <Link className={`card ${styles.noticeCard}`} href="/services/gstat-appeal">
+                <div className={styles.icWrap}><Landmark style={{ width: 23, height: 23 }} /></div>
+                <h3>GSTAT Appeal</h3>
+                <p className={styles.desc}>APL-05 — appellate tribunal filing.</p>
+                <div className={styles.price}>₹14,999 <small>fixed fee</small></div>
+                <span className={`badge badge-amber ${styles.badgeAmber}`}>
+                  <AlertTriangle style={{ width: 13, height: 13 }} />Pre-deposit required by law
+                </span>
+                <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
+              </Link>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -116,37 +126,45 @@ export default function HomePage() {
             <h2>From Notice to Resolution in 4 Steps</h2>
           </div>
           <div className={styles.steps}>
-            <div className={styles.step}>
-              <div className={styles.num}>1</div>
-              <div className={styles.stepBody}>
-                <h3>Upload Documents</h3>
-                <p>Share your notice and supporting documents securely through our encrypted portal.</p>
+            <AnimateIn delay={0}>
+              <div className={styles.step}>
+                <div className={styles.num}>1</div>
+                <div className={styles.stepBody}>
+                  <h3>Upload Documents</h3>
+                  <p>Share your notice and supporting documents securely through our encrypted portal.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>2</div>
-              <div className={styles.stepBody}>
-                <h3>Expert Review &amp; Draft Preparation</h3>
-                <p>A qualified CA or Advocate assesses your case and prepares the response.</p>
-                <span className={`badge badge-amber ${styles.sla}`}>
-                  <Clock style={{ width: 13, height: 13 }} />Draft prepared within 48 hours of document receipt
-                </span>
+            </AnimateIn>
+            <AnimateIn delay={120}>
+              <div className={styles.step}>
+                <div className={styles.num}>2</div>
+                <div className={styles.stepBody}>
+                  <h3>Expert Review &amp; Draft Preparation</h3>
+                  <p>A qualified CA or Advocate assesses your case and prepares the response.</p>
+                  <span className={`badge badge-amber ${styles.sla}`}>
+                    <Clock style={{ width: 13, height: 13 }} />Draft prepared within 48 hours of document receipt
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>3</div>
-              <div className={styles.stepBody}>
-                <h3>You Review &amp; Confirm</h3>
-                <p>Review the draft, raise questions, and confirm before anything is filed.</p>
+            </AnimateIn>
+            <AnimateIn delay={240}>
+              <div className={styles.step}>
+                <div className={styles.num}>3</div>
+                <div className={styles.stepBody}>
+                  <h3>You Review &amp; Confirm</h3>
+                  <p>Review the draft, raise questions, and confirm before anything is filed.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>4</div>
-              <div className={styles.stepBody}>
-                <h3>We File on Portal</h3>
-                <p>We submit your response on the GST portal and share the acknowledgement.</p>
+            </AnimateIn>
+            <AnimateIn delay={360}>
+              <div className={styles.step}>
+                <div className={styles.num}>4</div>
+                <div className={styles.stepBody}>
+                  <h3>We File on Portal</h3>
+                  <p>We submit your response on the GST portal and share the acknowledgement.</p>
+                </div>
               </div>
-            </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -169,12 +187,14 @@ export default function HomePage() {
               { Icon: ShieldCheck, title: 'Secure Document Handling', desc: 'All uploaded documents are encrypted, access-controlled, and never shared with third parties.' },
               { Icon: MapPin, title: 'Pan-India Representation', desc: 'GST litigation and appeal assistance across all jurisdictions throughout India.' },
               { Icon: Tag, title: 'No Hidden Charges', desc: 'Fixed-fee pricing with clearly defined scope. What you see on the pricing page is what you pay.' },
-            ].map(({ Icon, title, desc }) => (
-              <div key={title} className={styles.trustCard}>
-                <Icon className={styles.tcIcon} />
-                <h3>{title}</h3>
-                <p>{desc}</p>
-              </div>
+            ].map(({ Icon, title, desc }, i) => (
+              <AnimateIn key={title} delay={i * 80}>
+                <div className={styles.trustCard}>
+                  <Icon className={styles.tcIcon} />
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                </div>
+              </AnimateIn>
             ))}
           </div>
         </div>
@@ -187,23 +207,39 @@ export default function HomePage() {
             <div className="eyebrow">Track record</div>
             <h2>Results That Speak for Themselves</h2>
           </div>
-          <div className={styles.stats}>
-            <div className={styles.stat}><div className={styles.n}>500+</div><div className={styles.d}>Notices Handled</div></div>
-            <div className={styles.stat}><div className={styles.n}>₹12L</div><div className={styles.d}>Avg. Dispute Value Resolved</div></div>
-            <div className={styles.stat}><div className={styles.n}>48hrs</div><div className={styles.d}>Average Draft Time</div></div>
-            <div className={styles.stat}><div className={styles.n}>100%</div><div className={styles.d}>Cases Acknowledged Within 24 Hours</div></div>
-          </div>
+          <AnimateIn>
+            <div className={styles.stats}>
+              <div className={styles.stat}>
+                <div className={styles.n}><CountUp value={500} suffix="+" /></div>
+                <div className={styles.d}>Notices Handled</div>
+              </div>
+              <div className={styles.stat}>
+                <div className={styles.n}>₹<CountUp value={12} suffix="L" /></div>
+                <div className={styles.d}>Avg. Dispute Value Resolved</div>
+              </div>
+              <div className={styles.stat}>
+                <div className={styles.n}><CountUp value={48} suffix="hrs" /></div>
+                <div className={styles.d}>Average Draft Time</div>
+              </div>
+              <div className={styles.stat}>
+                <div className={styles.n}><CountUp value={100} suffix="%" /></div>
+                <div className={styles.d}>Cases Acknowledged Within 24 Hours</div>
+              </div>
+            </div>
+          </AnimateIn>
           <div className={styles.cases}>
             {[
               { ct: 'SCN Reply', issue: '₹8.4L ITC demand under DRC-01 for alleged ineligible credit.', out: 'Reply accepted, no penalty levied.' },
               { ct: 'ASMT-10 Scrutiny', issue: 'GSTR-3B vs 2A mismatch flagged for FY 2021-22.', out: 'Discrepancy explained; proceedings dropped.' },
               { ct: 'Commissioner Appeal', issue: '₹15.2L demand confirmed by adjudicating authority.', out: 'Demand reduced by 70% on appeal.' },
-            ].map(({ ct, issue, out }) => (
-              <div key={ct} className={`card ${styles.case}`}>
-                <div className={styles.ct}>{ct}</div>
-                <div className={styles.issue}>{issue}</div>
-                <div className={styles.out}><CheckCircle className={styles.ic} />{out}</div>
-              </div>
+            ].map(({ ct, issue, out }, i) => (
+              <AnimateIn key={ct} delay={i * 100}>
+                <div className={`card ${styles.case}`}>
+                  <div className={styles.ct}>{ct}</div>
+                  <div className={styles.issue}>{issue}</div>
+                  <div className={styles.out}><CheckCircle className={styles.ic} />{out}</div>
+                </div>
+              </AnimateIn>
             ))}
           </div>
         </div>
@@ -221,12 +257,14 @@ export default function HomePage() {
               { Icon: Lock, title: 'Encrypted Storage', desc: 'Every document is encrypted in transit and at rest. Your files are confidential and never shared with third parties.' },
               { Icon: Scale, title: 'Regulated Professionals', desc: 'Your case is handled only by ICAI-registered CAs and Bar Council-enrolled Advocates — verifiable registration numbers.' },
               { Icon: ClipboardList, title: 'Full Transparency', desc: 'Fixed professional fee quoted upfront. No hidden charges, no surprise add-ons after you\'ve signed up.' },
-            ].map(({ Icon, title, desc }) => (
-              <div key={title} className={styles.pillar}>
-                <div className={styles.icWrap}><Icon style={{ width: 28, height: 28 }} /></div>
-                <h3>{title}</h3>
-                <p>{desc}</p>
-              </div>
+            ].map(({ Icon, title, desc }, i) => (
+              <AnimateIn key={title} delay={i * 120}>
+                <div className={styles.pillar}>
+                  <div className={styles.icWrap}><Icon style={{ width: 28, height: 28 }} /></div>
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                </div>
+              </AnimateIn>
             ))}
           </div>
         </div>
@@ -240,58 +278,66 @@ export default function HomePage() {
             <h2>Transparent, Fixed Fees. No Surprises.</h2>
           </div>
           <div className={styles.tiers}>
-            <div className={`card ${styles.tier}`}>
-              <h3>ASMT-10 Reply</h3>
-              <div className={styles.price}>₹2,999</div>
-              <ul>
-                {['Section 61 discrepancy analysis', 'Drafted reply to ASMT-10', 'Filing on GST portal', 'Acknowledgement shared'].map(f => (
-                  <li key={f}><Check className={styles.ic} />{f}</li>
-                ))}
-              </ul>
-              <div className={styles.tierFoot}>
-                <Link className="btn btn-secondary btn-block" href="/services/asmt-10">Book This Service</Link>
+            <AnimateIn delay={0}>
+              <div className={`card ${styles.tier}`}>
+                <h3>ASMT-10 Reply</h3>
+                <div className={styles.price}>₹2,999</div>
+                <ul>
+                  {['Section 61 discrepancy analysis', 'Drafted reply to ASMT-10', 'Filing on GST portal', 'Acknowledgement shared'].map(f => (
+                    <li key={f}><Check className={styles.ic} />{f}</li>
+                  ))}
+                </ul>
+                <div className={styles.tierFoot}>
+                  <Link className="btn btn-secondary btn-block" href="/services/asmt-10">Book This Service</Link>
+                </div>
               </div>
-            </div>
-            <div className={`card ${styles.tier} ${styles.popular}`}>
-              <span className={`badge badge-green ${styles.popBadge}`}>Most Popular</span>
-              <h3>SCN Reply</h3>
-              <div className={styles.price}>₹5,999</div>
-              <ul>
-                {['DRC-01 / DRC-01A case review', 'Detailed reply with case law', 'Filing on GST portal', 'Acknowledgement shared'].map(f => (
-                  <li key={f}><Check className={styles.ic} />{f}</li>
-                ))}
-              </ul>
-              <div className={styles.tierFoot}>
-                <Link className="btn btn-primary btn-block" href="/services/scn-reply">Book This Service</Link>
+            </AnimateIn>
+            <AnimateIn delay={100}>
+              <div className={`card ${styles.tier} ${styles.popular}`}>
+                <span className={`badge badge-green ${styles.popBadge}`}>Most Popular</span>
+                <h3>SCN Reply</h3>
+                <div className={styles.price}>₹5,999</div>
+                <ul>
+                  {['DRC-01 / DRC-01A case review', 'Detailed reply with case law', 'Filing on GST portal', 'Acknowledgement shared'].map(f => (
+                    <li key={f}><Check className={styles.ic} />{f}</li>
+                  ))}
+                </ul>
+                <div className={styles.tierFoot}>
+                  <Link className="btn btn-primary btn-block" href="/services/scn-reply">Book This Service</Link>
+                </div>
               </div>
-            </div>
-            <div className={`card ${styles.tier}`}>
-              <h3>Commissioner Appeal</h3>
-              <div className={styles.price}>₹9,999</div>
-              <ul>
-                {['APL-01 appeal drafting', 'Grounds of appeal & statement', 'Filing before Commissioner (Appeals)', 'Acknowledgement shared'].map(f => (
-                  <li key={f}><Check className={styles.ic} />{f}</li>
-                ))}
-              </ul>
-              <div className={styles.tierFoot}>
-                <Link className="btn btn-secondary btn-block" href="/services/commissioner-appeal">Book This Service</Link>
+            </AnimateIn>
+            <AnimateIn delay={200}>
+              <div className={`card ${styles.tier}`}>
+                <h3>Commissioner Appeal</h3>
+                <div className={styles.price}>₹9,999</div>
+                <ul>
+                  {['APL-01 appeal drafting', 'Grounds of appeal & statement', 'Filing before Commissioner (Appeals)', 'Acknowledgement shared'].map(f => (
+                    <li key={f}><Check className={styles.ic} />{f}</li>
+                  ))}
+                </ul>
+                <div className={styles.tierFoot}>
+                  <Link className="btn btn-secondary btn-block" href="/services/commissioner-appeal">Book This Service</Link>
+                </div>
               </div>
-            </div>
-            <div className={`card ${styles.tier}`}>
-              <h3>GSTAT Appeal</h3>
-              <div className={styles.price}>₹14,999</div>
-              <ul>
-                {['APL-05 tribunal filing', 'Grounds of appeal & statement', 'Filing before Appellate Tribunal', 'Acknowledgement shared'].map(f => (
-                  <li key={f}><Check className={styles.ic} />{f}</li>
-                ))}
-              </ul>
-              <div className={styles.tierFoot}>
-                <span className="badge badge-amber">
-                  <AlertTriangle style={{ width: 13, height: 13 }} />Pre-deposit required by law
-                </span>
-                <Link className="btn btn-secondary btn-block" href="/services/gstat-appeal">Book This Service</Link>
+            </AnimateIn>
+            <AnimateIn delay={300}>
+              <div className={`card ${styles.tier}`}>
+                <h3>GSTAT Appeal</h3>
+                <div className={styles.price}>₹14,999</div>
+                <ul>
+                  {['APL-05 tribunal filing', 'Grounds of appeal & statement', 'Filing before Appellate Tribunal', 'Acknowledgement shared'].map(f => (
+                    <li key={f}><Check className={styles.ic} />{f}</li>
+                  ))}
+                </ul>
+                <div className={styles.tierFoot}>
+                  <span className="badge badge-amber">
+                    <AlertTriangle style={{ width: 13, height: 13 }} />Pre-deposit required by law
+                  </span>
+                  <Link className="btn btn-secondary btn-block" href="/services/gstat-appeal">Book This Service</Link>
+                </div>
               </div>
-            </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -336,9 +382,9 @@ export default function HomePage() {
               relevant tax authority — they cannot be predicted or guaranteed. Timelines mentioned are indicative and may
               vary based on case complexity and departmental processing times. The scope of services provided is defined
               by the selected service plan. For complete details, please refer to our{' '}
-              <Link href="#">Disclaimer</Link>,{' '}
-              <Link href="#">Terms &amp; Conditions</Link>, and{' '}
-              <Link href="#">Privacy Policy</Link>.
+              <Link href="/terms">Disclaimer</Link>,{' '}
+              <Link href="/terms">Terms &amp; Conditions</Link>, and{' '}
+              <Link href="/privacy">Privacy Policy</Link>.
             </p>
           </div>
         </div>

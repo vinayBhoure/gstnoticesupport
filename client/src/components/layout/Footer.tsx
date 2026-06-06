@@ -38,8 +38,7 @@ export function Footer() {
           <div>
             <h5>Resources</h5>
             <ul>
-              <li><Link href="#">GST Notice Guides</Link></li>
-              <li><Link href="#">Blog</Link></li>
+              <li><Link href="/faq">GST Notice Guides</Link></li>
               <li><Link href="/faq">FAQ</Link></li>
             </ul>
           </div>
@@ -71,9 +70,9 @@ export function Footer() {
 
         <div className="strip">
           <div className="pols">
-            <Link href="#">Privacy Policy</Link><span>|</span>
-            <Link href="#">Terms</Link><span>|</span>
-            <Link href="#">Refund Policy</Link>
+            <Link href="/privacy">Privacy Policy</Link><span>|</span>
+            <Link href="/terms">Terms</Link><span>|</span>
+            <Link href="/refund">Refund Policy</Link>
           </div>
           <span className="ssl" style={{ marginLeft: 'auto' }}>
             <ShieldCheck style={{ width: 15, height: 15 }} />

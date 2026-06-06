@@ -165,8 +165,8 @@ export default function FaqPage() {
                 <Phone size={22} />
               </div>
               <span className={styles.sqxLabel}>Call Us</span>
-              <a className={styles.sqxValue} href="tel:+919800000000" aria-label="Call GST Notice Support">
-                +91 98000 00000
+              <a className={styles.sqxValue} href="tel:+919343297622" aria-label="Call GST Notice Support">
+                +91 93432 97622
               </a>
             </div>
 
@@ -180,7 +180,7 @@ export default function FaqPage() {
               </p>
               <a
                 className={styles.btnWaCard}
-                href="https://wa.me/919800000000?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
+                href="https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Open WhatsApp chat with GST Notice Support"

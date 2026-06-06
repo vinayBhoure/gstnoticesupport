@@ -6,6 +6,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import styles from '../service.module.css';
+import { AnimateIn } from '@/components/ui/AnimateIn';
 
 export const dynamic = 'force-static';
 
@@ -83,31 +84,41 @@ export default function GstatAppealPage() {
             <p>Every deliverable prepared by a CA and Advocate working together — structured for the Tribunal&#39;s requirements.</p>
           </div>
           <div className={styles.doGrid5}>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><FileText size={24} /></div>
-              <h3>APL-05 Application</h3>
-              <p>The formal appeal application in the prescribed GST Appellate Tribunal format, completed with all required particulars and case history.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><BookOpen size={24} /></div>
-              <h3>Statement of Facts</h3>
-              <p>A precise chronological account of the transaction history and all proceedings — from SCN through OIO and OIA — leading to the Tribunal appeal.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><Scale size={24} /></div>
-              <h3>Grounds of Appeal</h3>
-              <p>Legally reasoned grounds citing the CGST Act, CBIC circulars, and binding Tribunal and High Court precedents applicable to your case.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><Gavel size={24} /></div>
-              <h3>Prayer / Relief Sought</h3>
-              <p>Precisely framed prayer clause — quashing, reduction, or remand — tailored to your legal position and the Tribunal&#39;s jurisdiction.</p>
-            </div>
-            <div className={`card card-elev ${styles.doCard}`}>
-              <div className={styles.icWrap}><Landmark size={24} /></div>
-              <h3>Pre-deposit Process Guidance</h3>
-              <p>Detailed walkthrough of the Section 112(8) pre-deposit calculation and GST portal payment steps. We do not collect or process government payments.</p>
-            </div>
+            <AnimateIn delay={0}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><FileText size={24} /></div>
+                <h3>APL-05 Application</h3>
+                <p>The formal appeal application in the prescribed GST Appellate Tribunal format, completed with all required particulars and case history.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={70}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><BookOpen size={24} /></div>
+                <h3>Statement of Facts</h3>
+                <p>A precise chronological account of the transaction history and all proceedings — from SCN through OIO and OIA — leading to the Tribunal appeal.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={140}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><Scale size={24} /></div>
+                <h3>Grounds of Appeal</h3>
+                <p>Legally reasoned grounds citing the CGST Act, CBIC circulars, and binding Tribunal and High Court precedents applicable to your case.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={210}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><Gavel size={24} /></div>
+                <h3>Prayer / Relief Sought</h3>
+                <p>Precisely framed prayer clause — quashing, reduction, or remand — tailored to your legal position and the Tribunal&#39;s jurisdiction.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={280}>
+              <div className={`card card-elev ${styles.doCard}`}>
+                <div className={styles.icWrap}><Landmark size={24} /></div>
+                <h3>Pre-deposit Process Guidance</h3>
+                <p>Detailed walkthrough of the Section 112(8) pre-deposit calculation and GST portal payment steps. We do not collect or process government payments.</p>
+              </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -178,37 +189,45 @@ export default function GstatAppealPage() {
             <h2>Your GSTAT Appeal in 4 Steps</h2>
           </div>
           <div className={styles.steps}>
-            <div className={styles.step}>
-              <div className={styles.num}>1</div>
-              <div className={styles.stepBody}>
-                <h3>Upload All Orders &amp; Documents</h3>
-                <p>Share the complete record — SCN, SCN reply, OIO, APL-01, and the Commissioner&#39;s Order (OIA) — through our encrypted portal. You&#39;ll receive a case reference immediately.</p>
+            <AnimateIn delay={0}>
+              <div className={styles.step}>
+                <div className={styles.num}>1</div>
+                <div className={styles.stepBody}>
+                  <h3>Upload All Orders &amp; Documents</h3>
+                  <p>Share the complete record — SCN, SCN reply, OIO, APL-01, and the Commissioner&#39;s Order (OIA) — through our encrypted portal. You&#39;ll receive a case reference immediately.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>2</div>
-              <div className={styles.stepBody}>
-                <h3>APL-05 Bundle Drafted</h3>
-                <p>A CA and Advocate jointly draft the complete APL-05 application, Statement of Facts, Grounds of Appeal, and Prayer — with Tribunal-level case-law research included.</p>
-                <span className={`badge badge-amber ${styles.sla}`}>
-                  <Clock size={13} />Draft prepared within 72 hours of document receipt
-                </span>
+            </AnimateIn>
+            <AnimateIn delay={120}>
+              <div className={styles.step}>
+                <div className={styles.num}>2</div>
+                <div className={styles.stepBody}>
+                  <h3>APL-05 Bundle Drafted</h3>
+                  <p>A CA and Advocate jointly draft the complete APL-05 application, Statement of Facts, Grounds of Appeal, and Prayer — with Tribunal-level case-law research included.</p>
+                  <span className={`badge badge-amber ${styles.sla}`}>
+                    <Clock size={13} />Draft prepared within 72 hours of document receipt
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>3</div>
-              <div className={styles.stepBody}>
-                <h3>You Review, Pre-deposit &amp; Share Credentials</h3>
-                <p>Confirm the appeal bundle. Make the 20% statutory pre-deposit directly on the GST portal, then share your portal credentials so we can file on your behalf.</p>
+            </AnimateIn>
+            <AnimateIn delay={240}>
+              <div className={styles.step}>
+                <div className={styles.num}>3</div>
+                <div className={styles.stepBody}>
+                  <h3>You Review, Pre-deposit &amp; Share Credentials</h3>
+                  <p>Confirm the appeal bundle. Make the 20% statutory pre-deposit directly on the GST portal, then share your portal credentials so we can file on your behalf.</p>
+                </div>
               </div>
-            </div>
-            <div className={styles.step}>
-              <div className={styles.num}>4</div>
-              <div className={styles.stepBody}>
-                <h3>We File APL-05 on the Portal</h3>
-                <p>We submit the complete appeal in FORM GST APL-05 on the GST portal and share the filing acknowledgement with you.</p>
+            </AnimateIn>
+            <AnimateIn delay={360}>
+              <div className={styles.step}>
+                <div className={styles.num}>4</div>
+                <div className={styles.stepBody}>
+                  <h3>We File APL-05 on the Portal</h3>
+                  <p>We submit the complete appeal in FORM GST APL-05 on the GST portal and share the filing acknowledgement with you.</p>
+                </div>
               </div>
-            </div>
+            </AnimateIn>
           </div>
         </div>
       </section>
@@ -246,7 +265,7 @@ export default function GstatAppealPage() {
             </div>
 
             <div className={styles.ctaRow}>
-              <Link className="btn btn-primary" href="#book">
+              <Link className="btn btn-primary" href="/contact#callback">
                 <FileCheck2 size={18} />Book GSTAT Appeal Now
               </Link>
             </div>

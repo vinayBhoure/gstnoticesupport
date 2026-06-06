@@ -13,9 +13,10 @@
 
 /* ---------- PRICING GRID ---------- */
 .pricingGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-items:stretch;}
-.pCard{background:#fff;border:1.5px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:32px 28px;display:flex;flex-direction:column;gap:0;position:relative;transition:box-shadow .15s,border-color .15s;height:100%;}
-.pCard:hover{box-shadow:var(--shadow-md);}
+.pCard{background:#fff;border:1.5px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:32px 28px;display:flex;flex-direction:column;gap:0;position:relative;transition:box-shadow .15s,border-color .15s,transform .15s ease;height:100%;}
+.pCard:hover{box-shadow:var(--shadow-md);border-color:var(--primary-navy);transform:translateY(-3px);}
 .pCard.popular{border-color:var(--accent-green);}
+.pCard.popular:hover{border-color:var(--accent-green);}
 .popularBadge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--accent-green);color:#fff;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 14px;border-radius:var(--r-badge);white-space:nowrap;}
 .noticeTag{display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--neutral-600);background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-badge);padding:4px 10px;margin-bottom:20px;width:fit-content;}
 .pCard h3{font-size:22px;color:var(--primary-navy);margin-bottom:6px;}
