@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+@theme inline {
+  /* Map tokens.css CSS custom properties to Tailwind color utilities.
+     Usage: bg-primary-navy, text-accent-green, border-neutral-200, etc. */
+  --color-primary-navy: var(--primary-navy);
+  --color-primary-deep-blue: var(--primary-deep-blue);
+  --color-accent-green: var(--accent-green);
+  --color-accent-green-hover: var(--accent-green-hover);
+  --color-warning-amber: var(--warning-amber);
+  --color-neutral-50: var(--neutral-50);
+  --color-neutral-200: var(--neutral-200);
+  --color-neutral-600: var(--neutral-600);
+  --color-neutral-900: var(--neutral-900);
+  --color-wa-green: var(--wa-green);
+
+  /* Typography — Next.js font API CSS variables */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}

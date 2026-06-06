@@ -1,165 +1,137 @@
 # gstnoticesupport.in — Agent Configuration
 
-A two-phase GST litigation services platform for Indian businesses, CAs, and Advocates. Phase 1 is a trust-first marketing site (launch: 15 June 2026). Phase 2 is a full booking platform with document upload, draft-gated payment, and admin workflow (launch: 5 July 2026).
+## Project Overview
+**gstnoticesupport.in** is a two-phase GST litigation services platform for Indian businesses, CAs, and Advocates. Phase 1 is a trust-first marketing site (launch: 15 June 2026). Phase 2 adds booking, document upload, draft-gated payment, and admin workflow (launch: 5 July 2026). The core product mechanic: admin prepares a draft PDF → user pays via Razorpay to unlock it.
 
----
+## Tech Stack
+- **Frontend**: Next.js 15 (App Router) + Tailwind CSS + TanStack Query + React Hook Form + Zod
+- **Backend**: Node.js + Express.js + TypeScript
+- **Database**: PostgreSQL via NeonDB + Prisma ORM
+- **Auth**: JWT in HTTP-only cookies + OTP via Resend
+- **Storage**: AWS S3 (private bucket, pre-signed URLs only)
+- **Payments**: Razorpay (Orders API + webhook + three-layer reliability)
+- **Email**: Resend (transactional templates)
+- **Language**: TypeScript (strict mode, both client and server)
 
-## Documentation Map
+## Architecture
+- **Pattern**: Monorepo — `/client` (Next.js) + `/server` (Express)
+- **API Style**: REST with `/api/v1/` prefix
+- **Response Format**: `{ success: boolean, data: T | null, error: string | null, statusCode: number }`
+- **Layering**: Controller → Service → Repository (hard boundaries, no cross-layer imports)
+- **File uploads**: Browser → S3 direct via pre-signed PUT URLs (never through Express)
+- **Auth flow**: OTP signup → JWT access token in HTTP-only cookie
 
-### Product & Requirements
-| Document | What it covers |
-|---|---|
-| `docs/architecture/gstnoticesupport_project_knowledge_base_1.md` | Services, pricing, personas, user flows, booking mechanics, state machine, admin scope, notification matrix, design constraints. **Primary source of truth for product requirements.** |
-| `docs/architecture/gstnoticesupport_project_knowledge_base_2.md` | Payment flow, PDF gating mechanic, Razorpay verify page, pre-deposit disclosure strategy, scope updates. **Supplements and partially overrides KB1 where noted.** |
-| `docs/architecture/platform_interaction_flows.md` | Step-by-step user and admin journeys across both phases. Reference when reasoning about state transitions or user touchpoints. |
-| `docs/architecture/service_workflow.md` | Admin workflow detail for the booking lifecycle. |
+## Project Structure
+```
+/client          → Next.js 15 App Router frontend
+/server          → Express.js + TypeScript API
+/docs            → Architecture, UI/UX, tracking documents
+/resources       → UI assets, design system, CSS tokens
+/.claude         → Agent configuration, rules, skills, commands
+```
 
-### Architecture & Technical Design
-| Document | What it covers |
-|---|---|
-| `docs/architecture/gstnoticesupport_HLD.md` | Full system architecture: tech stack, deployment topology, frontend/backend structure, auth, file handling, payment architecture, state machine, security, SEO, error handling, environment strategy, locked decisions appendix. |
-| `docs/architecture/gstnoticesupport_LLD.md` | Implementation-level detail: Prisma schema, endpoint contracts, key decisions per layer. Read after HLD for build-time specifics. |
+## Key Documentation
 
-### UI/UX & Design System
-| Document | What it covers |
-|---|---|
-| `docs/ui-ux/design.md` | Design principles, layout rules, interaction patterns. |
-| `docs/ui-ux/components.md` | Component specifications and usage patterns. |
-| `resources/ui/css/tokens.css` | Locked CSS design tokens — colour palette, spacing, typography. Use these; never hardcode hex values. |
-| `resources/ui/CLAUDE.md` | Agent instructions specific to the UI resources directory. |
-| `resources/ui/design-system/design.md` | Extended design system documentation. |
+**Product & Requirements**
+- `docs/architecture/gstnoticesupport_project_knowledge_base_1.md` — Services, pricing, personas, booking mechanics, state machine, admin scope, notification matrix *(primary source of truth)*
+- `docs/architecture/gstnoticesupport_project_knowledge_base_2.md` — Payment flow, PDF gating, Razorpay verify page, pre-deposit disclosure *(supplements and partially overrides KB1)*
+- `docs/architecture/platform_interaction_flows.md` — Step-by-step user and admin journeys across both phases
+- `docs/architecture/service_workflow.md` — Admin workflow detail for the booking lifecycle
 
-### Tracking
-| Document | What it covers |
-|---|---|
-| `docs/tracking/TASKS.md` | Active development task board. Check at session start; update when starting or completing work. |
-| `docs/tracking/CHANGELOG.md` | User-facing changes log. Update via `/log change` after every shipped feature or fix. |
-| `docs/tracking/TRACKING.md` | Project progress and phase tracking. |
-| `docs/tracking/ERROR.md` | Known errors and resolutions. Check before debugging a recurring issue. |
+**Architecture & Technical Design**
+- `docs/architecture/gstnoticesupport_HLD.md` — Full system architecture, deployment topology, auth, payments, state machine, security, SEO, locked decisions appendix
+- `docs/architecture/gstnoticesupport_LLD.md` — Prisma schema, endpoint contracts, implementation specifics *(read after HLD)*
 
----
+**UI/UX & Design System**
+- `docs/ui-ux/design.md` — Design principles, layout rules, interaction patterns
+- `docs/ui-ux/components.md` — Component specifications and usage patterns
+- `resources/ui/css/tokens.css` — Locked CSS design tokens (colour, spacing, typography) — never hardcode hex values
+- `resources/ui/design-system/design.md` — Extended design system documentation
 
-## Coding Rules
+**Tracking**
+- `docs/tracking/TASKS.md` — Active task board — check at session start, update when completing work
+- `docs/tracking/CHANGELOG.md` — User-facing changes log — update via `/log change` after every shipped feature
+- `docs/tracking/TRACKING.md` — Project progress and phase tracking
+- `docs/tracking/ERROR.md` — Known errors and resolutions — check before debugging a recurring issue
 
-Rules apply to every file written or modified in this project. Domain-specific rules take precedence over universal rules when they conflict.
+## Rules (must follow)
+- `.claude/rules/RULES.md` — Universal: TypeScript, naming conventions, Zod schemas, security non-negotiables, Git & PR conventions
+- `.claude/rules/frontend.md` — `client/`: Server vs Client Components, TanStack Query, React Hook Form, SSG/SSR, routing, images, component structure, design system
+- `.claude/rules/backend.md` — `server/`: Controller-service-repository layering, `asyncHandler`, `ApiError`, middleware order, validation, webhook handling, response envelope, file upload
+- `.claude/rules/database.md` — `server/src/repositories/`, `server/prisma/`: Repository-only Prisma calls, no raw SQL, soft-delete, migrations, DTO exposure, pagination, query safety
 
-| File | Scope |
-|---|---|
-| `.claude/rules/RULES.md` | **Universal** — TypeScript, naming conventions, shared Zod schemas, security non-negotiables, Git & PR conventions. Read this first. |
-| `.claude/rules/frontend.md` | `client/` — Server vs Client Components, TanStack Query, React Hook Form + Zod, SSG/SSR strategy, routing, images, component structure, design system constraints. |
-| `.claude/rules/backend.md` | `server/` — Controller-service-repository layering, `asyncHandler`, `ApiError`, middleware order, Zod validation, webhook handling, response envelope, file upload pattern. |
-| `.claude/rules/database.md` | `server/src/repositories/`, `server/prisma/` — Repository-only Prisma calls, no raw SQL, soft-delete, migration conventions, DTO type exposure, pagination, query safety. |
-
----
-
-## Skills
-
-Load the relevant skill before writing code in that domain. Skills encode the locked implementation patterns — they are not suggestions.
-
-| Skill | Directory | Load when working on |
-|---|---|---|
-| `backend-core` | `.claude/skills/backend/` | Any Express route, controller, service, Zod schema, error handling |
-| `auth-and-security` | `.claude/skills/auth/` | Auth endpoints, JWT/cookies, CORS, env config, OTP, password handling |
-| `data-storage` | `.claude/skills/data-storage/` | Prisma models, migrations, S3 uploads, file handling, repositories |
-| `integration` | `.claude/skills/integration/` | Razorpay, Resend, webhook processing, email templates, notification matrix |
-| `frontend` | `.claude/skills/frontend/` | Next.js pages, Server/Client Components, forms, TanStack Query, SEO metadata |
-| `status-machine` | `.claude/skills/status-machine/` | Booking status transitions, status-gated actions — load whenever `Booking.status` is touched |
-
----
+## Skills (load before writing code in that domain)
+- `backend` — Any Express route, controller, service, Zod schema, error handling
+- `auth` — Auth endpoints, JWT/cookies, CORS, env config, OTP, password handling
+- `data-storage` — Prisma models, migrations, S3 uploads, file handling, repositories
+- `integration` — Razorpay, Resend, webhook processing, email templates, notification matrix
+- `frontend` — Next.js pages, Server/Client Components, forms, TanStack Query, SEO metadata
+- `status-machine` — Booking status transitions, status-gated actions — load whenever `Booking.status` is touched
 
 ## Commands
-
-| Command | When to use |
-|---|---|
-| `/context` | **Start of every session.** Loads a compact project summary, current open tasks, recent decisions, and the locked stack. Use `/context flow:<name>` to walk through a specific platform flow (auth, booking, file-upload, payment, status-change, draft-delivery). Use `/context scope:<feature>` to check if a feature is in scope. |
-| `/scaffold <type> <name>` | Generate a complete, convention-compliant artifact. Types: `endpoint`, `page`, `model`, `email`, `component`. Never generates stubs — produces all required files. |
-| `/review [target]` | Audit code against all locked conventions across 7 passes: backend endpoint, status machine, auth/security, data/storage, integrations, frontend, and general quality. Run before every commit and PR. Default target is the current git diff. |
-| `/git start <description>` | Create a correctly named branch. |
-| `/git commit` | Generate a Conventional Commits message from the staged diff. |
-| `/git pr` | Draft a complete pull request description with the project-specific checklist. |
-| `/log decision <text>` | Record an architectural or product decision in `docs/tracking/decisions.md`. |
-| `/log change <text>` | Record a user-facing change in `docs/tracking/CHANGELOG.md`. |
-| `/log question <text>` | Record an unresolved question in `docs/tracking/open-questions.md`. |
-| `/task add <description>` | Add a task to `docs/tracking/TASKS.md` with phase, layer, and priority. |
-| `/task list [filters]` | List open tasks filtered by phase, layer, priority, or status. |
-| `/deploy staging` | Run the staging pre-deploy checklist and post-deploy smoke tests. |
-| `/deploy production` | Run the production pre-deploy checklist (includes Razorpay live key check, Cloudflare WAF, CORS, cookie domain, Sentry DSN). |
-| `/debug payment [bookingId]` | Diagnose a stuck payment across all three reliability layers. |
-| `/debug webhook` | Diagnose Razorpay webhook signature failures, raw body middleware issues, Cloudflare WAF. |
-| `/debug auth [symptom]` | Diagnose JWT rejection, cookie not sent, CORS failures. |
-| `/sync-hld [section]` | Detect drift between the codebase and the HLD/KB documentation. Run after significant features are completed. |
-
----
+- `/context` — **Start of every session.** Loads project summary, open tasks, recent decisions, locked stack. Use `/context flow:<name>` for a specific platform flow; `/context scope:<feature>` to check in-scope status
+- `/scaffold <type> <name>` — Generate a complete, convention-compliant artifact (types: `endpoint`, `page`, `model`, `email`, `component`) — never stubs
+- `/review [target]` — Audit against all locked conventions across 7 passes. Run before every commit and PR. Default target is current git diff
+- `/git start <description>` — Create a correctly named branch
+- `/git commit` — Generate a Conventional Commits message from the staged diff
+- `/git pr` — Draft a complete PR description with the project-specific checklist
+- `/log decision <text>` — Record an architectural or product decision in `docs/tracking/decisions.md`
+- `/log change <text>` — Record a user-facing change in `docs/tracking/CHANGELOG.md`
+- `/log question <text>` — Record an unresolved question in `docs/tracking/open-questions.md`
+- `/task add <description>` — Add a task to `docs/tracking/TASKS.md` with phase, layer, and priority
+- `/task list [filters]` — List open tasks filtered by phase, layer, priority, or status
+- `/deploy staging` — Run staging pre-deploy checklist and post-deploy smoke tests
+- `/deploy production` — Run production pre-deploy checklist (Razorpay live key, Cloudflare WAF, CORS, cookie domain, Sentry DSN)
+- `/debug payment [bookingId]` — Diagnose a stuck payment across all three reliability layers
+- `/debug webhook` — Diagnose Razorpay webhook signature failures, raw body middleware, Cloudflare WAF
+- `/debug auth [symptom]` — Diagnose JWT rejection, cookie not sent, CORS failures
+- `/sync-hld [section]` — Detect drift between codebase and HLD/KB documentation — run after significant features
 
 ## Session Workflow
+**Session start:** Run `/context` → check `docs/tracking/TASKS.md` → load the relevant skill for your area before writing any code.
 
-**At the start of every session:**
-1. Run `/context` to load the project state, open tasks, and recent decisions.
-2. Check `docs/tracking/TASKS.md` for the current branch's task status.
-3. If picking up work in a specific area, load the relevant skill file before writing code.
+**While working:** Load skill before scaffolding → run `/review` before committing → use `/git commit` for messages → log any undocumented decision with `/log decision`.
 
-**While working:**
-- Load the relevant skill before scaffolding or modifying any domain area.
-- Run `/review` on staged changes before committing.
-- Use `/git commit` to generate commit messages — do not write them freehand.
-- If a decision is made that is not documented in HLD/KB, log it immediately with `/log decision`.
+**Before PR:** Run `/review pr` on the full branch diff → resolve all errors → run `/git pr` → confirm target is `staging`, not `main`.
 
-**Before opening a PR:**
-1. Run `/review pr` on the full branch diff.
-2. Resolve all errors (warnings are advisory).
-3. Run `/git pr` to generate the PR description and checklist.
-4. Confirm the PR targets `staging`, not `main`.
+**After shipping:** Run `/log change` for any user-facing change → update task status in `TASKS.md` → run `/sync-hld` if HLD was affected.
 
-**After shipping a feature:**
-- Run `/log change` for any user-facing or API-visible change.
-- Update task status in `docs/tracking/TASKS.md`.
-- If the feature changes anything in the HLD, run `/sync-hld` to surface drift.
-
----
-
-## Hard Constraints
-
-These are non-negotiable. They encode locked product and architectural decisions that cannot be changed without an explicit client discussion and a `/log decision` entry.
+## Important Constraints
 
 **Product scope**
-- Admin-initiated booking cancellation is **not in Phase 2**. It is explicitly deferred. Do not implement it. (KB2 §9)
-- Re-upload of documents mid-service is **not in Phase 2**. Users must create a new booking. (HLD §19)
-- No in-platform messaging between admin and user. All admin↔user communication is via WhatsApp or email outside the platform. (KB1 §14)
-- No WhatsApp API automation. The WhatsApp button is a redirect-only URL. (KB1 §16)
-- Pre-deposit disclosure for GSTAT Appeal and Commissioner Appeal must appear at **four specific points**: pricing page, booking flow Step 1, Draft Ready email, Pay-to-Unlock screen. Never omit any of these four. (KB2 §7)
+- **No admin-initiated cancellation in Phase 2** — explicitly deferred, do not implement (KB2 §9)
+- **No mid-service re-upload** — users must create a new booking instead (HLD §19)
+- **No in-platform messaging** — all admin↔user communication is via WhatsApp or email outside the platform (KB1 §14)
+- **No WhatsApp API automation** — the WhatsApp button is a redirect-only URL (KB1 §16)
+- **Pre-deposit disclosure** for GSTAT Appeal and Commissioner Appeal must appear at all four points: pricing page, booking flow Step 1, Draft Ready email, Pay-to-Unlock screen — never omit any (KB2 §7)
 
 **Payment**
-- Razorpay webhook route must use `express.raw({ type: 'application/json' })`, never `express.json()`. Register it before the global JSON parser. (HLD §6.3, backend.md §6.1)
-- Always verify HMAC-SHA256 signature as the first operation on the webhook. Return 400 immediately on failure. No payload logging. (backend.md §6.2)
-- Idempotency is enforced via the unique constraint on `payment_records.razorpay_payment_id`. Never remove this constraint. (HLD §10.4)
-- Admin "Mark as Paid" must call the Razorpay Fetch Payment API before updating the DB. No blind override. (HLD §10.2)
+- **Webhook must use `express.raw()`** — never `express.json()` on the Razorpay route; register it before the global JSON parser (HLD §6.3)
+- **HMAC-SHA256 verification is the first operation** — return 400 immediately on failure, no payload logging (backend.md §6.2)
+- **Idempotency via unique constraint** on `payment_records.razorpay_payment_id` — never remove this constraint (HLD §10.4)
+- **Admin "Mark as Paid"** must call Razorpay Fetch Payment API before updating DB — no blind override (HLD §10.2)
 
 **File handling**
-- Files never pass through Express. Use pre-signed S3 PUT URLs for upload and pre-signed GET URLs for download. No Multer. (HLD §9.2, backend.md §9.1)
-- All S3 objects are private. No public S3 URLs, ever. (RULES.md §4.5)
-- Draft PDF pre-signed GET URLs are valid for 15 minutes and generated fresh per page load. Never store them in the DB. (HLD §9.4)
+- **Files never pass through Express** — pre-signed S3 PUT for upload, pre-signed GET for download, no Multer (HLD §9.2)
+- **All S3 objects are private** — no public S3 URLs, ever (RULES.md §4.5)
+- **Draft PDF pre-signed URLs expire in 15 minutes** and are generated fresh per page load — never store them in the DB (HLD §9.4)
 
 **Auth & security**
-- JWT is stored in HTTP-only cookies only. Never `localStorage`, never `sessionStorage`. (HLD §8.1)
-- User identity is always read from `req.user` (set by auth middleware). Never from `req.body`. (RULES.md §4.6)
-- Never log passwords, OTPs, JWT tokens, Razorpay secrets, or PII. (RULES.md §4.1)
-- Never put PII or tokens in URL query parameters. (RULES.md §4.2)
+- **JWT in HTTP-only cookies only** — never `localStorage`, never `sessionStorage` (HLD §8.1)
+- **User identity from `req.user` only** — never from `req.body` (RULES.md §4.6)
+- **Never log** passwords, OTPs, JWT tokens, Razorpay secrets, or PII (RULES.md §4.1)
+- **Never put PII or tokens in URL query parameters** (RULES.md §4.2)
 
 **Data**
-- All Prisma queries live in `src/repositories/`. Controllers and services never import the Prisma client directly. (database.md §1.1)
-- Users are soft-deleted (`deletedAt` timestamp). Bookings and payment records are never deleted. (database.md §3)
-- Never return raw Prisma rows. Always map to a DTO before sending a response. (backend.md §7.3)
+- **All Prisma queries in `src/repositories/`** — controllers and services never import Prisma directly (database.md §1.1)
+- **Users are soft-deleted** — bookings and payment records are never deleted (database.md §3)
+- **Never return raw Prisma rows** — always map to a DTO before sending a response (backend.md §7.3)
 
 **Deployment**
-- No code reaches `main` without passing through `staging` first. The promotion path is locked: `feature branch → PR to staging → staging deploy → test → PR to main → production deploy`. (HLD §18.4)
-- Production Razorpay key must start with `rzp_live_`. Deploying with a test key to production is a critical error.
-
----
+- **No code reaches `main` without passing `staging` first** — `feature branch → PR to staging → test → PR to main → production` (HLD §18.4)
+- **Production Razorpay key must start with `rzp_live_`** — deploying with a test key is a critical error
 
 ## Document Reading Order
-
-For a new session or a new engineer — read in this order:
-
 1. `README.md` — project overview, services, tech stack, roadmap
 2. `docs/architecture/gstnoticesupport_project_knowledge_base_1.md` — full product requirements
 3. `docs/architecture/gstnoticesupport_project_knowledge_base_2.md` — payment mechanic and scope updates
@@ -169,4 +141,4 @@ For a new session or a new engineer — read in this order:
 7. `.claude/rules/RULES.md` → `frontend.md` → `backend.md` → `database.md` — coding standards
 8. The skill file for the area you are about to work in
 
-> **Conflict resolution:** If any document contradicts another, the order of precedence is: KB2 > KB1 > HLD > LLD > everything else. A later decision in `docs/tracking/decisions.md` overrides HLD/KB only if the decision entry explicitly states it supersedes the earlier document.
+> **Conflict resolution:** KB2 > KB1 > HLD > LLD > everything else. A decision in `docs/tracking/decisions.md` overrides HLD/KB only if it explicitly states so.
