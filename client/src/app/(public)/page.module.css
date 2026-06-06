@@ -114,8 +114,7 @@
 .faqQ:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);border-radius:var(--r-btn);}
 .faqQ .chev{width:20px;height:20px;color:var(--neutral-600);transition:transform .2s ease;flex:0 0 auto;}
 .chevOpen{transform:rotate(180deg);}
-.faqA{display:none;padding:0 4px 24px;font-size:16px;color:var(--neutral-900);line-height:1.65;max-width:70ch;}
-.faqAOpen{display:block;}
+.faqA{overflow:hidden;font-size:16px;color:var(--neutral-900);line-height:1.65;max-width:70ch;}
 .faqEmpty{text-align:center;color:var(--neutral-600);padding:32px;}
 
 /* ---------- DISCLAIMER ---------- */

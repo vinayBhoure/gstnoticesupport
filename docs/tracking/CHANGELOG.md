@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-06-06] — fix: FAQ accordion answers now expand correctly
+
+**Bug fixed**
+- Homepage FAQ accordion answers were hidden and never revealed on click — `aria-expanded` flipped correctly (state was fine) but the CSS module declared `.faqA { display:none }` with a separate `.faqAOpen { display:block }` class that the component never applied. The React component animates via inline `max-height`, so the fix was to remove `display:none` from `.faqA` and drop the dead `.faqAOpen` rule.
+- Root cause: migration artifact — prototype's `display`-toggle model and the React `max-height` animation approach were never reconciled.
+- Validated with Playwright MCP: after fix, expanded panel renders `display:block, max-height:103px, height:103px` with answer text visible.
+
+---
+
 ## [2026-06-06] — EP2: All public marketing pages shipped (SSG, 10 routes)
 
 **Pages added — all statically generated (○ in `next build`)**
