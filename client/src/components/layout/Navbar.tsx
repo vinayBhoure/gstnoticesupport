@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Phone, ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
 
 export function Navbar() {
@@ -10,8 +11,14 @@ export function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [servicesExpanded, setServicesExpanded] = useState(false);
 
+  const pathname = usePathname();
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const drawerCloseRef = useRef<HTMLButtonElement>(null);
+
+  const isServicesActive = pathname.startsWith('/services');
+  function navCurrent(href: string): 'page' | undefined {
+    return pathname === href ? 'page' : undefined;
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -52,7 +59,11 @@ export function Navbar() {
 
           <nav className="links" aria-label="Primary">
             <div className="has-drop">
-              <button aria-haspopup="true" aria-expanded="false">
+              <button
+                aria-haspopup="true"
+                aria-expanded="false"
+                className={isServicesActive ? 'nav-active' : undefined}
+              >
                 Services <ChevronDown style={{ width: 15, height: 15 }} />
               </button>
               <div className="drop-menu" role="menu">
@@ -74,9 +85,9 @@ export function Navbar() {
                 </Link>
               </div>
             </div>
-            <Link href="/about">About</Link>
-            <Link href="/faq">Resources</Link>
-            <Link href="/pricing">Pricing</Link>
+            <Link href="/about" aria-current={navCurrent('/about')}>About</Link>
+            <Link href="/faq" aria-current={navCurrent('/faq')}>Resources</Link>
+            <Link href="/pricing" aria-current={navCurrent('/pricing')}>Pricing</Link>
           </nav>
 
           <div className="right">
@@ -155,9 +166,9 @@ export function Navbar() {
             <Link href="/services/gstat-appeal" onClick={closeDrawer}>GSTAT Appeal</Link>
           </div>
           <span className="drawer-divider" />
-          <Link href="/about" onClick={closeDrawer}>About</Link>
-          <Link href="/faq" onClick={closeDrawer}>Resources</Link>
-          <Link href="/pricing" onClick={closeDrawer}>Pricing</Link>
+          <Link href="/about" aria-current={navCurrent('/about')} onClick={closeDrawer}>About</Link>
+          <Link href="/faq" aria-current={navCurrent('/faq')} onClick={closeDrawer}>Resources</Link>
+          <Link href="/pricing" aria-current={navCurrent('/pricing')} onClick={closeDrawer}>Pricing</Link>
         </nav>
 
         <div className="drawer-foot">
