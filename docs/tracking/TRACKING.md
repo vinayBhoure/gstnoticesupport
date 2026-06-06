@@ -20,7 +20,7 @@
 | EP | Name | Status | Completed |
 |---|---|---|---|
 | EP1 | Project Scaffold, Tooling & Design System | ✅ Done | 2026-06-06 |
-| EP2 | Public Marketing Pages | ⬚ Pending | — |
+| EP2 | Public Marketing Pages | ✅ Done | 2026-06-06 |
 | EP3 | Lead Capture & Phase 1 Integrations | ⬚ Pending | — |
 | EP4 | SEO, Performance & Legal Pages | ⬚ Pending | — |
 | EP5 | Phase 1 Hardening & Launch | ⬚ Pending | — |
@@ -41,6 +41,25 @@
 | EP13 | Admin Dashboard | ⬚ Pending | — |
 | EP14 | Email Notifications (Resend + notification matrix) | ⬚ Pending | — |
 | EP15 | Phase 2 Hardening & Launch | ⬚ Pending | — |
+
+---
+
+## EP2 — Definition of Done (Verified 2026-06-06)
+
+- [x] All 10 public routes generate as `○ (Static)` — confirmed via `next build`
+- [x] `tsc --noEmit` passes clean with zero errors
+- [x] Homepage: 12 sections, Navbar, Footer, WhatsApp float, sticky mobile bar
+- [x] Four service pages: ASMT-10, SCN Reply, Commissioner Appeal, GSTAT Appeal
+- [x] Pre-deposit disclosure on Commissioner Appeal and GSTAT Appeal at hero + pricing (KB2 §7)
+- [x] Pricing page: 4-card grid, FAQ accordion, payment policy section, scroll interaction
+- [x] About page: team, mission/vision, company identity (CIN/GSTIN/address hardcoded)
+- [x] FAQ page: live keyword search + `<mark>` highlight + aria-live, 13-question accordion, FAQPage JSON-LD
+- [x] Contact page: 5 channels, grievance officer, `#callback` anchor; form deferred to EP3
+- [x] Custom 404 (`not-found.tsx`) matches design system
+- [x] Nav active states via `usePathname()` — `aria-current="page"` on all links, `.nav-active` on Services button
+- [x] No raw `<img>` tags — all images via `next/image`; logo has `priority`
+- [x] No hardcoded hex values — all CSS via `tokens.css` custom properties
+- [x] Per-page CSS Modules (D59) — class names match prototype 1:1
 
 ---
 
