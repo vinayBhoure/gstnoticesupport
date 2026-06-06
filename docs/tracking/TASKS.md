@@ -23,19 +23,21 @@
 ### EP2 — Public Marketing Pages
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Homepage — all 12 sections (SSG) | Reference: `resources/ui/Homepage.html` |
-| ⬚ | Service page — GSTAT Appeal | Reference: `resources/ui/GSTAT Appeal Service.html` |
-| ⬚ | Service page — Commissioner Appeal | Reference: `resources/ui/Commissioner Appeal Service.html` |
-| ⬚ | Service page — SCN Reply | Reference: `resources/ui/SCN Reply Service.html` |
-| ⬚ | Service page — ASMT-10 Reply | Reference: `resources/ui/ASMT-10 Reply Service.html` |
-| ⬚ | Pricing page (with pre-deposit disclosure for GSTAT + Commissioner) | Reference: `resources/ui/Pricing.html` |
-| ⬚ | About page | Reference: `resources/ui/About.html` |
-| ⬚ | FAQ page | Reference: `resources/ui/FAQ.html` |
-| ⬚ | Contact page | Reference: `resources/ui/Contact.html` |
-| ⬚ | Shared Navbar component (sticky, services dropdown, mobile drawer) | Per `components.md → Navbar` |
-| ⬚ | Shared Footer component (4-column, trust signals, legal identity) | Per `components.md → Footer` |
-| ⬚ | WhatsApp floating button (appears after first scroll, mobile) | Per `components.md → WhatsApp Floating Button` |
-| ⬚ | Sticky mobile bottom bar (Call + Book Service) | Per `components.md → Sticky Mobile Bottom Bar` |
+| ✅ | Homepage — all 12 sections (SSG) | Commit `0c53553` |
+| ✅ | Service page — GSTAT Appeal | Commit `bee764f` |
+| ✅ | Service page — Commissioner Appeal | Commit `bee764f` |
+| ✅ | Service page — SCN Reply | Commit `bee764f` |
+| ✅ | Service page — ASMT-10 Reply | Commit `bee764f` |
+| ✅ | Pricing page (with pre-deposit disclosure for GSTAT + Commissioner) | Commit `8f1060a` |
+| ✅ | About page | Commit `2dc6471` |
+| ✅ | FAQ page | Commit `6b22f12` — live search, accordion, FAQPage JSON-LD |
+| ✅ | Contact page | Commit `8017d8a` — EP2 static (form deferred EP3) |
+| ✅ | Shared Navbar component (sticky, services dropdown, mobile drawer) | Commit `0c53553` |
+| ✅ | Shared Footer component (4-column, trust signals, legal identity) | Commit `0c53553` |
+| ✅ | WhatsApp floating button (appears after first scroll, mobile) | Commit `0c53553` |
+| ✅ | Sticky mobile bottom bar (Call + Book Service) | Commit `0c53553` |
+| ✅ | Nav active states (`aria-current="page"` via `usePathname`) | Commit `7d64614` |
+| ✅ | Custom 404 page (`not-found.tsx`) | Commit `7d64614` |
 
 ### EP3 — Lead Capture & Phase 1 Integrations
 | Status | Task | Notes |
@@ -55,7 +57,7 @@
 | ⬚ | Schema.org JSON-LD: `Service`, `Organization`, `FAQPage` | |
 | ⬚ | `sitemap.xml` — all public routes | Disallow: /dashboard, /admin, /payment |
 | ⬚ | `robots.txt` | |
-| ⬚ | `<Image>` optimization audit — all `<img>` → `next/image` with `priority` on hero | |
+| ✅ | `<Image>` optimization audit — all `<img>` → `next/image` with `priority` on hero | No raw `<img>` tags in production code; logo uses `priority` |
 | ⬚ | Privacy Policy page | Blocked: legal content pending |
 | ⬚ | Terms & Conditions page | Blocked: legal content pending |
 | ⬚ | Google Analytics GA4 integration | Blocked: Measurement ID pending |

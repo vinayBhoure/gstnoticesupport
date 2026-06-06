@@ -5,6 +5,31 @@
 
 ---
 
+## [2026-06-06] — EP2: All public marketing pages shipped (SSG, 10 routes)
+
+**Pages added — all statically generated (○ in `next build`)**
+- `/` — Homepage: 12 sections (hero, services grid, how-it-works, about, testimonials, pricing summary, notice guide, trust signals, FAQ accordion, final CTA). Navbar, Footer, WhatsApp float, sticky mobile bar wired as shared shell.
+- `/services/asmt-10` — ASMT-10 Reply service page (Section 61 CGST, ₹2,999)
+- `/services/scn-reply` — SCN Reply service page (DRC-01/DRC-01A, ₹5,999)
+- `/services/commissioner-appeal` — Commissioner Appeal (APL-01, ₹9,999); pre-deposit 10% disclosed at hero + pricing per KB2 §7
+- `/services/gstat-appeal` — GSTAT Appeal (APL-05, ₹14,999); pre-deposit 20% disclosed at hero + pricing per KB2 §7
+- `/pricing` — Pricing page: 4-card pricing table, accordion FAQ, payment policy, representation card, scroll-to-table interaction
+- `/about` — About page: team cards (photo placeholders), mission/vision, company identity (CIN/GSTIN/address hardcoded), why-choose-us
+- `/faq` — FAQ page: live keyword search with `<mark>` highlighting, aria-live match count, 4 accordion groups (13 questions), FAQPage schema.org JSON-LD
+- `/contact` — Contact page: 5 contact channels (phone/WhatsApp/email/address/hours), grievance officer, callback banner; form deferred to EP3
+- `/_not-found` — Custom 404 page matching site design system
+
+**Shell & navigation**
+- Navbar: `usePathname()` wires `aria-current="page"` on all nav links; Services button gets `.nav-active` class when on any `/services/*` path; mobile drawer mirrors active states
+- All pages verified: no raw `<img>` tags; Navbar logo uses `next/image` with `priority`
+
+**Architecture decisions applied**
+- Per-page CSS Modules (D59) — class names 1:1 with prototype HTML for pixel fidelity
+- No `[Phase N]` commit prefix (D60)
+- Contact form submission deferred to EP3 (static placeholder shown in EP2)
+
+---
+
 ## [2026-06-06] — EP1: Project scaffold, design system, and server foundation
 
 **Client (`client/`)**
