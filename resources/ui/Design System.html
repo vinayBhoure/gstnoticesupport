@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GST Notice Support — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  :root{
+    --primary-navy:#0A2540;
+    --primary-deep-blue:#1B3A6B;
+    --accent-green:#0B8B4E;
+    --accent-green-hover:#0A7A45;
+    --warning-amber:#D97706;
+    --neutral-white:#FFFFFF;
+    --neutral-50:#F7F9FC;
+    --neutral-200:#E5E9F0;
+    --neutral-600:#5A6878;
+    --neutral-900:#0F172A;
+    --shadow-sm:0 1px 2px rgba(10,37,64,.05);
+    --shadow-md:0 4px 12px rgba(10,37,64,.08);
+    --r-card:12px; --r-btn:8px; --r-badge:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Inter',system-ui,sans-serif;color:var(--neutral-900);background:var(--neutral-white);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3,h4{color:var(--primary-navy);line-height:1.2;}
+  a{color:inherit;}
+
+  /* ---- shell ---- */
+  .layout{display:grid;grid-template-columns:264px 1fr;min-height:100vh;}
+  aside{position:sticky;top:0;align-self:start;height:100vh;border-right:1px solid var(--neutral-200);background:var(--neutral-50);padding:32px 24px;overflow-y:auto;}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+  .brand img{width:48px;height:48px;border-radius:var(--r-btn);object-fit:cover;border:1px solid var(--neutral-200);background:#fff;}
+  .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);line-height:1.25;}
+  .brand .bn span{color:var(--accent-green);}
+  .brand .bt{font-size:12px;color:var(--neutral-600);font-weight:500;}
+  nav.toc{display:flex;flex-direction:column;gap:2px;}
+  nav.toc a{display:block;padding:9px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-600);text-decoration:none;}
+  nav.toc a:hover{background:#fff;color:var(--primary-navy);box-shadow:var(--shadow-sm);}
+  nav.toc .lbl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:18px 12px 6px;}
+
+  main{padding:64px 64px 120px;max-width:1080px;min-width:0;}
+  header.page{padding-bottom:48px;border-bottom:1px solid var(--neutral-200);margin-bottom:64px;}
+  header.page .kicker{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-green);margin-bottom:14px;}
+  header.page h1{font-size:48px;font-weight:700;letter-spacing:-.02em;}
+  header.page p{font-size:18px;color:var(--neutral-600);margin-top:16px;max-width:64ch;}
+
+  section.block{margin-bottom:80px;scroll-margin-top:32px;}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;}
+  .sec-head .num{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--accent-green);font-weight:500;}
+  .sec-head h2{font-size:32px;font-weight:700;letter-spacing:-.01em;}
+  .sec-sub{color:var(--neutral-600);font-size:16px;margin-bottom:32px;max-width:70ch;}
+
+  .grid{display:grid;gap:16px;}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .g2{grid-template-columns:repeat(2,1fr);}
+  .g4{grid-template-columns:repeat(4,1fr);}
+
+  /* ---- swatches ---- */
+  .swatch{border:1px solid var(--neutral-200);border-radius:var(--r-card);overflow:hidden;background:#fff;}
+  .swatch .chip{height:88px;}
+  .swatch .meta{padding:14px 16px;}
+  .swatch .nm{font-weight:600;font-size:14px;color:var(--primary-navy);}
+  .swatch .hex{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--neutral-600);margin-top:3px;}
+  .swatch .use{font-size:13px;color:var(--neutral-600);margin-top:8px;line-height:1.4;}
+  .swatch.bord .chip{border-bottom:1px solid var(--neutral-200);}
+
+  /* ---- type scale ---- */
+  .type-row{display:flex;align-items:baseline;gap:24px;padding:20px 0;border-bottom:1px solid var(--neutral-200);}
+  .type-row .tag{flex:0 0 130px;font-size:13px;color:var(--neutral-600);}
+  .type-row .tag b{display:block;color:var(--primary-navy);font-size:14px;}
+
+  /* ---- spacing ---- */
+  .space-row{display:flex;align-items:center;gap:20px;padding:9px 0;}
+  .space-row .lab{flex:0 0 64px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--neutral-600);}
+  .space-bar{height:16px;background:var(--accent-green);border-radius:3px;}
+
+  /* ---- cards (panels) ---- */
+  .panel{border:1px solid var(--neutral-200);border-radius:var(--r-card);background:#fff;padding:28px;}
+  .panel.pad0{padding:0;overflow:hidden;}
+  .label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--neutral-600);margin-bottom:16px;}
+
+  /* ---- buttons ---- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:13px 22px;border-radius:var(--r-btn);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s,box-shadow .15s;text-decoration:none;}
+  .btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .btn-primary{background:var(--accent-green);color:#fff;}
+  .btn-primary:hover{background:var(--accent-green-hover);}
+  .btn-primary:active{background:var(--accent-green-hover);transform:translateY(1px);}
+  .btn-secondary{background:transparent;border-color:var(--primary-navy);color:var(--primary-navy);}
+  .btn-secondary:hover{background:var(--primary-navy);color:#fff;}
+  .btn-tertiary{min-height:auto;padding:6px 0;background:none;color:var(--primary-deep-blue);border:none;font-weight:600;}
+  .btn-tertiary:hover{color:var(--accent-green);}
+  .btn-phone{background:transparent;border-color:var(--neutral-200);color:var(--primary-navy);}
+  .btn-phone:hover{border-color:var(--primary-navy);}
+  .btn-wa{background:#25D366;color:#0A2540;}
+  .btn-wa:hover{background:#1ebe5b;}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;pointer-events:none;}
+  .btn .ic{width:18px;height:18px;}
+  .btn-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;}
+  .state-tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--neutral-600);display:block;margin-bottom:8px;}
+  .btn-cell{display:flex;flex-direction:column;align-items:flex-start;}
+
+  /* ---- component samples ---- */
+  .ntc-card{border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:24px;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+  .ntc-card:hover{border-color:var(--accent-green);box-shadow:var(--shadow-sm);}
+  .ntc-card .ic-wrap{width:44px;height:44px;border-radius:var(--r-btn);background:var(--neutral-50);display:flex;align-items:center;justify-content:center;color:var(--primary-deep-blue);margin-bottom:16px;}
+  .ntc-card h4{font-size:18px;font-weight:600;}
+  .ntc-card p{font-size:14px;color:var(--neutral-600);margin:8px 0 16px;line-height:1.5;}
+  .ntc-card .lnk{font-size:14px;font-weight:600;color:var(--accent-green);display:inline-flex;align-items:center;gap:5px;}
+  .ntc-card.recent{background:#F0F8F3;border-color:#CDE9D8;}
+
+  .step{display:flex;flex-direction:column;gap:14px;position:relative;}
+  .step .badge-n{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--primary-deep-blue);color:var(--primary-deep-blue);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:15px;background:#fff;z-index:1;}
+  .step .ic{color:var(--primary-deep-blue);}
+  .step h4{font-size:17px;font-weight:600;}
+  .step p{font-size:14px;color:var(--neutral-600);line-height:1.5;}
+  .steps-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;position:relative;}
+  .steps-wrap::before{content:"";position:absolute;top:22px;left:14%;right:14%;height:1.5px;background:var(--neutral-200);}
+
+  .expert .portrait{aspect-ratio:3/4;border-radius:var(--r-card);background:repeating-linear-gradient(135deg,var(--neutral-50),var(--neutral-50) 10px,#eef2f8 10px,#eef2f8 20px);border:1px solid var(--neutral-200);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+  .expert .portrait span{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--neutral-600);}
+  .expert h4{font-size:18px;font-weight:600;}
+  .expert .cred{font-size:14px;color:var(--neutral-900);margin-top:4px;}
+  .expert .spec{font-size:13px;color:var(--neutral-600);margin-top:2px;}
+  .expert .reg{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--neutral-600);margin-top:10px;display:flex;align-items:center;gap:8px;}
+
+  .stat{padding:8px 0;}
+  .stat .num{font-size:56px;font-weight:700;color:var(--primary-navy);letter-spacing:-.02em;line-height:1;}
+  .stat .desc{font-size:15px;color:var(--neutral-600);margin-top:10px;}
+
+  .tbadge{display:flex;align-items:center;gap:12px;border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:16px 18px;background:#fff;}
+  .tbadge .ic{color:var(--primary-deep-blue);flex:0 0 auto;}
+  .tbadge .tx{font-size:14px;font-weight:500;color:var(--primary-navy);}
+  .tbadge .vf{font-size:12px;color:var(--accent-green);font-weight:600;}
+
+  .quote{border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:28px;background:#fff;position:relative;}
+  .quote .qm{font-size:64px;line-height:.7;color:var(--neutral-200);font-family:Georgia,serif;}
+  .quote p{font-size:15px;color:var(--neutral-900);margin:6px 0 20px;line-height:1.55;}
+  .quote .div{height:1px;background:var(--neutral-200);margin-bottom:16px;}
+  .quote .who{display:flex;align-items:center;gap:12px;}
+  .quote .who .av{width:48px;height:48px;border-radius:50%;background:repeating-linear-gradient(135deg,var(--neutral-50),var(--neutral-50) 6px,#eef2f8 6px,#eef2f8 12px);border:1px solid var(--neutral-200);}
+  .quote .who .nm{font-weight:600;font-size:14px;}
+  .quote .who .meta{font-size:13px;color:var(--neutral-600);}
+
+  .upload{border:1.5px dashed var(--neutral-200);border-radius:var(--r-card);padding:40px;text-align:center;background:var(--neutral-50);}
+  .upload .ic{color:var(--primary-deep-blue);margin-bottom:14px;}
+  .upload h4{font-size:17px;font-weight:600;}
+  .upload .cons{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--neutral-600);margin-top:10px;}
+  .upload .priv{font-size:13px;color:var(--accent-green);margin-top:14px;display:inline-flex;align-items:center;gap:6px;font-weight:500;}
+
+  .stepper{display:flex;align-items:center;gap:0;}
+  .stepper .node{display:flex;flex-direction:column;align-items:center;gap:8px;flex:0 0 auto;}
+  .stepper .dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;border:1.5px solid var(--neutral-200);color:var(--neutral-600);background:#fff;}
+  .stepper .node.done .dot{background:var(--accent-green);border-color:var(--accent-green);color:#fff;}
+  .stepper .node.cur .dot{border-color:var(--primary-navy);color:var(--primary-navy);}
+  .stepper .node small{font-size:12px;color:var(--neutral-600);font-weight:500;}
+  .stepper .node.cur small{color:var(--primary-navy);}
+  .stepper .conn{flex:1;height:1.5px;background:var(--neutral-200);margin:0 8px;margin-bottom:24px;}
+  .stepper .conn.done{background:var(--accent-green);}
+
+  .unlock{border:1px solid var(--neutral-200);border-radius:var(--r-card);overflow:hidden;}
+  .unlock .doc{height:150px;background:var(--neutral-50);position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--neutral-600);border-bottom:1px solid var(--neutral-200);}
+  .unlock .doc .ic{color:var(--primary-navy);}
+  .unlock .doc small{font-size:13px;}
+  .unlock .body{padding:20px 22px;}
+  .unlock .li{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;color:var(--neutral-900);}
+  .unlock .li .mono{color:var(--neutral-600);}
+  .unlock .li.pre{color:var(--neutral-600);font-size:13px;}
+
+  .finalcta{background:var(--primary-navy);border-radius:var(--r-card);padding:56px 40px;text-align:center;}
+  .finalcta h3{color:#fff;font-size:30px;font-weight:700;letter-spacing:-.01em;max-width:22ch;margin:0 auto;}
+  .finalcta p{color:#B9C6D8;font-size:16px;margin-top:14px;}
+  .finalcta .btn-row{justify-content:center;margin-top:28px;}
+  .finalcta .btn-secondary{border-color:#fff;color:#fff;}
+  .finalcta .btn-secondary:hover{background:#fff;color:var(--primary-navy);}
+  .finalcta .ph{color:#fff;font-size:15px;font-weight:600;margin-top:22px;display:inline-flex;gap:8px;align-items:center;}
+
+  /* navbar + footer mocks */
+  .navmock{border:1px solid var(--neutral-200);border-radius:var(--r-card);overflow:hidden;}
+  .navmock .bar{display:flex;align-items:center;gap:24px;padding:14px 24px;background:#fff;border-bottom:1px solid var(--neutral-200);}
+  .navmock .bar img{height:34px;width:34px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .navmock .bar .nm{font-weight:700;font-size:15px;color:var(--primary-navy);}
+  .navmock .bar .nm span{color:var(--accent-green);}
+  .navmock .links{display:flex;gap:22px;font-size:14px;font-weight:500;color:var(--neutral-900);margin-left:8px;}
+  .navmock .links .drop{display:inline-flex;align-items:center;gap:4px;}
+  .navmock .right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+
+  .footmock{background:var(--primary-navy);border-radius:var(--r-card);padding:40px;color:#C7D2E0;}
+  .footmock .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;}
+  .footmock h5{color:#fff;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;}
+  .footmock ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;}
+  .footmock .mono{font-family:'JetBrains Mono',monospace;font-size:13px;color:#9FB0C4;}
+  .footmock .strip{border-top:1px solid rgba(255,255,255,.12);margin-top:28px;padding-top:18px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:13px;color:#9FB0C4;}
+  .footmock .strip .ssl{display:inline-flex;align-items:center;gap:6px;color:var(--accent-green);font-weight:600;}
+
+  /* rule lists */
+  .rules{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .rule{display:flex;gap:12px;padding:18px;border:1px solid var(--neutral-200);border-radius:var(--r-card);background:#fff;}
+  .rule .ic{color:var(--accent-green);flex:0 0 auto;}
+  .rule.no .ic{color:var(--warning-amber);}
+  .rule h4{font-size:15px;font-weight:600;}
+  .rule p{font-size:14px;color:var(--neutral-600);margin-top:4px;line-height:1.5;}
+
+  .pill-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .pill-list .tag{font-size:13px;color:var(--neutral-600);background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-badge);padding:6px 12px;}
+  .pill-list .tag.warn{color:var(--warning-amber);border-color:#F0D9B5;background:#FFF8EF;}
+
+  .callout{border:1px solid var(--neutral-200);border-left:3px solid var(--accent-green);background:var(--neutral-50);border-radius:var(--r-badge);padding:16px 20px;font-size:14px;color:var(--neutral-900);}
+  .callout b{color:var(--primary-navy);}
+
+  @media (max-width:1024px){
+    .layout{grid-template-columns:1fr;}
+    aside{position:static;height:auto;border-right:none;border-bottom:1px solid var(--neutral-200);}
+    nav.toc{display:grid;grid-template-columns:repeat(2,1fr);}
+    main{padding:40px 24px 80px;}
+    header.page h1{font-size:32px;}
+    .g3,.g4,.steps-wrap,.rules{grid-template-columns:1fr;}
+    .g2,.footmock .cols{grid-template-columns:1fr 1fr;}
+    .steps-wrap::before{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand">
+      <img src="assets/logo.png" alt="GST Notice Support logo" />
+      <div>
+        <div class="bn">GST<span>Notice</span>Support</div>
+        <div class="bt">Design System</div>
+      </div>
+    </div>
+    <nav class="toc">
+      <a href="#foundations">Overview</a>
+      <span class="lbl">Foundations</span>
+      <a href="#color">Color</a>
+      <a href="#type">Typography</a>
+      <a href="#spacing">Spacing</a>
+      <a href="#depth">Radius &amp; Depth</a>
+      <a href="#icons">Iconography</a>
+      <span class="lbl">Components</span>
+      <a href="#buttons">Buttons</a>
+      <a href="#cards">Cards &amp; Selectors</a>
+      <a href="#people">People &amp; Proof</a>
+      <a href="#flows">Flow Components</a>
+      <a href="#shell">Navbar &amp; Footer</a>
+      <span class="lbl">Behavior</span>
+      <a href="#interaction">Interaction</a>
+      <a href="#motion">Motion</a>
+      <a href="#trust">Trust &amp; A11y</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="page" id="foundations">
+      <div class="kicker">GST Litigation Portal · Source of Truth</div>
+      <h1>Design System</h1>
+      <p>Banking-grade, government-portal-familiar. Built for CAs, advocates, and SME owners who just received a tax notice. Calm, sparse, institutional — restraint signals confidence. Every screen inherits these locked tokens and shared components.</p>
+      <div class="callout" style="margin-top:28px;">
+        <b>Principles, in priority order.</b> 1 — Trust before conversion. 2 — One primary decision per screen. 3 — Restraint signals confidence. 4 — Specificity beats emotion. 5 — Readability is a trust signal.
+      </div>
+    </header>
+
+    <!-- COLOR -->
+    <section class="block" id="color">
+      <div class="sec-head"><span class="num">2.1</span><h2>Color</h2></div>
+      <p class="sec-sub">Locked palette — do not alter. Flat surfaces, thin borders, no gradients. Amber is reserved for deadlines and attention only, never decoration.</p>
+      <div class="grid g3">
+        <div class="swatch bord"><div class="chip" style="background:#0A2540"></div><div class="meta"><div class="nm">Primary Navy</div><div class="hex">#0A2540</div><div class="use">Headings, navbar, primary text</div></div></div>
+        <div class="swatch bord"><div class="chip" style="background:#1B3A6B"></div><div class="meta"><div class="nm">Deep Blue</div><div class="hex">#1B3A6B</div><div class="use">Section backgrounds</div></div></div>
+        <div class="swatch bord"><div class="chip" style="background:#0B8B4E"></div><div class="meta"><div class="nm">Accent Green</div><div class="hex">#0B8B4E</div><div class="use">Primary CTAs, success</div></div></div>
+        <div class="swatch bord"><div class="chip" style="background:#0A7A45"></div><div class="meta"><div class="nm">Green Hover</div><div class="hex">#0A7A45</div><div class="use">CTA hover state</div></div></div>
+        <div class="swatch bord"><div class="chip" style="background:#D97706"></div><div class="meta"><div class="nm">Warning Amber</div><div class="hex">#D97706</div><div class="use">Deadline / attention only</div></div></div>
+        <div class="swatch bord"><div class="chip" style="background:#0F172A"></div><div class="meta"><div class="nm">Neutral 900</div><div class="hex">#0F172A</div><div class="use">Primary body text</div></div></div>
+        <div class="swatch bord"><div class="chip" style="background:#5A6878"></div><div class="meta"><div class="nm">Neutral 600</div><div class="hex">#5A6878</div><div class="use">Secondary body text</div></div></div>
+        <div class="swatch bord"><div class="chip" style="background:#E5E9F0"></div><div class="meta"><div class="nm">Neutral 200</div><div class="hex">#E5E9F0</div><div class="use">Borders, dividers</div></div></div>
+        <div class="swatch bord"><div class="chip" style="background:#F7F9FC"></div><div class="meta"><div class="nm">Neutral 50</div><div class="hex">#F7F9FC</div><div class="use">Alternating sections</div></div></div>
+      </div>
+      <div style="margin-top:18px;" class="pill-list">
+        <span class="tag warn">Forbidden — pure red #FF0000</span>
+        <span class="tag warn">Forbidden — bright yellow #FFEB00</span>
+        <span class="tag warn">Forbidden — neon / saturated</span>
+        <span class="tag warn">Forbidden — black backgrounds</span>
+      </div>
+    </section>
+
+    <!-- TYPE -->
+    <section class="block" id="type">
+      <div class="sec-head"><span class="num">2.2</span><h2>Typography</h2></div>
+      <p class="sec-sub">Inter / Manrope for everything; JetBrains Mono reserved for reference numbers (CIN, GSTIN, ICAI / Bar IDs). Body never drops below 16px. Forbidden: script, decorative, condensed, slab serif.</p>
+      <div class="panel">
+        <div class="type-row"><div class="tag"><b>H1 · 48 / 32</b>Inter 700 · lh 1.1</div><div style="font-size:48px;font-weight:700;color:var(--primary-navy);letter-spacing:-.02em;">Resolve your GST notice</div></div>
+        <div class="type-row"><div class="tag"><b>H2 · 36 / 28</b>Inter 700 · lh 1.2</div><div style="font-size:36px;font-weight:700;color:var(--primary-navy);">How the process works</div></div>
+        <div class="type-row"><div class="tag"><b>H3 · 24</b>Inter 600 · lh 1.3</div><div style="font-size:24px;font-weight:600;color:var(--primary-navy);">Show Cause Notice (SCN)</div></div>
+        <div class="type-row"><div class="tag"><b>Body · 16</b>Inter 400 · lh 1.6</div><div style="font-size:16px;color:var(--neutral-900);">We draft and file responses to Section 74 demand notices, backed by qualified professionals.</div></div>
+        <div class="type-row"><div class="tag"><b>Label · 14</b>Inter 500</div><div style="font-size:14px;font-weight:500;color:var(--neutral-600);">Email address</div></div>
+        <div class="type-row" style="border-bottom:none;"><div class="tag"><b>Mono · ref nums</b>JetBrains Mono</div><div class="mono" style="font-size:15px;color:var(--neutral-900);">GSTIN 29ABCDE1234F1Z5 · CIN U74999KA2024PTC000000</div></div>
+      </div>
+    </section>
+
+    <!-- SPACING -->
+    <section class="block" id="spacing">
+      <div class="sec-head"><span class="num">2.3</span><h2>Spacing</h2></div>
+      <p class="sec-sub">8px base grid. Minimum vertical gap between major sections: 80px desktop, 48px mobile. Generous whitespace is a feature, not waste.</p>
+      <div class="panel">
+        <div class="space-row"><span class="lab">4px</span><div class="space-bar" style="width:4px"></div></div>
+        <div class="space-row"><span class="lab">8px</span><div class="space-bar" style="width:8px"></div></div>
+        <div class="space-row"><span class="lab">16px</span><div class="space-bar" style="width:16px"></div></div>
+        <div class="space-row"><span class="lab">24px</span><div class="space-bar" style="width:24px"></div></div>
+        <div class="space-row"><span class="lab">32px</span><div class="space-bar" style="width:32px"></div></div>
+        <div class="space-row"><span class="lab">48px</span><div class="space-bar" style="width:48px"></div></div>
+        <div class="space-row"><span class="lab">64px</span><div class="space-bar" style="width:64px"></div></div>
+        <div class="space-row"><span class="lab">80px</span><div class="space-bar" style="width:80px"></div></div>
+        <div class="space-row"><span class="lab">120px</span><div class="space-bar" style="width:120px"></div></div>
+      </div>
+    </section>
+
+    <!-- DEPTH -->
+    <section class="block" id="depth">
+      <div class="sec-head"><span class="num">2.4</span><h2>Radius &amp; Depth</h2></div>
+      <p class="sec-sub">No pill shapes. Shadows used sparingly — cards and elevated surfaces only. No text shadows, no neumorphism.</p>
+      <div class="grid g4">
+        <div class="panel" style="text-align:center;"><div style="height:64px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:12px;margin-bottom:14px;"></div><div class="nm" style="font-weight:600;font-size:14px;color:var(--primary-navy)">Card · 12px</div></div>
+        <div class="panel" style="text-align:center;"><div style="height:64px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:8px;margin-bottom:14px;"></div><div class="nm" style="font-weight:600;font-size:14px;color:var(--primary-navy)">Button / Input · 8px</div></div>
+        <div class="panel" style="text-align:center;"><div style="height:64px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:6px;margin-bottom:14px;"></div><div class="nm" style="font-weight:600;font-size:14px;color:var(--primary-navy)">Badge · 6px</div></div>
+        <div class="panel" style="text-align:center;display:flex;flex-direction:column;gap:14px;justify-content:center;"><div style="height:30px;background:#fff;border-radius:8px;box-shadow:var(--shadow-sm);"></div><div style="height:30px;background:#fff;border-radius:8px;box-shadow:var(--shadow-md);"></div><div class="nm" style="font-weight:600;font-size:14px;color:var(--primary-navy)">shadow-sm / md</div></div>
+      </div>
+    </section>
+
+    <!-- ICONS -->
+    <section class="block" id="icons">
+      <div class="sec-head"><span class="num">2.5</span><h2>Iconography</h2></div>
+      <p class="sec-sub">Outline icons, 1.5px stroke (Lucide). No 3D, no gradient, no emoji as UI. Icons supplement text labels — never replace them.</p>
+      <div class="panel" style="display:flex;gap:36px;flex-wrap:wrap;color:var(--primary-deep-blue);">
+        <i data-lucide="file-text" style="width:30px;height:30px"></i>
+        <i data-lucide="shield-check" style="width:30px;height:30px"></i>
+        <i data-lucide="scale" style="width:30px;height:30px"></i>
+        <i data-lucide="upload-cloud" style="width:30px;height:30px"></i>
+        <i data-lucide="lock" style="width:30px;height:30px"></i>
+        <i data-lucide="phone" style="width:30px;height:30px"></i>
+        <i data-lucide="calendar-clock" style="width:30px;height:30px"></i>
+        <i data-lucide="badge-check" style="width:30px;height:30px"></i>
+        <i data-lucide="building-2" style="width:30px;height:30px"></i>
+        <i data-lucide="arrow-right" style="width:30px;height:30px"></i>
+      </div>
+    </section>
+
+    <!-- BUTTONS -->
+    <section class="block" id="buttons">
+      <div class="sec-head"><span class="num">3.0</span><h2>Buttons</h2></div>
+      <p class="sec-sub">Min height 48px. Never two primaries adjacent — pattern is one primary + one outline secondary. Every variant ships default, hover, focus, active, disabled.</p>
+      <div class="panel" style="display:flex;flex-direction:column;gap:28px;">
+        <div class="btn-cell" style="width:100%"><span class="state-tag">Primary — main conversion</span>
+          <div class="btn-row">
+            <button class="btn btn-primary"><i data-lucide="calendar-check" class="ic"></i>Book Service</button>
+            <button class="btn btn-primary" style="background:var(--accent-green-hover)">Hover</button>
+            <button class="btn btn-primary" style="box-shadow:0 0 0 3px rgba(11,139,78,.35)">Focus</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+        </div>
+        <div class="btn-cell" style="width:100%"><span class="state-tag">Secondary — lower commitment</span>
+          <div class="btn-row">
+            <button class="btn btn-secondary">Request a Callback</button>
+            <button class="btn btn-secondary" style="background:var(--primary-navy);color:#fff">Hover</button>
+            <button class="btn btn-secondary" disabled>Disabled</button>
+          </div>
+        </div>
+        <div class="btn-cell" style="width:100%"><span class="state-tag">Tertiary · Phone · WhatsApp</span>
+          <div class="btn-row">
+            <a class="btn btn-tertiary">Learn More <i data-lucide="arrow-right" class="ic"></i></a>
+            <button class="btn btn-phone"><i data-lucide="phone" class="ic"></i>+91 98XXX XXXXX</button>
+            <button class="btn btn-wa"><i data-lucide="message-circle" class="ic"></i>Chat on WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARDS -->
+    <section class="block" id="cards">
+      <div class="sec-head"><span class="num">3.1</span><h2>Cards &amp; Selectors</h2></div>
+      <p class="sec-sub">Whole card is clickable where it represents a single choice. Hover lifts the border to green with a subtle shadow; recently-viewed gets a light green tint.</p>
+      <div class="grid g3">
+        <div class="ntc-card">
+          <div class="ic-wrap"><i data-lucide="file-warning" style="width:22px;height:22px"></i></div>
+          <h4>Show Cause Notice (SCN)</h4>
+          <p>Section 74 demand notices — we draft and file responses.</p>
+          <span class="lnk">Get help <i data-lucide="arrow-right" style="width:15px;height:15px"></i></span>
+        </div>
+        <div class="ntc-card recent">
+          <div class="ic-wrap"><i data-lucide="receipt-text" style="width:22px;height:22px"></i></div>
+          <h4>ITC Mismatch Notice</h4>
+          <p>GSTR-2B vs 3B reconciliation disputes resolved end-to-end.</p>
+          <span class="lnk">Get help <i data-lucide="arrow-right" style="width:15px;height:15px"></i></span>
+        </div>
+        <div class="ntc-card">
+          <div class="ic-wrap"><i data-lucide="gavel" style="width:22px;height:22px"></i></div>
+          <h4>Appeal Filing</h4>
+          <p>First-appellate representation before the Commissioner (Appeals).</p>
+          <span class="lnk">Get help <i data-lucide="arrow-right" style="width:15px;height:15px"></i></span>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;" class="label">Process Step Card</div>
+      <div class="panel">
+        <div class="steps-wrap">
+          <div class="step"><div class="badge-n">01</div><i data-lucide="upload-cloud" class="ic"></i><h4>Upload your notice</h4><p>Share the notice and supporting documents securely.</p></div>
+          <div class="step"><div class="badge-n">02</div><i data-lucide="users" class="ic"></i><h4>Expert review</h4><p>A qualified professional assesses your case within 24 hrs.</p></div>
+          <div class="step"><div class="badge-n">03</div><i data-lucide="send" class="ic"></i><h4>Response filed</h4><p>We draft, confirm, and file your response on the portal.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PEOPLE & PROOF -->
+    <section class="block" id="people">
+      <div class="sec-head"><span class="num">3.2</span><h2>People &amp; Proof</h2></div>
+      <p class="sec-sub">Real photos only — no avatars, no stock, no casual poses. Outcome proof uses verifiable numbers with "+" notation over vanity round numbers. Testimonials are specific, not emotional.</p>
+      <div class="grid g3">
+        <div class="panel expert">
+          <div class="portrait"><span>portrait 3:4 — real photo</span></div>
+          <h4>CA Priya Nair</h4>
+          <div class="cred">Chartered Accountant</div>
+          <div class="spec">GST litigation &amp; indirect tax</div>
+          <div class="reg"><span class="mono">ICAI 224578</span><a class="vf" style="display:inline-flex;align-items:center;gap:4px;color:var(--primary-deep-blue);text-decoration:none;">LinkedIn <i data-lucide="external-link" style="width:14px;height:14px"></i></a></div>
+        </div>
+        <div class="panel" style="display:flex;flex-direction:column;justify-content:center;gap:32px;">
+          <div class="stat"><div class="num">500+</div><div class="desc">GST Notices Resolved</div></div>
+          <div class="stat"><div class="num">₹50&nbsp;Cr+</div><div class="desc">Disputed Amount Defended</div></div>
+        </div>
+        <div class="quote">
+          <div class="qm">&ldquo;</div>
+          <p>Resolved a ₹12L SCN in two weeks. They handled the GSTR-3B reconciliation and filed everything on the portal — I just signed off.</p>
+          <div class="div"></div>
+          <div class="who"><div class="av"></div><div><div class="nm">Rohit Mehta</div><div class="meta">Proprietor, Textiles · Surat</div></div></div>
+        </div>
+      </div>
+      <div class="grid g4" style="margin-top:16px;">
+        <div class="tbadge"><i data-lucide="shield-check" class="ic" style="width:22px;height:22px"></i><div><div class="tx">256-bit SSL Secured</div></div></div>
+        <div class="tbadge"><i data-lucide="lock" class="ic" style="width:22px;height:22px"></i><div><div class="tx">Documents confidential</div></div></div>
+        <div class="tbadge"><i data-lucide="badge-check" class="ic" style="width:22px;height:22px"></i><div><div class="tx">ICAI-certified team</div><a class="vf">Verify ↗</a></div></div>
+        <div class="tbadge"><i data-lucide="clock" class="ic" style="width:22px;height:22px"></i><div><div class="tx">24-hr first response</div></div></div>
+      </div>
+    </section>
+
+    <!-- FLOWS -->
+    <section class="block" id="flows">
+      <div class="sec-head"><span class="num">3.3</span><h2>Flow Components</h2></div>
+      <p class="sec-sub">The highest-stakes interactions. Upload keeps instructions minimal and reassurance prominent. Pay-to-unlock shows any pre-deposit as its own line, referenced "as per GST Act" — never a percentage.</p>
+
+      <div class="label">Stepper / Progress</div>
+      <div class="panel" style="margin-bottom:24px;">
+        <div class="stepper">
+          <div class="node done"><div class="dot"><i data-lucide="check" style="width:16px;height:16px"></i></div><small>Notice</small></div>
+          <div class="conn done"></div>
+          <div class="node cur"><div class="dot">2</div><small>Details</small></div>
+          <div class="conn"></div>
+          <div class="node"><div class="dot">3</div><small>Review</small></div>
+          <div class="conn"></div>
+          <div class="node"><div class="dot">4</div><small>Pay</small></div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div>
+          <div class="label">Document Upload — empty state</div>
+          <div class="upload">
+            <i data-lucide="upload-cloud" class="ic" style="width:36px;height:36px"></i>
+            <h4>Drag &amp; drop your notice here</h4>
+            <div class="cons">PDF only · max 8 files · 5 MB each · 40 MB total</div>
+            <div class="priv"><i data-lucide="lock" style="width:14px;height:14px"></i>Your documents are confidential and never shared.</div>
+          </div>
+        </div>
+        <div>
+          <div class="label">Pay-to-Unlock → Draft</div>
+          <div class="unlock">
+            <div class="doc"><i data-lucide="lock" class="ic" style="width:30px;height:30px"></i><small>Draft response locked</small></div>
+            <div class="body">
+              <div class="li"><span>Litigation service</span><span class="mono">₹14,999</span></div>
+              <div class="li pre"><span>Pre-deposit (as per GST Act)</span><span class="mono">shown separately</span></div>
+              <div style="margin-top:14px;"><button class="btn btn-primary" style="width:100%"><i data-lucide="unlock" class="ic"></i>Pay to Unlock</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHELL -->
+    <section class="block" id="shell">
+      <div class="sec-head"><span class="num">3.4</span><h2>Navbar &amp; Footer</h2></div>
+      <p class="sec-sub">Public shell. Navbar is sticky with the phone number always visible; max 5 nav items excluding CTAs. Footer carries the mandatory legal-identity signals.</p>
+
+      <div class="navmock" style="margin-bottom:24px;">
+        <div class="bar">
+          <img src="assets/logo.png" alt="logo" />
+          <span class="nm">GST<span>Notice</span>Support</span>
+          <div class="links">
+            <span class="drop">Services <i data-lucide="chevron-down" style="width:14px;height:14px"></i></span>
+            <span>About</span><span>Resources</span><span>Pricing</span>
+          </div>
+          <div class="right">
+            <button class="btn btn-phone" style="min-height:40px;padding:9px 14px;font-size:14px"><i data-lucide="phone" class="ic" style="width:16px;height:16px"></i>+91 98XXX XXXXX</button>
+            <button class="btn btn-secondary" style="min-height:40px;padding:9px 16px;font-size:14px">Request Callback</button>
+            <button class="btn btn-primary" style="min-height:40px;padding:9px 16px;font-size:14px">Book Service</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footmock">
+        <div class="cols">
+          <div>
+            <h5>Company</h5>
+            <ul>
+              <li>GST Notice Support Pvt Ltd</li>
+              <li class="mono">CIN U74999KA2024PTC000000</li>
+              <li class="mono">GSTIN 29ABCDE1234F1Z5</li>
+              <li>4th Floor, MG Road, Bengaluru 560001</li>
+            </ul>
+          </div>
+          <div><h5>Services</h5><ul><li>Show Cause Notice</li><li>ITC Mismatch</li><li>Appeal Filing</li><li>Pricing</li></ul></div>
+          <div><h5>Resources</h5><ul><li>GST Notice Guides</li><li>Blog</li><li>FAQ</li></ul></div>
+          <div><h5>Contact</h5><ul><li>+91 98XXX XXXXX</li><li>help@gstnoticesupport.in</li><li>Grievance: A. Sharma</li><li>grievance@gstnoticesupport.in</li></ul></div>
+        </div>
+        <div class="strip">
+          <span>Privacy Policy</span><span>·</span><span>Terms</span><span>·</span><span>Refund Policy</span>
+          <span class="ssl" style="margin-left:auto;"><i data-lucide="shield-check" style="width:15px;height:15px"></i>SSL Secured</span>
+          <span>© 2026 GST Notice Support. All rights reserved.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTION -->
+    <section class="block" id="interaction">
+      <div class="sec-head"><span class="num">3</span><h2>Interaction Rules</h2></div>
+      <p class="sec-sub">Every interactive element carries explicit default, hover, focus, active, disabled states.</p>
+      <div class="rules">
+        <div class="rule"><i data-lucide="check-circle" class="ic"></i><div><h4>One primary, never two</h4><p>Pair one filled primary with one outline secondary. Adjacent primaries cause decision paralysis.</p></div></div>
+        <div class="rule"><i data-lucide="check-circle" class="ic"></i><div><h4>Whole-card clickable</h4><p>When a card represents a single choice, the entire card is the target — not just the inner link.</p></div></div>
+        <div class="rule"><i data-lucide="check-circle" class="ic"></i><div><h4>Single-item accordions</h4><p>FAQs expand one item at a time.</p></div></div>
+        <div class="rule"><i data-lucide="check-circle" class="ic"></i><div><h4>Disabled stays visible</h4><p>Show a short reason rather than silently hiding a blocked action.</p></div></div>
+        <div class="rule"><i data-lucide="check-circle" class="ic"></i><div><h4>Single-column forms</h4><p>Large fields, inline validation, errors specific and adjacent to the field.</p></div></div>
+        <div class="rule"><i data-lucide="check-circle" class="ic"></i><div><h4>Tables → cards on mobile</h4><p>Tables collapse to stacked cards below the breakpoint; admin tables may scroll horizontally.</p></div></div>
+      </div>
+    </section>
+
+    <!-- MOTION -->
+    <section class="block" id="motion">
+      <div class="sec-head"><span class="num">5</span><h2>Motion</h2></div>
+      <p class="sec-sub">Allowed in exactly three places. Everything else is static. All motion honors <span class="mono">prefers-reduced-motion</span>.</p>
+      <div class="grid g3">
+        <div class="panel"><i data-lucide="footprints" style="width:24px;height:24px;color:var(--accent-green)"></i><h4 style="font-size:16px;margin:12px 0 6px;">Booking step</h4><p style="font-size:14px;color:var(--neutral-600)">300ms ease-out transition between steps.</p></div>
+        <div class="panel"><i data-lucide="check-check" style="width:24px;height:24px;color:var(--accent-green)"></i><h4 style="font-size:16px;margin:12px 0 6px;">Upload confirmation</h4><p style="font-size:14px;color:var(--neutral-600)">File icon slides → replaced by a checkmark on success.</p></div>
+        <div class="panel"><i data-lucide="unlock" style="width:24px;height:24px;color:var(--accent-green)"></i><h4 style="font-size:16px;margin:12px 0 6px;">Pay-to-unlock</h4><p style="font-size:14px;color:var(--neutral-600)">Lock icon animates to an unlocked state on payment.</p></div>
+      </div>
+      <div style="margin-top:18px;" class="pill-list">
+        <span class="tag warn">No scroll-triggered animation</span><span class="tag warn">No parallax</span><span class="tag warn">No entrance/reveal on marketing</span><span class="tag warn">No autoplay carousels</span>
+      </div>
+    </section>
+
+    <!-- TRUST -->
+    <section class="block" id="trust">
+      <div class="sec-head"><span class="num">6 · 7</span><h2>Trust &amp; Accessibility</h2></div>
+      <p class="sec-sub">Trust patterns and accessibility are not optional polish — they are the product. The audience is skeptical and high-stakes.</p>
+      <div class="rules">
+        <div class="rule"><i data-lucide="landmark" class="ic"></i><div><h4>Mandatory legal identity</h4><p>Footer carries legal name, CIN, GSTIN, address, grievance officer, SSL, policies. Refund policy stated transparently.</p></div></div>
+        <div class="rule"><i data-lucide="shield" class="ic"></i><div><h4>Reassurance near every upload</h4><p>Confidentiality + encryption claim adjacent to the highest-stakes interaction; confirm with a case reference.</p></div></div>
+        <div class="rule"><i data-lucide="accessibility" class="ic"></i><div><h4>Tap targets ≥ 48px</h4><p>WCAG AA contrast, visible focus ring on every element, never color alone for state.</p></div></div>
+        <div class="rule no"><i data-lucide="x-circle" class="ic"></i><div><h4>No urgency theatre</h4><p>No countdown timers, "X viewing now" badges, early pop-ups, or "guaranteed win" language.</p></div></div>
+        <div class="rule no"><i data-lucide="x-circle" class="ic"></i><div><h4>No fake people</h4><p>No Western stock photos, no avatars for the team, no autoplay video with sound.</p></div></div>
+        <div class="rule"><i data-lucide="indian-rupee" class="ic"></i><div><h4>India-specific trust</h4><p>UPI named in payment contexts, tap-to-call on CTAs, WhatsApp as an evaluation channel with human handoff.</p></div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="30" y="30" width="40" height="40" rx="6" fill="none" stroke="#0B8B4E" stroke-width="3"/>
+    <text x="50" y="57" font-family="Inter,sans-serif" font-size="22" font-weight="700" fill="#fff" text-anchor="middle">GST</text>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

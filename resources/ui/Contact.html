@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contact Us | GST Notice Support</title>
+<meta name="description" content="Reach the GST Notice Support team by form, phone, WhatsApp, or email. We respond to every enquiry within 24 hours." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ── NAVBAR ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid var(--neutral-200);}
+.nav .row{display:flex;align-items:center;gap:28px;height:76px;transition:height .15s ease;}
+.nav.scrolled .row{height:62px;}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand img{height:40px;width:40px;border-radius:7px;border:1px solid var(--neutral-200);object-fit:cover;}
+.brand .bn{font-weight:700;font-size:17px;color:var(--primary-navy);letter-spacing:-.01em;}
+.brand .bn span{color:var(--accent-green);}
+.nav .links{display:flex;align-items:center;gap:26px;margin-left:6px;}
+.nav .links a,.nav .links button{font-size:15px;font-weight:500;color:var(--neutral-900);background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 0;}
+.nav .links a:hover,.nav .links button:hover,.nav .links a[aria-current="page"]{color:var(--accent-green);}
+.nav .links a[aria-current="page"]{font-weight:600;}
+.nav .right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+.nav .right .btn{min-height:44px;padding:10px 16px;font-size:14px;}
+.nav .ph{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--primary-navy);white-space:nowrap;}
+.nav .ph .ic{width:17px;height:17px;color:var(--accent-green);}
+.has-drop{position:relative;}
+.drop-menu{position:absolute;top:calc(100% + 10px);left:0;min-width:300px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:8px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;}
+.has-drop:hover .drop-menu,.has-drop:focus-within .drop-menu{opacity:1;visibility:visible;transform:translateY(0);}
+.nav .drop-menu a{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:4px;padding:10px 14px !important;border-radius:var(--r-btn);text-align:left !important;}
+.nav .drop-menu a:hover{background:var(--neutral-50);}
+.nav .drop-menu a strong{font-size:14px;font-weight:600;color:var(--primary-navy);display:block;width:100%;}
+.nav .drop-menu a small{font-size:13px;color:var(--neutral-600);font-weight:400;display:block;width:100%;}
+.hamburger{display:none;align-items:center;justify-content:center;width:48px;height:48px;background:none;border:none;cursor:pointer;color:var(--primary-navy);border-radius:var(--r-btn);}
+.hamburger:hover{background:var(--neutral-50);}
+.drawer-overlay{position:fixed;inset:0;background:rgba(10,37,64,.5);z-index:110;opacity:0;transition:opacity .2s ease;}
+.drawer-overlay.show{opacity:1;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(86vw,360px);background:#fff;z-index:120;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(10,37,64,.12);}
+.drawer.open{transform:translateX(0);}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--neutral-200);}
+.drawer-head .brand img{height:36px;width:36px;border-radius:7px;border:1px solid var(--neutral-200);}
+.drawer-head .brand .bn{font-weight:700;font-size:16px;color:var(--primary-navy);}
+.drawer-head .brand .bn span{color:var(--accent-green);}
+.drawer-close{width:44px;height:44px;background:none;border:none;cursor:pointer;color:var(--neutral-900);border-radius:var(--r-btn);display:flex;align-items:center;justify-content:center;}
+.drawer-close:hover{background:var(--neutral-50);}
+.drawer-nav{display:flex;flex-direction:column;padding:16px 20px;overflow-y:auto;flex:1;min-height:0;}
+.drawer-nav a{padding:13px 8px;font-size:16px;font-weight:500;color:var(--neutral-900);border-radius:var(--r-btn);min-height:48px;display:flex;align-items:center;}
+.drawer-nav a:hover{background:var(--neutral-50);color:var(--accent-green);}
+.drawer-divider{height:1px;background:var(--neutral-200);margin:10px 0;}
+.drawer-foot{padding:18px 20px;border-top:1px solid var(--neutral-200);display:flex;flex-direction:column;gap:12px;flex-shrink:0;}
+.drawer-foot .ph{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--primary-navy);}
+.drawer-foot .ph .ic{color:var(--accent-green);}
+.drawer-services-toggle{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:13px 8px;font-size:16px;font-weight:600;color:var(--primary-navy);border-radius:var(--r-btn);min-height:48px;text-align:left;}
+.drawer-services-toggle:hover{background:var(--neutral-50);color:var(--accent-green);}
+.drawer-services-toggle:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);}
+.drawer-services-chev{transition:transform .25s ease;flex:0 0 auto;color:var(--neutral-600);}
+.drawer-services-toggle[aria-expanded="true"] .drawer-services-chev{transform:rotate(90deg);}
+.drawer-services-menu{overflow:hidden;max-height:0;transition:max-height .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+.drawer-services-menu.open{max-height:280px;overflow-y:auto;}
+.drawer-services-menu a{padding:11px 8px 11px 22px;font-size:15px;font-weight:400;color:var(--neutral-900);border-radius:var(--r-btn);min-height:44px;display:flex;align-items:center;}
+.drawer-services-menu a:hover{background:var(--neutral-50);color:var(--accent-green);}
+body.drawer-open{overflow:hidden;}
+
+/* ── PAGE HERO ── */
+.page-hero{
+  background:var(--neutral-white);
+  min-height:calc(100vh - 76px);
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;
+  padding:56px 0;
+  border-bottom:1px solid var(--neutral-200);
+}
+.page-hero h1{margin:0 auto 18px;max-width:22ch;}
+.page-hero .sub{
+  font-size:18px;line-height:1.65;color:var(--neutral-600);
+  max-width:58ch;margin:0 auto;
+}
+
+/* ── CONTACT SPLIT ── */
+.contact-section{background:var(--neutral-50);padding:80px 0;}
+.contact-grid{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:56px;
+  align-items:start;
+}
+
+/* ── CONTACT FORM CARD ── */
+.form-card{
+  background:#fff;
+  border:1px solid var(--neutral-200);
+  border-radius:var(--r-card);
+  box-shadow:var(--shadow-sm);
+  padding:40px;
+}
+.form-card h3{margin-bottom:28px;}
+
+.field-group{display:flex;flex-direction:column;gap:20px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:15px;font-weight:500;color:var(--neutral-900);}
+.field label .req{color:var(--accent-green);margin-left:2px;font-size:13px;}
+.field label .opt{color:var(--neutral-600);font-size:13px;font-weight:400;margin-left:4px;}
+
+/* input states */
+.input{
+  width:100%;min-height:48px;padding:12px 14px;font-size:16px;font-family:inherit;
+  color:var(--neutral-900);background:#fff;border:1.5px solid var(--neutral-200);
+  border-radius:var(--r-btn);transition:border-color .15s,box-shadow .15s;
+}
+.input::placeholder{color:var(--neutral-600);}
+.input:focus{outline:none;border-color:var(--primary-deep-blue);box-shadow:0 0 0 3px rgba(27,58,107,.14);}
+.input:not(:placeholder-shown):not(:focus){border-color:var(--neutral-200);}
+.input.has-error{border-color:#C0392B;box-shadow:0 0 0 3px rgba(192,57,43,.10);}
+textarea.input{resize:vertical;min-height:120px;line-height:1.6;}
+
+.field-error{
+  display:none;align-items:center;gap:6px;
+  font-size:13px;font-weight:500;color:#B83232;
+  margin-top:2px;
+}
+.field-error.visible{display:flex;}
+
+/* submit zone */
+.submit-zone{margin-top:28px;}
+.btn-submit{width:100%;min-height:52px;font-size:16px;position:relative;}
+.btn-submit .spinner{
+  width:18px;height:18px;border:2px solid rgba(255,255,255,.35);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* form state messages */
+.form-status{
+  display:none;align-items:flex-start;gap:12px;
+  padding:16px 18px;border-radius:var(--r-btn);margin-top:16px;
+  font-size:15px;line-height:1.55;
+}
+.form-status.success{
+  display:flex;
+  background:#EBF8F0;border:1px solid #A8D8BC;color:#0A6338;
+}
+.form-status.error-msg{
+  display:flex;
+  background:#FEF0EE;border:1px solid #F0BEBA;color:#8B2020;
+}
+.form-status .status-ic{flex:0 0 20px;margin-top:1px;}
+
+.privacy-note{font-size:14px;color:var(--neutral-600);margin-top:14px;line-height:1.55;display:flex;align-items:flex-start;gap:8px;}
+.privacy-note .ic-lock{flex:0 0 15px;margin-top:2px;color:var(--neutral-600);}
+
+/* form hidden when success */
+.form-fields-wrap.submitted{display:none;}
+
+/* ── CONTACT DETAILS ── */
+.contact-details{}
+.contact-details h3{margin-bottom:32px;}
+.channel-list{display:flex;flex-direction:column;gap:0;}
+.channel-row{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:20px 0;
+  border-bottom:1px solid var(--neutral-200);
+}
+.channel-row:first-child{padding-top:0;}
+.channel-row:last-child{border-bottom:none;}
+.channel-ic{
+  width:44px;height:44px;flex:0 0 44px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:var(--r-btn);
+  border:1px solid var(--neutral-200);
+  background:#fff;
+  color:var(--primary-deep-blue);
+}
+.channel-body{display:flex;flex-direction:column;gap:3px;}
+.channel-label{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--neutral-600);}
+.channel-value{font-size:16px;font-weight:500;color:var(--primary-navy);line-height:1.5;}
+.channel-value a{color:var(--primary-navy);transition:color .15s;}
+.channel-value a:hover{color:var(--accent-green);}
+.channel-hours{font-size:14px;color:var(--neutral-600);margin-top:2px;}
+
+/* WhatsApp channel button */
+.btn-wa-channel{
+  display:inline-flex;align-items:center;gap:9px;
+  min-height:48px;padding:11px 20px;
+  background:var(--wa-green);color:#073b1e;
+  font-size:15px;font-weight:700;
+  border-radius:var(--r-btn);border:none;cursor:pointer;
+  transition:background .15s,box-shadow .15s;
+  text-decoration:none;
+  margin-top:4px;
+  width:fit-content;
+}
+.btn-wa-channel:hover{background:#1ebe5b;}
+.btn-wa-channel:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(37,211,102,.4);}
+.btn-wa-channel:active{transform:translateY(1px);}
+
+/* address block */
+.addr-text{font-size:15px;color:var(--neutral-900);line-height:1.7;}
+
+/* grievance row */
+.grievance-row{
+  margin-top:32px;padding-top:24px;border-top:1px solid var(--neutral-200);
+  font-size:14px;color:var(--neutral-600);line-height:1.6;
+}
+.grievance-row strong{color:var(--neutral-900);}
+.grievance-row a{color:var(--accent-green);font-weight:500;}
+.grievance-row a:hover{color:var(--accent-green-hover);}
+
+/* ── REQUEST CALLBACK BANNER ── */
+.callback-banner{
+  background:var(--neutral-white);
+  border:1px solid var(--neutral-200);
+  border-radius:var(--r-card);
+  padding:28px 32px;
+  margin-top:40px;
+  display:flex;align-items:center;gap:20px;
+  flex-wrap:wrap;
+}
+.callback-banner .cb-text{flex:1;min-width:180px;}
+.callback-banner .cb-text strong{display:block;font-size:17px;color:var(--primary-navy);margin-bottom:4px;}
+.callback-banner .cb-text span{font-size:14px;color:var(--neutral-600);}
+
+/* ── FOOTER ── */
+.footer{background:var(--primary-navy);color:#C7D2E0;padding:64px 0 28px;border-top:1px solid rgba(255,255,255,.1);}
+.footer .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:36px;}
+.footer .fbrand{display:flex;align-items:center;gap:11px;margin-bottom:18px;}
+.footer .fbrand img{height:38px;width:38px;border-radius:7px;}
+.footer .fbrand .bn{font-weight:700;font-size:16px;color:#fff;}
+.footer .fbrand .bn span{color:var(--accent-green);}
+.footer h5{color:#fff;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px;}
+.footer ul{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:14px;}
+.footer ul a:hover{color:#fff;}
+.footer .fmono{font-family:'JetBrains Mono',monospace;font-size:13px;color:#9FB0C4;}
+.footer .addr{font-size:14px;color:#9FB0C4;line-height:1.6;margin-top:4px;}
+.footer .btn-wa{margin-top:14px;}
+.footer .strip{border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-top:22px;display:flex;flex-wrap:wrap;align-items:center;gap:16px;font-size:13px;color:#9FB0C4;}
+.footer .strip .pols{display:flex;gap:14px;}
+.footer .strip .pols a:hover{color:#fff;}
+.footer .strip .ssl{display:inline-flex;align-items:center;gap:6px;color:var(--accent-green);font-weight:600;margin-left:auto;}
+
+/* ── WHATSAPP + MOBILE BAR ── */
+.wa-float{position:fixed;right:24px;bottom:24px;z-index:90;display:inline-flex;align-items:center;gap:9px;background:var(--wa-green);color:#073b1e;font-weight:700;font-size:14px;padding:13px 18px;border-radius:var(--r-btn);box-shadow:var(--shadow-md);opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s;}
+.wa-float.show{opacity:1;visibility:visible;transform:translateY(0);}
+.wa-float:hover{background:#1ebe5b;}
+.mobile-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:95;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);border-top:1px solid var(--neutral-200);padding:8px 14px;gap:10px;align-items:center;transform:translateY(100%);transition:transform .2s ease;padding-bottom:max(8px,env(safe-area-inset-bottom));}
+.mobile-bar.show{transform:translateY(0);}
+.mobile-bar .btn{min-height:48px;flex:1;font-size:14px;padding:10px 12px;}
+
+/* ── RESPONSIVE ── */
+@media (max-width:1024px){
+  h1{font-size:32px;}
+  h2{font-size:28px;}
+  body{padding-bottom:72px;}
+  .nav .links{display:none;}
+  .hamburger{display:flex;}
+  .nav-cta{display:none;}
+  .mobile-bar{display:flex;}
+  .wa-float{bottom:84px;}
+  /* Contact grid: details on top, form below on mobile */
+  .contact-grid{
+    grid-template-columns:1fr;
+    gap:40px;
+  }
+  .form-card{order:2;}
+  .details-col{order:1;}
+  .footer .cols{grid-template-columns:1fr 1fr;}
+  .footer .strip .ssl{margin-left:0;}
+  .callback-banner{gap:16px;}
+  .contact-section{padding:56px 0;}
+}
+@media (max-width:640px){
+  .container{padding:0 20px;}
+  .section{padding:48px 0;}
+  .page-hero{min-height:auto;padding:48px 0;}
+  .page-hero .sub{font-size:17px;}
+  .form-card{padding:28px 22px;}
+  .footer .cols{grid-template-columns:1fr;}
+  .footer .strip{flex-direction:column;align-items:flex-start;}
+  .footer .strip .ssl{margin-left:0;}
+  .nav .ph .ph-num{display:none;}
+  .btn-wa-channel{width:100%;}
+  .callback-banner{flex-direction:column;gap:14px;}
+  .callback-banner .btn{width:100%;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important;}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<!-- NAVBAR (components.md → Navbar) -->
+<header class="nav" id="nav">
+  <div class="container row">
+    <a class="brand" href="Homepage.html" aria-label="GST Notice Support home">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav class="links" aria-label="Primary">
+      <div class="has-drop">
+        <button aria-haspopup="true" aria-expanded="false">Services <i data-lucide="chevron-down" style="width:15px;height:15px"></i></button>
+        <div class="drop-menu" role="menu">
+          <a href="ASMT-10 Reply Service.html" role="menuitem"><strong>ASMT-10 Scrutiny Notice</strong><small>Section 61 — return discrepancies</small></a>
+          <a href="SCN Reply Service.html" role="menuitem"><strong>Show Cause Notice (SCN)</strong><small>DRC-01 / DRC-01A demands</small></a>
+          <a href="Commissioner Appeal Service.html" role="menuitem"><strong>Commissioner Appeal</strong><small>APL-01 first appeal</small></a>
+          <a href="GSTAT Appeal Service.html" role="menuitem"><strong>GSTAT Appeal</strong><small>APL-05 tribunal filing</small></a>
+        </div>
+      </div>
+      <a href="About.html">About</a>
+      <a href="FAQ.html">Resources</a>
+      <a href="Pricing.html">Pricing</a>
+    </nav>
+    <div class="right">
+      <a class="ph" href="tel:+919800000000" aria-label="Call +91 98000 00000">
+        <i data-lucide="phone" class="ic"></i><span class="ph-num">+91 98000 00000</span>
+      </a>
+      <a class="btn btn-secondary nav-cta" href="Contact.html#callback">Request Callback</a>
+      <a class="btn btn-primary nav-cta" href="Pricing.html">Book a Service</a>
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+        <i data-lucide="menu" style="width:24px;height:24px"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile drawer -->
+<div class="drawer-overlay" id="drawerOverlay" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Mobile menu" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="brand">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </span>
+    <button class="drawer-close" id="drawerClose" aria-label="Close menu">
+      <i data-lucide="x" style="width:24px;height:24px"></i>
+    </button>
+  </div>
+  <nav class="drawer-nav" aria-label="Mobile primary">
+    <button class="drawer-services-toggle" id="drawerServicesToggle" aria-expanded="false" aria-controls="drawerServicesMenu">
+      <span>Services</span>
+      <i data-lucide="chevron-right" class="drawer-services-chev" style="width:18px;height:18px"></i>
+    </button>
+    <div class="drawer-services-menu" id="drawerServicesMenu" aria-hidden="true">
+      <a href="ASMT-10 Reply Service.html">ASMT-10 Scrutiny Notice</a>
+      <a href="SCN Reply Service.html">Show Cause Notice (SCN)</a>
+      <a href="Commissioner Appeal Service.html">Commissioner Appeal</a>
+      <a href="GSTAT Appeal Service.html">GSTAT Appeal</a>
+    </div>
+    <span class="drawer-divider"></span>
+    <a href="About.html">About</a>
+    <a href="FAQ.html">Resources</a>
+    <a href="Pricing.html">Pricing</a>
+  </nav>
+  <div class="drawer-foot">
+    <a class="ph" href="tel:+919800000000">
+      <i data-lucide="phone" class="ic" style="width:17px;height:17px"></i>+91 98000 00000
+    </a>
+    <a class="btn btn-secondary btn-block" href="Contact.html#callback">Request Callback</a>
+    <a class="btn btn-primary btn-block" href="Pricing.html">Book a Service</a>
+  </div>
+</aside>
+
+<main id="main">
+
+  <!-- 2. PAGE HERO -->
+  <section class="page-hero" data-screen-label="Hero">
+    <div class="container">
+      <h1>Get in Touch</h1>
+      <p class="sub">Have a GST notice or a question about our services? Reach us by form, phone, email, or WhatsApp. We respond within 24 hours.</p>
+    </div>
+  </section>
+
+  <!-- 3. CONTACT SPLIT -->
+  <section class="contact-section" data-screen-label="Contact Split" id="contact">
+    <div class="container">
+      <div class="contact-grid">
+
+        <!-- LEFT — CONTACT FORM -->
+        <div class="form-card" data-screen-label="Contact Form">
+          <h3>Send Us a Message</h3>
+
+          <!-- Success state (initially hidden, shown after submit) -->
+          <div class="form-status success" id="formSuccess" role="status" aria-live="polite" hidden>
+            <i data-lucide="check-circle-2" class="status-ic" style="width:20px;height:20px;color:#0B8B4E" aria-hidden="true"></i>
+            <span><strong>Message received.</strong> We'll respond to your enquiry within 24 hours on the contact details you provided.</span>
+          </div>
+
+          <!-- Error state (shown on server failure) -->
+          <div class="form-status error-msg" id="formError" role="alert" aria-live="assertive" hidden>
+            <i data-lucide="alert-circle" class="status-ic" style="width:20px;height:20px;color:#8B2020" aria-hidden="true"></i>
+            <span>Something went wrong. Please try again or <a href="tel:+919800000000" style="color:#8B2020;font-weight:600;text-decoration:underline;">call us directly</a>.</span>
+          </div>
+
+          <!-- Form fields (hidden after success) -->
+          <div class="form-fields-wrap" id="formFieldsWrap">
+            <form id="contactForm" novalidate autocomplete="on">
+              <div class="field-group">
+
+                <!-- Full Name -->
+                <div class="field">
+                  <label for="fullName">Full Name <span class="req" aria-hidden="true">*</span></label>
+                  <input
+                    class="input"
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    autocomplete="name"
+                    placeholder="e.g. Rajesh Kumar"
+                    required
+                    aria-required="true"
+                    aria-describedby="fullName-err"
+                  />
+                  <span class="field-error" id="fullName-err" role="alert">
+                    <i data-lucide="alert-circle" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true"></i>
+                    Please enter your full name.
+                  </span>
+                </div>
+
+                <!-- Email -->
+                <div class="field">
+                  <label for="email">Email Address <span class="req" aria-hidden="true">*</span></label>
+                  <input
+                    class="input"
+                    type="email"
+                    id="email"
+                    name="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    required
+                    aria-required="true"
+                    aria-describedby="email-err"
+                  />
+                  <span class="field-error" id="email-err" role="alert">
+                    <i data-lucide="alert-circle" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true"></i>
+                    Please enter a valid email address.
+                  </span>
+                </div>
+
+                <!-- Phone -->
+                <div class="field">
+                  <label for="phone">Phone Number <span class="req" aria-hidden="true">*</span></label>
+                  <input
+                    class="input"
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    autocomplete="tel"
+                    placeholder="+91 98000 00000"
+                    required
+                    aria-required="true"
+                    aria-describedby="phone-err"
+                  />
+                  <span class="field-error" id="phone-err" role="alert">
+                    <i data-lucide="alert-circle" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true"></i>
+                    Please enter a valid phone number with country code.
+                  </span>
+                </div>
+
+                <!-- Organisation (optional) -->
+                <div class="field">
+                  <label for="org">Organisation / Firm Name <span class="opt">(Optional)</span></label>
+                  <input
+                    class="input"
+                    type="text"
+                    id="org"
+                    name="org"
+                    autocomplete="organization"
+                    placeholder="e.g. Mehta &amp; Associates"
+                  />
+                </div>
+
+                <!-- Message -->
+                <div class="field">
+                  <label for="message">Your Question or Message <span class="req" aria-hidden="true">*</span></label>
+                  <textarea
+                    class="input"
+                    id="message"
+                    name="message"
+                    rows="4"
+                    placeholder="Describe your GST notice or question in brief…"
+                    required
+                    aria-required="true"
+                    aria-describedby="message-err"
+                  ></textarea>
+                  <span class="field-error" id="message-err" role="alert">
+                    <i data-lucide="alert-circle" style="width:14px;height:14px;flex:0 0 14px" aria-hidden="true"></i>
+                    Please enter your message or question.
+                  </span>
+                </div>
+
+              </div><!-- /field-group -->
+
+              <div class="submit-zone">
+                <button type="submit" class="btn btn-primary btn-submit" id="submitBtn">
+                  <i data-lucide="send" style="width:17px;height:17px" aria-hidden="true"></i>
+                  <span id="submitLabel">Send Message</span>
+                </button>
+              </div>
+
+              <p class="privacy-note">
+                <i data-lucide="lock" class="ic-lock" style="width:15px;height:15px" aria-hidden="true"></i>
+                Your details are used only to respond to your enquiry. We do not sell or share your data.
+              </p>
+            </form>
+          </div><!-- /form-fields-wrap -->
+        </div><!-- /form-card -->
+
+        <!-- RIGHT — CONTACT DETAILS -->
+        <div class="details-col" data-screen-label="Contact Details">
+          <h3>Other Ways to Reach Us</h3>
+
+          <div class="channel-list">
+
+            <!-- Phone -->
+            <div class="channel-row">
+              <div class="channel-ic" aria-hidden="true">
+                <i data-lucide="phone" style="width:20px;height:20px"></i>
+              </div>
+              <div class="channel-body">
+                <span class="channel-label">Phone</span>
+                <span class="channel-value">
+                  <a href="tel:+919800000000">+91 98000 00000</a>
+                </span>
+                <span class="channel-hours">Tap to call · Mon–Sat, 9 AM–7 PM IST</span>
+              </div>
+            </div>
+
+            <!-- WhatsApp -->
+            <div class="channel-row">
+              <div class="channel-ic" aria-hidden="true">
+                <i data-lucide="message-circle" style="width:20px;height:20px"></i>
+              </div>
+              <div class="channel-body">
+                <span class="channel-label">WhatsApp</span>
+                <a
+                  class="btn-wa-channel"
+                  href="https://wa.me/919800000000?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
+                  target="_blank"
+                  rel="noopener"
+                  aria-label="Chat on WhatsApp — opens WhatsApp"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2C6.476 2 2 6.477 2 12.001c0 1.898.52 3.668 1.428 5.192L2.024 22l4.916-1.374A9.941 9.941 0 0 0 12 22c5.522 0 10-4.477 10-10S17.522 2 12 2h-.001zm0 18.333a8.3 8.3 0 0 1-4.226-1.155l-.303-.18-3.127.875.838-3.081-.197-.316A8.294 8.294 0 0 1 3.667 12C3.667 7.4 7.4 3.667 12 3.667S20.333 7.4 20.333 12 16.6 20.333 12 20.333z"/></svg>
+                  Chat on WhatsApp
+                </a>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="channel-row">
+              <div class="channel-ic" aria-hidden="true">
+                <i data-lucide="mail" style="width:20px;height:20px"></i>
+              </div>
+              <div class="channel-body">
+                <span class="channel-label">Email</span>
+                <span class="channel-value">
+                  <a href="mailto:support@gstnoticesupport.in">support@gstnoticesupport.in</a>
+                </span>
+                <span class="channel-hours">We respond within 24 hours on working days</span>
+              </div>
+            </div>
+
+            <!-- Office Address -->
+            <div class="channel-row">
+              <div class="channel-ic" aria-hidden="true">
+                <i data-lucide="map-pin" style="width:20px;height:20px"></i>
+              </div>
+              <div class="channel-body">
+                <span class="channel-label">Office Address</span>
+                <address class="addr-text" style="font-style:normal;">
+                  [PLACEHOLDER — Floor/Unit, Building Name]<br />
+                  Street, Locality, City<br />
+                  State — PIN 000 000<br />
+                  India
+                </address>
+                <span class="channel-hours" style="margin-top:6px;display:block;">Services delivered remotely — no in-person visit required</span>
+              </div>
+            </div>
+
+            <!-- Hours -->
+            <div class="channel-row">
+              <div class="channel-ic" aria-hidden="true">
+                <i data-lucide="clock" style="width:20px;height:20px"></i>
+              </div>
+              <div class="channel-body">
+                <span class="channel-label">Office Hours</span>
+                <span class="channel-value">Monday – Saturday</span>
+                <span class="channel-hours">9 AM – 7 PM IST · Closed on Sundays &amp; national holidays</span>
+              </div>
+            </div>
+
+          </div><!-- /channel-list -->
+
+          <!-- Grievance Officer -->
+          <div class="grievance-row">
+            <strong>Grievance Officer:</strong> [Name]<br />
+            <a href="mailto:grievance@gstnoticesupport.in">grievance@gstnoticesupport.in</a>
+            &nbsp;·&nbsp;For escalations and unresolved complaints only.
+          </div>
+
+          <!-- Request Callback banner -->
+          <div class="callback-banner" id="callback">
+            <div class="cb-text">
+              <strong>Prefer a call back?</strong>
+              <span>Leave your number and a convenient time — we'll call you.</span>
+            </div>
+            <a class="btn btn-secondary" href="tel:+919800000000">
+              <i data-lucide="phone-incoming" style="width:17px;height:17px" aria-hidden="true"></i>
+              Request a Callback
+            </a>
+          </div>
+
+        </div><!-- /details-col -->
+
+      </div><!-- /contact-grid -->
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER (components.md → Footer) -->
+<footer class="footer">
+  <div class="container">
+    <div class="cols">
+      <div>
+        <div class="fbrand"><img src="assets/logo.png" alt="" /><span class="bn">GST<span>Notice</span>Support</span></div>
+        <div>GST Notice Support Pvt. Ltd.</div>
+        <div class="fmono" style="margin-top:10px">[PLACEHOLDER — CIN]</div>
+        <div class="fmono">[PLACEHOLDER — GSTIN]</div>
+        <div class="addr">[PLACEHOLDER — Full registered address]</div>
+      </div>
+      <div>
+        <h5>Services</h5>
+        <ul>
+          <li><a href="ASMT-10 Reply Service.html">ASMT-10 Scrutiny Notice</a></li>
+          <li><a href="SCN Reply Service.html">Show Cause Notice (SCN)</a></li>
+          <li><a href="Commissioner Appeal Service.html">Commissioner Appeal</a></li>
+          <li><a href="GSTAT Appeal Service.html">GSTAT Appeal</a></li>
+          <li><a href="Pricing.html">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="#">GST Notice Guides</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="FAQ.html">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact</h5>
+        <ul>
+          <li><a href="tel:+919800000000"><i data-lucide="phone" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:6px;color:var(--accent-green)"></i>+91 98000 00000</a></li>
+          <li><a href="mailto:support@gstnoticesupport.in">support@gstnoticesupport.in</a></li>
+          <li style="margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:13px;color:#9FB0C4;">Grievance Officer</li>
+          <li>[Name] · <a href="mailto:grievance@gstnoticesupport.in">grievance@gstnoticesupport.in</a></li>
+        </ul>
+        <a class="btn btn-wa btn-block" href="https://wa.me/919800000000?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice." target="_blank" rel="noopener" style="margin-top:14px;">
+          <i data-lucide="message-circle" style="width:18px;height:18px"></i>Chat on WhatsApp
+        </a>
+      </div>
+    </div>
+    <div class="strip">
+      <div class="pols">
+        <a href="#">Privacy Policy</a>
+        <span aria-hidden="true">|</span>
+        <a href="#">Terms</a>
+        <span aria-hidden="true">|</span>
+        <a href="#">Refund Policy</a>
+      </div>
+      <span class="ssl"><i data-lucide="lock" style="width:14px;height:14px"></i>Secured · 256-bit SSL</span>
+      <div>© 2026 GST Notice Support Pvt. Ltd. All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+
+<!-- WhatsApp float (mobile, appears after scroll) -->
+<a class="wa-float" id="waFloat" href="https://wa.me/919800000000?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice." target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <i data-lucide="message-circle" style="width:18px;height:18px"></i>WhatsApp
+</a>
+
+<!-- Sticky mobile bottom bar -->
+<div class="mobile-bar" id="mobileBar" aria-label="Quick actions">
+  <a class="btn btn-secondary" href="tel:+919800000000"><i data-lucide="phone" style="width:17px;height:17px"></i>Call Now</a>
+  <a class="btn btn-primary" href="Pricing.html">Book a Service</a>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  /* ── Scroll affordances ── */
+  const nav = document.getElementById('nav');
+  const wa  = document.getElementById('waFloat');
+  const bar = document.getElementById('mobileBar');
+
+  function onScroll(){
+    const y = window.scrollY;
+    nav.classList.toggle('scrolled', y > 12);
+    const show = y > 200;
+    wa.classList.toggle('show', show);
+    bar.classList.toggle('show', show);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ── Mobile drawer ── */
+  const hamburger     = document.getElementById('hamburger');
+  const drawer        = document.getElementById('drawer');
+  const drawerOverlay = document.getElementById('drawerOverlay');
+  const drawerClose   = document.getElementById('drawerClose');
+
+  function openDrawer(){
+    drawerOverlay.hidden = false;
+    requestAnimationFrame(() => {
+      drawer.classList.add('open');
+      drawerOverlay.classList.add('show');
+    });
+    hamburger.setAttribute('aria-expanded','true');
+    drawer.setAttribute('aria-hidden','false');
+    document.body.classList.add('drawer-open');
+    drawerClose.focus();
+  }
+  function closeDrawer(){
+    drawer.classList.remove('open');
+    drawerOverlay.classList.remove('show');
+    hamburger.setAttribute('aria-expanded','false');
+    drawer.setAttribute('aria-hidden','true');
+    document.body.classList.remove('drawer-open');
+    setTimeout(() => { drawerOverlay.hidden = true; }, 250);
+    hamburger.focus();
+  }
+  hamburger.addEventListener('click', openDrawer);
+  drawerClose.addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+  });
+
+  const servicesToggle = document.getElementById('drawerServicesToggle');
+  const servicesMenu   = document.getElementById('drawerServicesMenu');
+  servicesToggle.addEventListener('click', () => {
+    const expanded = servicesToggle.getAttribute('aria-expanded') === 'true';
+    servicesToggle.setAttribute('aria-expanded', String(!expanded));
+    servicesMenu.classList.toggle('open', !expanded);
+    servicesMenu.setAttribute('aria-hidden', String(expanded));
+  });
+
+  /* ── Contact Form ── */
+  const form          = document.getElementById('contactForm');
+  const submitBtn     = document.getElementById('submitBtn');
+  const submitLabel   = document.getElementById('submitLabel');
+  const formSuccess   = document.getElementById('formSuccess');
+  const formError     = document.getElementById('formError');
+  const formFieldsWrap= document.getElementById('formFieldsWrap');
+
+  /* Validators */
+  function isEmpty(v){ return !v.trim(); }
+  function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
+  function isValidPhone(v){ return /^\+?[\d\s\-().]{7,20}$/.test(v.trim()); }
+
+  function setFieldError(input, errId, show){
+    const err = document.getElementById(errId);
+    if(show){
+      input.classList.add('has-error');
+      err.classList.add('visible');
+      input.setAttribute('aria-invalid','true');
+    } else {
+      input.classList.remove('has-error');
+      err.classList.remove('visible');
+      input.setAttribute('aria-invalid','false');
+    }
+    return show;
+  }
+
+  function validateForm(){
+    const name    = document.getElementById('fullName');
+    const email   = document.getElementById('email');
+    const phone   = document.getElementById('phone');
+    const message = document.getElementById('message');
+    let ok = true;
+
+    if(setFieldError(name, 'fullName-err', isEmpty(name.value))) ok = false;
+    if(setFieldError(email, 'email-err', !isValidEmail(email.value))) ok = false;
+    if(setFieldError(phone, 'phone-err', !isValidPhone(phone.value))) ok = false;
+    if(setFieldError(message, 'message-err', isEmpty(message.value))) ok = false;
+
+    return ok;
+  }
+
+  /* Clear error on input */
+  ['fullName','email','phone','message'].forEach(id => {
+    const input = document.getElementById(id);
+    input.addEventListener('input', () => {
+      input.classList.remove('has-error');
+      document.getElementById(id + '-err').classList.remove('visible');
+      input.setAttribute('aria-invalid','false');
+    });
+  });
+
+  /* Submit */
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formError.hidden = true;
+
+    if(!validateForm()){
+      /* focus first errored field */
+      const firstErr = form.querySelector('[aria-invalid="true"]');
+      if(firstErr) firstErr.focus();
+      return;
+    }
+
+    /* Submitting state */
+    submitBtn.disabled = true;
+    submitLabel.textContent = 'Sending…';
+    const spinnerEl = document.createElement('span');
+    spinnerEl.className = 'spinner';
+    spinnerEl.setAttribute('aria-hidden','true');
+    submitBtn.insertBefore(spinnerEl, submitLabel);
+    /* remove send icon */
+    const sendIcon = submitBtn.querySelector('[data-lucide="send"]');
+    if(sendIcon) sendIcon.style.display = 'none';
+
+    try {
+      /* Simulate network call (replace with real fetch in production) */
+      await new Promise(resolve => setTimeout(resolve, 1600));
+
+      /* ── SUCCESS ── */
+      formFieldsWrap.classList.add('submitted');
+      formSuccess.hidden = false;
+      formSuccess.focus();
+
+    } catch(err) {
+      /* ── ERROR ── */
+      formError.hidden = false;
+      formError.focus();
+
+      /* Reset button */
+      submitBtn.disabled = false;
+      submitLabel.textContent = 'Send Message';
+      if(spinnerEl.parentNode) spinnerEl.parentNode.removeChild(spinnerEl);
+      if(sendIcon) sendIcon.style.display = '';
+      lucide.createIcons();
+    }
+  });
+</script>
+</body>
+</html>
