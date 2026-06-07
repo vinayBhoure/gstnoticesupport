@@ -46,7 +46,7 @@
 | ✅ | react-hot-toast global Toaster in root layout | `position="bottom-center"`, 5s duration |
 | ✅ | WhatsApp click-to-chat redirect | Verified: 4 links, correct number, contextual prefill |
 | ✅ | Calendly popup widget integration | `RequestCallbackButton` component; all 14 CTAs across 13 pages/components replaced |
-| ⛔ | Rate limit on contact endpoint | Deferred to Phase 2 (D61). Revisit when full server stack lands |
+| ✅ | Rate limit on contact endpoint | 3/60min/IP in-memory (`lib/rate-limit.ts`) → `429`; verified via curl. Swap-ready for Upstash |
 
 ### EP4 — SEO, Performance & Legal Pages
 | Status | Task | Notes |

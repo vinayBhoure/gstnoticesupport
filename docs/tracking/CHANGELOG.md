@@ -13,8 +13,9 @@
 - React Email template (`ContactNotificationEmail.tsx`) in brand navy/green; `Reply-To` set to the enquirer's email so admins reply directly to the customer.
 - Field-level errors: name (min 2), mobile (Indian `[6-9]\d{9}`), email, query (min 20).
 - Submit disabled + `aria-busy` while sending; success state shows submitter's name; failure → `react-hot-toast` error, form data retained.
-- Admin-only notification to `bhoure05@gmail.com`; no user auto-reply; no DB persistence; no rate limiting in Phase 1.
-- Verified: `curl` → `200 {sent:true}`, invalid → `400` with field messages, malformed JSON → `400`; Playwright E2E → success state renders.
+- Admin-only notification to `bhoure05@gmail.com`; no user auto-reply; no DB persistence.
+- **Rate limiting:** 3 requests / 60 min / IP (in-memory sliding window, keyed on `x-forwarded-for`); exceeding it returns `429` and the form shows a distinct toast. Best-effort on serverless (per-instance), swap-ready for Upstash.
+- Verified: `curl` → `200 {sent:true}`, invalid → `400` with field messages, malformed JSON → `400`, 4th rapid request → `429`; Playwright E2E → success state renders; live email received at `bhoure05@gmail.com`.
 
 **Global toast system**
 - `react-hot-toast` `<Toaster>` mounted in root layout — available on every page.
