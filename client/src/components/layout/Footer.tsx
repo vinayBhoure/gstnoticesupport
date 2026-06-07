@@ -74,7 +74,7 @@ export function Footer() {
             <Link href="/terms">Terms</Link><span>|</span>
             <Link href="/refund">Refund Policy</Link>
           </div>
-          <span className="ssl" style={{ marginLeft: 'auto' }}>
+          <span className="ssl">
             <ShieldCheck style={{ width: 15, height: 15 }} />
             SSL Secured
           </span>

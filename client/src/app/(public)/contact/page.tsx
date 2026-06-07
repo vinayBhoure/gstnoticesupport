@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Phone, Mail, MapPin, Clock, Info, PhoneIncoming } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, PhoneIncoming } from 'lucide-react';
 import styles from './contact.module.css';
+import { ContactForm } from './ContactForm';
 
 export const dynamic = 'force-static';
 
@@ -35,39 +35,10 @@ export default function ContactPage() {
         <div className="container">
           <div className={styles.contactGrid}>
 
-            {/* LEFT — CONTACT FORM (deferred to EP3; static placeholder for EP2) */}
+            {/* LEFT — CONTACT FORM */}
             <div className={styles.formCard}>
               <h3>Send Us a Message</h3>
-              <div className={styles.comingSoonBody}>
-                <div className={styles.comingSoonNote}>
-                  <Info size={20} className={styles.notIc} aria-hidden="true" />
-                  <p>
-                    <strong>Online contact form launching soon.</strong>{' '}
-                    Until then, reach us directly using the channels on the right — or use
-                    the shortcuts below.
-                  </p>
-                </div>
-                <div className={styles.channelShortcuts}>
-                  <a className={styles.shortcutRow} href="tel:+919343297622" aria-label="Call GST Notice Support">
-                    <Phone size={20} className={styles.scIc} aria-hidden="true" />
-                    Call +91 93432 97622
-                  </a>
-                  <a
-                    className={styles.btnWaShortcut}
-                    href="https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Open WhatsApp chat with GST Notice Support"
-                  >
-                    <WaIcon />
-                    Chat on WhatsApp
-                  </a>
-                  <a className={styles.shortcutRow} href="mailto:support@gstnoticesupport.in" aria-label="Email GST Notice Support">
-                    <Mail size={20} className={styles.scIc} aria-hidden="true" />
-                    support@gstnoticesupport.in
-                  </a>
-                </div>
-              </div>
+              <ContactForm />
             </div>
 
             {/* RIGHT — CONTACT DETAILS */}

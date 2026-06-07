@@ -23,6 +23,11 @@
    Exception logged: decisions.md D59
    ===================================================== */
 
+/* Off-canvas drawer and the skip-link sit outside the viewport; clip the
+   horizontal axis so they never create a horizontal scrollbar on mobile.
+   `clip` (not `hidden`) keeps the sticky navbar working. D59 */
+body{overflow-x:clip;}
+
 /* ---------- NAVBAR ---------- */
 .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid var(--neutral-200);}
 .nav .row{display:flex;align-items:center;gap:28px;height:76px;transition:height .15s ease;}
@@ -98,7 +103,7 @@ body.drawer-open{overflow:hidden;}
 .footer .strip{border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-top:22px;display:flex;flex-wrap:wrap;align-items:center;gap:16px;font-size:13px;color:#9FB0C4;}
 .footer .strip .pols{display:flex;gap:14px;}
 .footer .strip .pols a:hover{color:#fff;}
-.footer .strip .ssl{display:inline-flex;align-items:center;gap:6px;color:var(--accent-green);font-weight:600;}
+.footer .strip .ssl{display:inline-flex;align-items:center;gap:6px;margin-left:auto;color:var(--accent-green);font-weight:600;}
 
 /* ---------- WHATSAPP FLOAT ---------- */
 .wa-float{position:fixed;right:24px;bottom:24px;z-index:90;display:inline-flex;align-items:center;gap:9px;background:var(--wa-green);color:#073b1e;font-weight:700;font-size:14px;padding:13px 18px;border-radius:var(--r-btn);box-shadow:var(--shadow-md);opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s;}
@@ -124,8 +129,13 @@ body.drawer-open{overflow:hidden;}
   .nav-cta{display:none;}
   .mobile-bar{display:flex;}
   .wa-float{bottom:84px;}
+  .footer .cols{grid-template-columns:1fr 1fr;}
 }
 @media (max-width:640px){
   .container{padding:0 20px;} .section{padding:48px 0;}
   .nav .ph .ph-num{display:none;}
+  .footer{padding:48px 0 24px;}
+  .footer .cols{grid-template-columns:1fr;gap:32px;}
+  .footer .strip{flex-direction:column;align-items:flex-start;gap:12px;}
+  .footer .strip .ssl{margin-left:0;}
 }

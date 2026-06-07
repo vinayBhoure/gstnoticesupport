@@ -9,21 +9,9 @@
 .contactSection{background:var(--neutral-50);padding:80px 0;}
 .contactGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:start;}
 
-/* ---------- FORM CARD (EP3 placeholder state) ---------- */
+/* ---------- FORM CARD ---------- */
 .formCard{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:40px;}
-.formCard h3{margin-bottom:20px;}
-.comingSoonBody{display:flex;flex-direction:column;gap:20px;}
-.comingSoonNote{display:flex;align-items:flex-start;gap:14px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-btn);padding:18px;}
-.comingSoonNote .notIc{flex:0 0 20px;margin-top:2px;color:var(--primary-deep-blue);}
-.comingSoonNote p{font-size:15px;color:var(--neutral-900);line-height:1.6;}
-.comingSoonNote strong{color:var(--primary-navy);}
-.channelShortcuts{display:flex;flex-direction:column;gap:10px;}
-.shortcutRow{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:15px;font-weight:600;color:var(--primary-navy);text-decoration:none;transition:border-color .15s,color .15s;}
-.shortcutRow:hover{border-color:var(--accent-green);color:var(--accent-green);}
-.shortcutRow .scIc{flex:0 0 20px;color:var(--primary-deep-blue);}
-.shortcutRow:hover .scIc{color:var(--accent-green);}
-.btnWaShortcut{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:12px 20px;background:#25D366;color:#073b1e;font-size:15px;font-weight:700;border-radius:var(--r-btn);text-decoration:none;transition:opacity .15s;width:100%;}
-.btnWaShortcut:hover{opacity:.88;}
+.formCard h3{margin-bottom:24px;}
 
 /* ---------- CHANNEL DETAILS ---------- */
 .detailsCol h3{margin-bottom:32px;}
@@ -55,6 +43,24 @@
 .cbText{flex:1;min-width:180px;}
 .cbText strong{display:block;font-size:17px;color:var(--primary-navy);margin-bottom:4px;}
 .cbText span{font-size:14px;color:var(--neutral-600);}
+
+/* ---------- CONTACT FORM ---------- */
+.contactForm{display:flex;flex-direction:column;gap:20px;}
+.formGroup{display:flex;flex-direction:column;gap:6px;}
+.formLabel{font-size:14px;font-weight:600;color:var(--neutral-900);}
+.required{color:var(--warning-amber);margin-left:2px;}
+.formTextarea{min-height:128px !important;resize:vertical;height:auto;line-height:1.6;}
+.inputErr{border-color:var(--warning-amber) !important;}
+.inputErr:focus{box-shadow:0 0 0 3px rgba(217,119,6,.14) !important;}
+.errMsg{font-size:13px;color:var(--warning-amber);line-height:1.4;margin-top:2px;}
+
+/* ---------- FORM SUCCESS STATE ---------- */
+.successState{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:16px 0;}
+.successIcon{width:60px;height:60px;flex:0 0 60px;border-radius:50%;background:rgba(11,139,78,.1);border:2px solid rgba(11,139,78,.25);display:flex;align-items:center;justify-content:center;color:var(--accent-green);}
+.successTitle{font-size:22px;font-weight:700;color:var(--primary-navy);}
+.successBody{font-size:15px;color:var(--neutral-600);line-height:1.6;max-width:36ch;}
+.successBody strong{color:var(--primary-navy);}
+.resetBtn{margin-top:4px;}
 
 /* ---------- RESPONSIVE ---------- */
 @media(max-width:1024px){

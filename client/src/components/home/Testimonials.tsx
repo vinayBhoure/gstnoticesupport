@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import styles from '@/app/(public)/page.module.css';
 
 type Tab = 'ca' | 'adv' | 'biz';
@@ -28,8 +28,33 @@ const TESTIMONIALS: Record<Tab, { quote: string; name: string; meta: string }[]>
 
 export function Testimonials() {
   const [active, setActive] = useState<Tab>('ca');
+  const [activeDot, setActiveDot] = useState(0);
+  const scrollRefs = useRef<Record<Tab, HTMLDivElement | null>>({ ca: null, adv: null, biz: null });
 
-  const selectTab = useCallback((id: Tab) => setActive(id), []);
+  const selectTab = useCallback((id: Tab) => {
+    setActive(id);
+    setActiveDot(0);
+  }, []);
+
+  const onScroll = (id: Tab) => {
+    const scroller = scrollRefs.current[id];
+    if (!scroller) return;
+    const cards = Array.from(scroller.children) as HTMLElement[];
+    const center = scroller.scrollLeft + scroller.clientWidth / 2;
+    let best = 0, bd = Infinity;
+    cards.forEach((card, i) => {
+      const c = card.offsetLeft + card.offsetWidth / 2;
+      const d = Math.abs(c - center);
+      if (d < bd) { bd = d; best = i; }
+    });
+    setActiveDot(best);
+  };
+
+  const goToCard = (id: Tab, i: number) => {
+    const scroller = scrollRefs.current[id];
+    const card = scroller?.children[i] as HTMLElement | undefined;
+    card?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  };
 
   const onKeyDown = (e: React.KeyboardEvent, idx: number) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -69,7 +94,14 @@ export function Testimonials() {
           className={active === t.id ? styles.tpanelActive : styles.tpanel}
           hidden={active !== t.id}
         >
-          <div className={styles.tscroll} role="group" aria-label={`${t.label} testimonials`} tabIndex={0}>
+          <div
+            className={styles.tscroll}
+            role="group"
+            aria-label={`${t.label} testimonials`}
+            tabIndex={0}
+            ref={el => { scrollRefs.current[t.id] = el; }}
+            onScroll={() => onScroll(t.id)}
+          >
             {TESTIMONIALS[t.id].map((tm) => (
               <div key={tm.name} className={`card card-elev ${styles.tcard}`}>
                 <div className={styles.qm}>&ldquo;</div>
@@ -80,6 +112,17 @@ export function Testimonials() {
                   <div className={styles.meta}>{tm.meta}</div>
                 </div>
               </div>
+            ))}
+          </div>
+          <div className={`scroll-dots ${styles.tdots}`} aria-hidden="true">
+            {TESTIMONIALS[t.id].map((tm, i) => (
+              <button
+                key={tm.name}
+                type="button"
+                aria-label={`Go to testimonial ${i + 1}`}
+                aria-current={active === t.id && activeDot === i ? 'true' : 'false'}
+                onClick={() => goToCard(t.id, i)}
+              />
             ))}
           </div>
         </div>
