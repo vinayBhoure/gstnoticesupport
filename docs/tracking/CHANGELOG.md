@@ -5,6 +5,29 @@
 
 ---
 
+## [2026-06-07] — EP3 (partial): Contact form live, toast system and WhatsApp links verified
+
+**Contact form**
+- Replaced manual-validation stub with React Hook Form + Zod (`contactSchema`) + EmailJS client-side send.
+- Field-level errors for: name (min 2 chars), mobile (Indian `[6-9]\d{9}` regex), email, query (min 20 chars).
+- Submit button disabled + `aria-busy` while sending; re-enabled on completion.
+- Success state shows submitter's name and 24-hour response expectation.
+- On send failure: `react-hot-toast` error toast; form data retained so the user can retry.
+- No backend or database — Phase 1 is email-only via EmailJS (decision D61).
+- Admin notification only (to `bhoure05@gmail.com`); no user auto-reply.
+- **Pending:** live send test requires EmailJS credentials (`NEXT_PUBLIC_EMAILJS_SERVICE_ID`, `NEXT_PUBLIC_EMAILJS_TEMPLATE_ID`, `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY`).
+
+**Global toast system**
+- `react-hot-toast` `<Toaster>` mounted in root layout — available on every page.
+
+**WhatsApp links**
+- All 4 `wa.me` links verified: correct number `919343297622`, contextual prefill text.
+
+**Blocked (pending client)**
+- Calendly popup — awaiting event URL.
+
+---
+
 ## [2026-06-06] — fix: FAQ accordion answers now expand correctly
 
 **Bug fixed**
