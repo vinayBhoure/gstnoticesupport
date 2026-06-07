@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from '@/app/(public)/pricing/pricing.module.css';
 
 type FaqItem = {
@@ -70,9 +71,9 @@ const faqs: FaqItem[] = [
       <p>
         Yes. You can request a callback before booking any service. One of our CAs or Advocates will call to
         understand your notice and confirm the right service for your situation.{' '}
-        <Link href="/contact#callback" style={{ color: 'var(--accent-green)', fontWeight: 600 }}>
+        <RequestCallbackButton style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'var(--accent-green)', fontWeight: 600 }}>
           Request a callback →
-        </Link>
+        </RequestCallbackButton>
       </p>
     ),
   },
