@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Phone, ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -95,7 +96,7 @@ export function Navbar() {
               <Phone className="ic" />
               <span className="ph-num">+91 93432 97622</span>
             </a>
-            <Link className="btn btn-secondary nav-cta" href="/contact#callback">Request Callback</Link>
+            <RequestCallbackButton className="btn btn-secondary nav-cta">Request Callback</RequestCallbackButton>
             <Link className="btn btn-primary nav-cta" href="/pricing">Book Service</Link>
             <button
               ref={hamburgerRef}
@@ -176,9 +177,9 @@ export function Navbar() {
             <Phone className="ic" style={{ width: 17, height: 17 }} />
             +91 93432 97622
           </a>
-          <Link className="btn btn-secondary btn-block" href="/contact#callback" onClick={closeDrawer}>
+          <RequestCallbackButton className="btn btn-secondary btn-block" onClick={closeDrawer}>
             Request Callback
-          </Link>
+          </RequestCallbackButton>
           <Link className="btn btn-primary btn-block" href="/pricing" onClick={closeDrawer}>
             Book Service
           </Link>

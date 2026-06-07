@@ -4,6 +4,7 @@ import {
   User, ShieldCheck, Receipt, BadgeCheck, MapPin, Clock,
 } from 'lucide-react';
 import styles from './about.module.css';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
 export const dynamic = 'force-static';
 
@@ -31,7 +32,7 @@ export default function AboutPage() {
           </p>
           <div className={styles.ctaRow}>
             <Link className="btn btn-primary" href="/pricing">Book a Service</Link>
-            <Link className="btn btn-secondary" href="/contact#callback">Request Callback</Link>
+            <RequestCallbackButton className="btn btn-secondary">Request Callback</RequestCallbackButton>
           </div>
         </div>
       </section>
@@ -232,9 +233,9 @@ export default function AboutPage() {
           <p>Expert filing and appeal support — fixed fee, no surprises.</p>
           <div className={styles.btnRow}>
             <Link className="btn btn-primary" href="/pricing">Book a Service</Link>
-            <Link className="btn btn-secondary on-dark" href="/contact#callback" id="callback">
+            <RequestCallbackButton className="btn btn-secondary on-dark">
               Request a Callback
-            </Link>
+            </RequestCallbackButton>
           </div>
         </div>
       </section>

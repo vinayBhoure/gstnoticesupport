@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Phone, Mail, MapPin, Clock, PhoneIncoming } from 'lucide-react';
 import styles from './contact.module.css';
 import { ContactForm } from './ContactForm';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
 export const dynamic = 'force-static';
 
@@ -146,10 +147,10 @@ export default function ContactPage() {
                   <strong>Prefer a callback?</strong>
                   <span>Leave your number and a convenient time — we will call you.</span>
                 </div>
-                <a className="btn btn-secondary" href="tel:+919343297622" aria-label="Request a callback">
+                <RequestCallbackButton className="btn btn-secondary">
                   <PhoneIncoming size={17} aria-hidden="true" />
                   Request a Callback
-                </a>
+                </RequestCallbackButton>
               </div>
 
             </div>{/* /detailsCol */}

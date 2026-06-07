@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { PricingScrollButton } from '@/components/pricing/PricingScrollButton';
 import { PricingFaqAccordion } from '@/components/pricing/PricingFaqAccordion';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './pricing.module.css';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 
@@ -152,9 +153,9 @@ export default function PricingPage() {
               </p>
             </div>
             <div className={styles.repAction}>
-              <Link className="btn btn-secondary on-dark" href="/contact#callback">
+              <RequestCallbackButton className="btn btn-secondary on-dark">
                 Request a Callback for Representation
-              </Link>
+              </RequestCallbackButton>
             </div>
           </div>
         </div>
@@ -207,9 +208,9 @@ export default function PricingPage() {
             <Link className="btn btn-primary" href="/contact">
               <Upload size={18} />Upload Your Notice
             </Link>
-            <Link className="btn btn-secondary on-dark" href="/contact#callback">
+            <RequestCallbackButton className="btn btn-secondary on-dark">
               <Phone size={18} />Request a Callback
-            </Link>
+            </RequestCallbackButton>
           </div>
         </div>
       </section>

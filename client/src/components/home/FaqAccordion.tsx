@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { Search, ChevronDown } from 'lucide-react';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from '@/app/(public)/page.module.css';
 
 const FAQS = [
@@ -82,7 +83,7 @@ export function FaqAccordion() {
       {filtered.length === 0 && (
         <div className={styles.faqEmpty}>
           No questions match your search. Try a different term or{' '}
-          <Link href="/contact#callback">request a callback</Link>.
+          <RequestCallbackButton style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer', color: 'inherit', textDecoration: 'underline' }}>request a callback</RequestCallbackButton>.
         </div>
       )}
     </>

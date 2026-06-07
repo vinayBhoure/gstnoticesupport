@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Phone, Mail } from 'lucide-react';
 import { FaqSection } from '@/components/faq/FaqSection';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './faq.module.css';
 
 export const dynamic = 'force-static';
@@ -211,9 +212,9 @@ export default function FaqPage() {
           <p>Upload your notice today and get a professional response within 48 hours.</p>
           <div className={styles.btnRow}>
             <Link className="btn btn-primary" href="/pricing">Book a Service</Link>
-            <Link className="btn btn-secondary on-dark" href="/contact#callback">
+            <RequestCallbackButton className="btn btn-secondary on-dark">
               Request a Callback
-            </Link>
+            </RequestCallbackButton>
           </div>
         </div>
       </section>

@@ -8,6 +8,7 @@ import { Testimonials } from '@/components/home/Testimonials';
 import { FaqAccordion } from '@/components/home/FaqAccordion';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 import { CountUp } from '@/components/ui/CountUp';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './page.module.css';
 
 export const dynamic = 'force-static';
@@ -33,7 +34,7 @@ export default function HomePage() {
                   <Link className="btn btn-primary" href="/pricing">
                     <UploadCloud className="ic" />Upload Your Notice
                   </Link>
-                  <Link className="btn btn-secondary" href="/contact#callback">Request a Callback</Link>
+                  <RequestCallbackButton className="btn btn-secondary">Request a Callback</RequestCallbackButton>
                 </div>
                 <div className={styles.reassure}>
                   <span><Check className="ic" />Response within 24 hours</span>
@@ -399,7 +400,7 @@ export default function HomePage() {
             <Link className="btn btn-primary" href="/pricing">
               <UploadCloud className="ic" />Upload Your Notice Now
             </Link>
-            <Link className="btn btn-secondary on-dark" href="tel:+919343297622">Request a Callback</Link>
+            <RequestCallbackButton className="btn btn-secondary on-dark">Request a Callback</RequestCallbackButton>
           </div>
           <a className={styles.ph} href="tel:+919343297622">
             <Phone style={{ width: 17, height: 17 }} />+91 93432 97622

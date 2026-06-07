@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { Search, X, ChevronDown, HelpCircle } from 'lucide-react';
+import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from '@/app/(public)/faq/faq.module.css';
 
 type FaqItem = {
@@ -103,7 +104,7 @@ const groups: FaqGroup[] = [
             Yes, for cases that require personal or virtual appearance before the Appellate Authority or GSTAT.
             This is covered under our <strong>Representation Before Tax Authority</strong> service, which is
             priced separately based on case complexity, jurisdiction, and hearing schedule.{' '}
-            <Link className={styles.inlineCta} href="/contact#callback">Request a callback to discuss →</Link>
+            <RequestCallbackButton className={styles.inlineCta} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>Request a callback to discuss →</RequestCallbackButton>
           </p>
         ),
       },
