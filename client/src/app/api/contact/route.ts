@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import { contactSchema } from '@/lib/schemas/contact.schema';
 import { ContactNotificationEmail } from '@/lib/email/templates/ContactNotificationEmail';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -25,6 +26,13 @@ function envelope<T>(
 }
 
 export async function POST(request: Request) {
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const ip = forwardedFor?.split(',')[0]?.trim() || 'unknown';
+  const limit = checkRateLimit(`contact:${ip}`);
+  if (!limit.allowed) {
+    return envelope(null, 'Too many requests. Please try again later.', 429);
+  }
+
   let body: unknown;
   try {
     body = await request.json();

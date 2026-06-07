@@ -27,6 +27,10 @@ export function ContactForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      if (res.status === 429) {
+        toast.error('You have sent too many messages. Please try again in a little while.');
+        return;
+      }
       if (!res.ok) throw new Error('send failed');
       setSubmittedName(data.name.trim());
       setSubmitted(true);
