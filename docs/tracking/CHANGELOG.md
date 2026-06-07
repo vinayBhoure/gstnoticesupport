@@ -23,8 +23,11 @@
 **WhatsApp links**
 - All 4 `wa.me` links verified: correct number `919343297622`, contextual prefill text.
 
-**Blocked (pending client)**
-- Calendly popup — awaiting event URL.
+**Calendly popup**
+- New `RequestCallbackButton` Client Component wraps `react-calendly` `PopupModal`.
+- All 14 "Request Callback" / "Request a Callback" CTAs across navbar (desktop + mobile drawer), homepage (×2), about (×2), all 4 service pages, pricing (×2), contact, faq, and 3 inline accordion links now open the Calendly scheduling popup.
+- Falls back to `/contact#callback` if `NEXT_PUBLIC_CALENDLY_URL` is not set (safe for local dev without the env var).
+- Tested via Playwright: popup confirmed on homepage, GSTAT service page, and navbar renders correctly as `<button>` on all pages.
 
 ---
 

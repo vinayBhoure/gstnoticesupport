@@ -45,7 +45,7 @@
 | ✅ | Contact form — RHF + zodResolver + EmailJS send + react-hot-toast | Client-side only (D61). Awaiting EmailJS credentials to test live send |
 | ✅ | react-hot-toast global Toaster in root layout | `position="bottom-center"`, 5s duration |
 | ✅ | WhatsApp click-to-chat redirect | Verified: 4 links, correct number, contextual prefill |
-| ⬚ | Calendly popup widget integration | Blocked: Calendly URL pending from client |
+| ✅ | Calendly popup widget integration | `RequestCallbackButton` component; all 14 CTAs across 13 pages/components replaced |
 | ⛔ | Server-side rate limit on contact endpoint | Deferred — no backend in Phase 1 (D61). EmailJS dashboard limits apply |
 
 ### EP4 — SEO, Performance & Legal Pages
