@@ -3,21 +3,9 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import emailjs from '@emailjs/browser';
 import toast from 'react-hot-toast';
 import { contactSchema, type ContactFormData } from '@/lib/schemas/contact.schema';
 import styles from './contact.module.css';
-
-/*
- * EmailJS template must define these variables:
- *   {{user_name}}   — sender's full name
- *   {{user_mobile}} — sender's mobile number
- *   {{user_email}}  — sender's email (set as Reply-To in template)
- *   {{user_query}}  — the message / query text
- *
- * Set NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
- * and NEXT_PUBLIC_EMAILJS_PUBLIC_KEY in .env.local (see .env.example).
- */
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -34,17 +22,12 @@ export function ContactForm() {
 
   async function onSubmit(data: ContactFormData) {
     try {
-      await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-        {
-          user_name: data.name,
-          user_mobile: data.mobile,
-          user_email: data.email,
-          user_query: data.query,
-        },
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
-      );
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('send failed');
       setSubmittedName(data.name.trim());
       setSubmitted(true);
     } catch {
