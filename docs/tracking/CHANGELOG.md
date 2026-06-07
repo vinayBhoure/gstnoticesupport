@@ -5,17 +5,16 @@
 
 ---
 
-## [2026-06-07] — EP3 (partial): Contact form live, toast system and WhatsApp links verified
+## [2026-06-07] — EP3: Contact form (Resend), Calendly popup, toast, WhatsApp
 
-**Contact form**
-- Replaced manual-validation stub with React Hook Form + Zod (`contactSchema`) + EmailJS client-side send.
-- Field-level errors for: name (min 2 chars), mobile (Indian `[6-9]\d{9}` regex), email, query (min 20 chars).
-- Submit button disabled + `aria-busy` while sending; re-enabled on completion.
-- Success state shows submitter's name and 24-hour response expectation.
-- On send failure: `react-hot-toast` error toast; form data retained so the user can retry.
-- No backend or database — Phase 1 is email-only via EmailJS (decision D61).
-- Admin notification only (to `bhoure05@gmail.com`); no user auto-reply.
-- **Pending:** live send test requires EmailJS credentials (`NEXT_PUBLIC_EMAILJS_SERVICE_ID`, `NEXT_PUBLIC_EMAILJS_TEMPLATE_ID`, `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY`).
+**Contact form — Resend via Next.js Route Handler**
+- `POST /api/contact` Route Handler (server-side, Vercel serverless) sends mail via the Resend SDK. `RESEND_API_KEY` is server-only — never in the browser bundle (decision D61, supersedes the interim EmailJS approach).
+- React Hook Form + Zod (`contactSchema`); the same schema validates again server-side in the handler.
+- React Email template (`ContactNotificationEmail.tsx`) in brand navy/green; `Reply-To` set to the enquirer's email so admins reply directly to the customer.
+- Field-level errors: name (min 2), mobile (Indian `[6-9]\d{9}`), email, query (min 20).
+- Submit disabled + `aria-busy` while sending; success state shows submitter's name; failure → `react-hot-toast` error, form data retained.
+- Admin-only notification to `bhoure05@gmail.com`; no user auto-reply; no DB persistence; no rate limiting in Phase 1.
+- Verified: `curl` → `200 {sent:true}`, invalid → `400` with field messages, malformed JSON → `400`; Playwright E2E → success state renders.
 
 **Global toast system**
 - `react-hot-toast` `<Toaster>` mounted in root layout — available on every page.

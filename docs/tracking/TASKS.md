@@ -42,11 +42,11 @@
 ### EP3 — Lead Capture & Phase 1 Integrations
 | Status | Task | Notes |
 |---|---|---|
-| ✅ | Contact form — RHF + zodResolver + EmailJS send + react-hot-toast | Client-side only (D61). Awaiting EmailJS credentials to test live send |
+| ✅ | Contact form — RHF + zodResolver + Resend via `/api/contact` Route Handler | D61. React Email template; Reply-To = enquirer; verified via curl + Playwright |
 | ✅ | react-hot-toast global Toaster in root layout | `position="bottom-center"`, 5s duration |
 | ✅ | WhatsApp click-to-chat redirect | Verified: 4 links, correct number, contextual prefill |
 | ✅ | Calendly popup widget integration | `RequestCallbackButton` component; all 14 CTAs across 13 pages/components replaced |
-| ⛔ | Server-side rate limit on contact endpoint | Deferred — no backend in Phase 1 (D61). EmailJS dashboard limits apply |
+| ⛔ | Rate limit on contact endpoint | Deferred to Phase 2 (D61). Revisit when full server stack lands |
 
 ### EP4 — SEO, Performance & Legal Pages
 | Status | Task | Notes |
