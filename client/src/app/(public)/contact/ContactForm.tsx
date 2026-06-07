@@ -1,57 +1,55 @@
 'use client';
 
-import { useState, type FormEvent, type ChangeEvent } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import emailjs from '@emailjs/browser';
+import toast from 'react-hot-toast';
+import { contactSchema, type ContactFormData } from '@/lib/schemas/contact.schema';
 import styles from './contact.module.css';
 
-type Fields = {
-  name: string;
-  mobile: string;
-  email: string;
-  query: string;
-};
-
-type Errors = Partial<Fields>;
-
-function validate(data: Fields): Errors {
-  const e: Errors = {};
-  if (!data.name.trim() || data.name.trim().length < 2)
-    e.name = 'Please enter your full name (at least 2 characters).';
-  if (!/^[6-9]\d{9}$/.test(data.mobile.trim()))
-    e.mobile = 'Enter a valid 10-digit Indian mobile number.';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim()))
-    e.email = 'Enter a valid email address.';
-  if (!data.query.trim() || data.query.trim().length < 20)
-    e.query = 'Please describe your query (at least 20 characters).';
-  return e;
-}
-
-const EMPTY: Fields = { name: '', mobile: '', email: '', query: '' };
+/*
+ * EmailJS template must define these variables:
+ *   {{user_name}}   — sender's full name
+ *   {{user_mobile}} — sender's mobile number
+ *   {{user_email}}  — sender's email (set as Reply-To in template)
+ *   {{user_query}}  — the message / query text
+ *
+ * Set NEXT_PUBLIC_EMAILJS_SERVICE_ID, NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+ * and NEXT_PUBLIC_EMAILJS_PUBLIC_KEY in .env.local (see .env.example).
+ */
 
 export function ContactForm() {
-  const [form, setForm] = useState<Fields>(EMPTY);
-  const [errors, setErrors] = useState<Errors>({});
-  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedName, setSubmittedName] = useState('');
 
-  function onChange(field: keyof Fields) {
-    return (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm(prev => ({ ...prev, [field]: e.target.value }));
-      if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
-    };
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+  });
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    const errs = validate(form);
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      return;
+  async function onSubmit(data: ContactFormData) {
+    try {
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        {
+          user_name: data.name,
+          user_mobile: data.mobile,
+          user_email: data.email,
+          user_query: data.query,
+        },
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
+      );
+      setSubmittedName(data.name.trim());
+      setSubmitted(true);
+    } catch {
+      toast.error('Could not send your message. Please try again or call us directly.');
     }
-    setSubmitting(true);
-    // TODO: Replace with POST /api/v1/contact when EP3 backend endpoint is ready.
-    await new Promise(r => setTimeout(r, 700));
-    setSubmitting(false);
-    setSubmitted(true);
   }
 
   if (submitted) {
@@ -64,13 +62,13 @@ export function ContactForm() {
         </div>
         <h4 className={styles.successTitle}>Message Received</h4>
         <p className={styles.successBody}>
-          Thank you, <strong>{form.name.trim()}</strong>. We&apos;ve received your query and will
+          Thank you, <strong>{submittedName}</strong>. We&apos;ve received your query and will
           respond within 24 hours on working days.
         </p>
         <button
           type="button"
           className={`btn btn-secondary ${styles.resetBtn}`}
-          onClick={() => { setForm(EMPTY); setErrors({}); setSubmitted(false); }}
+          onClick={() => { reset(); setSubmitted(false); setSubmittedName(''); }}
         >
           Send Another Query
         </button>
@@ -79,7 +77,12 @@ export function ContactForm() {
   }
 
   return (
-    <form className={styles.contactForm} onSubmit={onSubmit} noValidate aria-label="Contact form">
+    <form
+      className={styles.contactForm}
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      aria-label="Contact form"
+    >
       <div className={styles.formGroup}>
         <label htmlFor="cf-name" className={styles.formLabel}>
           Full Name <span className={styles.required} aria-hidden="true">*</span>
@@ -89,12 +92,15 @@ export function ContactForm() {
           className={`input${errors.name ? ` ${styles.inputErr}` : ''}`}
           type="text"
           placeholder="e.g. Rajesh Kumar"
-          value={form.name}
-          onChange={onChange('name')}
           autoComplete="name"
           aria-describedby={errors.name ? 'err-name' : undefined}
+          {...register('name')}
         />
-        {errors.name && <p id="err-name" className={styles.errMsg} role="alert">{errors.name}</p>}
+        {errors.name && (
+          <p id="err-name" className={styles.errMsg} role="alert">
+            {errors.name.message}
+          </p>
+        )}
       </div>
 
       <div className={styles.formGroup}>
@@ -106,14 +112,17 @@ export function ContactForm() {
           className={`input${errors.mobile ? ` ${styles.inputErr}` : ''}`}
           type="tel"
           placeholder="10-digit mobile number"
-          value={form.mobile}
-          onChange={onChange('mobile')}
           autoComplete="tel"
           maxLength={10}
           inputMode="numeric"
           aria-describedby={errors.mobile ? 'err-mobile' : undefined}
+          {...register('mobile')}
         />
-        {errors.mobile && <p id="err-mobile" className={styles.errMsg} role="alert">{errors.mobile}</p>}
+        {errors.mobile && (
+          <p id="err-mobile" className={styles.errMsg} role="alert">
+            {errors.mobile.message}
+          </p>
+        )}
       </div>
 
       <div className={styles.formGroup}>
@@ -125,12 +134,15 @@ export function ContactForm() {
           className={`input${errors.email ? ` ${styles.inputErr}` : ''}`}
           type="email"
           placeholder="you@example.com"
-          value={form.email}
-          onChange={onChange('email')}
           autoComplete="email"
           aria-describedby={errors.email ? 'err-email' : undefined}
+          {...register('email')}
         />
-        {errors.email && <p id="err-email" className={styles.errMsg} role="alert">{errors.email}</p>}
+        {errors.email && (
+          <p id="err-email" className={styles.errMsg} role="alert">
+            {errors.email.message}
+          </p>
+        )}
       </div>
 
       <div className={styles.formGroup}>
@@ -141,21 +153,24 @@ export function ContactForm() {
           id="cf-query"
           className={`input ${styles.formTextarea}${errors.query ? ` ${styles.inputErr}` : ''}`}
           placeholder="Describe your GST notice or query in brief…"
-          value={form.query}
-          onChange={onChange('query')}
           rows={5}
           aria-describedby={errors.query ? 'err-query' : undefined}
+          {...register('query')}
         />
-        {errors.query && <p id="err-query" className={styles.errMsg} role="alert">{errors.query}</p>}
+        {errors.query && (
+          <p id="err-query" className={styles.errMsg} role="alert">
+            {errors.query.message}
+          </p>
+        )}
       </div>
 
       <button
         type="submit"
         className="btn btn-primary btn-block"
-        disabled={submitting}
-        aria-busy={submitting}
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
       >
-        {submitting ? 'Submitting…' : 'Submit Query'}
+        {isSubmitting ? 'Submitting…' : 'Submit Query'}
       </button>
     </form>
   );

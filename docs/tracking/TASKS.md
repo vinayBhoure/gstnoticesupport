@@ -42,11 +42,11 @@
 ### EP3 — Lead Capture & Phase 1 Integrations
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Contact form (React Hook Form + zodResolver) with field-level errors | Blocked: endpoint needed |
-| ⬚ | Rate limit: 3 requests / 60 min / IP on contact endpoint | `express-rate-limit` |
-| ⬚ | Calendly popup widget integration | Blocked: Calendly URL pending |
-| ⬚ | WhatsApp click-to-chat redirect | Deep-link: `https://wa.me/919343297622?text=Hi%2C+I+want+to+know+more+about+the+service.` |
-| ⬚ | Let's discuss about email service changes first in detail. There are some changes.
+| ✅ | Contact form — RHF + zodResolver + EmailJS send + react-hot-toast | Client-side only (D61). Awaiting EmailJS credentials to test live send |
+| ✅ | react-hot-toast global Toaster in root layout | `position="bottom-center"`, 5s duration |
+| ✅ | WhatsApp click-to-chat redirect | Verified: 4 links, correct number, contextual prefill |
+| ⬚ | Calendly popup widget integration | Blocked: Calendly URL pending from client |
+| ⛔ | Server-side rate limit on contact endpoint | Deferred — no backend in Phase 1 (D61). EmailJS dashboard limits apply |
 
 ### EP4 — SEO, Performance & Legal Pages
 | Status | Task | Notes |
