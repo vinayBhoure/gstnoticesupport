@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Receipt, BadgeCheck, MapPin, Clock } from 'lucide-react';
 import styles from './about.module.css';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { ORG } from '@/lib/site';
 
 export const dynamic = 'force-static';
 
@@ -65,26 +66,29 @@ export default function AboutPage() {
               <p>Our CIN and GSTIN are listed for reference and can be verified on the MCA portal and GST portal respectively. We believe legal identity transparency is a baseline requirement for any professional services firm.</p>
             </div>
             <aside className={styles.companyRef} aria-label="Company legal reference">
-              <h3>GST Notice Support Pvt. Ltd.</h3>
+              <h3>{ORG.legalName}</h3>
               <div className={styles.refRow}>
                 <div className={styles.refItem}>
                   <span className={styles.refLabel}>CIN</span>
-                  <span className={`${styles.refValue} ${styles.refMono}`}>U74999KA2024PTC000000</span>
+                  <span className={`${styles.refValue} ${styles.refMono}`}>{ORG.cin}</span>
                 </div>
                 <div className={styles.refItem}>
                   <span className={styles.refLabel}>Company GSTIN</span>
-                  <span className={`${styles.refValue} ${styles.refMono}`}>29ABCDE1234F1Z5</span>
+                  <span className={`${styles.refValue} ${styles.refMono}`}>{ORG.gstin}</span>
                 </div>
                 <div className={styles.refItem}>
                   <span className={styles.refLabel}>Registered Address</span>
-                  <span className={styles.refValue}>4th Floor, Prestige Centre, MG Road,<br />Bengaluru, Karnataka 560001</span>
+                  <span className={styles.refValue}>
+                    {ORG.address.street},<br />
+                    {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}
+                  </span>
                 </div>
                 <div className={styles.refItem}>
                   <span className={styles.refLabel}>Grievance Officer</span>
                   <span className={styles.refValue}>
-                    Ananya Rao ·{' '}
-                    <a href="mailto:grievance@gstnoticesupport.in" style={{ color: 'var(--accent-green)' }}>
-                      grievance@gstnoticesupport.in
+                    {ORG.grievanceOfficer} ·{' '}
+                    <a href={`mailto:${ORG.grievanceEmail}`} style={{ color: 'var(--accent-green)' }}>
+                      {ORG.grievanceEmail}
                     </a>
                   </span>
                 </div>
