@@ -6,6 +6,8 @@ import {
   ArrowLeft, ArrowRight,
 } from 'lucide-react';
 import styles from '../service.module.css';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { serviceSchema } from '@/lib/structured-data';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
@@ -19,6 +21,15 @@ export const metadata: Metadata = {
 export default function CommissionerAppealPage() {
   return (
     <>
+      <JsonLd
+        data={serviceSchema({
+          name: 'Commissioner Appeal (APL-01)',
+          description:
+            'Commissioner Appeal (APL-01) filing under Section 107 CGST Act, prepared by CAs and Advocates. Fixed professional fee ₹9,999. Statement of Facts, Grounds of Appeal, portal filing.',
+          price: 9999,
+          path: '/services/commissioner-appeal',
+        })}
+      />
       {/* PAGE HERO */}
       <section className={`${styles.pageHero} bg-white`}>
         <div className="container">

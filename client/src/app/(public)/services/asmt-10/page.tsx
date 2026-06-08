@@ -5,6 +5,8 @@ import {
   CheckCircle2, ShieldCheck, Clock, Check, AlertTriangle,
 } from 'lucide-react';
 import styles from '../service.module.css';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { serviceSchema } from '@/lib/structured-data';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
@@ -18,6 +20,15 @@ export const metadata: Metadata = {
 export default function Asmt10Page() {
   return (
     <>
+      <JsonLd
+        data={serviceSchema({
+          name: 'ASMT-10 Scrutiny Notice Reply',
+          description:
+            'ASMT-10 scrutiny notice reply prepared by ICAI-registered CAs. Fixed fee ₹2,999. Draft within 48 hours. Section 61 CGST Act responses, filed on the GST portal.',
+          price: 2999,
+          path: '/services/asmt-10',
+        })}
+      />
       {/* PAGE HERO */}
       <section className={`${styles.pageHero} bg-white`}>
         <div className="container">
