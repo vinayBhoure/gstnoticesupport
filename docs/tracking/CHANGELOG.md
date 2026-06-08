@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-06-08] — EP4: SEO plumbing (metadata, OG image, sitemap, robots, JSON-LD)
+
+**Site-wide SEO foundation (unblocked code; legal content + analytics still client-blocked)**
+- `src/lib/site.ts` single source for `SITE_URL` (from `NEXT_PUBLIC_SITE_URL`), `SITE_NAME`, `SITE_DESCRIPTION`, and `ORG` legal identity (CIN/GSTIN/address/grievance) — all sourced from env with dummy placeholders to be swapped for authentic data before launch.
+- Root layout: `metadataBase`, default title/description, and sitewide `openGraph` (website, `en_IN`) + `twitter` (`summary_large_image`) defaults inherited by every route.
+- Homepage: unique absolute `<title>`, unique meta description, and `canonical`. OG is intentionally inherited from root so the generated share image is preserved (a page-level `openGraph` shallow-replaces the root one in Next 16).
+- Generated OG/Twitter share image (`app/opengraph-image.tsx`) — 1200×630 branded card via `next/og`, inline SVG check (no dynamic font fetch).
+- `app/sitemap.ts` (12 public routes, priority + change frequency) and `app/robots.ts` (allow crawl; disallow `/dashboard`, `/admin`, `/payment`, `/api`; links sitemap).
+- Structured data: `Organization` JSON-LD on every public page (via public layout), `Service` JSON-LD on the 4 service pages (INR `Offer`), pre-existing `FAQPage` retained. New `JsonLd` component + `lib/structured-data.ts`.
+- About page company-reference card now reads legal identity from `ORG` constants (one place to swap real data later).
+- Cleanup: removed "Meet the Team" remnants from `/about` (unused imports, orphaned `LinkedInIcon`, stale metadata description, dead team CSS).
+- Verified: `next build` clean, ESLint clean, `tsc --noEmit` exit 0; rendered HTML confirmed for OG/canonical tags, `sitemap.xml`, `robots.txt`, and Organization/Service/FAQPage JSON-LD.
+
+---
+
 ## [2026-06-08] — refactor: FAQ page accordion (content-based height, a11y)
 
 **`/faq` page accordion (`FaqSection`) reworked**

@@ -463,10 +463,10 @@ The build is decomposed into **15 small, sequential execution phases**, each ind
 
 | # | Phase | Track | Milestone | Status |
 |---|-------|-------|-----------|--------|
-| 1 | Project Scaffold, Tooling & Design System | Foundation | — | ⬚ |
-| 2 | Public Marketing Pages | Phase 1 | — | ⬚ |
-| 3 | Lead Capture & Phase 1 Integrations | Phase 1 | — | ⬚ |
-| 4 | SEO, Performance & Legal Pages | Phase 1 | — | ⬚ |
+| 1 | Project Scaffold, Tooling & Design System | Foundation | — | ✅ |
+| 2 | Public Marketing Pages | Phase 1 | — | ✅ |
+| 3 | Lead Capture & Phase 1 Integrations | Phase 1 | — | ✅ |
+| 4 | SEO, Performance & Legal Pages | Phase 1 | — | 🔄 |
 | 5 | Phase 1 Hardening & Launch | Phase 1 | 🚀 **Phase 1 Live** | ⬚ |
 | 6 | Database Schema & Repository Layer | Phase 2 | — | ⬚ |
 | 7 | Backend Core Infrastructure | Phase 2 | — | ⬚ |

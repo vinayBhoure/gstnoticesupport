@@ -51,14 +51,16 @@
 ### EP4 — SEO, Performance & Legal Pages
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Metadata API — unique title + description per page | Next.js `generateMetadata` |
-| ⬚ | OG + Twitter card tags on all public pages | |
-| ⬚ | Schema.org JSON-LD: `Service`, `Organization`, `FAQPage` | |
-| ⬚ | `sitemap.xml` — all public routes | Disallow: /dashboard, /admin, /payment |
-| ⬚ | `robots.txt` | |
+| ✅ | Metadata API — unique title + description per page | `metadataBase` from `NEXT_PUBLIC_SITE_URL`; homepage unique title + canonical; 12 pages have per-page metadata |
+| ✅ | OG + Twitter card tags on all public pages | Sitewide `openGraph`/`twitter` defaults in root layout; inherited by all routes |
+| ✅ | Generated OG share image | Code-generated 1200×630 via `next/og` (`app/opengraph-image.tsx`); inline SVG check, no font fetch |
+| ✅ | Schema.org JSON-LD: `Service`, `Organization`, `FAQPage` | Organization sitewide via public layout; Service ×4 service pages; FAQPage pre-existing. `JsonLd` component + `lib/structured-data.ts` |
+| ✅ | `sitemap.xml` — all public routes | `app/sitemap.ts`, 12 routes with priority/changefreq |
+| ✅ | `robots.txt` | `app/robots.ts` — Disallow: /dashboard, /admin, /payment, /api; links sitemap |
 | ✅ | `<Image>` optimization audit — all `<img>` → `next/image` with `priority` on hero | No raw `<img>` tags in production code; logo uses `priority` |
-| ⬚ | Privacy Policy page | Blocked: legal content pending |
-| ⬚ | Terms & Conditions page | Blocked: legal content pending |
+| 🔄 | Privacy Policy page | Page built; legal identity now via `ORG` env (dummy). Blocked: real legal content |
+| 🔄 | Terms & Conditions page | Page built. Blocked: real legal content |
+| 🔄 | Refund Policy page | Page built (Razorpay requirement). Blocked: real refund terms |
 | ⬚ | Google Analytics GA4 integration | Blocked: Measurement ID pending |
 | ⬚ | Google Search Console setup | Blocked: access pending |
 
