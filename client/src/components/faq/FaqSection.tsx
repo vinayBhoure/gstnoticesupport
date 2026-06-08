@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Search, X, ChevronDown, HelpCircle } from 'lucide-react';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
@@ -254,7 +254,6 @@ function highlightText(text: string, query: string): React.ReactNode {
 export function FaqSection() {
   const [searchQuery, setSearchQuery] = useState('');
   const [openItemId, setOpenItemId] = useState<string | null>(null);
-  const bodyRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const trimmedQuery = searchQuery.trim();
 
@@ -364,35 +363,34 @@ export function FaqSection() {
                         className={styles.faqItem}
                         role="listitem"
                       >
-                        <button
-                          className={styles.faqTrigger}
-                          aria-expanded={isOpen}
-                          aria-controls={`faq-body-${item.id}`}
-                          onClick={() => toggle(item.id)}
-                        >
-                          <span className={isOpen ? `${styles.faqQ} ${styles.faqQOpen}` : styles.faqQ}>
-                            {highlightText(item.question, trimmedQuery)}
-                          </span>
-                          <ChevronDown
-                            className={isOpen ? `${styles.faqChev} ${styles.faqChevOpen}` : styles.faqChev}
-                            size={20}
-                            aria-hidden="true"
-                          />
-                        </button>
+                        <h3 className={styles.faqHeading}>
+                          <button
+                            type="button"
+                            id={`faq-trigger-${item.id}`}
+                            className={styles.faqTrigger}
+                            aria-expanded={isOpen}
+                            aria-controls={`faq-body-${item.id}`}
+                            onClick={() => toggle(item.id)}
+                          >
+                            <span className={isOpen ? `${styles.faqQ} ${styles.faqQOpen}` : styles.faqQ}>
+                              {highlightText(item.question, trimmedQuery)}
+                            </span>
+                            <ChevronDown
+                              className={isOpen ? `${styles.faqChev} ${styles.faqChevOpen}` : styles.faqChev}
+                              size={20}
+                              aria-hidden="true"
+                            />
+                          </button>
+                        </h3>
                         <div
-                          className={styles.faqBody}
+                          className={isOpen ? `${styles.faqBody} ${styles.faqBodyOpen}` : styles.faqBody}
                           id={`faq-body-${item.id}`}
                           role="region"
-                          style={{
-                            maxHeight: isOpen && bodyRefs.current[item.id]
-                              ? `${bodyRefs.current[item.id]!.scrollHeight}px`
-                              : '0',
-                            overflow: 'hidden',
-                            transition: 'max-height 0.28s cubic-bezier(0.4,0,0.2,1)',
-                          }}
-                          ref={el => { bodyRefs.current[item.id] = el; }}
+                          aria-labelledby={`faq-trigger-${item.id}`}
+                          inert={!isOpen}
                         >
-                          <div style={{ padding: '0 0 20px' }}>{item.answerJsx}
+                          <div className={styles.faqBodyInner}>
+                            <div className={styles.faqAnswer}>{item.answerJsx}</div>
                           </div>
                         </div>
                       </div>
