@@ -14,24 +14,6 @@
 .mvPanel h3{font-size:22px;color:var(--primary-navy);margin-bottom:14px;}
 .mvPanel p{font-size:16px;color:var(--neutral-900);line-height:1.75;}
 
-/* ---------- TEAM CARDS ---------- */
-.teamGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
-.teamCard{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .15s;}
-.teamCard:hover{box-shadow:var(--shadow-md);}
-.teamPhoto{width:100%;aspect-ratio:3/4;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative;}
-.phIcon{width:56px;height:56px;border-radius:50%;background:var(--neutral-200);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);}
-.phLabel{font-size:12px;font-weight:600;color:var(--neutral-600);text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:0 16px;}
-.phFlag{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--warning-amber);font-weight:600;background:rgba(217,119,6,.1);border:1px solid #F0D9B5;border-radius:var(--r-badge);padding:3px 10px;white-space:nowrap;}
-.teamBody{padding:24px 24px 20px;display:flex;flex-direction:column;gap:10px;flex:1;}
-.teamBody h3{font-size:20px;color:var(--primary-navy);margin:0;}
-.teamCredBadge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--neutral-600);background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-badge);padding:4px 10px;width:fit-content;}
-.teamReg{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;color:var(--neutral-600);user-select:text;}
-.teamSpec{font-size:15px;color:var(--neutral-600);line-height:1.55;}
-.teamFooter{margin-top:auto;padding-top:14px;border-top:1px solid var(--neutral-200);display:flex;align-items:center;}
-.teamLinkedin{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:var(--r-btn);color:var(--neutral-600);transition:color .15s,background .15s;}
-.teamLinkedin:hover{color:var(--primary-deep-blue);background:var(--neutral-50);}
-.teamLinkedin:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(27,58,107,.3);}
-
 /* ---------- COMPANY IDENTITY ---------- */
 .companyGrid{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:start;}
 .companyText p{font-size:16px;color:var(--neutral-900);line-height:1.75;}
@@ -61,7 +43,6 @@
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width:1024px){
-  .teamGrid{grid-template-columns:1fr;}
   .companyGrid{grid-template-columns:1fr;gap:32px;}
   .mvGrid{grid-template-columns:1fr;}
   .whyGrid{grid-template-columns:1fr;}
