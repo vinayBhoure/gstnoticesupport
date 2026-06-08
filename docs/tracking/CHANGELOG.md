@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-06-08] — refactor: FAQ page accordion (content-based height, a11y)
+
+**`/faq` page accordion (`FaqSection`) reworked**
+- Replaced the fragile JS height animation (a `ref` `scrollHeight` measurement written to inline `max-height`) with the pure-CSS grid `grid-template-rows: 0fr → 1fr` technique. Panels now animate to natural content height — no measurement, no stale heights on resize/font-load, and no clipping or text overlap of long answers.
+- Each question is now a semantic `<h3>` wrapping the trigger button (screen-reader heading navigation); panel gets `role="region"` + `aria-labelledby`, and `inert` when collapsed so links inside closed answers are not keyboard-focusable.
+- Category headers are divider-separated (bottom border) with the question-count badge retained; item gap increased `2px → 10px`; answer padding consolidated into CSS-module classes (removed inline styles).
+- Added `≤640px` padding overrides and a `prefers-reduced-motion: reduce` guard that disables the expand/chevron transitions.
+- No FAQ content changed — structure, layout, styling, and behavior only. `tsc --noEmit` passes clean.
+- Note: distinct from the 2026-06-06 fix, which addressed the **homepage** `FaqAccordion`.
+
+---
+
 ## [2026-06-07] — EP3: Contact form (Resend), Calendly popup, toast, WhatsApp
 
 **Contact form — Resend via Next.js Route Handler**

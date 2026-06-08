@@ -27,32 +27,39 @@
 .noResults strong{color:var(--primary-navy);}
 
 /* Group */
-.faqGroup{margin-bottom:48px;}
+.faqGroup{margin-bottom:44px;}
 .faqGroup:last-child{margin-bottom:0;}
-.faqGroupHeader{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.faqGroupHeader{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--neutral-200);}
 .faqGroupHeader h2{font-size:18px;font-weight:700;color:var(--primary-navy);margin:0;}
 .groupTag{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 8px;background:var(--accent-green);color:#fff;font-size:12px;font-weight:700;border-radius:var(--r-badge);}
 
 /* Accordion list */
-.faqList{display:flex;flex-direction:column;gap:2px;}
-.faqItem{border:1px solid var(--neutral-200);border-radius:var(--r-card);background:#fff;overflow:hidden;transition:border-color .15s;}
+.faqList{display:flex;flex-direction:column;gap:10px;}
+.faqItem{border:1px solid var(--neutral-200);border-radius:var(--r-card);background:#fff;transition:border-color .15s,box-shadow .15s;}
+.faqItem:hover{border-color:var(--neutral-300);}
 .faqItem:focus-within{border-color:var(--accent-green);}
 
-/* Trigger */
-.faqTrigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;background:none;border:none;cursor:pointer;text-align:left;}
+/* Heading wrapper — semantic heading without altering visual scale */
+.faqHeading{margin:0;font-size:inherit;font-weight:inherit;line-height:inherit;}
+
+/* Trigger — full-width clickable header */
+.faqTrigger{width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px;background:none;border:none;cursor:pointer;text-align:left;border-radius:var(--r-card);}
 .faqTrigger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(16,185,129,.3) inset;}
-.faqQ{font-size:16px;font-weight:600;color:var(--primary-navy);line-height:1.4;transition:color .12s;}
+.faqQ{font-size:16px;font-weight:600;color:var(--primary-navy);line-height:1.45;transition:color .12s;}
 .faqQOpen{color:var(--accent-green);}
-.faqChev{flex:0 0 auto;color:var(--neutral-600);transition:transform .2s;}
-.faqChevOpen{transform:rotate(180deg);}
+.faqChev{flex:0 0 auto;margin-top:2px;color:var(--neutral-600);transition:transform .25s ease,color .12s;}
+.faqChevOpen{transform:rotate(180deg);color:var(--accent-green);}
 .faqQ :global(mark){background:rgba(16,185,129,.18);color:inherit;border-radius:2px;padding:0 2px;}
 
-/* Body */
-.faqBody{padding:0 20px 18px;}
-.faqBody p{font-size:15px;color:var(--neutral-900);line-height:1.7;}
-.faqBody p+p{margin-top:12px;}
-.faqBody strong{color:var(--primary-navy);}
-.faqBody :global(.mono){font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;background:var(--neutral-100);padding:1px 6px;border-radius:4px;}
+/* Body — CSS-grid height animation: content-based, no fixed heights, no clipping */
+.faqBody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s cubic-bezier(0.4,0,0.2,1);}
+.faqBodyOpen{grid-template-rows:1fr;}
+.faqBodyInner{overflow:hidden;min-height:0;}
+.faqAnswer{padding:0 20px 20px;}
+.faqAnswer p{font-size:15px;color:var(--neutral-900);line-height:1.7;margin:0;}
+.faqAnswer p+p{margin-top:12px;}
+.faqAnswer strong{color:var(--primary-navy);}
+.faqAnswer :global(.mono){font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;background:var(--neutral-100);padding:1px 6px;border-radius:4px;}
 .inlineCta{color:var(--accent-green);font-weight:600;text-decoration:none;transition:opacity .12s;}
 .inlineCta:hover{opacity:.75;}
 
@@ -82,8 +89,15 @@
   .pageHero{padding:56px 0 0;}
   .searchArea{padding:24px 0 40px;}
   .faqSection{padding:40px 0 56px;}
+  .faqTrigger{padding:16px;}
+  .faqAnswer{padding:0 16px 16px;}
   .ctaBanner{padding:56px 0;}
   .btnRow{flex-direction:column;}
   .btnRow :global(.btn){width:100%;}
   .sqxCard{padding:24px 20px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .faqBody{transition:none;}
+  .faqChev{transition:none;}
 }
