@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   MapPin, Check, FileSearch, FileWarning, Gavel, Landmark, ArrowRight,
@@ -12,6 +13,20 @@ import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './page.module.css';
 
 export const dynamic = 'force-static';
+
+export const metadata: Metadata = {
+  title: {
+    absolute: 'GST Notice? Get Expert Legal Support in 24 Hours | GST Notice Support',
+  },
+  description:
+    'Received a GST notice? ICAI-registered CAs and Bar Council-enrolled Advocates prepare your reply, appeal, or representation — fixed fee, draft within 48 hours, pan-India.',
+  alternates: {
+    canonical: '/',
+  },
+  // openGraph/twitter are intentionally inherited from the root layout so the
+  // generated share image, site name, locale and type are not dropped — a
+  // page-level openGraph object would shallow-replace the root one (Next 16).
+};
 
 export default function HomePage() {
   return (

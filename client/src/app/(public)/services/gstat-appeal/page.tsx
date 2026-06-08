@@ -6,6 +6,8 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import styles from '../service.module.css';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { serviceSchema } from '@/lib/structured-data';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
@@ -19,6 +21,15 @@ export const metadata: Metadata = {
 export default function GstatAppealPage() {
   return (
     <>
+      <JsonLd
+        data={serviceSchema({
+          name: 'GSTAT Appeal (APL-05)',
+          description:
+            'GSTAT Appeal (APL-05) filing before the GST Appellate Tribunal — second tier appeal under Section 112 CGST Act. Complete APL-05 bundle prepared by CAs and Advocates. Fixed fee ₹14,999.',
+          price: 14999,
+          path: '/services/gstat-appeal',
+        })}
+      />
       {/* PAGE HERO */}
       <section className={`${styles.pageHero} bg-white`}>
         <div className="container">

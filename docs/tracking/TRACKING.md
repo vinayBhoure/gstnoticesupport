@@ -21,8 +21,8 @@
 |---|---|---|---|
 | EP1 | Project Scaffold, Tooling & Design System | ✅ Done | 2026-06-06 |
 | EP2 | Public Marketing Pages | ✅ Done | 2026-06-06 |
-| EP3 | Lead Capture & Phase 1 Integrations | ⬚ Pending | — |
-| EP4 | SEO, Performance & Legal Pages | ⬚ Pending | — |
+| EP3 | Lead Capture & Phase 1 Integrations | ✅ Done | 2026-06-08 |
+| EP4 | SEO, Performance & Legal Pages | 🔄 In Progress | — |
 | EP5 | Phase 1 Hardening & Launch | ⬚ Pending | — |
 
 ---

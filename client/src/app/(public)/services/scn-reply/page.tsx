@@ -6,6 +6,8 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import styles from '../service.module.css';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { serviceSchema } from '@/lib/structured-data';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
@@ -19,6 +21,15 @@ export const metadata: Metadata = {
 export default function ScnReplyPage() {
   return (
     <>
+      <JsonLd
+        data={serviceSchema({
+          name: 'Show Cause Notice (SCN) Reply',
+          description:
+            'Show Cause Notice reply for DRC-01 and DRC-01A prepared by CAs and Advocates. Fixed fee ₹5,999. Full structured reply under Section 73/74 CGST Act, filed on the GST portal.',
+          price: 5999,
+          path: '/services/scn-reply',
+        })}
+      />
       {/* PAGE HERO */}
       <section className={`${styles.pageHero} bg-white`}>
         <div className="container">
