@@ -23,12 +23,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
-  openGraph: {
-    url: '/',
-    title: 'GST Notice? Get Expert Legal Support in 24 Hours',
-    description:
-      'ICAI-registered CAs and Bar Council-enrolled Advocates handle GST notices, scrutiny, show-cause replies, and appeals — fixed fee, 48-hour drafts, pan-India.',
-  },
+  // openGraph/twitter are intentionally inherited from the root layout so the
+  // generated share image, site name, locale and type are not dropped — a
+  // page-level openGraph object would shallow-replace the root one (Next 16).
 };
 
 export default function HomePage() {
