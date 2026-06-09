@@ -80,7 +80,7 @@ Four services are bookable through the platform with fixed prices. A fifth servi
 
 ### 2.1 Architecture Style
 
-The system follows a decoupled frontend-backend architecture with two independent deployments communicating over HTTPS. The frontend is a Next.js application hosted on Vercel. The backend is an Express.js API hosted on Render or Railway. They share a PostgreSQL database hosted on NeonDB and an AWS S3 bucket for file storage.
+The system follows a decoupled frontend-backend architecture with two independent deployments communicating over HTTPS. The frontend is a Next.js application hosted on Hostinger Business plan as a Node.js application. The backend is an Express.js API also hosted on Hostinger Business plan as a separate Node.js application under the `api.gstnoticesupport.in` subdomain. They share a PostgreSQL database hosted on NeonDB and an AWS S3 bucket for file storage.
 
 ### 2.2 High-Level System Components
 
@@ -141,8 +141,8 @@ All data access from the Next.js frontend goes through the Express backend via a
 
 | Layer | Technology |
 |---|---|
-| Frontend hosting | Vercel |
-| Backend hosting | Render or Railway (final choice deferred) |
+| Frontend hosting | Hostinger Business plan (Node.js app, `gstnoticesupport.in`) |
+| Backend hosting | Hostinger Business plan (Node.js app, `api.gstnoticesupport.in`) |
 | Version control | Git + GitHub |
 | Linting | ESLint |
 | Formatting | Prettier |
@@ -168,7 +168,7 @@ NeonDB branching is used to create the staging database from the production sche
 
 ### 4.2 Domain Architecture
 
-The frontend is served from `gstnoticesupport.in` (apex) and the backend from `api.gstnoticesupport.in` (subdomain). This split allows independent deployment, independent scaling, and clean CORS configuration. The frontend deployment lives on Vercel; the backend deployment lives on Render or Railway.
+The frontend is served from `gstnoticesupport.in` (apex) and the backend from `api.gstnoticesupport.in` (subdomain). This split allows independent deployment, independent scaling, and clean CORS configuration. Both deployments live on Hostinger Business plan as separate Node.js applications managed through hPanel.
 
 ### 4.3 CORS Configuration
 
@@ -184,7 +184,7 @@ Cloudflare sits in front of both the frontend and the backend at the DNS layer. 
 
 ### 4.6 CI/CD
 
-Vercel auto-deploys the frontend on every push to the `main` branch for production and on every push to the `staging` branch for staging. Render or Railway auto-deploys the backend the same way. Pull requests trigger preview deployments on Vercel automatically. No custom CI/CD pipeline is needed at launch.
+Deployments are triggered manually via Hostinger hPanel. On each production release: SSH into the server, pull the latest code from the `main` branch, run `npm run build` (frontend) or compile TypeScript (backend `dist/`), then restart the Node.js application through hPanel. The hPanel Node.js manager handles process lifecycle and auto-restart on crashes or server reboots. No automated CI/CD pipeline is in place at launch.
 
 ---
 
@@ -305,7 +305,7 @@ A centralized error handling middleware catches all errors thrown in controllers
 
 ### 6.5 Logging
 
-During development and testing, all logging is via `console.log`, `console.error`, and `console.warn`. Vercel and Render expose these logs through their respective dashboards. Before production launch, Sentry is integrated for error tracking, performance monitoring, and alerting on production incidents.
+During development and testing, all logging is via `console.log`, `console.error`, and `console.warn`. On Hostinger, these are captured as `console.log` (stdout) and `stderr.log` (stderr) files in each application's directory, accessible via SSH or hPanel's file manager. Before production launch, Sentry is integrated for error tracking, performance monitoring, and alerting on production incidents.
 
 ### 6.6 Rate Limiting
 
@@ -595,7 +595,7 @@ A single S3 bucket is provisioned in the `ap-south-1` (Mumbai) region for low-la
 
 ### 14.1 Transport Security
 
-All traffic uses HTTPS in production and staging. Cloudflare provides automatic TLS certificates for the apex domain. Vercel and Render provide certificates for their respective domains. SSL/TLS mode in Cloudflare is set to "Full (strict)" so the connection is encrypted on both legs: user-to-Cloudflare and Cloudflare-to-origin.
+All traffic uses HTTPS in production and staging. Cloudflare provides automatic TLS certificates for the apex domain. Hostinger provides SSL certificates for the origin server for both the frontend and backend. SSL/TLS mode in Cloudflare is set to "Full (strict)" so the connection is encrypted on both legs: user-to-Cloudflare and Cloudflare-to-origin.
 
 ### 14.2 Authentication Security
 
@@ -649,7 +649,7 @@ No personally identifiable information, document content, or session tokens are 
 
 ### 15.2 Rendering Strategy for Performance
 
-Marketing pages are statically generated at build time. Static HTML is served from Vercel's edge network and Cloudflare's CDN, ensuring sub-second response times globally. Dashboard pages are server-rendered per request, with the rendering happening in the same region as the backend (Mumbai) for low latency.
+Marketing pages are statically generated at build time. Static HTML is served from Hostinger's server with Cloudflare's CDN caching in front, ensuring fast response times. Dashboard pages are server-rendered per request, with the rendering happening on the Hostinger server alongside the backend for low-latency data access.
 
 ### 15.3 Image Optimization
 
@@ -738,7 +738,7 @@ Errors are classified into three categories:
 
 ### 17.2 Monitoring Phases
 
-During development and testing, errors are logged to the console and visible in Vercel and Render dashboards. This is sufficient for the development phase.
+During development and testing, errors are logged to the console and captured in `console.log` / `stderr.log` files in the Hostinger application directory, accessible via SSH. This is sufficient for the development phase.
 
 Before production launch, Sentry (or an equivalent service) is integrated. Sentry captures uncaught exceptions, monitors performance metrics, and alerts on production incidents. Source maps are uploaded to Sentry to enable readable stack traces. PII is scrubbed from error reports.
 
@@ -773,7 +773,7 @@ Each log entry includes a timestamp, log level (info, warn, error), request ID (
 
 ### 18.2 Environment Variables
 
-Each environment has its own set of environment variables, never committed to git. Production secrets (Razorpay live keys, Resend API key, AWS credentials, JWT signing secret) are stored in Vercel and Render's encrypted environment variable stores. Development secrets are stored in `.env.local` files, included in `.gitignore`.
+Each environment has its own set of environment variables, never committed to git. Production secrets (Razorpay live keys, Resend API key, AWS credentials, JWT signing secret) are stored in Hostinger hPanel's environment variable configuration for each Node.js application. Development secrets are stored in `.env.local` files, included in `.gitignore`.
 
 ### 18.3 Razorpay Mode
 
@@ -781,7 +781,7 @@ Development and staging use Razorpay test mode (test API keys, test cards). Prod
 
 ### 18.4 Promotion Path
 
-Code changes flow: feature branch → pull request to `staging` → merge triggers staging deploy → manual testing → pull request to `main` → merge triggers production deploy. No code reaches production without passing through staging first.
+Code changes flow: feature branch → pull request to `staging` → manual deploy to staging via SSH (`git pull` + build + hPanel restart) → manual testing → pull request to `main` → manual deploy to production the same way. No code reaches production without passing through staging first.
 
 ### 18.5 Database Migrations
 
@@ -898,7 +898,7 @@ The following items are recognized as gaps or pending decisions that should be a
 This appendix consolidates every architectural decision locked during the requirement and design phases. For full context behind each decision, refer to the knowledge bases and design blueprint.
 
 ### 22.1 Architecture & Deployment
-- Decoupled frontend (Vercel) and backend (Render or Railway) on separate domains
+- Decoupled frontend and backend both hosted on Hostinger Business plan as separate Node.js applications on separate subdomains (`gstnoticesupport.in` and `api.gstnoticesupport.in`)
 - Frontend domain: `gstnoticesupport.in` and `api.gstnoticesupport.in` for backend
 - Three environments: development (localhost), staging (deployed), production (live)
 - NeonDB branching for staging database

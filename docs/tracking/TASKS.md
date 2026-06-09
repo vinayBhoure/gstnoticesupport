@@ -67,8 +67,8 @@
 ### EP5 — Phase 1 Hardening & Launch
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Vercel project setup + env vars for staging | |
-| ⬚ | Railway project setup + env vars for staging | Confirmed: Railway for Phase 1 |
+| ⬚ | Hostinger hPanel env vars set for frontend (staging) | Replace: Vercel/Railway tasks no longer applicable |
+| ⬚ | Hostinger hPanel env vars set for backend (staging) | Entry point: `dist/index.js` |
 | ⬚ | Cloudflare DNS + SSL "Full (strict)" | Blocked: Cloudflare account pending |
 | ⬚ | Trust signals (legal name, CIN, GSTIN, address, grievance officer) | Blocked: content pending via env |
 | ⬚ | Production phone number visible in header | |

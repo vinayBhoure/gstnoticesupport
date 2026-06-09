@@ -183,8 +183,8 @@ Razorpay webhook is exempt from rate limiting (per HLD §6.6).
 
 ### Technical
 
-- Frontend: Next.js + TypeScript + shadcn (Vercel deploy).
-- Backend: nodejs (express js) over Express (Railway or Fly.io, Mumbai region).
+- Frontend: Next.js + TypeScript + shadcn (Hostinger Business plan, Node.js app at `gstnoticesupport.in`).
+- Backend: Node.js + Express.js (Hostinger Business plan, Node.js app at `api.gstnoticesupport.in`, entry point `dist/index.js`).
 - DB: PostgreSQL (Supabase under consideration for consolidation).
 - Storage: AWS S3 Mumbai (or Supabase Storage).
 - Payments: Razorpay Orders flow only.
