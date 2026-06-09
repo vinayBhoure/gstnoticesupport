@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-06-09] — docs: Phase 2 component specs; repo hygiene
+
+**Design system**
+- `docs/ui-ux/components.md`: added specifications for the Auth Card Shell, OTP Input, Form Field Primitives, and the authenticated Mobile Bottom Tab Bar (Phase 2 groundwork).
+
+**Repo hygiene**
+- `.gitignore` now excludes local tooling and working artefacts (`.playwright-mcp/`, graphify output, audit working note).
+- Added the firecrawl skill under `.claude/skills/`.
+
+---
+
 ## [2026-06-08] — EP4: SEO plumbing (metadata, OG image, sitemap, robots, JSON-LD)
 
 **Site-wide SEO foundation (unblocked code; legal content + analytics still client-blocked)**

@@ -97,3 +97,10 @@ desktop.ini
 .cache/
 tmp/
 temp/
+
+# ────────────────────────────────────────────────────────────────
+# Local tooling & working artefacts (not source)
+# ────────────────────────────────────────────────────────────────
+.playwright-mcp/
+GRAPHIFY_CLAUDE_CODE.md
+audit.md
