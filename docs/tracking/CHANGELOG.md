@@ -126,5 +126,5 @@
 
 **Infrastructure**
 - `client/` and `server/` are fully independent packages — separate `package.json`, `node_modules`, and deploy targets
-- `client/` → Vercel · `server/` → Railway (Phase 1) → VPS (before Phase 2)
+- `client/` → Hostinger Business plan (Node.js app, `gstnoticesupport.in`) · `server/` → Hostinger Business plan (Node.js app, `api.gstnoticesupport.in`, entry point `dist/index.js`)
 - `server/.env` excluded from git; `.env.example` committed as template
