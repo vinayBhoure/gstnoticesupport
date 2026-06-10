@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GST Notice Support — Expert GST Litigation Help in 24 Hours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ---------- NAVBAR ---------- */
+  .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid var(--neutral-200);}
+  .nav .row{display:flex;align-items:center;gap:28px;height:76px;transition:height .15s ease;}
+  .nav.scrolled .row{height:62px;}
+  .brand{display:flex;align-items:center;gap:11px;}
+  .brand img{height:40px;width:40px;border-radius:7px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .brand .bn{font-weight:700;font-size:17px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .brand .bn span{color:var(--accent-green);}
+  .nav .links{display:flex;align-items:center;gap:26px;margin-left:6px;}
+  .nav .links a,.nav .links button{font-size:15px;font-weight:500;color:var(--neutral-900);background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 0;}
+  .nav .links a:hover,.nav .links button:hover{color:var(--accent-green);}
+  .nav .right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+  .nav .right .btn{min-height:44px;padding:10px 16px;font-size:14px;}
+  .nav .ph{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--primary-navy);white-space:nowrap;}
+  .nav .ph .ic{width:17px;height:17px;color:var(--accent-green);}
+  /* services dropdown */
+  .has-drop{position:relative;}
+  .drop-menu{position:absolute;top:calc(100% + 10px);left:0;min-width:300px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:8px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;}
+  .has-drop:hover .drop-menu,.has-drop:focus-within .drop-menu{opacity:1;visibility:visible;transform:translateY(0);}
+  .nav .drop-menu a{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:4px;padding:10px 14px !important;border-radius:var(--r-btn);text-align:left !important;}
+  .nav .drop-menu a:hover{background:var(--neutral-50);}
+  .nav .drop-menu a strong{font-size:14px;font-weight:600;color:var(--primary-navy);display:block;width:100%;}
+  .nav .drop-menu a small{font-size:13px;color:var(--neutral-600);font-weight:400;display:block;width:100%;}
+
+  /* hamburger + drawer (hidden on desktop) */
+  .hamburger{display:none;align-items:center;justify-content:center;width:48px;height:48px;background:none;border:none;cursor:pointer;color:var(--primary-navy);border-radius:var(--r-btn);}
+  .hamburger:hover{background:var(--neutral-50);}
+  .drawer-overlay{position:fixed;inset:0;background:rgba(10,37,64,.5);z-index:110;opacity:0;transition:opacity .2s ease;}
+  .drawer-overlay.show{opacity:1;}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(86vw,360px);background:#fff;z-index:120;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(10,37,64,.12);}
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--neutral-200);}
+  .drawer-head .brand img{height:36px;width:36px;border-radius:7px;border:1px solid var(--neutral-200);}
+  .drawer-head .brand .bn{font-weight:700;font-size:16px;color:var(--primary-navy);}
+  .drawer-head .brand .bn span{color:var(--accent-green);}
+  .drawer-close{width:44px;height:44px;background:none;border:none;cursor:pointer;color:var(--neutral-900);border-radius:var(--r-btn);display:flex;align-items:center;justify-content:center;}
+  .drawer-close:hover{background:var(--neutral-50);}
+  .drawer-nav{display:flex;flex-direction:column;padding:16px 20px;overflow-y:auto;flex:1;min-height:0;}
+  .drawer-nav a{padding:13px 8px;font-size:16px;font-weight:500;color:var(--neutral-900);border-radius:var(--r-btn);min-height:48px;display:flex;align-items:center;}
+  .drawer-nav a:hover{background:var(--neutral-50);color:var(--accent-green);}
+  .drawer-label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:8px;}
+  .drawer-divider{height:1px;background:var(--neutral-200);margin:10px 0;}
+  .drawer-foot{padding:18px 20px;border-top:1px solid var(--neutral-200);display:flex;flex-direction:column;gap:12px;flex-shrink:0;}
+  .drawer-foot .ph{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--primary-navy);margin-bottom:4px;}
+  .drawer-foot .ph .ic{color:var(--accent-green);}
+
+  /* ---------- HERO ---------- */
+  .hero{min-height:calc(100vh - 76px);display:flex;align-items:center;padding:56px 0;}
+  .hero .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:56px;align-items:center;width:100%;}
+  .hero h1{margin:18px 0;max-width:15ch;}
+  .hero .sub{font-size:20px;color:var(--neutral-600);max-width:46ch;line-height:1.55;}
+  .hero .cta{display:flex;gap:16px;margin-top:32px;flex-wrap:wrap;}
+  .hero .reassure{display:flex;flex-wrap:wrap;gap:14px 24px;margin-top:28px;}
+  .hero .reassure span{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--neutral-600);}
+  .hero .reassure .ic{width:17px;height:17px;color:var(--accent-green);flex:0 0 auto;}
+
+  /* hero visual — flat document + shield + check (echoes the logo mark) */
+  .hero-art{position:relative;aspect-ratio:4/4;display:flex;align-items:center;justify-content:center;}
+  .hero-art .doc{width:74%;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:26px 24px;}
+  .hero-art .doc .doc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .hero-art .doc .tag{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--primary-deep-blue);border:1px solid var(--neutral-200);border-radius:var(--r-badge);padding:4px 9px;}
+  .hero-art .doc .ref{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--neutral-600);}
+  .hero-art .doc .line{height:9px;border-radius:3px;background:var(--neutral-200);margin-bottom:11px;}
+  .hero-art .doc .line.s{background:#EDF1F7;}
+  .hero-art .shield{position:absolute;right:6%;bottom:8%;width:104px;height:118px;filter:drop-shadow(0 6px 14px rgba(10,37,64,.18));}
+
+  /* ---------- NOTICE SELECTOR ---------- */
+  .notice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .notice-card{display:flex;flex-direction:column;padding:24px;height:100%;transition:border-color .15s,box-shadow .15s;}
+  .notice-card:hover{border-color:var(--primary-navy);box-shadow:var(--shadow-md);}
+  .notice-card:focus-visible{outline:none;border-color:var(--primary-navy);box-shadow:0 0 0 3px rgba(10,37,64,.25);}
+  .notice-card .ic-wrap{width:46px;height:46px;border-radius:var(--r-btn);background:var(--neutral-50);display:flex;align-items:center;justify-content:center;color:var(--primary-deep-blue);margin-bottom:16px;}
+  .notice-card h3{font-size:18px;}
+  .notice-card .desc{font-size:14px;color:var(--neutral-600);margin-top:8px;line-height:1.5;flex:1;}
+  .notice-card .price{font-size:20px;font-weight:700;color:var(--primary-navy);margin-top:16px;}
+  .notice-card .price small{font-size:13px;font-weight:500;color:var(--neutral-600);}
+  .notice-card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;}
+  .notice-card .getlink{display:inline-flex;align-items:center;gap:5px;color:var(--accent-green);font-weight:600;font-size:14px;}
+  .notice-card .badge-amber{margin-top:14px;align-self:flex-start;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;position:relative;}
+  .steps::before{content:"";position:absolute;top:24px;left:12.5%;right:12.5%;height:2px;background:var(--neutral-200);}
+  .step{display:flex;flex-direction:column;align-items:flex-start;gap:14px;position:relative;}
+  .step .num{width:48px;height:48px;border-radius:50%;background:var(--primary-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;z-index:1;}
+  .step h3{font-size:19px;}
+  .step p{font-size:14px;color:var(--neutral-600);line-height:1.5;}
+  .step .sla{margin-top:4px;}
+
+  /* ---------- TRUST CARDS ---------- */
+  .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .trust-card{padding:28px 26px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;cursor:default;transition:box-shadow .15s ease;}
+  .trust-card:hover{box-shadow:var(--shadow-md);}
+  .trust-card .tc-icon{width:24px;height:24px;color:var(--accent-green);flex:0 0 auto;margin-bottom:16px;}
+  .trust-card h3{font-size:18px;font-weight:600;color:var(--primary-navy);margin-bottom:10px;line-height:1.3;}
+  .trust-card p{font-size:16px;color:var(--neutral-600);line-height:1.55;margin:0;}
+
+  /* ---------- OUTCOMES ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:48px;}
+  .stat{text-align:center;}
+  .stat .n{font-size:64px;font-weight:700;color:var(--primary-navy);letter-spacing:-.02em;line-height:1;}
+  .stat .d{font-size:15px;color:var(--neutral-600);margin-top:12px;line-height:1.4;}
+  .cases{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .case{padding:22px 24px;}
+  .case .ct{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--primary-deep-blue);}
+  .case .issue{font-size:16px;color:var(--neutral-900);margin:10px 0 14px;line-height:1.5;}
+  .case .out{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--neutral-900);font-weight:500;}
+  .case .out .ic{width:18px;height:18px;color:var(--accent-green);flex:0 0 auto;margin-top:1px;}
+
+  /* ---------- SECURITY ---------- */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;}
+  .pillar .ic-wrap{width:56px;height:56px;border-radius:var(--r-card);border:1.5px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:#fff;margin-bottom:20px;}
+  .pillar h3{color:#fff;font-size:20px;}
+  .pillar p{color:rgba(255,255,255,.8);font-size:15px;margin-top:10px;line-height:1.55;}
+
+  /* ---------- PRICING ---------- */
+  .tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:stretch;}
+  .tier{padding:26px 22px;display:flex;flex-direction:column;position:relative;}
+  .tier.popular{border-color:var(--accent-green);box-shadow:var(--shadow-md);}
+  .tier .pop-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);}
+  .tier h3{font-size:21px;min-height:calc(21px * 1.3 * 2);display:flex;align-items:flex-start;}
+  .tier .price{font-size:48px;font-weight:700;color:var(--primary-navy);margin:14px 0 4px;letter-spacing:-.02em;}
+  .tier .price small{font-size:15px;font-weight:500;color:var(--neutral-600);}
+  .tier ul{list-style:none;margin:22px 0 28px;display:flex;flex-direction:column;gap:12px;}
+  .tier ul li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--neutral-900);}
+  .tier ul li .ic{width:17px;height:17px;color:var(--accent-green);flex:0 0 auto;margin-top:2px;}
+  .tier-foot{margin-top:auto;display:flex;flex-direction:column;gap:14px;}
+  .tier-foot .badge-amber{align-self:flex-start;}
+  .pricing-note{text-align:center;font-size:14px;color:var(--neutral-600);margin-top:28px;max-width:70ch;margin-left:auto;margin-right:auto;line-height:1.6;}
+
+  /* ---------- TESTIMONIALS ---------- */
+  .tabs{display:flex;gap:6px;justify-content:center;border-bottom:1px solid var(--neutral-200);margin-bottom:36px;}
+  .tab{background:none;border:none;cursor:pointer;font-size:15px;font-weight:600;color:var(--neutral-600);padding:14px 22px;position:relative;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tab:hover{color:var(--primary-navy);}
+  .tab[aria-selected="true"]{color:var(--primary-navy);border-bottom-color:var(--accent-green);}
+  .tab:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);border-radius:var(--r-btn);}
+  .tpanel{display:none;}
+  .tpanel.active{display:block;}
+  .tscroll{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .tscroll:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);border-radius:var(--r-card);}
+  .tcard{padding:28px;}
+  .tcard .qm{font-family:Georgia,serif;font-size:56px;line-height:.6;color:var(--neutral-200);height:30px;}
+  .tcard .quote{font-size:16px;color:var(--neutral-900);line-height:1.6;margin:8px 0 22px;}
+  .tcard .div{height:1px;background:var(--neutral-200);margin-bottom:18px;}
+  .tcard .who .nm{font-weight:600;color:var(--primary-navy);font-size:15px;}
+  .tcard .who .meta{font-size:14px;color:var(--neutral-600);margin-top:3px;}
+
+  /* ---------- FAQ ---------- */
+  .faq-search{position:relative;max-width:520px;margin:0 auto 32px;}
+  .faq-search .ic{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--neutral-600);}
+  .faq-search .input{padding-left:44px;}
+  .faq-list{max-width:820px;margin:0 auto;border-top:1px solid var(--neutral-200);}
+  .faq-item{border-bottom:1px solid var(--neutral-200);}
+  .faq-q{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 4px;text-align:left;font-size:18px;font-weight:600;color:var(--primary-navy);}
+  .faq-q:hover{color:var(--accent-green);}
+  .faq-q:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);border-radius:var(--r-btn);}
+  .faq-q .chev{width:20px;height:20px;color:var(--neutral-600);transition:transform .2s ease;flex:0 0 auto;}
+  .faq-q[aria-expanded="true"] .chev{transform:rotate(180deg);}
+  .faq-a{display:none;padding:0 4px 24px;font-size:16px;color:var(--neutral-900);line-height:1.65;max-width:70ch;}
+  .faq-a.open{display:block;}
+  .faq-a a{color:var(--accent-green);font-weight:600;}
+  .faq-empty{text-align:center;color:var(--neutral-600);padding:32px;display:none;}
+
+  /* ---------- DISCLAIMER ---------- */
+  .disclaimer{padding:48px 0;background:var(--neutral-50);}
+  .disc-inner{max-width:720px;margin:0 auto;}
+  .disc-rule{height:1px;background:var(--neutral-200);margin-bottom:20px;}
+  .disc-label{font-size:12px;font-weight:500;color:var(--neutral-600);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;}
+  .disc-body{font-size:14px;color:var(--neutral-600);line-height:1.6;margin:0;}
+  .disc-body a{color:var(--accent-green);text-decoration:none;font-weight:400;}
+  .disc-body a:hover{text-decoration:underline;}
+
+  /* ---------- FINAL CTA ---------- */
+  .final{text-align:center;padding:80px 0;}
+  .final h2{color:#fff;max-width:20ch;margin:0 auto;}
+  .final p{color:rgba(255,255,255,.8);font-size:18px;margin-top:16px;}
+  .final .cta{display:flex;gap:16px;justify-content:center;margin-top:32px;flex-wrap:wrap;}
+  .final .ph{color:#fff;font-size:15px;font-weight:600;margin-top:24px;display:inline-flex;align-items:center;gap:8px;}
+
+  /* ---------- FOOTER ---------- */
+  .footer{background:var(--primary-navy);color:#C7D2E0;padding:64px 0 28px;}
+  .footer .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:36px;}
+  .footer .fbrand{display:flex;align-items:center;gap:11px;margin-bottom:18px;}
+  .footer .fbrand img{height:38px;width:38px;border-radius:7px;}
+  .footer .fbrand .bn{font-weight:700;font-size:16px;color:#fff;}
+  .footer .fbrand .bn span{color:var(--accent-green);}
+  .footer h5{color:#fff;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px;}
+  .footer ul{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:14px;}
+  .footer ul a:hover{color:#fff;}
+  .footer .mono{font-family:'JetBrains Mono',monospace;font-size:13px;color:#9FB0C4;}
+  .footer .addr{font-size:14px;color:#9FB0C4;line-height:1.6;margin-top:4px;}
+  .footer .btn-wa{margin-top:14px;}
+  .footer .strip{border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-top:22px;display:flex;flex-wrap:wrap;align-items:center;gap:16px;font-size:13px;color:#9FB0C4;}
+  .footer .strip .pols{display:flex;gap:14px;}
+  .footer .strip .pols a:hover{color:#fff;}
+  .footer .strip .ssl{display:inline-flex;align-items:center;gap:6px;color:var(--accent-green);font-weight:600;}
+
+  /* WhatsApp float */
+  .wa-float{position:fixed;right:24px;bottom:24px;z-index:90;display:inline-flex;align-items:center;gap:9px;background:var(--wa-green);color:#073b1e;font-weight:700;font-size:14px;padding:13px 18px;border-radius:var(--r-btn);box-shadow:var(--shadow-md);opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s;}
+  .wa-float.show{opacity:1;visibility:visible;transform:translateY(0);}
+  .wa-float:hover{background:#1ebe5b;}
+
+  /* scroll-dot indicators (carousels — mobile only) */
+  .scroll-dots{display:none;justify-content:center;gap:8px;margin-top:20px;}
+  .scroll-dots button{width:8px;height:8px;border-radius:50%;border:none;background:var(--neutral-200);cursor:pointer;padding:0;transition:background .15s,width .15s;}
+  .scroll-dots button[aria-current="true"]{background:var(--accent-green);width:22px;border-radius:5px;}
+
+  /* sticky mobile bottom bar (hidden on desktop) */
+  .mobile-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:95;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);border-top:1px solid var(--neutral-200);padding:8px 14px;gap:10px;align-items:center;transform:translateY(100%);transition:transform .2s ease;padding-bottom:max(8px,env(safe-area-inset-bottom));}
+  .mobile-bar.show{transform:translateY(0);}
+  .mobile-bar .btn{min-height:48px;flex:1;font-size:14px;padding:10px 12px;}
+  /* Services collapsible in drawer */
+  .drawer-services-toggle{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:13px 8px;font-size:16px;font-weight:600;color:var(--primary-navy);border-radius:var(--r-btn);min-height:48px;text-align:left;}
+  .drawer-services-toggle:hover{background:var(--neutral-50);color:var(--accent-green);}
+  .drawer-services-toggle:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);}
+  .drawer-services-chev{transition:transform .25s ease;flex:0 0 auto;color:var(--neutral-600);}
+  .drawer-services-toggle[aria-expanded="true"] .drawer-services-chev{transform:rotate(90deg);}
+  .drawer-services-menu{overflow:hidden;max-height:0;transition:max-height .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+  .drawer-services-menu.open{max-height:280px;overflow-y:auto;}
+  .drawer-services-menu a{padding:11px 8px 11px 22px;font-size:15px;font-weight:400;color:var(--neutral-900);border-radius:var(--r-btn);min-height:44px;display:flex;align-items:center;}
+  .drawer-services-menu a:hover{background:var(--neutral-50);color:var(--accent-green);}
+
+  /* ---------- RESPONSIVE (component fallbacks) ---------- */
+  /* ===== TABLET & BELOW (<lg) — drawer + sticky bar appear (components.md → Navbar mobile, Sticky Bottom Bar) ===== */
+  @media (max-width:1024px){
+    h1{font-size:32px;} h2{font-size:28px;}
+    body{padding-bottom:72px;}
+    .nav .links{display:none;}
+    .hamburger{display:flex;}
+    .nav-cta{display:none;}
+    .mobile-bar{display:flex;}
+    .wa-float{bottom:84px;}
+    .hero .grid{grid-template-columns:1fr;gap:36px;}
+    .hero-art{order:-1;max-width:420px;margin:0 auto;}
+    .notice-grid,.stats{grid-template-columns:repeat(2,1fr);}
+    .steps{grid-template-columns:repeat(2,1fr);} .steps::before{display:none;}
+    .cases,.pillars{grid-template-columns:1fr;}
+    .trust-grid{grid-template-columns:repeat(2,1fr);}
+    .tiers{grid-template-columns:repeat(2,1fr);}
+    .footer .cols{grid-template-columns:1fr 1fr;}
+    .tscroll{grid-template-columns:1fr;}
+  }
+
+  /* ===== PHONE (375–430px) — full mobile deltas ===== */
+  @media (max-width:640px){
+    .container{padding:0 20px;} .section{padding:48px 0;}
+    .nav .ph .ph-num{display:none;}
+
+    /* HERO: full-width stacked CTAs + 2×2 reassurance grid */
+    .hero{min-height:auto;padding:32px 0 40px;}
+    .hero .cta{flex-direction:column;gap:12px;}
+    .hero .cta .btn{width:100%;}
+    .hero .reassure{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;}
+
+    /* NOTICE SELECTOR: 2-col */
+    .notice-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+    .notice-card{padding:18px;}
+    .notice-card h3{font-size:16px;}
+    .notice-card .ic-wrap{width:40px;height:40px;margin-bottom:12px;}
+
+    /* HOW IT WORKS: vertical stack with left connector line */
+    .steps{grid-template-columns:1fr;gap:28px;}
+    .steps::before{display:block;content:"";top:24px;bottom:24px;left:23px;right:auto;width:2px;height:auto;}
+    .step{flex-direction:row;align-items:flex-start;gap:16px;}
+    .step .num{flex:0 0 48px;}
+    .step-body{flex:1;display:flex;flex-direction:column;gap:8px;padding-top:2px;}
+
+    /* CASE OUTCOMES: 2-col stat grid */
+    .stats{grid-template-columns:repeat(2,1fr);gap:20px 16px;}
+    .stat .n{font-size:48px;}
+
+    /* PRICING: vertical stack, Most Popular first */
+    .tiers{grid-template-columns:1fr;}
+    .tier.popular{order:-1;}
+    .tier h3{min-height:0;}
+
+    /* TRUST CARDS: single column on mobile */
+    .trust-grid{grid-template-columns:1fr;}
+
+    /* TESTIMONIALS: single-card swipe + scrollable tab bar + dots */
+    .tabs{overflow-x:auto;justify-content:flex-start;scrollbar-width:none;}
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab{white-space:nowrap;flex:0 0 auto;}
+    .tscroll{display:flex;overflow-x:auto;gap:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px;}
+    .tscroll::-webkit-scrollbar{display:none;}
+    .tcard{flex:0 0 100%;scroll-snap-align:center;}
+    .tdots{display:flex;}
+
+    /* FINAL CTA: stacked full-width */
+    .final{padding:56px 0;}
+    .final .cta{flex-direction:column;gap:12px;}
+    .final .cta .btn{width:100%;}
+
+    /* FOOTER: single stacked column */
+    .footer .cols{grid-template-columns:1fr;}
+    .footer .strip{flex-direction:column;align-items:flex-start;}
+    .footer .strip .ssl{margin-left:0;}
+  }
+
+  body.drawer-open{overflow:hidden;}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<!-- NAVBAR (components.md → Navbar) -->
+<header class="nav" id="nav">
+  <div class="container row">
+    <a class="brand" href="/" aria-label="GST Notice Support home">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav class="links" aria-label="Primary">
+      <div class="has-drop">
+        <button aria-haspopup="true" aria-expanded="false">Services <i data-lucide="chevron-down" style="width:15px;height:15px"></i></button>
+        <div class="drop-menu" role="menu">
+          <a href="ASMT-10 Reply Service.html" role="menuitem"><strong>ASMT-10 Scrutiny Notice</strong><small>Section 61 — return discrepancies</small></a>
+          <a href="SCN Reply Service.html" role="menuitem"><strong>Show Cause Notice (SCN)</strong><small>DRC-01 / DRC-01A demands</small></a>
+          <a href="Commissioner Appeal Service.html" role="menuitem"><strong>Commissioner Appeal</strong><small>APL-01 first appeal</small></a>
+          <a href="GSTAT Appeal Service.html" role="menuitem"><strong>GSTAT Appeal</strong><small>APL-05 tribunal filing</small></a>
+        </div>
+      </div>
+      <a href="About.html">About</a>
+      <a href="FAQ.html">Resources</a>
+      <a href="Pricing.html">Pricing</a>
+    </nav>
+    <div class="right">
+      <a class="ph" href="tel:+919800000000" aria-label="Call +91 98000 00000"><i data-lucide="phone" class="ic"></i><span class="ph-num">+91 98000 00000</span></a>
+      <a class="btn btn-secondary nav-cta" href="Contact.html#callback">Request Callback</a>
+      <a class="btn btn-primary nav-cta" href="Pricing.html">Book Service</a>
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><i data-lucide="menu" style="width:24px;height:24px"></i></button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile drawer (components.md → Navbar mobile state) -->
+<div class="drawer-overlay" id="drawerOverlay" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Mobile menu" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="brand"><img src="assets/logo.png" alt="" /><span class="bn">GST<span>Notice</span>Support</span></span>
+    <button class="drawer-close" id="drawerClose" aria-label="Close menu"><i data-lucide="x" style="width:24px;height:24px"></i></button>
+  </div>
+  <nav class="drawer-nav" aria-label="Mobile primary">
+    <button class="drawer-services-toggle" id="drawerServicesToggle" aria-expanded="false" aria-controls="drawerServicesMenu">
+      <span>Services</span>
+      <i data-lucide="chevron-right" class="drawer-services-chev" style="width:18px;height:18px"></i>
+    </button>
+    <div class="drawer-services-menu" id="drawerServicesMenu" aria-hidden="true">
+      <a href="ASMT-10 Reply Service.html">ASMT-10 Scrutiny Notice</a>
+      <a href="SCN Reply Service.html">Show Cause Notice (SCN)</a>
+      <a href="Commissioner Appeal Service.html">Commissioner Appeal</a>
+      <a href="GSTAT Appeal Service.html">GSTAT Appeal</a>
+    </div>
+    <span class="drawer-divider"></span>
+    <a href="About.html">About</a>
+    <a href="FAQ.html">Resources</a>
+    <a href="Pricing.html">Pricing</a>
+  </nav>
+  <div class="drawer-foot">
+    <a class="ph" href="tel:+919800000000"><i data-lucide="phone" class="ic" style="width:17px;height:17px"></i>+91 98000 00000</a>
+    <a class="btn btn-secondary btn-block" href="Contact.html#callback">Request Callback</a>
+    <a class="btn btn-primary btn-block" href="Pricing.html">Book Service</a>
+  </div>
+</aside>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero bg-white">
+    <div class="container grid">
+      <div>
+        <span class="badge badge-outline"><i data-lucide="map-pin" style="width:14px;height:14px;color:var(--accent-green)"></i>Trusted GST Litigation Experts · Pan-India</span>
+        <h1>GST Notice? Get Expert Legal Support in 24 Hours.</h1>
+        <p class="sub">Our team of ICAI-registered CAs and Bar Council-enrolled Advocates prepare your reply, appeal, or representation — fully managed, fixed fee.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="Pricing.html"><i data-lucide="upload-cloud" class="ic"></i>Upload Your Notice</a>
+          <a class="btn btn-secondary" href="Contact.html#callback">Request a Callback</a>
+        </div>
+        <div class="reassure">
+          <span><i data-lucide="check" class="ic"></i>Response within 24 hours</span>
+          <span><i data-lucide="check" class="ic"></i>Fixed fee, no hidden charges</span>
+          <span><i data-lucide="check" class="ic"></i>Pan-India service</span>
+          <span><i data-lucide="check" class="ic"></i>Documents encrypted</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="doc">
+          <div class="doc-head">
+            <span class="tag">GST NOTICE</span>
+            <span class="ref">DRC-01</span>
+          </div>
+          <div class="line" style="width:90%"></div>
+          <div class="line s" style="width:100%"></div>
+          <div class="line s" style="width:96%"></div>
+          <div class="line s" style="width:80%"></div>
+          <div class="line" style="width:55%;margin-top:18px"></div>
+          <div class="line s" style="width:100%"></div>
+          <div class="line s" style="width:72%"></div>
+        </div>
+        <svg class="shield" viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 4 L92 20 V58 C92 86 72 104 50 112 C28 104 8 86 8 58 V20 Z" fill="#0A2540"/>
+          <path d="M34 58 L46 70 L68 44" stroke="#0B8B4E" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. NOTICE TYPE SELECTOR -->
+  <section class="section bg-50" id="notices">
+    <div class="container">
+      <div class="sec-head">
+        <div class="eyebrow">Choose your service</div>
+        <h2>What Type of Notice Did You Receive?</h2>
+        <p>Select your notice type to begin. Fixed professional fee shown for each.</p>
+      </div>
+      <div class="notice-grid">
+        <a class="card notice-card" href="ASMT-10 Reply Service.html">
+          <div class="ic-wrap"><i data-lucide="file-search" style="width:23px;height:23px"></i></div>
+          <h3>ASMT-10 Scrutiny Notice</h3>
+          <p class="desc">Section 61 CGST Act — discrepancies in your return.</p>
+          <div class="price">₹2,999 <small>fixed fee</small></div>
+          <div class="foot"><span class="getlink">Get Help <i data-lucide="arrow-right" style="width:15px;height:15px"></i></span></div>
+        </a>
+        <a class="card notice-card" href="SCN Reply Service.html">
+          <div class="ic-wrap"><i data-lucide="file-warning" style="width:23px;height:23px"></i></div>
+          <h3>Show Cause Notice (SCN)</h3>
+          <p class="desc">DRC-01 / DRC-01A — demand for tax, interest, penalty.</p>
+          <div class="price">₹5,999 <small>fixed fee</small></div>
+          <div class="foot"><span class="getlink">Get Help <i data-lucide="arrow-right" style="width:15px;height:15px"></i></span></div>
+        </a>
+        <a class="card notice-card" href="Commissioner Appeal Service.html">
+          <div class="ic-wrap"><i data-lucide="gavel" style="width:23px;height:23px"></i></div>
+          <h3>Commissioner Appeal</h3>
+          <p class="desc">APL-01 — first appeal after adjudicating authority order.</p>
+          <div class="price">₹9,999 <small>fixed fee</small></div>
+          <div class="foot"><span class="getlink">Get Help <i data-lucide="arrow-right" style="width:15px;height:15px"></i></span></div>
+        </a>
+        <a class="card notice-card" href="GSTAT Appeal Service.html">
+          <div class="ic-wrap"><i data-lucide="landmark" style="width:23px;height:23px"></i></div>
+          <h3>GSTAT Appeal</h3>
+          <p class="desc">APL-05 — appellate tribunal filing.</p>
+          <div class="price">₹14,999 <small>fixed fee</small></div>
+          <span class="badge badge-amber"><i data-lucide="alert-triangle" style="width:13px;height:13px"></i>Pre-deposit required by law</span>
+          <div class="foot"><span class="getlink">Get Help <i data-lucide="arrow-right" style="width:15px;height:15px"></i></span></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. HOW IT WORKS -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="sec-head">
+        <div class="eyebrow">The process</div>
+        <h2>From Notice to Resolution in 4 Steps</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div class="step-body">
+          <h3>Upload Documents</h3>
+          <p>Share your notice and supporting documents securely through our encrypted portal.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="step-body">
+          <h3>Expert Review &amp; Draft Preparation</h3>
+          <p>A qualified CA or Advocate assesses your case and prepares the response.</p>
+          <span class="badge badge-amber sla"><i data-lucide="clock" style="width:13px;height:13px"></i>Draft prepared within 48 hours of document receipt</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="step-body">
+          <h3>You Review &amp; Confirm</h3>
+          <p>Review the draft, raise questions, and confirm before anything is filed.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <div class="step-body">
+          <h3>We File on Portal</h3>
+          <p>We submit your response on the GST portal and share the acknowledgement.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. WHY BUSINESSES TRUST US -->
+  <section class="section bg-50" id="trust">
+    <div class="container">
+      <div class="sec-head">
+        <div class="eyebrow">Trusted by CAs, Advocates &amp; Businesses</div>
+        <h2>Why Businesses Trust GSTNoticeSupport</h2>
+        <p style="font-size:20px;color:var(--neutral-600);">Institutional expertise, structured process, and full transparency — from the first notice to the final filing.</p>
+      </div>
+      <div class="trust-grid">
+        <div class="trust-card">
+          <i data-lucide="user-check" class="tc-icon"></i>
+          <h3>Qualified Professionals</h3>
+          <p>Cases handled by experienced CAs, Advocates, and GST practitioners with domain-specific litigation expertise.</p>
+        </div>
+        <div class="trust-card">
+          <i data-lucide="clipboard-list" class="tc-icon"></i>
+          <h3>Structured Review Process</h3>
+          <p>Every notice follows a documented review and response workflow — no ad-hoc handling.</p>
+        </div>
+        <div class="trust-card">
+          <i data-lucide="message-square" class="tc-icon"></i>
+          <h3>Transparent Communication</h3>
+          <p>Clear timelines, case status updates, and defined deliverables at every stage.</p>
+        </div>
+        <div class="trust-card">
+          <i data-lucide="shield-check" class="tc-icon"></i>
+          <h3>Secure Document Handling</h3>
+          <p>All uploaded documents are encrypted, access-controlled, and never shared with third parties.</p>
+        </div>
+        <div class="trust-card">
+          <i data-lucide="map-pin" class="tc-icon"></i>
+          <h3>Pan-India Representation</h3>
+          <p>GST litigation and appeal assistance across all jurisdictions throughout India.</p>
+        </div>
+        <div class="trust-card">
+          <i data-lucide="tag" class="tc-icon"></i>
+          <h3>No Hidden Charges</h3>
+          <p>Fixed-fee pricing with clearly defined scope. What you see on the pricing page is what you pay.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. CASE OUTCOMES -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="sec-head">
+        <div class="eyebrow">Track record</div>
+        <h2>Results That Speak for Themselves</h2>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="n">500+</div><div class="d">Notices Handled</div></div>
+        <div class="stat"><div class="n">₹12L</div><div class="d">Avg. Dispute Value Resolved</div></div>
+        <div class="stat"><div class="n">48hrs</div><div class="d">Average Draft Time</div></div>
+        <div class="stat"><div class="n">100%</div><div class="d">Cases Acknowledged Within 24 Hours</div></div>
+      </div>
+      <div class="cases">
+        <div class="card case">
+          <div class="ct">SCN Reply</div>
+          <div class="issue">₹8.4L ITC demand under DRC-01 for alleged ineligible credit.</div>
+          <div class="out"><i data-lucide="check-circle" class="ic"></i>Reply accepted, no penalty levied.</div>
+        </div>
+        <div class="card case">
+          <div class="ct">ASMT-10 Scrutiny</div>
+          <div class="issue">GSTR-3B vs 2A mismatch flagged for FY 2021-22.</div>
+          <div class="out"><i data-lucide="check-circle" class="ic"></i>Discrepancy explained; proceedings dropped.</div>
+        </div>
+        <div class="card case">
+          <div class="ct">Commissioner Appeal</div>
+          <div class="issue">₹15.2L demand confirmed by adjudicating authority.</div>
+          <div class="out"><i data-lucide="check-circle" class="ic"></i>Demand reduced by 70% on appeal.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. TRUST & SECURITY -->
+  <section class="section bg-deep on-dark">
+    <div class="container">
+      <div class="sec-head">
+        <div class="eyebrow" style="color:#7FD3A6">Security &amp; transparency</div>
+        <h2 style="color:#fff">Your Documents Are Safe With Us</h2>
+      </div>
+      <div class="pillars">
+        <div class="pillar">
+          <div class="ic-wrap"><i data-lucide="lock" style="width:28px;height:28px"></i></div>
+          <h3>Encrypted Storage</h3>
+          <p>Every document is encrypted in transit and at rest. Your files are confidential and never shared with third parties.</p>
+        </div>
+        <div class="pillar">
+          <div class="ic-wrap"><i data-lucide="scale" style="width:28px;height:28px"></i></div>
+          <h3>Regulated Professionals</h3>
+          <p>Your case is handled only by ICAI-registered CAs and Bar Council-enrolled Advocates — verifiable registration numbers.</p>
+        </div>
+        <div class="pillar">
+          <div class="ic-wrap"><i data-lucide="clipboard-list" style="width:28px;height:28px"></i></div>
+          <h3>Full Transparency</h3>
+          <p>Fixed professional fee quoted upfront. No hidden charges, no surprise add-ons after you've signed up.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. PRICING -->
+  <section class="section bg-50" id="pricing">
+    <div class="container">
+      <div class="sec-head">
+        <div class="eyebrow">Pricing</div>
+        <h2>Transparent, Fixed Fees. No Surprises.</h2>
+      </div>
+      <div class="tiers">
+        <div class="card tier">
+          <h3>ASMT-10 Reply</h3>
+          <div class="price">₹2,999</div>
+          <ul>
+            <li><i data-lucide="check" class="ic"></i>Section 61 discrepancy analysis</li>
+            <li><i data-lucide="check" class="ic"></i>Drafted reply to ASMT-10</li>
+            <li><i data-lucide="check" class="ic"></i>Filing on GST portal</li>
+            <li><i data-lucide="check" class="ic"></i>Acknowledgement shared</li>
+          </ul>
+          <div class="tier-foot"><a class="btn btn-secondary btn-block" href="ASMT-10 Reply Service.html">Book This Service</a></div>
+        </div>
+        <div class="card tier popular">
+          <span class="badge badge-green pop-badge">Most Popular</span>
+          <h3>SCN Reply</h3>
+          <div class="price">₹5,999</div>
+          <ul>
+            <li><i data-lucide="check" class="ic"></i>DRC-01 / DRC-01A case review</li>
+            <li><i data-lucide="check" class="ic"></i>Detailed reply with case law</li>
+            <li><i data-lucide="check" class="ic"></i>Filing on GST portal</li>
+            <li><i data-lucide="check" class="ic"></i>Acknowledgement shared</li>
+          </ul>
+          <div class="tier-foot"><a class="btn btn-primary btn-block" href="SCN Reply Service.html">Book This Service</a></div>
+        </div>
+        <div class="card tier">
+          <h3>Commissioner Appeal</h3>
+          <div class="price">₹9,999</div>
+          <ul>
+            <li><i data-lucide="check" class="ic"></i>APL-01 appeal drafting</li>
+            <li><i data-lucide="check" class="ic"></i>Grounds of appeal &amp; statement</li>
+            <li><i data-lucide="check" class="ic"></i>Filing before Commissioner (Appeals)</li>
+            <li><i data-lucide="check" class="ic"></i>Acknowledgement shared</li>
+          </ul>
+          <div class="tier-foot"><a class="btn btn-secondary btn-block" href="Commissioner Appeal Service.html">Book This Service</a></div>
+        </div>
+        <div class="card tier">
+          <h3>GSTAT Appeal</h3>
+          <div class="price">₹14,999</div>
+          <ul>
+            <li><i data-lucide="check" class="ic"></i>APL-05 tribunal filing</li>
+            <li><i data-lucide="check" class="ic"></i>Grounds of appeal &amp; statement</li>
+            <li><i data-lucide="check" class="ic"></i>Filing before Appellate Tribunal</li>
+            <li><i data-lucide="check" class="ic"></i>Acknowledgement shared</li>
+          </ul>
+          <div class="tier-foot">
+            <span class="badge badge-amber"><i data-lucide="alert-triangle" style="width:13px;height:13px"></i>Pre-deposit required by law</span>
+            <a class="btn btn-secondary btn-block" href="GSTAT Appeal Service.html">Book This Service</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. TESTIMONIALS -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="sec-head">
+        <div class="eyebrow">Client voices</div>
+        <h2>What Our Clients Say</h2>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Testimonials by client type">
+        <button class="tab" role="tab" id="tab-ca" aria-controls="panel-ca" aria-selected="true">Chartered Accountants</button>
+        <button class="tab" role="tab" id="tab-adv" aria-controls="panel-adv" aria-selected="false" tabindex="-1">Advocates</button>
+        <button class="tab" role="tab" id="tab-biz" aria-controls="panel-biz" aria-selected="false" tabindex="-1">Business Owners</button>
+      </div>
+
+      <div class="tpanel active" role="tabpanel" id="panel-ca" aria-labelledby="tab-ca">
+        <div class="tscroll" role="group" aria-label="CA testimonials — swipe" tabindex="0">
+        <div class="card card-elev tcard">
+          <div class="qm">&ldquo;</div>
+          <p class="quote">They drafted a watertight SCN reply for my client's ₹8L ITC demand in two days. I now refer my own clients' litigation work to them.</p>
+          <div class="div"></div>
+          <div class="who"><div class="nm">CA Anand Krishnan</div><div class="meta">Practising CA · Kochi</div></div>
+        </div>
+        <div class="card card-elev tcard">
+          <div class="qm">&ldquo;</div>
+          <p class="quote">Clear scope, fixed fee, filed on time. The reconciliation working they prepared for the ASMT-10 was exactly what the officer asked for.</p>
+          <div class="div"></div>
+          <div class="who"><div class="nm">CA Meera Joshi</div><div class="meta">Partner, Joshi &amp; Associates · Pune</div></div>
+        </div>
+        </div>
+        <div class="scroll-dots tdots" aria-hidden="true"></div>
+      </div>
+
+      <div class="tpanel" role="tabpanel" id="panel-adv" aria-labelledby="tab-adv" hidden>
+        <div class="tscroll" role="group" aria-label="Advocate testimonials — swipe" tabindex="0">
+        <div class="card card-elev tcard">
+          <div class="qm">&ldquo;</div>
+          <p class="quote">Their grounds of appeal for an APL-01 were thoroughly researched with relevant case law. Saved me hours of drafting on a tight deadline.</p>
+          <div class="div"></div>
+          <div class="who"><div class="nm">Adv. Imran Sheikh</div><div class="meta">Tax Advocate · Hyderabad</div></div>
+        </div>
+        <div class="card card-elev tcard">
+          <div class="qm">&ldquo;</div>
+          <p class="quote">Professional coordination and prompt filing before the Commissioner (Appeals). The demand was reduced substantially for my client.</p>
+          <div class="div"></div>
+          <div class="who"><div class="nm">Adv. Lakshmi Rao</div><div class="meta">Advocate, High Court · Bengaluru</div></div>
+        </div>
+        </div>
+        <div class="scroll-dots tdots" aria-hidden="true"></div>
+      </div>
+
+      <div class="tpanel" role="tabpanel" id="panel-biz" aria-labelledby="tab-biz" hidden>
+        <div class="tscroll" role="group" aria-label="Business owner testimonials — swipe" tabindex="0">
+        <div class="card card-elev tcard">
+          <div class="qm">&ldquo;</div>
+          <p class="quote">Got a scary DRC-01 for ₹8.4L. They explained it in plain language, replied within 48 hours, and it was accepted with no penalty.</p>
+          <div class="div"></div>
+          <div class="who"><div class="nm">Rohit Mehta</div><div class="meta">Proprietor, Mehta Textiles · Surat</div></div>
+        </div>
+        <div class="card card-elev tcard">
+          <div class="qm">&ldquo;</div>
+          <p class="quote">First time I received a GST notice and panicked. Fixed fee, no surprises, and they kept me updated at every step on WhatsApp.</p>
+          <div class="div"></div>
+          <div class="who"><div class="nm">Fatima Qureshi</div><div class="meta">Founder, Crafted Home · Jaipur</div></div>
+        </div>
+        </div>
+        <div class="scroll-dots tdots" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. FAQ -->
+  <section class="section bg-50" id="faq">
+    <div class="container">
+      <div class="sec-head">
+        <div class="eyebrow">Questions</div>
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-search">
+        <i data-lucide="search" class="ic"></i>
+        <input type="text" class="input" id="faqSearch" placeholder="Search your question…" aria-label="Search frequently asked questions" />
+      </div>
+      <div class="faq-list" id="faqList">
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Is my GST data safe with you?<i data-lucide="chevron-down" class="chev"></i></button>
+          <div class="faq-a">Yes. Every document you upload is encrypted in transit and at rest, stored confidentially, and never shared with third parties. Only the professional assigned to your case can access your files.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">How quickly will you respond to my notice?<i data-lucide="chevron-down" class="chev"></i></button>
+          <div class="faq-a">We acknowledge every case within 24 hours and prepare your draft response within 48 hours of receiving your documents. <a href="Pricing.html">Upload your notice</a> to start the clock.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What documents do I need to upload?<i data-lucide="chevron-down" class="chev"></i></button>
+          <div class="faq-a">At minimum, the notice itself (PDF). Depending on the matter we may request relevant returns (GSTR-1, 3B), invoices, or reconciliation statements — your assigned professional will give you a precise checklist.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Do your experts appear before GST officers?<i data-lucide="chevron-down" class="chev"></i></button>
+          <div class="faq-a">Yes. Our Bar Council-enrolled Advocates and CAs can represent you in personal hearings and before appellate authorities where required, in addition to drafting and filing your response.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What is your fee structure?<i data-lucide="chevron-down" class="chev"></i></button>
+          <div class="faq-a">Fixed professional fees, quoted upfront per service — ₹2,999 for ASMT-10, ₹5,999 for SCN reply, ₹9,999 for Commissioner Appeal, ₹14,999 for GSTAT Appeal. Government pre-deposits, where applicable, are paid separately to the GST portal. <a href="Pricing.html">See full pricing</a>.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Can I track my case progress?<i data-lucide="chevron-down" class="chev"></i></button>
+          <div class="faq-a">Yes. You'll receive a case reference number after upload and can track each stage — review, draft, confirmation, filing — from your dashboard, with updates also sent on WhatsApp.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">Do you handle pan-India GST matters?<i data-lucide="chevron-down" class="chev"></i></button>
+          <div class="faq-a">Yes. GST is a national law and we handle notices and appeals across all states and union territories, regardless of where your business is registered.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">What if my case is not resolved in our favour?<i data-lucide="chevron-down" class="chev"></i></button>
+          <div class="faq-a">Outcomes depend on the facts and the authority's decision, so we never promise a guaranteed result. If an order goes against you, we'll advise on the next remedy — such as a Commissioner or GSTAT appeal — and what it involves.</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:32px;margin-bottom:8px;">
+        <a class="btn btn-secondary" href="FAQ.html" style="min-width:200px;">
+          <i data-lucide="list" style="width:17px;height:17px" aria-hidden="true"></i>
+          View More FAQs
+        </a>
+      </div>
+      <div class="faq-empty" id="faqEmpty">No questions match your search. Try a different term or <a href="Contact.html#callback" style="color:var(--accent-green);font-weight:600">request a callback</a>.</div>
+    </div>
+  </section>
+
+  <!-- 11. DISCLAIMER -->
+  <section class="disclaimer">
+    <div class="container">
+      <div class="disc-inner">
+        <div class="disc-rule"></div>
+        <div class="disc-label">Disclaimer</div>
+        <p class="disc-body">The information provided on this website is for general guidance only and does not constitute legal advice. Outcomes in GST litigation depend on case-specific facts, the applicable law, and decisions made by the relevant tax authority — they cannot be predicted or guaranteed. Timelines mentioned are indicative and may vary based on case complexity and departmental processing times. The scope of services provided is defined by the selected service plan. For complete details, please refer to our <a href="#">Disclaimer</a>, <a href="#">Terms &amp; Conditions</a>, and <a href="#">Privacy Policy</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. FINAL CTA -->
+  <section class="final bg-navy" id="callback">
+    <div class="container">
+      <h2>Don't Let a GST Notice Become a Bigger Problem</h2>
+      <p>Get expert legal support within 24 hours.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="Pricing.html"><i data-lucide="upload-cloud" class="ic"></i>Upload Your Notice Now</a>
+        <a class="btn btn-secondary on-dark" href="tel:+919800000000">Request a Callback</a>
+      </div>
+      <a class="ph" href="tel:+919800000000"><i data-lucide="phone" style="width:17px;height:17px"></i>+91 98000 00000</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- 12. FOOTER (components.md → Footer) -->
+<footer class="footer">
+  <div class="container">
+    <div class="cols">
+      <div>
+        <div class="fbrand"><img src="assets/logo.png" alt="" /><span class="bn">GST<span>Notice</span>Support</span></div>
+        <div>GST Notice Support Pvt. Ltd.</div>
+        <div class="mono" style="margin-top:10px">CIN: U74999KA2024PTC000000</div>
+        <div class="mono">GSTIN: 29ABCDE1234F1Z5</div>
+        <div class="addr">4th Floor, Prestige Centre, MG Road,<br/>Bengaluru, Karnataka 560001</div>
+      </div>
+      <div>
+        <h5>Services</h5>
+        <ul>
+          <li><a href="ASMT-10 Reply Service.html">ASMT-10 Scrutiny Notice</a></li>
+          <li><a href="SCN Reply Service.html">Show Cause Notice (SCN)</a></li>
+          <li><a href="Commissioner Appeal Service.html">Commissioner Appeal</a></li>
+          <li><a href="GSTAT Appeal Service.html">GSTAT Appeal</a></li>
+          <li><a href="Pricing.html">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="#">GST Notice Guides</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="FAQ.html">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact</h5>
+        <ul>
+          <li><a href="tel:+919800000000">+91 98000 00000</a></li>
+          <li><a href="mailto:help@gstnoticesupport.in">help@gstnoticesupport.in</a></li>
+          <li>Grievance Officer: A. Sharma</li>
+          <li><a href="mailto:grievance@gstnoticesupport.in" class="mono">grievance@gstnoticesupport.in</a></li>
+        </ul>
+        <a class="btn btn-wa" href="https://wa.me/919800000000?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice." target="_blank" rel="noopener"><i data-lucide="message-circle" class="ic"></i>Chat on WhatsApp</a>
+      </div>
+    </div>
+    <div class="strip">
+      <div class="pols">
+        <a href="#">Privacy Policy</a><span>|</span>
+        <a href="#">Terms</a><span>|</span>
+        <a href="#">Refund Policy</a>
+      </div>
+      <span class="ssl" style="margin-left:auto"><i data-lucide="shield-check" style="width:15px;height:15px"></i>SSL Secured</span>
+      <span>© 2026 GST Notice Support Pvt. Ltd. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Sticky mobile bottom bar (components.md → Sticky Mobile Bottom Bar) -->
+<div class="mobile-bar" id="mobileBar">
+  <a class="btn btn-secondary mb-call" href="tel:+919800000000"><i data-lucide="phone" class="ic"></i>Call Now</a>
+  <a class="btn btn-primary mb-book" href="Pricing.html">Book Service</a>
+</div>
+
+<a class="wa-float" id="waFloat" href="https://wa.me/919800000000?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice." target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp"><i data-lucide="message-circle" style="width:19px;height:19px"></i>Chat with us</a>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <path d="M50 24 L72 32 V52 C72 66 62 75 50 79 C38 75 28 66 28 52 V32 Z" fill="none" stroke="#0B8B4E" stroke-width="3"/>
+    <path d="M42 52 L48 58 L60 44" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  // Navbar shrink on scroll
+  const nav = document.getElementById('nav');
+  const waFloat = document.getElementById('waFloat');
+  const onScroll = () => {
+    const y = window.scrollY;
+    nav.classList.toggle('scrolled', y > 8);
+    waFloat.classList.toggle('show', y > 400);
+    mobileBar.classList.toggle('show', y > 300);
+  };
+  const mobileBar = document.getElementById('mobileBar');
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // Mobile drawer
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('drawer');
+  const drawerOverlay = document.getElementById('drawerOverlay');
+  const drawerClose = document.getElementById('drawerClose');
+  function openDrawer(){
+    drawerOverlay.hidden = false;
+    requestAnimationFrame(() => { drawer.classList.add('open'); drawerOverlay.classList.add('show'); });
+    hamburger.setAttribute('aria-expanded','true');
+    drawer.setAttribute('aria-hidden','false');
+    document.body.classList.add('drawer-open');
+    drawerClose.focus();
+  }
+  function closeDrawer(){
+    drawer.classList.remove('open'); drawerOverlay.classList.remove('show');
+    hamburger.setAttribute('aria-expanded','false');
+    drawer.setAttribute('aria-hidden','true');
+    document.body.classList.remove('drawer-open');
+    setTimeout(() => { drawerOverlay.hidden = true; }, 250);
+    hamburger.focus();
+  }
+  hamburger.addEventListener('click', openDrawer);
+  drawerClose.addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer(); });
+
+  // Drawer Services collapsible
+  const servicesToggle = document.getElementById('drawerServicesToggle');
+  const servicesMenu = document.getElementById('drawerServicesMenu');
+  servicesToggle.addEventListener('click', () => {
+    const expanded = servicesToggle.getAttribute('aria-expanded') === 'true';
+    servicesToggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    servicesMenu.classList.toggle('open', !expanded);
+    servicesMenu.setAttribute('aria-hidden', expanded ? 'true' : 'false');
+  });
+
+  // Testimonial tabs
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  function selectTab(tab){
+    tabs.forEach(t => {
+      const sel = t === tab;
+      t.setAttribute('aria-selected', sel ? 'true' : 'false');
+      t.tabIndex = sel ? 0 : -1;
+      const panel = document.getElementById(t.getAttribute('aria-controls'));
+      panel.classList.toggle('active', sel);
+      panel.hidden = !sel;
+    });
+  }
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => selectTab(tab));
+    tab.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+        e.preventDefault();
+        const dir = e.key === 'ArrowRight' ? 1 : -1;
+        const next = tabs[(i + dir + tabs.length) % tabs.length];
+        selectTab(next); next.focus();
+      }
+    });
+  });
+
+  // FAQ accordion — single-item expansion
+  const faqBtns = Array.from(document.querySelectorAll('.faq-q'));
+  faqBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      faqBtns.forEach(b => {
+        b.setAttribute('aria-expanded', 'false');
+        b.nextElementSibling.classList.remove('open');
+      });
+      if(!open){
+        btn.setAttribute('aria-expanded', 'true');
+        btn.nextElementSibling.classList.add('open');
+      }
+    });
+  });
+
+  // FAQ search
+  const search = document.getElementById('faqSearch');
+  const items = Array.from(document.querySelectorAll('.faq-item'));
+  const empty = document.getElementById('faqEmpty');
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    let visible = 0;
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      const match = !q || text.includes(q);
+      item.style.display = match ? '' : 'none';
+      if(match) visible++;
+    });
+    empty.style.display = visible === 0 ? 'block' : 'none';
+  });
+
+  // Carousels (mobile horizontal scroll-snap) — dots + arrow-key nav
+  function initCarousel(scroller, dotsEl, cardSel){
+    if(!scroller || !dotsEl) return;
+    const cards = Array.from(scroller.querySelectorAll(cardSel));
+    if(cards.length < 2) return;
+    dotsEl.innerHTML = '';
+    const dots = cards.map((_, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Go to item ' + (i + 1));
+      b.addEventListener('click', () => {
+        cards[i].scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+      });
+      dotsEl.appendChild(b);
+      return b;
+    });
+    const activeIndex = () => {
+      const c = scroller.scrollLeft + scroller.clientWidth / 2;
+      let best = 0, bd = Infinity;
+      cards.forEach((card, i) => {
+        const center = card.offsetLeft + card.offsetWidth / 2;
+        const d = Math.abs(center - (scroller.scrollLeft + scroller.clientWidth / 2));
+        if(d < bd){ bd = d; best = i; }
+      });
+      return best;
+    };
+    const update = () => {
+      const a = activeIndex();
+      dots.forEach((d, i) => d.setAttribute('aria-current', i === a ? 'true' : 'false'));
+    };
+    let raf;
+    scroller.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(update); }, {passive:true});
+    scroller.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+        e.preventDefault();
+        const a = activeIndex();
+        const next = Math.min(cards.length - 1, Math.max(0, a + (e.key === 'ArrowRight' ? 1 : -1)));
+        cards[next].scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+      }
+    });
+    update();
+  }
+
+  document.querySelectorAll('.tpanel').forEach(panel => {
+    initCarousel(panel.querySelector('.tscroll'), panel.querySelector('.tdots'), '.tcard');
+  });
+</script>
+</body>
+</html>

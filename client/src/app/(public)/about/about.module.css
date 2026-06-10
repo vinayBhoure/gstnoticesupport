@@ -1,0 +1,60 @@
+/* About page styles — verbatim from prototype. D59 */
+
+/* ---------- PAGE HERO ---------- */
+.pageHero{min-height:calc(100vh - 76px);display:flex;align-items:center;justify-content:center;text-align:center;padding:48px 0;}
+.pageHero h1{max-width:22ch;margin:0 auto 20px;}
+.sub{font-size:20px;line-height:1.6;color:var(--neutral-600);max-width:60ch;margin:0 auto 32px;}
+.ctaRow{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+
+/* ---------- MISSION & VISION ---------- */
+.mvGrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--neutral-200);border:1px solid var(--neutral-200);border-radius:var(--r-card);overflow:hidden;}
+.mvPanel{background:var(--neutral-50);padding:48px 40px;}
+.mvPanel .mvLabel{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent-green);margin-bottom:16px;}
+.mvPanel .mvLabel::before{content:"";width:6px;height:6px;border-radius:1px;background:var(--accent-green);}
+.mvPanel h3{font-size:22px;color:var(--primary-navy);margin-bottom:14px;}
+.mvPanel p{font-size:16px;color:var(--neutral-900);line-height:1.75;}
+
+/* ---------- COMPANY IDENTITY ---------- */
+.companyGrid{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:start;}
+.companyText p{font-size:16px;color:var(--neutral-900);line-height:1.75;}
+.companyText p + p{margin-top:18px;}
+.companyRef{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:32px;}
+.companyRef h3{font-size:20px;color:var(--primary-navy);margin-bottom:24px;}
+.refRow{display:flex;flex-direction:column;gap:16px;}
+.refItem{display:flex;flex-direction:column;gap:4px;padding-bottom:16px;border-bottom:1px solid var(--neutral-200);}
+.refItem:last-child{border-bottom:none;padding-bottom:0;}
+.refLabel{font-size:12px;font-weight:600;color:var(--neutral-600);text-transform:uppercase;letter-spacing:.08em;}
+.refValue{font-size:15px;color:var(--neutral-900);line-height:1.5;}
+.refMono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;user-select:text;}
+
+/* ---------- WHY CHOOSE US ---------- */
+.whyGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:32px;}
+.whyItem{display:flex;align-items:flex-start;gap:20px;}
+.whyItem .icWrap{width:48px;height:48px;border-radius:var(--r-btn);background:var(--neutral-50);border:1px solid var(--neutral-200);color:var(--primary-deep-blue);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.whyBody{display:flex;flex-direction:column;gap:6px;}
+.whyItem h3{font-size:18px;color:var(--primary-navy);}
+.whyItem p{font-size:15px;color:var(--neutral-600);line-height:1.6;}
+
+/* ---------- FINAL CTA BANNER ---------- */
+.ctaBanner{background:var(--primary-navy);padding:80px 0;text-align:center;}
+.ctaBanner h2{color:#fff;margin-bottom:14px;}
+.ctaBanner p{font-size:18px;color:rgba(255,255,255,.72);margin-bottom:36px;}
+.btnRow{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:1024px){
+  .companyGrid{grid-template-columns:1fr;gap:32px;}
+  .mvGrid{grid-template-columns:1fr;}
+  .whyGrid{grid-template-columns:1fr;}
+}
+@media (max-width:640px){
+  .pageHero{min-height:auto;padding:48px 0 56px;}
+  .sub{font-size:17px;}
+  .ctaRow{flex-direction:column;}
+  .ctaRow :global(.btn){width:100%;}
+  .mvPanel{padding:32px 24px;}
+  .ctaBanner{padding:56px 0;}
+  .btnRow{flex-direction:column;}
+  .btnRow :global(.btn){width:100%;}
+  .whyItem{flex-direction:column;gap:14px;}
+}
