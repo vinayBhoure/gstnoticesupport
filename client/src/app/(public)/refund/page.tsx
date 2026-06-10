@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle, Phone, Mail } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Mail } from 'lucide-react';
 
 export const dynamic = 'force-static';
 
@@ -140,10 +140,6 @@ export default function RefundPolicyPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Mail style={{ width: 18, height: 18, color: 'var(--accent-green)' }} aria-hidden="true" />
                   <span><strong>Grievance Officer:</strong> Ananya Rao — <a href="mailto:grievance@gstnoticesupport.in">grievance@gstnoticesupport.in</a></span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Phone style={{ width: 18, height: 18, color: 'var(--accent-green)' }} aria-hidden="true" />
-                  <span><a href="tel:+919343297622">+91 93432 97622</a> &nbsp;(Mon–Sat, 9 AM–7 PM IST)</span>
                 </div>
               </div>
             </div>

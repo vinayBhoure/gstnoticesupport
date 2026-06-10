@@ -47,7 +47,6 @@ export function Footer() {
           <div>
             <h5>Contact</h5>
             <ul>
-              <li><a href="tel:+919343297622">+91 93432 97622</a></li>
               <li><a href="mailto:help@gstnoticesupport.in">help@gstnoticesupport.in</a></li>
               <li>Grievance Officer: A. Sharma</li>
               <li>

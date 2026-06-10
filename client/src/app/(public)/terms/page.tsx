@@ -176,8 +176,7 @@ export default function TermsPage() {
             <h2>13. Contact</h2>
             <p>
               For any questions about these Terms, contact us at:{' '}
-              <a href="mailto:help@gstnoticesupport.in">help@gstnoticesupport.in</a> or{' '}
-              <a href="tel:+919343297622">+91 93432 97622</a>.
+              <a href="mailto:help@gstnoticesupport.in">help@gstnoticesupport.in</a>.
             </p>
 
             <hr style={{ margin: '40px 0', borderColor: 'var(--neutral-200)' }} />

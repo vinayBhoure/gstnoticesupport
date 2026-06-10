@@ -106,7 +106,7 @@ body.drawer-open{overflow:hidden;}
 .footer .strip .ssl{display:inline-flex;align-items:center;gap:6px;margin-left:auto;color:var(--accent-green);font-weight:600;}
 
 /* ---------- WHATSAPP FLOAT ---------- */
-.wa-float{position:fixed;right:24px;bottom:24px;z-index:90;display:inline-flex;align-items:center;gap:9px;background:var(--wa-green);color:#073b1e;font-weight:700;font-size:14px;padding:13px 18px;border-radius:var(--r-btn);box-shadow:var(--shadow-md);opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s;}
+.wa-float{position:fixed;right:24px;bottom:24px;z-index:90;display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;padding:0;background:var(--wa-green);color:#073b1e;border-radius:50%;box-shadow:var(--shadow-md);opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s;}
 .wa-float.show{opacity:1;visibility:visible;transform:translateY(0);}
 .wa-float:hover{background:#1ebe5b;}
 
@@ -128,7 +128,7 @@ body.drawer-open{overflow:hidden;}
   .hamburger{display:flex;}
   .nav-cta{display:none;}
   .mobile-bar{display:flex;}
-  .wa-float{bottom:84px;}
+  .wa-float{bottom:84px;right:16px;}
   .footer .cols{grid-template-columns:1fr 1fr;}
 }
 @media (max-width:640px){

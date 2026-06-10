@@ -4,6 +4,7 @@ import { Receipt, BadgeCheck, MapPin, Clock } from 'lucide-react';
 import styles from './about.module.css';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import { ORG } from '@/lib/site';
+import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
 
 export const dynamic = 'force-static';
 
@@ -16,7 +17,7 @@ export default function AboutPage() {
   return (
     <>
       {/* PAGE HERO */}
-      <section className={`${styles.pageHero} bg-white`}>
+      <section className={`${styles.pageHero} bg-white`} style={{ position: 'relative' }}>
         <div className="container">
           <h1>India&#39;s GST Litigation Experts — Backed by Real Credentials</h1>
           <p className={styles.sub}>
@@ -24,10 +25,18 @@ export default function AboutPage() {
             specialising in GST litigation, notice handling, and appellate representation across India.
           </p>
           <div className={styles.ctaRow}>
-            <Link className="btn btn-primary" href="/pricing">Book a Service</Link>
+            <a
+              className="btn btn-primary"
+              href="https://wa.me/919343297622?text=Hello%2C%20I%20want%20to%20know%20more%20about%20GST%20Notice%20Support%20services.%20Please%20assist%20me."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Service
+            </a>
             <RequestCallbackButton className="btn btn-secondary">Request Callback</RequestCallbackButton>
           </div>
         </div>
+        <HeroScrollIndicator />
       </section>
 
       {/* MISSION & VISION */}
@@ -144,7 +153,14 @@ export default function AboutPage() {
           <h2>Have a GST Notice? Let&#39;s Handle It.</h2>
           <p>Expert filing and appeal support — fixed fee, no surprises.</p>
           <div className={styles.btnRow}>
-            <Link className="btn btn-primary" href="/pricing">Book a Service</Link>
+            <a
+              className="btn btn-primary"
+              href="https://wa.me/919343297622?text=Hello%2C%20I%20want%20to%20know%20more%20about%20GST%20Notice%20Support%20services.%20Please%20assist%20me."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Service
+            </a>
             <RequestCallbackButton className="btn btn-secondary on-dark">
               Request a Callback
             </RequestCallbackButton>

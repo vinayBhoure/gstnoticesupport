@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Phone, ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
 export function Navbar() {
@@ -87,17 +87,13 @@ export function Navbar() {
               </div>
             </div>
             <Link href="/about" aria-current={navCurrent('/about')}>About</Link>
-            <Link href="/faq" aria-current={navCurrent('/faq')}>Resources</Link>
+            <Link href="/faq" aria-current={navCurrent('/faq')}>FAQ</Link>
             <Link href="/pricing" aria-current={navCurrent('/pricing')}>Pricing</Link>
           </nav>
 
           <div className="right">
-            <a className="ph" href="tel:+919343297622" aria-label="Call +91 93432 97622">
-              <Phone className="ic" />
-              <span className="ph-num">+91 93432 97622</span>
-            </a>
             <RequestCallbackButton className="btn btn-secondary nav-cta">Request Callback</RequestCallbackButton>
-            <Link className="btn btn-primary nav-cta" href="/pricing">Book Service</Link>
+            <Link className="btn btn-primary nav-cta" href="/contact">Contact Us</Link>
             <button
               ref={hamburgerRef}
               className="hamburger"
@@ -168,20 +164,16 @@ export function Navbar() {
           </div>
           <span className="drawer-divider" />
           <Link href="/about" aria-current={navCurrent('/about')} onClick={closeDrawer}>About</Link>
-          <Link href="/faq" aria-current={navCurrent('/faq')} onClick={closeDrawer}>Resources</Link>
+          <Link href="/faq" aria-current={navCurrent('/faq')} onClick={closeDrawer}>FAQ</Link>
           <Link href="/pricing" aria-current={navCurrent('/pricing')} onClick={closeDrawer}>Pricing</Link>
         </nav>
 
         <div className="drawer-foot">
-          <a className="ph" href="tel:+919343297622">
-            <Phone className="ic" style={{ width: 17, height: 17 }} />
-            +91 93432 97622
-          </a>
           <RequestCallbackButton className="btn btn-secondary btn-block" onClick={closeDrawer}>
             Request Callback
           </RequestCallbackButton>
-          <Link className="btn btn-primary btn-block" href="/pricing" onClick={closeDrawer}>
-            Book Service
+          <Link className="btn btn-primary btn-block" href="/contact" onClick={closeDrawer}>
+            Contact Us
           </Link>
         </div>
       </aside>
