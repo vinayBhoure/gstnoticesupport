@@ -19,12 +19,6 @@ export function organizationSchema(): Record<string, unknown> {
       postalCode: ORG.address.postalCode,
       addressCountry: ORG.address.country,
     },
-    taxID: ORG.gstin,
-    identifier: {
-      '@type': 'PropertyValue',
-      propertyID: 'CIN',
-      value: ORG.cin,
-    },
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',

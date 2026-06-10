@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ORG } from '@/lib/site';
 
 export const dynamic = 'force-static';
 
@@ -31,9 +32,9 @@ export default function PrivacyPolicyPage() {
 
             <h2>1. Who We Are</h2>
             <p>
-              GST Notice Support Pvt. Ltd. (<strong>"we", "us", "our"</strong>) is a company incorporated
-              under the Companies Act, 2013 (CIN: U74999KA2024PTC000000), with its registered office at
-              4th Floor, Prestige Centre, MG Road, Bengaluru, Karnataka 560001. We provide GST litigation
+              {ORG.legalName} (<strong>"we", "us", "our"</strong>) is a company incorporated
+              under the Companies Act, 2013, with its registered office at{' '}
+              {ORG.address.street}, {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}. We provide GST litigation
               services to individuals and businesses across India through this website and our online
               booking platform at <strong>gstnoticesupport.in</strong>.
             </p>
@@ -110,8 +111,8 @@ export default function PrivacyPolicyPage() {
               <li>Withdraw consent for communications where consent was the legal basis.</li>
             </ul>
             <p>
-              To exercise these rights, email our Grievance Officer at{' '}
-              <a href="mailto:grievance@gstnoticesupport.in">grievance@gstnoticesupport.in</a>.
+              To exercise these rights, email us at{' '}
+              <a href={`mailto:${ORG.email}`}>{ORG.email}</a>.
             </p>
 
             <h2>8. Cookies</h2>
@@ -142,10 +143,10 @@ export default function PrivacyPolicyPage() {
               For any privacy-related queries or to file a grievance, contact:
             </p>
             <p>
-              <strong>Grievance Officer:</strong> Ananya Rao<br />
-              <strong>Email:</strong> <a href="mailto:grievance@gstnoticesupport.in">grievance@gstnoticesupport.in</a><br />
-              <strong>Address:</strong> GST Notice Support Pvt. Ltd., 4th Floor, Prestige Centre,
-              MG Road, Bengaluru, Karnataka 560001<br />
+              <strong>Grievance Contact:</strong> {ORG.grievanceOfficer}<br />
+              <strong>Email:</strong> <a href={`mailto:${ORG.email}`}>{ORG.email}</a><br />
+              <strong>Address:</strong> {ORG.legalName}, {ORG.address.street},
+              {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}<br />
               <strong>Response time:</strong> We acknowledge grievances within 48 hours and aim to
               resolve them within 30 days.
             </p>

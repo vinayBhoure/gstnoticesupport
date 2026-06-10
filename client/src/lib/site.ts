@@ -11,17 +11,14 @@ export const SITE_DESCRIPTION =
 
 export const ORG = {
   legalName: process.env.ORG_LEGAL_NAME ?? 'GST Notice Support Pvt. Ltd.',
-  cin: process.env.ORG_CIN ?? 'U74999KA2024PTC000000',
-  gstin: process.env.ORG_GSTIN ?? '29ABCDE1234F1Z5',
   phone: process.env.ORG_PHONE ?? '+919343297622',
-  email: process.env.ORG_EMAIL ?? 'help@gstnoticesupport.in',
-  grievanceOfficer: process.env.ORG_GRIEVANCE_OFFICER ?? 'Ananya Rao',
-  grievanceEmail: process.env.ORG_GRIEVANCE_EMAIL ?? 'grievance@gstnoticesupport.in',
+  email: process.env.ORG_EMAIL ?? 'support@gstnoticesupport.in',
+  grievanceOfficer: process.env.ORG_GRIEVANCE_OFFICER ?? 'Customer Support',
   address: {
-    street: process.env.ORG_ADDRESS_STREET ?? '4th Floor, Prestige Centre, MG Road',
-    locality: process.env.ORG_ADDRESS_LOCALITY ?? 'Bengaluru',
-    region: process.env.ORG_ADDRESS_REGION ?? 'Karnataka',
-    postalCode: process.env.ORG_ADDRESS_POSTAL ?? '560001',
+    street: process.env.ORG_ADDRESS_STREET ?? 'Dashmesh Dear, The brain train academy, opp. Gurudwara, Premnagar, Madan Mahal',
+    locality: process.env.ORG_ADDRESS_LOCALITY ?? 'Jabalpur',
+    region: process.env.ORG_ADDRESS_REGION ?? 'Madhya Pradesh',
+    postalCode: process.env.ORG_ADDRESS_POSTAL ?? '482001',
     country: process.env.ORG_ADDRESS_COUNTRY ?? 'IN',
   },
 } as const;

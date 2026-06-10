@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ORG } from '@/lib/site';
 
 export const dynamic = 'force-static';
 
@@ -32,7 +33,7 @@ export default function TermsPage() {
             <h2>1. Agreement to Terms</h2>
             <p>
               By accessing <strong>gstnoticesupport.in</strong> or using any service offered by
-              GST Notice Support Pvt. Ltd. (CIN: U74999KA2024PTC000000), you agree to be bound
+              {ORG.legalName}, you agree to be bound
               by these Terms &amp; Conditions (<strong>"Terms"</strong>) and our{' '}
               <Link href="/privacy">Privacy Policy</Link>. If you do not agree to these Terms, you
               must not use our website or services.
@@ -170,13 +171,13 @@ export default function TermsPage() {
             <p>
               These Terms are governed by the laws of India. Any dispute arising under or in connection
               with these Terms shall be subject to the exclusive jurisdiction of the courts of
-              Bengaluru, Karnataka.
+              {ORG.address.locality}, {ORG.address.region}.
             </p>
 
             <h2>13. Contact</h2>
             <p>
               For any questions about these Terms, contact us at:{' '}
-              <a href="mailto:help@gstnoticesupport.in">help@gstnoticesupport.in</a>.
+              <a href={`mailto:${ORG.email}`}>{ORG.email}</a>.
             </p>
 
             <hr style={{ margin: '40px 0', borderColor: 'var(--neutral-200)' }} />
