@@ -1,0 +1,80 @@
+/* Contact page styles — verbatim from prototype. D59 */
+
+/* ---------- PAGE HERO ---------- */
+.pageHero{min-height:calc(100vh - 76px);display:flex;align-items:center;justify-content:center;text-align:center;padding:56px 0;border-bottom:1px solid var(--neutral-200);background:var(--neutral-white);}
+.pageHero h1{margin:0 auto 18px;max-width:22ch;}
+.sub{font-size:18px;line-height:1.65;color:var(--neutral-600);max-width:58ch;margin:0 auto;}
+
+/* ---------- CONTACT SPLIT ---------- */
+.contactSection{background:var(--neutral-50);padding:80px 0;}
+.contactGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:start;}
+
+/* ---------- FORM CARD ---------- */
+.formCard{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:40px;}
+.formCard h3{margin-bottom:24px;}
+
+/* ---------- CHANNEL DETAILS ---------- */
+.detailsCol h3{margin-bottom:32px;}
+.channelList{display:flex;flex-direction:column;gap:0;}
+.channelRow{display:flex;align-items:flex-start;gap:16px;padding:20px 0;border-bottom:1px solid var(--neutral-200);}
+.channelRow:first-child{padding-top:0;}
+.channelRow:last-child{border-bottom:none;}
+.channelIc{width:44px;height:44px;flex:0 0 44px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-btn);border:1px solid var(--neutral-200);background:#fff;color:var(--primary-deep-blue);}
+.channelBody{display:flex;flex-direction:column;gap:3px;}
+.channelLabel{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--neutral-600);}
+.channelValue{font-size:16px;font-weight:500;color:var(--primary-navy);line-height:1.5;}
+.channelValue a{color:var(--primary-navy);transition:color .15s;}
+.channelValue a:hover{color:var(--accent-green);}
+.channelHours{font-size:14px;color:var(--neutral-600);margin-top:2px;}
+.addrText{font-size:15px;color:var(--neutral-900);line-height:1.7;font-style:normal;}
+
+/* WhatsApp channel button */
+.btnWaChannel{display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:11px 20px;background:#25D366;color:#073b1e;font-size:15px;font-weight:700;border-radius:var(--r-btn);text-decoration:none;transition:opacity .15s;margin-top:4px;width:fit-content;}
+.btnWaChannel:hover{opacity:.88;}
+
+/* ---------- GRIEVANCE ---------- */
+.grievanceRow{margin-top:32px;padding-top:24px;border-top:1px solid var(--neutral-200);font-size:14px;color:var(--neutral-600);line-height:1.6;}
+.grievanceRow strong{color:var(--neutral-900);}
+.grievanceRow a{color:var(--accent-green);font-weight:500;}
+.grievanceRow a:hover{text-decoration:underline;}
+
+/* ---------- CALLBACK BANNER ---------- */
+.callbackBanner{background:var(--neutral-white);border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:28px 32px;margin-top:40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.cbText{flex:1;min-width:180px;}
+.cbText strong{display:block;font-size:17px;color:var(--primary-navy);margin-bottom:4px;}
+.cbText span{font-size:14px;color:var(--neutral-600);}
+
+/* ---------- CONTACT FORM ---------- */
+.contactForm{display:flex;flex-direction:column;gap:20px;}
+.formGroup{display:flex;flex-direction:column;gap:6px;}
+.formLabel{font-size:14px;font-weight:600;color:var(--neutral-900);}
+.required{color:var(--warning-amber);margin-left:2px;}
+.formTextarea{min-height:128px !important;resize:vertical;height:auto;line-height:1.6;}
+.inputErr{border-color:var(--warning-amber) !important;}
+.inputErr:focus{box-shadow:0 0 0 3px rgba(217,119,6,.14) !important;}
+.errMsg{font-size:13px;color:var(--warning-amber);line-height:1.4;margin-top:2px;}
+
+/* ---------- FORM SUCCESS STATE ---------- */
+.successState{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:16px 0;}
+.successIcon{width:60px;height:60px;flex:0 0 60px;border-radius:50%;background:rgba(11,139,78,.1);border:2px solid rgba(11,139,78,.25);display:flex;align-items:center;justify-content:center;color:var(--accent-green);}
+.successTitle{font-size:22px;font-weight:700;color:var(--primary-navy);}
+.successBody{font-size:15px;color:var(--neutral-600);line-height:1.6;max-width:36ch;}
+.successBody strong{color:var(--primary-navy);}
+.resetBtn{margin-top:4px;}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:1024px){
+  .contactGrid{grid-template-columns:1fr;gap:40px;}
+  .formCard{order:2;}
+  .detailsCol{order:1;}
+  .contactSection{padding:56px 0;}
+  .callbackBanner{gap:16px;}
+}
+@media(max-width:640px){
+  .pageHero{min-height:auto;padding:48px 0;}
+  .pageHero .sub{font-size:17px;}
+  .formCard{padding:28px 22px;}
+  .btnWaChannel{width:100%;}
+  .callbackBanner{flex-direction:column;gap:14px;}
+  .callbackBanner :global(.btn){width:100%;}
+}

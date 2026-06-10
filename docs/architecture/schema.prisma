@@ -1,0 +1,227 @@
+// =============================================================================
+// gstnoticesupport.in — Prisma schema
+// Source of truth: gstnoticesupport_LLD.md §5
+// Database: PostgreSQL (Mumbai region)
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum UserRole {
+  user
+  admin
+
+  @@map("user_role_enum")
+}
+
+enum ServiceType {
+  asmt_10
+  scn
+  commissioner_appeal
+  gstat_appeal
+
+  @@map("service_enum")
+}
+
+enum BookingStatus {
+  document_upload
+  in_review
+  draft_ready
+  filing
+  complete
+  cancelled
+
+  @@map("booking_status_enum")
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+
+  @@map("payment_status_enum")
+}
+
+enum FilingFor {
+  self
+  others
+
+  @@map("filing_enum")
+}
+
+enum UploadedBy {
+  user
+  admin
+
+  @@map("upload_by_enum")
+}
+
+enum PaymentRecordStatus {
+  created
+  authorized
+  captured
+  failed
+
+  @@map("pay_rec_status_enum")
+}
+
+// =============================================================================
+// CORE MODELS (locked 4-table structure per LLD)
+// =============================================================================
+
+model User {
+  id                 String        @id @default(uuid()) @db.Uuid
+  name               String        @db.VarChar(255)
+  email              String        @unique @db.VarChar(255)
+  hashedPassword     String        @map("hashed_password") @db.VarChar(255)
+  role               UserRole      @default(user)
+  emailVerified      Boolean       @default(false) @map("email_verified")
+  termsAccepted      Boolean       @default(false) @map("terms_accepted")
+  allowPromotions    Boolean       @default(false) @map("allow_promotions")
+  interestedServices ServiceType[] @default([]) @map("interested_services")
+  createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  bookings      Booking[]
+  otpEntries    OtpStore[]
+  refreshTokens RefreshToken[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model Booking {
+  id                         String        @id @default(uuid()) @db.Uuid
+  userId                     String        @map("user_id") @db.Uuid
+  serviceType                ServiceType   @map("service_type")
+  status                     BookingStatus @default(document_upload)
+  paymentStatus              PaymentStatus @default(pending) @map("payment_status")
+  contactName                String        @map("contact_name") @db.VarChar(255)
+  contactEmail               String        @map("contact_email") @db.VarChar(255)
+  contactPhone               String        @map("contact_phone") @db.VarChar(20)
+  organizationName           String?       @map("organization_name") @db.VarChar(255)
+  filingFor                  FilingFor     @map("filing_for")
+  gstn                       String        @db.VarChar(15)
+  consentInformationAccurate Boolean       @map("consent_information_accurate")
+  consentContactAuthorized   Boolean       @map("consent_contact_authorized")
+  draftS3Key                 String?       @map("draft_s3_key") @db.Text
+  adminNote                  String?       @map("admin_note") @db.Text
+  createdAt                  DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                  DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // onDelete: Restrict — LLD §7 "Account deletion blocked when any booking is in active state."
+  // App-level gate enforces business rule; DB-level Restrict is a safety net.
+  user           User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  documents      BookingDocument[]
+  paymentRecords PaymentRecord[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@index([userId, status])
+  @@map("bookings")
+}
+
+model BookingDocument {
+  id         String     @id @default(uuid()) @db.Uuid
+  bookingId  String     @map("booking_id") @db.Uuid
+  uploadedBy UploadedBy @map("uploaded_by")
+  fileName   String     @map("file_name") @db.VarChar(255)
+  // S3 keys: userId-yyyyMMdd-sanitizedFileName-<4RandomChars>.pdf (LLD D77)
+  s3Key      String     @unique @map("s3_key") @db.VarChar(512)
+  uploadedAt DateTime   @default(now()) @map("uploaded_at") @db.Timestamptz(6)
+
+  // No user_id FK on this table by design (LLD §5, Decision 8).
+  // Documents inherit ownership via booking → user.
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@map("booking_documents")
+}
+
+model PaymentRecord {
+  id                String              @id @default(uuid()) @db.Uuid
+  // Deliberately NOT unique — multiple rows per booking allowed.
+  // Each retry/failure preserved for admin visibility (LLD §3, Decision 62).
+  bookingId         String              @map("booking_id") @db.Uuid
+  razorpayOrderId   String              @unique @map("razorpay_order_id") @db.VarChar(255)
+  // Nullable until payment captured. UNIQUE is the single source of payment
+  // idempotency (LLD §11 "Context Handoff for Engineers").
+  razorpayPaymentId String?             @unique @map("razorpay_payment_id") @db.VarChar(255)
+  amountPaise       Int                 @map("amount_paise")
+  currency          String              @default("INR") @db.VarChar(3)
+  status            PaymentRecordStatus @default(created)
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payment_records")
+}
+
+// =============================================================================
+// AUXILIARY MODELS — auth + token lifecycle (LLD §5)
+// Rate-limit counters are intentionally omitted; their backing store
+// (in-memory / Redis / Postgres) is still open per LLD §9, Q1.
+// =============================================================================
+
+model OtpStore {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  hashedOtp    String   @map("hashed_otp") @db.VarChar(255)
+  expiresAt    DateTime @map("expires_at") @db.Timestamptz(6)
+  // Capped at 5 attempts per OTP per LLD §6 rate-limit matrix.
+  attemptCount Int      @default(0) @map("attempt_count") @db.SmallInt
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("otp_store")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  // Store the hash of the refresh token, never the raw token (LLD §3, Decision 71).
+  tokenHash String   @unique @map("token_hash") @db.VarChar(255)
+  // 7-day expiry per LLD §3, Decision 71.
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model TokenBlacklist {
+  id        String   @id @default(uuid()) @db.Uuid
+  // Scoped to logout + "This wasn't me" link only (LLD §3, Decision 74).
+  // Auto-cleanup within 24h tied to access-token expiry.
+  tokenJti  String   @unique @map("token_jti") @db.VarChar(255)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // No FK by design — this table tracks tokens, not users.
+  // Same JTI never appears twice (UNIQUE constraint).
+
+  @@index([expiresAt])
+  @@map("token_blacklist")
+}
