@@ -46,9 +46,14 @@ export default function ScnReplyPage() {
           <p className={styles.sub}>High-stakes GST demand notices require a precise, legally structured response. Our team of CAs and Advocates prepares your reply — fixed fee ₹5,999, draft within 48 hours.</p>
 
           <div className={styles.heroCta}>
-            <Link className="btn btn-primary" href="#book">
-              <FileCheck2 size={18} />Book SCN Reply — ₹5,999
-            </Link>
+            <a
+              className="btn btn-primary"
+              href="https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20Show%20Cause%20Notice%20Reply%20service.%20Please%20assist%20me%20to%20proceed%20further."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book SCN Reply — ₹5,999
+            </a>
             <RequestCallbackButton className="btn btn-secondary">Request Callback</RequestCallbackButton>
           </div>
 
@@ -255,9 +260,14 @@ export default function ScnReplyPage() {
             </div>
 
             <div className={styles.ctaRow}>
-              <Link className="btn btn-primary" href="/contact#callback">
-                <FileCheck2 size={18} />Book SCN Reply Now
-              </Link>
+              <a
+                className="btn btn-primary"
+                href="https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20Show%20Cause%20Notice%20Reply%20service.%20Please%20assist%20me%20to%20proceed%20further."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book SCN Reply Now
+              </a>
             </div>
             <p className={styles.payNote}>Full payment upfront. Non-refundable once draft preparation begins. No EMI.</p>
           </div>

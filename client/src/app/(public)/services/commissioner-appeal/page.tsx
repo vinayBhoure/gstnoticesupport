@@ -46,9 +46,14 @@ export default function CommissionerAppealPage() {
           <p className={styles.sub}>Challenging an Order of Adjudicating Authority requires a precise APL-01 filing with Statement of Facts and Grounds of Appeal. Fixed fee ₹9,999. Note: Statutory pre-deposit payable by you directly to the GST portal — our fee covers professional services only.</p>
 
           <div className={styles.heroCta}>
-            <Link className="btn btn-primary" href="#book">
-              <FileCheck2 size={18} />Book Commissioner Appeal — ₹9,999
-            </Link>
+            <a
+              className="btn btn-primary"
+              href="https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20Commissioner%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Commissioner Appeal — ₹9,999
+            </a>
             <RequestCallbackButton className="btn btn-secondary">Request Callback</RequestCallbackButton>
           </div>
 
@@ -264,9 +269,14 @@ export default function CommissionerAppealPage() {
             </div>
 
             <div className={styles.ctaRow}>
-              <Link className="btn btn-primary" href="/contact#callback">
-                <FileCheck2 size={18} />Book Commissioner Appeal Now
-              </Link>
+              <a
+                className="btn btn-primary"
+                href="https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20Commissioner%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book Commissioner Appeal Now
+              </a>
             </div>
             <p className={styles.payNote}>Full payment upfront. Non-refundable once draft preparation begins. No EMI.</p>
           </div>

@@ -45,9 +45,14 @@ export default function Asmt10Page() {
           <p className={styles.sub}>Section 61 CGST Act scrutiny notices handled by ICAI-registered CAs. Fixed fee: ₹2,999. Draft within 48 hours.</p>
 
           <div className={styles.heroCta}>
-            <Link className="btn btn-primary" href="#book">
-              <FileCheck2 size={18} />Book ASMT-10 Reply — ₹2,999
-            </Link>
+            <a
+              className="btn btn-primary"
+              href="https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20ASMT-10%20Scrutiny%20Reply%20service.%20Please%20assist%20me%20to%20proceed%20further."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book ASMT-10 Reply — ₹2,999
+            </a>
             <RequestCallbackButton className="btn btn-secondary">Request Callback</RequestCallbackButton>
           </div>
 
@@ -240,9 +245,14 @@ export default function Asmt10Page() {
             </div>
 
             <div className={styles.ctaRow}>
-              <Link className="btn btn-primary" href="/contact#callback">
-                <FileCheck2 size={18} />Book ASMT-10 Reply Now
-              </Link>
+              <a
+                className="btn btn-primary"
+                href="https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20ASMT-10%20Scrutiny%20Reply%20service.%20Please%20assist%20me%20to%20proceed%20further."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book ASMT-10 Reply Now
+              </a>
             </div>
             <p className={styles.payNote}>Full payment upfront. Non-refundable once draft preparation begins. No EMI.</p>
           </div>

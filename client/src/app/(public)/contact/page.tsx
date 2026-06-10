@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
-import { Phone, Mail, MapPin, Clock, PhoneIncoming } from 'lucide-react';
+import { Mail, MapPin, Clock, PhoneIncoming } from 'lucide-react';
 import styles from './contact.module.css';
 import { ContactForm } from './ContactForm';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
 
 export const dynamic = 'force-static';
 
@@ -21,14 +22,15 @@ export default function ContactPage() {
   return (
     <>
       {/* PAGE HERO */}
-      <section className={styles.pageHero}>
+      <section className={styles.pageHero} style={{ position: 'relative' }}>
         <div className="container">
           <h1>Get in Touch</h1>
           <p className={styles.sub}>
-            Have a GST notice or a question about our services? Reach us by phone, email, or
-            WhatsApp. We respond within 24 hours on working days.
+            Have a GST notice or a question about our services? Reach us by email or WhatsApp.
+            We respond within 24 hours on working days.
           </p>
         </div>
+        <HeroScrollIndicator />
       </section>
 
       {/* CONTACT SPLIT */}
@@ -47,20 +49,6 @@ export default function ContactPage() {
               <h3>Other Ways to Reach Us</h3>
 
               <div className={styles.channelList}>
-
-                {/* Phone */}
-                <div className={styles.channelRow}>
-                  <div className={styles.channelIc} aria-hidden="true">
-                    <Phone size={20} />
-                  </div>
-                  <div className={styles.channelBody}>
-                    <span className={styles.channelLabel}>Phone</span>
-                    <span className={styles.channelValue}>
-                      <a href="tel:+919343297622">+91 93432 97622</a>
-                    </span>
-                    <span className={styles.channelHours}>Tap to call · Mon–Sat, 9 AM–7 PM IST</span>
-                  </div>
-                </div>
 
                 {/* WhatsApp */}
                 <div className={styles.channelRow}>

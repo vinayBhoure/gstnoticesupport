@@ -3,11 +3,12 @@ import Link from 'next/link';
 import {
   MapPin, Check, FileSearch, FileWarning, Gavel, Landmark, ArrowRight,
   Clock, AlertTriangle, UserCheck, ClipboardList, MessageSquare,
-  ShieldCheck, Tag, CheckCircle, Lock, Scale, UploadCloud, List, Phone,
+  ShieldCheck, Tag, CheckCircle, Lock, Scale, List,
 } from 'lucide-react';
 import { Testimonials } from '@/components/home/Testimonials';
 import { FaqAccordion } from '@/components/home/FaqAccordion';
 import { AnimateIn } from '@/components/ui/AnimateIn';
+import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
 import { CountUp } from '@/components/ui/CountUp';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './page.module.css';
@@ -16,7 +17,7 @@ export const dynamic = 'force-static';
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'GST Notice? Get Expert Legal Support in 24 Hours | GST Notice Support',
+    absolute: 'GST Notice Support | Get Expert Legal Support in 24 Hours',
   },
   description:
     'Received a GST notice? ICAI-registered CAs and Bar Council-enrolled Advocates prepare your reply, appeal, or representation — fixed fee, draft within 48 hours, pan-India.',
@@ -32,7 +33,7 @@ export default function HomePage() {
   return (
     <>
       {/* 1. HERO */}
-      <section className={`${styles.hero} bg-white`}>
+      <section className={`${styles.hero} bg-white`} style={{ position: 'relative' }}>
         <div className="container">
           <div className={styles.grid}>
               <AnimateIn delay={0} distance={32}>
@@ -46,9 +47,14 @@ export default function HomePage() {
                   appeal, or representation — fully managed, fixed fee.
                 </p>
                 <div className={styles.cta}>
-                  <Link className="btn btn-primary" href="/pricing">
-                    <UploadCloud className="ic" />Upload Your Notice
-                  </Link>
+                  <a
+                    className="btn btn-primary"
+                    href="https://wa.me/919343297622?text=Hello%2C%20I%27m%20want%20to%20know%20more%20about%20GST%20Notice%20Support"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Book Service
+                  </a>
                   <RequestCallbackButton className="btn btn-secondary">Request a Callback</RequestCallbackButton>
                 </div>
                 <div className={styles.reassure}>
@@ -59,27 +65,20 @@ export default function HomePage() {
                 </div>
               </AnimateIn>
 
-              <AnimateIn delay={150} distance={32} className={styles.heroArt} aria-hidden="true">
-                <div className={styles.doc}>
-                  <div className={styles.docHead}>
-                    <span className={styles.tag}>GST NOTICE</span>
-                    <span className={styles.ref}>DRC-01</span>
-                  </div>
-                  <div className={styles.line} style={{ width: '90%' }} />
-                  <div className={styles.lineS} style={{ width: '100%' }} />
-                  <div className={styles.lineS} style={{ width: '96%' }} />
-                  <div className={styles.lineS} style={{ width: '80%' }} />
-                  <div className={styles.line} style={{ width: '55%', marginTop: 18 }} />
-                  <div className={styles.lineS} style={{ width: '100%' }} />
-                  <div className={styles.lineS} style={{ width: '72%' }} />
-                </div>
-                <svg className={styles.shield} viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M50 4 L92 20 V58 C92 86 72 104 50 112 C28 104 8 86 8 58 V20 Z" fill="#0A2540" />
-                  <path d="M34 58 L46 70 L68 44" stroke="#0B8B4E" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </AnimateIn>
+              <div className={styles.heroArt} aria-hidden="true">
+                <video
+                  className={styles.heroVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                >
+                  <source src="/hero-section.mp4" type="video/mp4" />
+                </video>
+              </div>
           </div>
         </div>
+        <HeroScrollIndicator />
       </section>
 
       {/* 3. NOTICE TYPE SELECTOR */}
@@ -95,7 +94,7 @@ export default function HomePage() {
               <Link className={`card ${styles.noticeCard}`} href="/services/asmt-10">
                 <div className={styles.icWrap}><FileSearch style={{ width: 23, height: 23 }} /></div>
                 <h3>ASMT-10 Scrutiny Notice</h3>
-                <p className={styles.desc}>Section 61 CGST Act — discrepancies in your return.</p>
+                <p className={styles.desc}>Issued under Section 61 of the CGST Act when the authority detects return discrepancies. Our CAs prepare a structured, evidence-backed reply and ensure your input tax credit remains protected.</p>
                 <div className={styles.price}>₹2,999 <small>fixed fee</small></div>
                 <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
               </Link>
@@ -104,7 +103,7 @@ export default function HomePage() {
               <Link className={`card ${styles.noticeCard}`} href="/services/scn-reply">
                 <div className={styles.icWrap}><FileWarning style={{ width: 23, height: 23 }} /></div>
                 <h3>Show Cause Notice (SCN)</h3>
-                <p className={styles.desc}>DRC-01 / DRC-01A — demand for tax, interest, penalty.</p>
+                <p className={styles.desc}>A formal demand alleging unpaid tax, interest, and penalties under DRC-01 or DRC-01A. Without a legally sound reply you risk ex-parte adjudication and recovery proceedings. Our Advocates draft a response backed by case law and your financials.</p>
                 <div className={styles.price}>₹5,999 <small>fixed fee</small></div>
                 <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
               </Link>
@@ -113,7 +112,7 @@ export default function HomePage() {
               <Link className={`card ${styles.noticeCard}`} href="/services/commissioner-appeal">
                 <div className={styles.icWrap}><Gavel style={{ width: 23, height: 23 }} /></div>
                 <h3>Commissioner Appeal</h3>
-                <p className={styles.desc}>APL-01 — first appeal after adjudicating authority order.</p>
+                <p className={styles.desc}>Filed as an APL-01 against an unfavourable adjudicating authority order. We draft the grounds of appeal, compile supporting documents, and represent you before the Commissioner (Appeals).</p>
                 <div className={styles.price}>₹9,999 <small>fixed fee</small></div>
                 <div className={styles.foot}><span className={styles.getlink}>Get Help <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
               </Link>
@@ -122,7 +121,7 @@ export default function HomePage() {
               <Link className={`card ${styles.noticeCard}`} href="/services/gstat-appeal">
                 <div className={styles.icWrap}><Landmark style={{ width: 23, height: 23 }} /></div>
                 <h3>GSTAT Appeal</h3>
-                <p className={styles.desc}>APL-05 — appellate tribunal filing.</p>
+                <p className={styles.desc}>The GST Appellate Tribunal is the last fact-finding forum before the High Court. We file APL-05 applications, research precedents, and provide full representation. Statutory pre-deposit is mandatory and not included in the fee.</p>
                 <div className={styles.price}>₹14,999 <small>fixed fee</small></div>
                 <span className={`badge badge-amber ${styles.badgeAmber}`}>
                   <AlertTriangle style={{ width: 13, height: 13 }} />Pre-deposit required by law
@@ -412,14 +411,16 @@ export default function HomePage() {
           <h2>Don&apos;t Let a GST Notice Become a Bigger Problem</h2>
           <p>Get expert legal support within 24 hours.</p>
           <div className={styles.cta}>
-            <Link className="btn btn-primary" href="/pricing">
-              <UploadCloud className="ic" />Upload Your Notice Now
-            </Link>
+            <a
+              className="btn btn-primary"
+              href="https://wa.me/919343297622?text=Hello%2C%20I%27m%20want%20to%20know%20more%20about%20GST%20Notice%20Support"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Service
+            </a>
             <RequestCallbackButton className="btn btn-secondary on-dark">Request a Callback</RequestCallbackButton>
           </div>
-          <a className={styles.ph} href="tel:+919343297622">
-            <Phone style={{ width: 17, height: 17 }} />+91 93432 97622
-          </a>
         </div>
       </section>
     </>

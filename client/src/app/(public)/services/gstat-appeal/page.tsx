@@ -46,9 +46,14 @@ export default function GstatAppealPage() {
           <p className={styles.sub}>The GST Appellate Tribunal is the second tier of appeal under GST law. Our experts prepare your complete APL-05 bundle — Statement of Facts, Grounds of Appeal, and Prayer. Fixed fee: ₹14,999. Statutory pre-deposit is payable by you to the government; it is not part of our fee.</p>
 
           <div className={styles.heroCta}>
-            <Link className="btn btn-primary" href="#book">
-              <FileCheck2 size={18} />Book GSTAT Appeal — ₹14,999
-            </Link>
+            <a
+              className="btn btn-primary"
+              href="https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20GSTAT%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book GSTAT Appeal — ₹14,999
+            </a>
             <RequestCallbackButton className="btn btn-secondary">Request Callback</RequestCallbackButton>
           </div>
 
@@ -277,9 +282,14 @@ export default function GstatAppealPage() {
             </div>
 
             <div className={styles.ctaRow}>
-              <Link className="btn btn-primary" href="/contact#callback">
-                <FileCheck2 size={18} />Book GSTAT Appeal Now
-              </Link>
+              <a
+                className="btn btn-primary"
+                href="https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20GSTAT%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book GSTAT Appeal Now
+              </a>
             </div>
             <p className={styles.payNote}>Full payment upfront. Non-refundable once draft preparation begins. No EMI.</p>
           </div>

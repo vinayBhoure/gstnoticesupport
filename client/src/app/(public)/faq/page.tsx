@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Phone, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { FaqSection } from '@/components/faq/FaqSection';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './faq.module.css';
@@ -160,16 +160,6 @@ export default function FaqPage() {
             <p>Our team is available Monday to Saturday, 9 AM – 7 PM IST.</p>
           </div>
           <div className={styles.sqxGrid}>
-
-            <div className={styles.sqxCard}>
-              <div className={styles.sqxIc} aria-hidden="true">
-                <Phone size={22} />
-              </div>
-              <span className={styles.sqxLabel}>Call Us</span>
-              <a className={styles.sqxValue} href="tel:+919343297622" aria-label="Call GST Notice Support">
-                +91 93432 97622
-              </a>
-            </div>
 
             <div className={styles.sqxCard}>
               <div className={styles.sqxIc} style={{ background: 'rgba(37,211,102,.1)', borderColor: 'rgba(37,211,102,.25)', color: '#128C7E' }} aria-hidden="true">
