@@ -71,7 +71,7 @@
 | ⬚ | Hostinger hPanel env vars set for backend (staging) | Entry point: `dist/index.js` |
 | ⬚ | Cloudflare DNS + SSL "Full (strict)" | Blocked: Cloudflare account pending |
 | ⬚ | Trust signals (legal name, CIN, GSTIN, address, grievance officer) | Blocked: content pending via env |
-| ⬚ | Production phone number visible in header | |
+| ~~⛔~~ | ~~Production phone number visible in header~~ | Removed — phone eliminated site-wide per 2026-06-10 changelist |
 | ⬚ | `/deploy staging` pre + post smoke tests | |
 | ⬚ | `staging → main` PR + production deploy | |
 

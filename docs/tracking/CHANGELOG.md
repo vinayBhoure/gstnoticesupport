@@ -5,6 +5,35 @@
 
 ---
 
+## [2026-06-10] — feat: WhatsApp-first booking, hero video, nav cleanup, site-wide phone removal
+
+**Navigation**
+- Navbar: removed phone number from desktop right rail and mobile drawer; renamed "Resources" → "FAQ"; replaced "Book Service" CTA with "Contact Us" (→ `/contact`) in both desktop and mobile drawer.
+- Mobile sticky bar: replaced "Call Now" (tel: link) with `RequestCallbackButton`; "Book Service" → "Contact Us" (→ `/contact`).
+
+**WhatsApp widget**
+- Floating widget redesigned from text pill to circular 56×56 px icon (proper WhatsApp brand SVG).
+- Widget is now always visible on page load — no scroll threshold.
+
+**Homepage hero**
+- SVG document + shield graphic replaced with autoplay/muted/loop `hero-section.mp4` video.
+- "Upload Your Notice" CTA renamed "Book Service"; links to WhatsApp deep-link with pre-filled message.
+- Final CTA section: same WhatsApp redirect; phone number block removed.
+- Service descriptions in "Choose Your Service" grid expanded from one-liners to 2–3 sentence professional copy for all 4 services.
+
+**Book Service → WhatsApp (site-wide)**
+- About page (hero + final CTA): "Book a Service" → WhatsApp with general enquiry message.
+- All 4 service pages (2 buttons each — hero + pricing section): redirects to WhatsApp with service-specific pre-filled messages.
+
+**Scroll indicators**
+- New `HeroScrollIndicator` shared component: decorative bounce chevron, `aria-hidden`, `pointer-events:none`, respects `prefers-reduced-motion`.
+- Added to hero sections on: Homepage, About page, Contact page. Pricing page already had one. FAQ page explicitly excluded per spec.
+
+**Phone number removal (site-wide)**
+- All displayed `+91 93432 97622` and `tel:` hrefs removed from: Navbar, Footer, Contact page "Other Ways to Reach", FAQ "Still Have Questions" card, Homepage final CTA, Refund page, Terms page.
+
+---
+
 ## [2026-06-09] — docs: Phase 2 component specs; repo hygiene
 
 **Design system**
