@@ -71,20 +71,11 @@ export default function AboutPage() {
           <div className={styles.companyGrid}>
             <div className={styles.companyText}>
               <p>GST Notice Support Pvt. Ltd. is a professionally managed company established with the singular focus of helping Indian businesses navigate the increasingly complex GST litigation landscape. We operate nationally, serving CAs, Advocates, and SME owners who need expert help responding to tax notices and filing appeals.</p>
-              <p>Our registered office is in Bengaluru, Karnataka. All professional services are delivered by ICAI-registered Chartered Accountants and Bar Council-enrolled Advocates. We do not engage generalist legal or tax advisors for client work.</p>
-              <p>Our CIN and GSTIN are listed for reference and can be verified on the MCA portal and GST portal respectively. We believe legal identity transparency is a baseline requirement for any professional services firm.</p>
+              <p>Our registered office is in {ORG.address.locality}, {ORG.address.region}. All professional services are delivered by ICAI-registered Chartered Accountants and Bar Council-enrolled Advocates. We do not engage generalist legal or tax advisors for client work.</p>
             </div>
             <aside className={styles.companyRef} aria-label="Company legal reference">
               <h3>{ORG.legalName}</h3>
               <div className={styles.refRow}>
-                <div className={styles.refItem}>
-                  <span className={styles.refLabel}>CIN</span>
-                  <span className={`${styles.refValue} ${styles.refMono}`}>{ORG.cin}</span>
-                </div>
-                <div className={styles.refItem}>
-                  <span className={styles.refLabel}>Company GSTIN</span>
-                  <span className={`${styles.refValue} ${styles.refMono}`}>{ORG.gstin}</span>
-                </div>
                 <div className={styles.refItem}>
                   <span className={styles.refLabel}>Registered Address</span>
                   <span className={styles.refValue}>
@@ -93,13 +84,8 @@ export default function AboutPage() {
                   </span>
                 </div>
                 <div className={styles.refItem}>
-                  <span className={styles.refLabel}>Grievance Officer</span>
-                  <span className={styles.refValue}>
-                    {ORG.grievanceOfficer} ·{' '}
-                    <a href={`mailto:${ORG.grievanceEmail}`} style={{ color: 'var(--accent-green)' }}>
-                      {ORG.grievanceEmail}
-                    </a>
-                  </span>
+                  <span className={styles.refLabel}>Grievance Contact</span>
+                  <span className={styles.refValue}>{ORG.grievanceOfficer}</span>
                 </div>
               </div>
             </aside>

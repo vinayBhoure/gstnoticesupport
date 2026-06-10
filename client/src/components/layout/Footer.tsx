@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { MessageCircle, ShieldCheck } from 'lucide-react';
+import { ORG } from '@/lib/site';
 
 export function Footer() {
   return (
@@ -13,12 +14,10 @@ export function Footer() {
               <Image src="/logo.png" alt="" width={38} height={38} />
               <span className="bn">GST<span>Notice</span>Support</span>
             </div>
-            <div>GST Notice Support Pvt. Ltd.</div>
-            <div className="mono" style={{ marginTop: 10 }}>CIN: U74999KA2024PTC000000</div>
-            <div className="mono">GSTIN: 29ABCDE1234F1Z5</div>
+            <div>{ORG.legalName}</div>
             <div className="addr">
-              4th Floor, Prestige Centre, MG Road,<br />
-              Bengaluru, Karnataka 560001
+              {ORG.address.street},<br />
+              {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}
             </div>
           </div>
 
@@ -47,13 +46,8 @@ export function Footer() {
           <div>
             <h5>Contact</h5>
             <ul>
-              <li><a href="mailto:help@gstnoticesupport.in">help@gstnoticesupport.in</a></li>
-              <li>Grievance Officer: A. Sharma</li>
-              <li>
-                <a href="mailto:grievance@gstnoticesupport.in" className="mono">
-                  grievance@gstnoticesupport.in
-                </a>
-              </li>
+              <li><a href={`mailto:${ORG.email}`}>{ORG.email}</a></li>
+              <li>Grievance: {ORG.grievanceOfficer}</li>
             </ul>
             <a
               className="btn btn-wa"
@@ -77,7 +71,7 @@ export function Footer() {
             <ShieldCheck style={{ width: 15, height: 15 }} />
             SSL Secured
           </span>
-          <span>© 2026 GST Notice Support Pvt. Ltd. All rights reserved.</span>
+          <span>© 2026 {ORG.legalName}. All rights reserved.</span>
         </div>
       </div>
     </footer>

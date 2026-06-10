@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle, Mail } from 'lucide-react';
+import { ORG } from '@/lib/site';
 
 export const dynamic = 'force-static';
 
@@ -139,7 +140,7 @@ export default function RefundPolicyPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Mail style={{ width: 18, height: 18, color: 'var(--accent-green)' }} aria-hidden="true" />
-                  <span><strong>Grievance Officer:</strong> Ananya Rao — <a href="mailto:grievance@gstnoticesupport.in">grievance@gstnoticesupport.in</a></span>
+                  <span><strong>Grievance:</strong> {ORG.grievanceOfficer} — <a href={`mailto:${ORG.email}`}>{ORG.email}</a></span>
                 </div>
               </div>
             </div>

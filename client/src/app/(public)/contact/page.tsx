@@ -4,6 +4,7 @@ import styles from './contact.module.css';
 import { ContactForm } from './ContactForm';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
+import { ORG } from '@/lib/site';
 
 export const dynamic = 'force-static';
 
@@ -82,7 +83,7 @@ export default function ContactPage() {
                   <div className={styles.channelBody}>
                     <span className={styles.channelLabel}>Email</span>
                     <span className={styles.channelValue}>
-                      <a href="mailto:support@gstnoticesupport.in">support@gstnoticesupport.in</a>
+                      <a href={`mailto:${ORG.email}`}>{ORG.email}</a>
                     </span>
                     <span className={styles.channelHours}>We respond within 24 hours on working days</span>
                   </div>
@@ -96,8 +97,8 @@ export default function ContactPage() {
                   <div className={styles.channelBody}>
                     <span className={styles.channelLabel}>Office Address</span>
                     <address className={styles.addrText}>
-                      4th Floor, Prestige Centre, MG Road<br />
-                      Bengaluru, Karnataka 560001<br />
+                      {ORG.address.street}<br />
+                      {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}<br />
                       India
                     </address>
                     <span className={styles.channelHours} style={{ display: 'block', marginTop: '6px' }}>
@@ -122,11 +123,11 @@ export default function ContactPage() {
 
               </div>{/* /channelList */}
 
-              {/* Grievance Officer */}
+              {/* Grievance */}
               <div className={styles.grievanceRow}>
-                <strong>Grievance Officer:</strong> Ananya Rao<br />
-                <a href="mailto:grievance@gstnoticesupport.in">grievance@gstnoticesupport.in</a>
-                &nbsp;·&nbsp;For escalations and unresolved complaints only.
+                <strong>Grievance:</strong> {ORG.grievanceOfficer}
+                &nbsp;·&nbsp;For escalations and unresolved complaints, email us at{' '}
+                <a href={`mailto:${ORG.email}`}>{ORG.email}</a>.
               </div>
 
               {/* Request Callback Banner */}

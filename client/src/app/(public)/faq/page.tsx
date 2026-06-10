@@ -4,6 +4,7 @@ import { Mail } from 'lucide-react';
 import { FaqSection } from '@/components/faq/FaqSection';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './faq.module.css';
+import { ORG } from '@/lib/site';
 
 export const dynamic = 'force-static';
 
@@ -186,8 +187,8 @@ export default function FaqPage() {
                 <Mail size={22} />
               </div>
               <span className={styles.sqxLabel}>Email Us</span>
-              <a className={styles.sqxValue} href="mailto:support@gstnoticesupport.in" aria-label="Email GST Notice Support">
-                support@gstnoticesupport.in
+              <a className={styles.sqxValue} href={`mailto:${ORG.email}`} aria-label="Email GST Notice Support">
+                {ORG.email}
               </a>
             </div>
 
