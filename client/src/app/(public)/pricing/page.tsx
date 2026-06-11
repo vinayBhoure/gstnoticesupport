@@ -1,20 +1,26 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  Check, AlertTriangle, CreditCard, Ban, Upload, Phone,
+  Check, AlertTriangle, Upload, Phone,
 } from 'lucide-react';
 import { PricingScrollButton } from '@/components/pricing/PricingScrollButton';
 import { PricingFaqAccordion } from '@/components/pricing/PricingFaqAccordion';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './pricing.module.css';
 import { AnimateIn } from '@/components/ui/AnimateIn';
+import {
+  pricingMeta, pricingHero, pricingTable, pricingRepresentation,
+  pricingPaymentPolicy, pricingFaqHead, pricingCta,
+} from '@/data/pricing';
 
 export const dynamic = 'force-static';
 
 export const metadata: Metadata = {
-  title: 'Pricing | GST Notice Support',
-  description: 'Transparent, fixed pricing for GST notice and appeal services. SCN Reply ₹5,999 · Commissioner Appeal ₹9,999 · GSTAT Appeal ₹14,999. No hourly billing, no hidden fees.',
+  title: pricingMeta.title,
+  description: pricingMeta.description,
 };
+
+const [card1, card2, card3, card4] = pricingTable.cards;
 
 export default function PricingPage() {
   return (
@@ -23,10 +29,9 @@ export default function PricingPage() {
       <section className={`${styles.pageHero} bg-white`}>
         <div className="container">
           <div className={styles.heroInner}>
-            <h1>Transparent, Fixed Pricing. No Hourly Billing. No Hidden Fees.</h1>
+            <h1>{pricingHero.heading}</h1>
             <p className={styles.sub}>
-              Every service has a fixed professional fee. You see the price before you book. Final fee is
-              confirmed before any payment is taken.
+              {pricingHero.sub}
             </p>
             <PricingScrollButton />
           </div>
@@ -37,9 +42,9 @@ export default function PricingPage() {
       <section className="section bg-50" id="pricing-table" style={{ paddingTop: '64px' }}>
         <div className="container">
           <div className="sec-head">
-            <div className="eyebrow">Services &amp; fees</div>
-            <h2>All Services, All Prices</h2>
-            <p>Professional fees are fixed. What you see is what you pay.</p>
+            <div className="eyebrow">{pricingTable.eyebrow}</div>
+            <h2>{pricingTable.heading}</h2>
+            <p>{pricingTable.sub}</p>
           </div>
 
           <div className={styles.pricingGrid}>
@@ -47,20 +52,18 @@ export default function PricingPage() {
             {/* ASMT-10 */}
             <AnimateIn delay={0}>
               <div className={styles.pCard}>
-                <span className={styles.noticeTag}>Section 61 CGST Act scrutiny</span>
-                <h3>ASMT-10 Reply</h3>
-                <div className={styles.price}>₹2,999</div>
-                <p className={styles.priceSub}>One-time professional fee</p>
+                <span className={styles.noticeTag}>{card1.noticeTag}</span>
+                <h3>{card1.title}</h3>
+                <div className={styles.price}>{card1.priceDisplay}</div>
+                <p className={styles.priceSub}>{card1.priceSub}</p>
                 <ul className={styles.incList}>
-                  <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Structured reply draft</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
+                  {card1.features.map(feature => (
+                    <li key={feature}><Check className={styles.ic} aria-hidden="true" />{feature}</li>
+                  ))}
                 </ul>
                 <div className={styles.cardBottom}>
                   <div className={styles.pdSpacer} aria-hidden="true" />
-                  <Link className="btn btn-primary" href="/services/asmt-10">Book ASMT-10 Reply</Link>
+                  <Link className="btn btn-primary" href={card1.href}>{card1.ctaLabel}</Link>
                 </div>
               </div>
             </AnimateIn>
@@ -68,21 +71,19 @@ export default function PricingPage() {
             {/* SCN Reply — Most Popular */}
             <AnimateIn delay={80}>
               <div className={`${styles.pCard} ${styles.popular}`}>
-                <span className={styles.popularBadge} aria-label="Most popular service">Most Popular</span>
-                <span className={styles.noticeTag}>DRC-01 / DRC-01A demand notice</span>
-                <h3>SCN Reply</h3>
-                <div className={styles.price}>₹5,999</div>
-                <p className={styles.priceSub}>One-time professional fee</p>
+                <span className={styles.popularBadge} aria-label={card2.popularAriaLabel}>{card2.popularBadge}</span>
+                <span className={styles.noticeTag}>{card2.noticeTag}</span>
+                <h3>{card2.title}</h3>
+                <div className={styles.price}>{card2.priceDisplay}</div>
+                <p className={styles.priceSub}>{card2.priceSub}</p>
                 <ul className={styles.incList}>
-                  <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Structured reply draft</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
+                  {card2.features.map(feature => (
+                    <li key={feature}><Check className={styles.ic} aria-hidden="true" />{feature}</li>
+                  ))}
                 </ul>
                 <div className={styles.cardBottom}>
                   <div className={styles.pdSpacer} aria-hidden="true" />
-                  <Link className="btn btn-primary" href="/services/scn-reply">Book SCN Reply</Link>
+                  <Link className="btn btn-primary" href={card2.href}>{card2.ctaLabel}</Link>
                 </div>
               </div>
             </AnimateIn>
@@ -90,23 +91,21 @@ export default function PricingPage() {
             {/* Commissioner Appeal */}
             <AnimateIn delay={160}>
               <div className={styles.pCard}>
-                <span className={styles.noticeTag}>APL-01 first appeal</span>
-                <h3>Commissioner Appeal</h3>
-                <div className={styles.price}>₹9,999</div>
-                <p className={styles.priceSub}>One-time professional fee</p>
+                <span className={styles.noticeTag}>{card3.noticeTag}</span>
+                <h3>{card3.title}</h3>
+                <div className={styles.price}>{card3.priceDisplay}</div>
+                <p className={styles.priceSub}>{card3.priceSub}</p>
                 <ul className={styles.incList}>
-                  <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Complete appeal bundle draft</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Draft within 48 hours</li>
+                  {card3.features.map(feature => (
+                    <li key={feature}><Check className={styles.ic} aria-hidden="true" />{feature}</li>
+                  ))}
                 </ul>
                 <div className={styles.cardBottom}>
-                  <div className={styles.pdNote} role="note" aria-label="Government pre-deposit note">
+                  <div className={styles.pdNote} role="note" aria-label={card3.predepositNote?.ariaLabel}>
                     <AlertTriangle className={styles.ic} aria-hidden="true" />
-                    <p><strong>Govt. pre-deposit:</strong> 10% of disputed tax — paid by you to GST portal. Not our fee.</p>
+                    {card3.predepositNote?.body}
                   </div>
-                  <Link className="btn btn-primary" href="/services/commissioner-appeal">Book Commissioner Appeal</Link>
+                  <Link className="btn btn-primary" href={card3.href}>{card3.ctaLabel}</Link>
                 </div>
               </div>
             </AnimateIn>
@@ -114,23 +113,21 @@ export default function PricingPage() {
             {/* GSTAT Appeal */}
             <AnimateIn delay={240}>
               <div className={styles.pCard}>
-                <span className={styles.noticeTag}>APL-05 second appeal</span>
-                <h3>GSTAT Appeal</h3>
-                <div className={styles.price}>₹14,999</div>
-                <p className={styles.priceSub}>One-time professional fee</p>
+                <span className={styles.noticeTag}>{card4.noticeTag}</span>
+                <h3>{card4.title}</h3>
+                <div className={styles.price}>{card4.priceDisplay}</div>
+                <p className={styles.priceSub}>{card4.priceSub}</p>
                 <ul className={styles.incList}>
-                  <li><Check className={styles.ic} aria-hidden="true" />Expert review of your documents</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Complete APL-05 bundle draft</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />One revision round</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Portal filing support</li>
-                  <li><Check className={styles.ic} aria-hidden="true" />Draft within 72 hours</li>
+                  {card4.features.map(feature => (
+                    <li key={feature}><Check className={styles.ic} aria-hidden="true" />{feature}</li>
+                  ))}
                 </ul>
                 <div className={styles.cardBottom}>
-                  <div className={styles.pdNote} role="note" aria-label="Government pre-deposit note">
+                  <div className={styles.pdNote} role="note" aria-label={card4.predepositNote?.ariaLabel}>
                     <AlertTriangle className={styles.ic} aria-hidden="true" />
-                    <p><strong>Govt. pre-deposit:</strong> 20% of disputed tax — paid by you to GST portal. Not our fee.</p>
+                    {card4.predepositNote?.body}
                   </div>
-                  <Link className="btn btn-primary" href="/services/gstat-appeal">Book GSTAT Appeal</Link>
+                  <Link className="btn btn-primary" href={card4.href}>{card4.ctaLabel}</Link>
                 </div>
               </div>
             </AnimateIn>
@@ -144,17 +141,15 @@ export default function PricingPage() {
         <div className="container">
           <div className={styles.repCard}>
             <div className={styles.repText}>
-              <span className={styles.repTag}>Consultation-based · offline service</span>
-              <h2>Representation Before Tax Authority</h2>
+              <span className={styles.repTag}>{pricingRepresentation.tag}</span>
+              <h2>{pricingRepresentation.heading}</h2>
               <p>
-                Handling where physical or virtual appearance before the GST Officer or Appellate Authority is
-                required. Pricing depends on case complexity, jurisdiction, and hearing schedule. This service
-                is discussed and confirmed offline before any engagement.
+                {pricingRepresentation.body}
               </p>
             </div>
             <div className={styles.repAction}>
               <RequestCallbackButton className="btn btn-secondary on-dark">
-                Request a Callback for Representation
+                {pricingRepresentation.ctaLabel}
               </RequestCallbackButton>
             </div>
           </div>
@@ -165,25 +160,17 @@ export default function PricingPage() {
       <section className="section bg-50">
         <div className="container">
           <div className="sec-head">
-            <div className="eyebrow">How payment works</div>
-            <h2>Payment Policy</h2>
+            <div className="eyebrow">{pricingPaymentPolicy.eyebrow}</div>
+            <h2>{pricingPaymentPolicy.heading}</h2>
           </div>
           <div className={styles.policyGrid}>
-            <div className={styles.policyItem}>
-              <div className={styles.icWrap}><CreditCard size={22} /></div>
-              <h3>Full Payment Upfront</h3>
-              <p>Payment is taken before draft delivery. You review a partial preview before full payment — so you know work has begun before committing.</p>
-            </div>
-            <div className={styles.policyItem}>
-              <div className={styles.icWrap}><Ban size={22} /></div>
-              <h3>No EMI, No Partial Payment</h3>
-              <p>Services are priced as fixed units. We do not split payments or offer instalment plans. The fee you see is the fee you pay, once.</p>
-            </div>
-            <div className={`${styles.policyItem} ${styles.refund}`}>
-              <div className={styles.icWrap}><AlertTriangle size={22} /></div>
-              <h3>No Refund Policy</h3>
-              <p>Once draft preparation begins, payment is non-refundable. We are transparent about this before you pay — not in fine print after. Our Refund Policy is linked in the footer.</p>
-            </div>
+            {pricingPaymentPolicy.items.map(({ Icon, title, body, refund }) => (
+              <div key={title} className={refund ? `${styles.policyItem} ${styles.refund}` : styles.policyItem}>
+                <div className={styles.icWrap}><Icon size={22} /></div>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -192,8 +179,8 @@ export default function PricingPage() {
       <section className="section bg-white">
         <div className="container">
           <div className="sec-head">
-            <div className="eyebrow">Common questions</div>
-            <h2>Questions About Pricing</h2>
+            <div className="eyebrow">{pricingFaqHead.eyebrow}</div>
+            <h2>{pricingFaqHead.heading}</h2>
           </div>
           <PricingFaqAccordion />
         </div>
@@ -202,14 +189,14 @@ export default function PricingPage() {
       {/* FINAL CTA BANNER */}
       <section className={styles.ctaBanner} id="callback">
         <div className="container">
-          <h2>Ready to Get Started?</h2>
-          <p>Upload your notice now, or speak to an expert first.</p>
+          <h2>{pricingCta.heading}</h2>
+          <p>{pricingCta.sub}</p>
           <div className={styles.btnRow}>
-            <Link className="btn btn-primary" href="/contact">
-              <Upload size={18} />Upload Your Notice
+            <Link className="btn btn-primary" href={pricingCta.uploadHref}>
+              <Upload size={18} />{pricingCta.uploadLabel}
             </Link>
             <RequestCallbackButton className="btn btn-secondary on-dark">
-              <Phone size={18} />Request a Callback
+              <Phone size={18} />{pricingCta.callbackLabel}
             </RequestCallbackButton>
           </div>
         </div>

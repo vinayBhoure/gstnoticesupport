@@ -64,6 +64,11 @@
 | ⬚ | Google Analytics GA4 integration | Blocked: Measurement ID pending |
 | ⬚ | Google Search Console setup | Blocked: access pending |
 
+### EP4-Addendum — Content Data Layer Refactor
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | Extract all static copy into `client/src/data/` (14 files, 24 types) | All pages/components now render-only; verified pixel-identical against pre-refactor build |
+
 ### EP5 — Phase 1 Hardening & Launch
 | Status | Task | Notes |
 |---|---|---|

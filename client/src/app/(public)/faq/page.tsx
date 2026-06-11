@@ -5,123 +5,13 @@ import { FaqSection } from '@/components/faq/FaqSection';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from './faq.module.css';
 import { ORG } from '@/lib/site';
+import { faqMeta, faqSchema, faqHero, faqStillQuestions, faqCta } from '@/data/faq';
 
 export const dynamic = 'force-static';
 
 export const metadata: Metadata = {
-  title: 'FAQ | GST Notice Support',
-  description: 'Answers to the most common questions about GST notice handling, our expert team, document security, fees, and payment. Find out how GST Notice Support works.',
-};
-
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: 'I have received a GST notice. What should I do first?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Do not respond without professional review. Upload a copy of your notice through our booking system. Our team reviews it within 4 business hours and guides you on the right service.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'How long does it take to prepare my reply or appeal?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'ASMT-10 Reply and SCN Reply: 48 hours. Commissioner Appeal (APL-01): 48 hours. GSTAT Appeal (APL-05): 72 hours. Clock starts from complete document receipt.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What documents do I need to submit?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'At minimum: the notice itself and your GSTN. For notice replies, also GSTR returns, purchase and sales registers, and GSTR-2B reconciliation. For appeals, the original order plus supporting records.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Can I track the progress of my case after booking?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Yes. Your dashboard shows real-time booking status from document upload through review, draft ready, and filing. Email notifications are sent at each stage.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Do your experts appear before GST authorities in person?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Yes, for cases requiring personal or virtual appearance before the Appellate Authority or GSTAT. This is the Representation Before Tax Authority service, priced separately.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What is the difference between your team and a local CA?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Our team works exclusively on GST litigation — notice replies, appeals, and tribunal filings. Specialisation means our professionals have handled hundreds of GST demands, ITC disallowances, and appellate proceedings.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Are your professionals registered with ICAI or Bar Council?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Yes. CA work is handled by ICAI-registered CAs. Appellate and tribunal representation is handled by Bar Council-enrolled Advocates. Registration details are on our About page.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Is my GST data and financial information safe with you?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Documents are stored on AWS S3 in private, encrypted buckets. Access is via time-limited pre-signed URLs. Our professionals are bound by confidentiality obligations.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What happens to my documents after the service is complete?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Documents remain in your dashboard while your account is active. If you delete your account, documents are permanently removed from our servers within 7 days.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What is your exact fee for each service?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Fixed fees: ASMT-10 Reply ₹2,999 · SCN Reply ₹5,999 · Commissioner Appeal ₹9,999 · GSTAT Appeal ₹14,999. One-time professional fees — no retainer, no hourly billing.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What is the government pre-deposit and who pays it?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'The pre-deposit is a mandatory statutory payment you make directly to the GST portal before your appeal is admitted. It is not our fee. Commissioner Appeal requires 10% of disputed tax; GSTAT Appeal requires 20%.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Is there a refund if my case is not decided in my favour?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'No. Our fee is for professional service — preparation, drafting, and filing — not for the outcome. We do not guarantee results. Our No-Refund Policy is linked in the footer.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'When exactly do I pay?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'After you upload your documents and our team prepares a partial draft preview. You review the preview first. Payment unlocks the complete draft and portal filing support.',
-      },
-    },
-  ],
+  title: faqMeta.title,
+  description: faqMeta.description,
 };
 
 const WaIcon = () => (
@@ -141,10 +31,9 @@ export default function FaqPage() {
       {/* PAGE HERO */}
       <section className={`${styles.pageHero} bg-50`}>
         <div className="container">
-          <h1>Frequently Asked Questions</h1>
+          <h1>{faqHero.heading}</h1>
           <p className={styles.sub}>
-            Answers to the most common questions about GST notice handling, our process,
-            our team, and our fees.
+            {faqHero.sub}
           </p>
         </div>
       </section>
@@ -156,9 +45,9 @@ export default function FaqPage() {
       <section className={`${styles.sqxSection} bg-white`}>
         <div className="container">
           <div className="sec-head" style={{ marginBottom: '40px' }}>
-            <div className="eyebrow">Get in touch</div>
-            <h2>Still Have Questions?</h2>
-            <p>Our team is available Monday to Saturday, 9 AM – 7 PM IST.</p>
+            <div className="eyebrow">{faqStillQuestions.eyebrow}</div>
+            <h2>{faqStillQuestions.heading}</h2>
+            <p>{faqStillQuestions.sub}</p>
           </div>
           <div className={styles.sqxGrid}>
 
@@ -166,19 +55,19 @@ export default function FaqPage() {
               <div className={styles.sqxIc} style={{ background: 'rgba(37,211,102,.1)', borderColor: 'rgba(37,211,102,.25)', color: '#128C7E' }} aria-hidden="true">
                 <WaIcon />
               </div>
-              <span className={styles.sqxLabel}>WhatsApp Us</span>
+              <span className={styles.sqxLabel}>{faqStillQuestions.whatsapp.label}</span>
               <p style={{ fontSize: '15px', color: 'var(--neutral-600)', lineHeight: 1.5, margin: '0' }}>
-                Send your query directly — we reply within 2 hours.
+                {faqStillQuestions.whatsapp.body}
               </p>
               <a
                 className={styles.btnWaCard}
-                href="https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
+                href={faqStillQuestions.whatsapp.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Open WhatsApp chat with GST Notice Support"
+                aria-label={faqStillQuestions.whatsapp.ariaLabel}
               >
                 <WaIcon />
-                Chat on WhatsApp
+                {faqStillQuestions.whatsapp.ctaLabel}
               </a>
             </div>
 
@@ -186,8 +75,8 @@ export default function FaqPage() {
               <div className={styles.sqxIc} aria-hidden="true">
                 <Mail size={22} />
               </div>
-              <span className={styles.sqxLabel}>Email Us</span>
-              <a className={styles.sqxValue} href={`mailto:${ORG.email}`} aria-label="Email GST Notice Support">
+              <span className={styles.sqxLabel}>{faqStillQuestions.email.label}</span>
+              <a className={styles.sqxValue} href={`mailto:${ORG.email}`} aria-label={faqStillQuestions.email.ariaLabel}>
                 {ORG.email}
               </a>
             </div>
@@ -199,12 +88,12 @@ export default function FaqPage() {
       {/* FINAL CTA BANNER */}
       <section className={styles.ctaBanner}>
         <div className="container">
-          <h2>Ready to Get Expert Help?</h2>
-          <p>Upload your notice today and get a professional response within 48 hours.</p>
+          <h2>{faqCta.heading}</h2>
+          <p>{faqCta.sub}</p>
           <div className={styles.btnRow}>
-            <Link className="btn btn-primary" href="/pricing">Book a Service</Link>
+            <Link className="btn btn-primary" href={faqCta.bookHref}>{faqCta.bookLabel}</Link>
             <RequestCallbackButton className="btn btn-secondary on-dark">
-              Request a Callback
+              {faqCta.callbackLabel}
             </RequestCallbackButton>
           </div>
         </div>

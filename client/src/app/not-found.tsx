@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { NOT_FOUND } from '@/data/common';
 
 export const metadata: Metadata = {
-  title: '404 — Page Not Found | GST Notice Support',
+  title: NOT_FOUND.metaTitle,
 };
 
 export default function NotFound() {
@@ -25,10 +26,10 @@ export default function NotFound() {
           marginBottom: '16px',
           fontFamily: 'var(--font-inter, Inter, sans-serif)',
         }}>
-          404
+          {NOT_FOUND.code}
         </div>
         <h1 style={{ fontSize: '28px', color: 'var(--primary-navy)', marginBottom: '16px' }}>
-          Page Not Found
+          {NOT_FOUND.heading}
         </h1>
         <p style={{
           fontSize: '17px',
@@ -36,17 +37,16 @@ export default function NotFound() {
           lineHeight: 1.65,
           marginBottom: '36px',
         }}>
-          The page you are looking for may have been moved or does not exist.
-          Try one of the links below.
+          {NOT_FOUND.body}
         </p>
         <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link className="btn btn-primary" href="/">Go to Homepage</Link>
-          <Link className="btn btn-secondary" href="/contact">Contact Us</Link>
+          <Link className="btn btn-primary" href={NOT_FOUND.homeCta.href}>{NOT_FOUND.homeCta.label}</Link>
+          <Link className="btn btn-secondary" href={NOT_FOUND.contactCta.href}>{NOT_FOUND.contactCta.label}</Link>
         </div>
         <div style={{ marginTop: '40px', fontSize: '14px', color: 'var(--neutral-600)' }}>
-          Looking for a specific service?{' '}
-          <Link href="/pricing" style={{ color: 'var(--accent-green)', fontWeight: 600 }}>
-            View all services →
+          {NOT_FOUND.servicesPrompt}{' '}
+          <Link href={NOT_FOUND.servicesCta.href} style={{ color: 'var(--accent-green)', fontWeight: 600 }}>
+            {NOT_FOUND.servicesCta.label}
           </Link>
         </div>
       </div>
