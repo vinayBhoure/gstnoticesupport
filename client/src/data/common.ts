@@ -3,22 +3,25 @@
 import { ORG } from '@/lib/site';
 import type { FooterColumn, NavItem, NavServiceItem } from './types';
 
+// Strip leading '+' for wa.me URL format (ORG.phone is stored as +91XXXXXXXXXX).
+const WA_PHONE = ORG.phone.replace('+', '');
+
 // Pre-filled WhatsApp deep links. The message text is part of the URL —
 // keep it URL-encoded exactly as it should appear in the chat box.
 export const WHATSAPP_LINKS = {
-  home: 'https://wa.me/919343297622?text=Hello%2C%20I%27m%20want%20to%20know%20more%20about%20GST%20Notice%20Support',
+  home: `https://wa.me/${WA_PHONE}?text=Hello%2C%20I%27m%20want%20to%20know%20more%20about%20GST%20Notice%20Support`,
   about:
-    'https://wa.me/919343297622?text=Hello%2C%20I%20want%20to%20know%20more%20about%20GST%20Notice%20Support%20services.%20Please%20assist%20me.',
-  generalQuery: 'https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice.',
+    `https://wa.me/${WA_PHONE}?text=Hello%2C%20I%20want%20to%20know%20more%20about%20GST%20Notice%20Support%20services.%20Please%20assist%20me.`,
+  generalQuery: `https://wa.me/${WA_PHONE}?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice.`,
   asmt10:
-    'https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20ASMT-10%20Scrutiny%20Reply%20service.%20Please%20assist%20me%20to%20proceed%20further.',
+    `https://wa.me/${WA_PHONE}?text=Hi%2C%20I%20am%20interested%20in%20ASMT-10%20Scrutiny%20Reply%20service.%20Please%20assist%20me%20to%20proceed%20further.`,
   scnReply:
-    'https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20Show%20Cause%20Notice%20Reply%20service.%20Please%20assist%20me%20to%20proceed%20further.',
+    `https://wa.me/${WA_PHONE}?text=Hi%2C%20I%20am%20interested%20in%20Show%20Cause%20Notice%20Reply%20service.%20Please%20assist%20me%20to%20proceed%20further.`,
   commissionerAppeal:
-    'https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20Commissioner%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further.',
+    `https://wa.me/${WA_PHONE}?text=Hi%2C%20I%20am%20interested%20in%20Commissioner%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further.`,
   gstatAppeal:
-    'https://wa.me/919343297622?text=Hi%2C%20I%20am%20interested%20in%20GSTAT%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further.',
-} as const;
+    `https://wa.me/${WA_PHONE}?text=Hi%2C%20I%20am%20interested%20in%20GSTAT%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further.`,
+};
 
 export const NAV_SERVICE_ITEMS: NavServiceItem[] = [
   { href: '/services/asmt-10', title: 'ASMT-10 Scrutiny Notice', description: 'Section 61 — return discrepancies' },
