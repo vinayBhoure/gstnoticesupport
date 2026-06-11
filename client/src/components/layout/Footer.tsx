@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MessageCircle, ShieldCheck } from 'lucide-react';
 import { ORG } from '@/lib/site';
+import { FOOTER_COLUMNS, FOOTER_LABELS, FOOTER_POLICIES } from '@/data/common';
 
 export function Footer() {
   return (
@@ -23,55 +24,54 @@ export function Footer() {
 
           {/* Services */}
           <div>
-            <h5>Services</h5>
+            <h5>{FOOTER_COLUMNS.services.heading}</h5>
             <ul>
-              <li><Link href="/services/asmt-10">ASMT-10 Scrutiny Notice</Link></li>
-              <li><Link href="/services/scn-reply">Show Cause Notice (SCN)</Link></li>
-              <li><Link href="/services/commissioner-appeal">Commissioner Appeal</Link></li>
-              <li><Link href="/services/gstat-appeal">GSTAT Appeal</Link></li>
-              <li><Link href="/pricing">Pricing</Link></li>
+              {FOOTER_COLUMNS.services.links.map(link => (
+                <li key={link.label}><Link href={link.href}>{link.label}</Link></li>
+              ))}
             </ul>
           </div>
 
           {/* Resources */}
           <div>
-            <h5>Resources</h5>
+            <h5>{FOOTER_COLUMNS.resources.heading}</h5>
             <ul>
-              <li><Link href="/faq">GST Notice Guides</Link></li>
-              <li><Link href="/faq">FAQ</Link></li>
+              {FOOTER_COLUMNS.resources.links.map(link => (
+                <li key={link.label}><Link href={link.href}>{link.label}</Link></li>
+              ))}
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h5>Contact</h5>
+            <h5>{FOOTER_LABELS.contactHeading}</h5>
             <ul>
               <li><a href={`mailto:${ORG.email}`}>{ORG.email}</a></li>
-              <li>Grievance: {ORG.grievanceOfficer}</li>
+              <li>{FOOTER_LABELS.grievanceLabel} {ORG.grievanceOfficer}</li>
             </ul>
             <a
               className="btn btn-wa"
-              href="https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
+              href={FOOTER_LABELS.whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
             >
               <MessageCircle className="ic" />
-              Chat on WhatsApp
+              {FOOTER_LABELS.whatsappCta}
             </a>
           </div>
         </div>
 
         <div className="strip">
           <div className="pols">
-            <Link href="/privacy">Privacy Policy</Link><span>|</span>
-            <Link href="/terms">Terms</Link><span>|</span>
-            <Link href="/refund">Refund Policy</Link>
+            <Link href={FOOTER_POLICIES[0].href}>{FOOTER_POLICIES[0].label}</Link><span>|</span>
+            <Link href={FOOTER_POLICIES[1].href}>{FOOTER_POLICIES[1].label}</Link><span>|</span>
+            <Link href={FOOTER_POLICIES[2].href}>{FOOTER_POLICIES[2].label}</Link>
           </div>
           <span className="ssl">
             <ShieldCheck style={{ width: 15, height: 15 }} />
-            SSL Secured
+            {FOOTER_LABELS.sslLabel}
           </span>
-          <span>© 2026 {ORG.legalName}. All rights reserved.</span>
+          <span>{FOOTER_LABELS.copyright}</span>
         </div>
       </div>
     </footer>

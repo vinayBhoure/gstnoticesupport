@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-06-11] — refactor: extract all static content into `client/src/data/` layer
+
+**Content data layer (developer-facing; zero visible change to rendered site)**
+- All hardcoded copy extracted from 9 public pages, `not-found.tsx`, and 6 components into a typed `client/src/data/` directory — 14 new files total.
+- `types.ts` — 24+ explicit TypeScript interfaces covering every content shape (`PageMeta`, `ServicePageContent`, `TestimonialItem`, `PricingTier`, `FaqItem`, etc.).
+- `common.ts` — shared content: all 7 WhatsApp deep links (with per-service pre-filled message text), nav items, footer columns, 404 copy. Org identity stays env-driven in `lib/site.ts`.
+- Per-page data files: `home.tsx`, `about.ts`, `contact.ts`, `pricing.tsx`, `faq.tsx`, `home-faq.tsx`, `pricing-faq.tsx`, `testimonials.ts`, `services/asmt10.tsx`, `services/scn.tsx`, `services/commissioner-appeal.tsx`, `services/gstat-appeal.tsx`.
+- SEO metadata (`PageMeta`) and JSON-LD inputs included in data files alongside content.
+- Lucide icon component references stored in data arrays beside their copy (typed `LucideIcon`).
+- JSX-rich content (links/bold inside FAQ answers, pre-deposit disclosures) stored as `ReactNode` in `.tsx` data files.
+- **Verification:** prerendered HTML diff of all 14 static routes against pre-refactor baseline — pixel-identical. `tsc --noEmit` clean, `next build` passes (15 SSG routes).
+- **Going forward:** all copy edits touch only `client/src/data/` files; no component code needs changing for content updates.
+
+---
+
 ## [2026-06-10] — feat: WhatsApp-first booking, hero video, nav cleanup, site-wide phone removal
 
 **Navigation**

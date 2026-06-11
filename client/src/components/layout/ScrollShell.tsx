@@ -10,7 +10,9 @@ const WaIcon = () => (
   </svg>
 );
 
-export function ScrollShell() {
+type ScrollShellProps = { whatsappHref: string };
+
+export function ScrollShell({ whatsappHref }: ScrollShellProps) {
   const [showBar, setShowBar] = useState(false);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export function ScrollShell() {
     <>
       <a
         className="wa-float show"
-        href="https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
+        href={whatsappHref}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat with us on WhatsApp"
