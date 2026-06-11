@@ -5,12 +5,13 @@ import { ContactForm } from './ContactForm';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
 import { ORG } from '@/lib/site';
+import { contactMeta, contactHero, contactContent } from '@/data/contact';
 
 export const dynamic = 'force-static';
 
 export const metadata: Metadata = {
-  title: 'Contact Us | GST Notice Support',
-  description: 'Reach the GST Notice Support team by phone, WhatsApp, or email. We respond to every enquiry within 24 hours. Mon–Sat, 9 AM–7 PM IST.',
+  title: contactMeta.title,
+  description: contactMeta.description,
 };
 
 const WaIcon = () => (
@@ -25,10 +26,9 @@ export default function ContactPage() {
       {/* PAGE HERO */}
       <section className={styles.pageHero} style={{ position: 'relative' }}>
         <div className="container">
-          <h1>Get in Touch</h1>
+          <h1>{contactHero.heading}</h1>
           <p className={styles.sub}>
-            Have a GST notice or a question about our services? Reach us by email or WhatsApp.
-            We respond within 24 hours on working days.
+            {contactHero.sub}
           </p>
         </div>
         <HeroScrollIndicator />
@@ -41,13 +41,13 @@ export default function ContactPage() {
 
             {/* LEFT — CONTACT FORM */}
             <div className={styles.formCard}>
-              <h3>Send Us a Message</h3>
+              <h3>{contactContent.formCardHeading}</h3>
               <ContactForm />
             </div>
 
             {/* RIGHT — CONTACT DETAILS */}
             <div className={styles.detailsCol}>
-              <h3>Other Ways to Reach Us</h3>
+              <h3>{contactContent.detailsHeading}</h3>
 
               <div className={styles.channelList}>
 
@@ -61,16 +61,16 @@ export default function ContactPage() {
                     <WaIcon />
                   </div>
                   <div className={styles.channelBody}>
-                    <span className={styles.channelLabel}>WhatsApp</span>
+                    <span className={styles.channelLabel}>{contactContent.whatsapp.label}</span>
                     <a
                       className={styles.btnWaChannel}
-                      href="https://wa.me/919343297622?text=Hello%2C%20I%20have%20a%20query%20about%20a%20GST%20notice."
+                      href={contactContent.whatsapp.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label="Chat on WhatsApp — opens WhatsApp"
+                      aria-label={contactContent.whatsapp.ariaLabel}
                     >
                       <WaIcon />
-                      Chat on WhatsApp
+                      {contactContent.whatsapp.ctaLabel}
                     </a>
                   </div>
                 </div>
@@ -81,11 +81,11 @@ export default function ContactPage() {
                     <Mail size={20} />
                   </div>
                   <div className={styles.channelBody}>
-                    <span className={styles.channelLabel}>Email</span>
+                    <span className={styles.channelLabel}>{contactContent.email.label}</span>
                     <span className={styles.channelValue}>
                       <a href={`mailto:${ORG.email}`}>{ORG.email}</a>
                     </span>
-                    <span className={styles.channelHours}>We respond within 24 hours on working days</span>
+                    <span className={styles.channelHours}>{contactContent.email.hours}</span>
                   </div>
                 </div>
 
@@ -95,14 +95,14 @@ export default function ContactPage() {
                     <MapPin size={20} />
                   </div>
                   <div className={styles.channelBody}>
-                    <span className={styles.channelLabel}>Office Address</span>
+                    <span className={styles.channelLabel}>{contactContent.address.label}</span>
                     <address className={styles.addrText}>
                       {ORG.address.street}<br />
                       {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}<br />
-                      India
+                      {contactContent.address.country}
                     </address>
                     <span className={styles.channelHours} style={{ display: 'block', marginTop: '6px' }}>
-                      Services delivered remotely — no in-person visit required
+                      {contactContent.address.note}
                     </span>
                   </div>
                 </div>
@@ -113,10 +113,10 @@ export default function ContactPage() {
                     <Clock size={20} />
                   </div>
                   <div className={styles.channelBody}>
-                    <span className={styles.channelLabel}>Office Hours</span>
-                    <span className={styles.channelValue}>Monday – Saturday</span>
+                    <span className={styles.channelLabel}>{contactContent.hours.label}</span>
+                    <span className={styles.channelValue}>{contactContent.hours.days}</span>
                     <span className={styles.channelHours}>
-                      9 AM – 7 PM IST · Closed on Sundays &amp; national holidays
+                      {contactContent.hours.detail}
                     </span>
                   </div>
                 </div>
@@ -125,20 +125,20 @@ export default function ContactPage() {
 
               {/* Grievance */}
               <div className={styles.grievanceRow}>
-                <strong>Grievance:</strong> {ORG.grievanceOfficer}
-                &nbsp;·&nbsp;For escalations and unresolved complaints, email us at{' '}
+                <strong>{contactContent.grievance.label}</strong> {ORG.grievanceOfficer}
+                &nbsp;·&nbsp;{contactContent.grievance.text}{' '}
                 <a href={`mailto:${ORG.email}`}>{ORG.email}</a>.
               </div>
 
               {/* Request Callback Banner */}
               <div className={styles.callbackBanner} id="callback">
                 <div className={styles.cbText}>
-                  <strong>Prefer a callback?</strong>
-                  <span>Leave your number and a convenient time — we will call you.</span>
+                  <strong>{contactContent.callback.title}</strong>
+                  <span>{contactContent.callback.sub}</span>
                 </div>
                 <RequestCallbackButton className="btn btn-secondary">
                   <PhoneIncoming size={17} aria-hidden="true" />
-                  Request a Callback
+                  {contactContent.callback.ctaLabel}
                 </RequestCallbackButton>
               </div>
 

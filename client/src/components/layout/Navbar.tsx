@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { NAV_LABELS, NAV_LINKS, NAV_SERVICE_ITEMS } from '@/data/common';
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -65,35 +66,25 @@ export function Navbar() {
                 aria-expanded="false"
                 className={isServicesActive ? 'nav-active' : undefined}
               >
-                Services <ChevronDown style={{ width: 15, height: 15 }} />
+                {NAV_LABELS.servicesDropdown} <ChevronDown style={{ width: 15, height: 15 }} />
               </button>
               <div className="drop-menu" role="menu">
-                <Link href="/services/asmt-10" role="menuitem">
-                  <strong>ASMT-10 Scrutiny Notice</strong>
-                  <small>Section 61 — return discrepancies</small>
-                </Link>
-                <Link href="/services/scn-reply" role="menuitem">
-                  <strong>Show Cause Notice (SCN)</strong>
-                  <small>DRC-01 / DRC-01A demands</small>
-                </Link>
-                <Link href="/services/commissioner-appeal" role="menuitem">
-                  <strong>Commissioner Appeal</strong>
-                  <small>APL-01 first appeal</small>
-                </Link>
-                <Link href="/services/gstat-appeal" role="menuitem">
-                  <strong>GSTAT Appeal</strong>
-                  <small>APL-05 tribunal filing</small>
-                </Link>
+                {NAV_SERVICE_ITEMS.map(item => (
+                  <Link key={item.href} href={item.href} role="menuitem">
+                    <strong>{item.title}</strong>
+                    <small>{item.description}</small>
+                  </Link>
+                ))}
               </div>
             </div>
-            <Link href="/about" aria-current={navCurrent('/about')}>About</Link>
-            <Link href="/faq" aria-current={navCurrent('/faq')}>FAQ</Link>
-            <Link href="/pricing" aria-current={navCurrent('/pricing')}>Pricing</Link>
+            {NAV_LINKS.map(item => (
+              <Link key={item.href} href={item.href} aria-current={navCurrent(item.href)}>{item.label}</Link>
+            ))}
           </nav>
 
           <div className="right">
-            <RequestCallbackButton className="btn btn-secondary nav-cta">Request Callback</RequestCallbackButton>
-            <Link className="btn btn-primary nav-cta" href="/contact">Contact Us</Link>
+            <RequestCallbackButton className="btn btn-secondary nav-cta">{NAV_LABELS.callback}</RequestCallbackButton>
+            <Link className="btn btn-primary nav-cta" href={NAV_LABELS.contact.href}>{NAV_LABELS.contact.label}</Link>
             <button
               ref={hamburgerRef}
               className="hamburger"
@@ -146,7 +137,7 @@ export function Navbar() {
             aria-controls="drawerServicesMenu"
             onClick={() => setServicesExpanded(v => !v)}
           >
-            <span>Services</span>
+            <span>{NAV_LABELS.servicesDropdown}</span>
             <ChevronRight
               className="drawer-services-chev"
               style={{ width: 18, height: 18 }}
@@ -157,23 +148,22 @@ export function Navbar() {
             id="drawerServicesMenu"
             aria-hidden={!servicesExpanded}
           >
-            <Link href="/services/asmt-10" onClick={closeDrawer}>ASMT-10 Scrutiny Notice</Link>
-            <Link href="/services/scn-reply" onClick={closeDrawer}>Show Cause Notice (SCN)</Link>
-            <Link href="/services/commissioner-appeal" onClick={closeDrawer}>Commissioner Appeal</Link>
-            <Link href="/services/gstat-appeal" onClick={closeDrawer}>GSTAT Appeal</Link>
+            {NAV_SERVICE_ITEMS.map(item => (
+              <Link key={item.href} href={item.href} onClick={closeDrawer}>{item.title}</Link>
+            ))}
           </div>
           <span className="drawer-divider" />
-          <Link href="/about" aria-current={navCurrent('/about')} onClick={closeDrawer}>About</Link>
-          <Link href="/faq" aria-current={navCurrent('/faq')} onClick={closeDrawer}>FAQ</Link>
-          <Link href="/pricing" aria-current={navCurrent('/pricing')} onClick={closeDrawer}>Pricing</Link>
+          {NAV_LINKS.map(item => (
+            <Link key={item.href} href={item.href} aria-current={navCurrent(item.href)} onClick={closeDrawer}>{item.label}</Link>
+          ))}
         </nav>
 
         <div className="drawer-foot">
           <RequestCallbackButton className="btn btn-secondary btn-block" onClick={closeDrawer}>
-            Request Callback
+            {NAV_LABELS.callback}
           </RequestCallbackButton>
-          <Link className="btn btn-primary btn-block" href="/contact" onClick={closeDrawer}>
-            Contact Us
+          <Link className="btn btn-primary btn-block" href={NAV_LABELS.contact.href} onClick={closeDrawer}>
+            {NAV_LABELS.contact.label}
           </Link>
         </div>
       </aside>
