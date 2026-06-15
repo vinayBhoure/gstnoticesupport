@@ -9,7 +9,9 @@ export type PageMeta = {
 export type ServiceSchemaInput = {
   name: string;
   description: string;
-  price: number;
+  // Optional: consultation-based services (e.g. Representation Before Authority)
+  // have no fixed price, so no Schema.org Offer is emitted for them.
+  price?: number;
   path: string;
 };
 

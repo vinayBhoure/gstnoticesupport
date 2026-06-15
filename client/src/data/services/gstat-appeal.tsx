@@ -142,8 +142,8 @@ export const gstatAppealContent: ServicePageContent = {
   },
   related: {
     eyebrow: 'Related services',
-    heading: 'The Stage Before This Appeal',
-    sub: 'GSTAT is the second-tier remedy. A Commissioner Appeal (APL-01) must be decided against you before GSTAT jurisdiction arises.',
+    heading: 'Around the Tribunal Appeal',
+    sub: 'A Commissioner Appeal (APL-01) must be decided against you before GSTAT jurisdiction arises. If your appeal needs a personal hearing, we appear on your behalf.',
     cards: [
       {
         href: '/services/commissioner-appeal',
@@ -152,6 +152,14 @@ export const gstatAppealContent: ServicePageContent = {
         description: 'First appeal against a demand order before the Appellate Authority. Pre-deposit: 10% of disputed tax.',
         priceDisplay: '₹9,999',
         ariaLabel: 'Commissioner Appeal (APL-01) — ₹9,999',
+      },
+      {
+        href: '/services/representation-before-authority',
+        stageLabel: 'At the hearing',
+        title: 'Representation Before Authority',
+        description: 'Personal or virtual appearance before the Tribunal when your appeal is heard. Our CAs and Advocates argue your case.',
+        priceDisplay: 'Custom quote',
+        ariaLabel: 'Representation Before Authority — consultation-based',
       },
     ],
   },

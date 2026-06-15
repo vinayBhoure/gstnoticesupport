@@ -21,6 +21,8 @@ export const WHATSAPP_LINKS = {
     `https://wa.me/${WA_PHONE}?text=Hi%2C%20I%20am%20interested%20in%20Commissioner%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further.`,
   gstatAppeal:
     `https://wa.me/${WA_PHONE}?text=Hi%2C%20I%20am%20interested%20in%20GSTAT%20Appeal%20service.%20Please%20assist%20me%20to%20proceed%20further.`,
+  representation:
+    `https://wa.me/${WA_PHONE}?text=Hi%2C%20I%20am%20interested%20in%20Representation%20Before%20Authority%20service.%20Please%20assist%20me%20to%20proceed%20further.`,
 };
 
 export const NAV_SERVICE_ITEMS: NavServiceItem[] = [
@@ -28,6 +30,7 @@ export const NAV_SERVICE_ITEMS: NavServiceItem[] = [
   { href: '/services/scn-reply', title: 'Show Cause Notice (SCN)', description: 'DRC-01 / DRC-01A demands' },
   { href: '/services/commissioner-appeal', title: 'Commissioner Appeal', description: 'APL-01 first appeal' },
   { href: '/services/gstat-appeal', title: 'GSTAT Appeal', description: 'APL-05 tribunal filing' },
+  { href: '/services/representation-before-authority', title: 'Representation Before Authority', description: 'Personal hearing & appearance' },
 ];
 
 export const NAV_LINKS: NavItem[] = [
@@ -50,6 +53,7 @@ export const FOOTER_COLUMNS: { services: FooterColumn; resources: FooterColumn }
       { href: '/services/scn-reply', label: 'Show Cause Notice (SCN)' },
       { href: '/services/commissioner-appeal', label: 'Commissioner Appeal' },
       { href: '/services/gstat-appeal', label: 'GSTAT Appeal' },
+      { href: '/services/representation-before-authority', label: 'Representation Before Authority' },
       { href: '/pricing', label: 'Pricing' },
     ],
   },
