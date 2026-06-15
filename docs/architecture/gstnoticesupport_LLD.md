@@ -151,7 +151,9 @@ Detailed schema (column types, constraints, indexes) will be finalized in a foll
 `id`, `booking_id` (FK), `uploaded_by` (enum: `user`/`admin`), `file_name`, `s3_key` (unique), `uploaded_at`
 
 ### `payment_records`
-`id`, `booking_id` (FK, **not unique**), `razorpay_order_id` (unique), `razorpay_payment_id` (nullable, unique), `amount` (paise, integer), `currency` (default `INR`), `status` (enum), `created_at`, `updated_at`
+`id`, `booking_id` (FK, **not unique**), `razorpay_order_id` (unique), `razorpay_payment_id` (nullable, unique), `amount` (paise, integer), `currency` (default `INR`), `status` (enum: `created | authorized | captured | failed`), `source` (enum: `webhook | verify | admin_override`, default `webhook`), `performed_by_admin_id` (nullable FK → `users.id` — set only when `source = admin_override`), `created_at`, `updated_at`
+
+> **D66** — `source` and `performed_by_admin_id` added 2026-06-16 to support admin override audit without a separate log table.
 
 ### Auxiliary tables (to be designed in next session)
 - OTP store (hashed OTP, expiry, attempt count)
@@ -242,21 +244,21 @@ Razorpay webhook is exempt from rate limiting (per HLD §6.6).
 
 ## 9. Open Questions
 
-| # | Question |
-|---|---|
-| 1 | Rate limiter implementation: in-memory, Redis, or DB-backed? Affects deployment topology. |
-| 2 | Auxiliary table schema details (OTP store, refresh token store, blacklist) — to be defined in next DB session. |
-| 3 | Exact API contract payloads, status codes, and Zod schema definitions — separate session. |
-| 4 | Login security alert email content: what device/location data is shown? IP geolocation source? |
-| 5 | Admin override (Layer 3) UI: what fields are captured, what audit is recorded? |
-| 6 | Email template structure and branding — pending client approval on copy. |
-| 7 | Forgot-password flow specifics (OTP vs link, expiry, single-use) — **Unknown**. |
-| 8 | Profile completion fields beyond signup — **Unknown**. |
-| 9 | Settings screen content for both user and admin — **Unknown**. |
-| 10 | Payment History screen data source: derived from `payment_records` joined with `bookings`? Pagination strategy? |
-| 11 | Invoice generation: PDF in-app, emailed only, or both? Storage of invoices? — **Unknown**. |
-| 12 | Whether `interested_services` is required at signup or optional. |
-| 13 | What "Profile Completion" screen captures that signup doesn't. |
+| # | Question | Status |
+|---|---|---|
+| 1 | Rate limiter implementation: in-memory, Redis, or DB-backed? Affects deployment topology. | ✅ **Resolved** — in-memory `express-rate-limit` (no DB table). See `backend_plan.md §Phase 1`. |
+| 2 | Auxiliary table schema details (OTP store, refresh token store, blacklist) — to be defined in next DB session. | ✅ **Resolved** — `otp_store`, `refresh_tokens`, `token_blacklist` defined in `schema.prisma`. See `backend_plan.md §Phase 1`. |
+| 3 | Exact API contract payloads, status codes, and Zod schema definitions — separate session. | ✅ **Resolved** — `docs/architecture/api_contract.md` is authoritative. |
+| 4 | Login security alert email content: what device/location data is shown? IP geolocation source? | ✅ **Resolved (D65)** — IP address + sanitized User-Agent (max 200 chars). No geolocation API. |
+| 5 | Admin override (Layer 3) UI: what fields are captured, what audit is recorded? | ✅ **Resolved (D66)** — `source = admin_override` + `performed_by_admin_id` on a new `payment_records` row. |
+| 6 | Email template structure and branding — pending client approval on copy. | 🔄 **Partially resolved** — 14-event matrix defined in HLD §12.2; React Email templates in Phase 7. Copy pending client. |
+| 7 | Forgot-password flow specifics (OTP vs link, expiry, single-use) — **Unknown**. | ✅ **Resolved** — OTP-based, 10-min expiry, single-use, attempt-capped. See `backend_plan.md §Phase 2`. |
+| 8 | Profile completion fields beyond signup — **Unknown**. | ✅ **Resolved (D67)** — `name` + `phone` only. |
+| 9 | Settings screen content for both user and admin — **Unknown**. | ✅ **Partially resolved** — `PATCH /user/profile` updates name + phone. Admin has no settings screen at Phase 2 launch. |
+| 10 | Payment History screen data source: derived from `payment_records` joined with `bookings`? Pagination strategy? | ✅ **Resolved (D64)** — `payment_records JOIN bookings`, offset pagination (default 20, max 100). |
+| 11 | Invoice generation: PDF in-app, emailed only, or both? Storage of invoices? — **Unknown**. | ✅ **Resolved (D64)** — Razorpay receipt URL only; no in-house PDF. |
+| 12 | Whether `interested_services` is required at signup or optional. | ⬚ **Open** — no decision recorded. Recommend optional (informational only). |
+| 13 | What "Profile Completion" screen captures that signup doesn't. | ✅ **Resolved (D67)** — `name` + `phone` (signup captures email + password only). |
 
 ---
 
@@ -300,14 +302,17 @@ Deferred from Phase 2:
 - All emails go through Resend or Postmark (provider TBD); no SMS, no WhatsApp API.
 
 **Locked decisions — do not change without explicit review:**
-- 4-table schema structure (users, bookings, booking_documents, payment_records).
+- 4-table schema structure (users, bookings, booking_documents, payment_records) + 3 auxiliary tables (otp_store, refresh_tokens, token_blacklist).
 - `payment_records` has no unique constraint on `booking_id`.
+- `payment_records` has `source` enum (`webhook | verify | admin_override`) and nullable `performed_by_admin_id` — added D66, 2026-06-16.
 - `booking_documents` has no `user_id`.
 - Booking state machine and transitions.
 - Razorpay Orders flow + 3-layer reliability architecture.
 - 15 min / 7 day JWT durations.
-- Rate limit matrix in §6.
+- Rate limit matrix in §6; state is in-memory (`express-rate-limit`), no DB table.
 - File constraints: PDF / 5MB / 8 files.
+- `complete-profile` collects name + phone only (D67, 2026-06-16).
+- Payment History uses offset pagination + Razorpay receipt links (D64, 2026-06-16).
 
 **Areas open to refinement:**
 - API contract payloads.

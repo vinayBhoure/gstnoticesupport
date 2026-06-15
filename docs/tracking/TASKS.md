@@ -93,7 +93,150 @@
 
 ## Phase 2 — Platform (Launch: 5–6 July 2026)
 
-> Tasks will be added as Phase 1 ships. See README §Roadmap for full Phase 2 scope (EP6–EP15).
+> Dependency order: EP7 → EP6 → EP8 → EP9 → EP10 → EP11 → EP12 → EP13 → EP14 → EP15
+> Maps to `backend_plan.md` phases: EP7=Ph0, EP6=Ph1, EP8=Ph2, EP9=Ph3+4, EP12=Ph5, EP13=Ph6, EP14=Ph7, EP15=Ph8
+
+### EP7 — Backend Core Infrastructure (backend_plan Phase 0)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Typed env loader — validate required vars at boot, fail fast with clear message | `server/src/lib/env.ts` |
+| ⬚ | Rate-limit factory utility (`createRateLimiter`) — not yet attached to routes | `server/src/lib/rateLimiter.ts` |
+| ⬚ | Full directory layout: `routes/ controllers/ services/ repositories/ validators/ middleware/ lib/` | Per `backend_plan.md §Ph0` |
+| ⬚ | Central `routes/index.ts` router registry — one route file + one line to register | |
+| ⬚ | Structured request logging middleware | Morgan or custom; no PII in log output |
+| ⬚ | Global 404 handler (before existing `errorHandler`) | |
+| ⬚ | Confirm `GET /health` returns standard envelope shape | Already exists; verify envelope compliance |
+| ⬚ | Update `.env.example` with all Phase 2 vars | DB, JWT, S3, Razorpay, Resend keys |
+
+### EP6 — Database Schema & Repository Layer (backend_plan Phase 1)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Prisma init in `server/` pointing at locked `schema.prisma` | `npx prisma init` |
+| ⬚ | Prisma client singleton in `server/src/lib/prisma.ts` | Single instance, reused across app |
+| ⬚ | `schema.prisma` — 7 tables, 7 enums, all indexes, `onDelete` rules | users, bookings, booking_documents, payment_records, otp_store, refresh_tokens, token_blacklist |
+| ⬚ | `payment_records` includes `source` enum + `performed_by_admin_id` nullable FK | D66 — add before first migration |
+| ⬚ | NeonDB dev branch connection — supply `DATABASE_URL` | External: NeonDB account needed |
+| ⬚ | First migration — `npx prisma migrate dev --name initial_schema` | Must match `schema.prisma` exactly |
+| ⬚ | Admin seed script — single admin user, `role = admin`, `email_verified = true` | No promotion endpoint ever |
+| ⬚ | Prisma middleware in `lib/prisma.ts` for soft-delete global filter on User | Auto-exclude `deleted_at IS NOT NULL` |
+| ⬚ | Verify: `prisma migrate status` clean; tables visible in Neon console | Acceptance criterion |
+| ⬚ | Verify: re-run migration on a fresh Neon branch reproduces schema identically | Staging-branch workflow validation |
+
+### EP8 — Auth Backend (backend_plan Phase 2)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | bcrypt password hashing service (cost 12) | `server/src/lib/bcrypt.ts` |
+| ⬚ | JWT service: issue + verify access token (15 min, carries `id/role/email/jti`) | HTTP-only, Secure, SameSite=Lax cookie |
+| ⬚ | JWT service: issue + verify refresh token (7 days) — stored **hashed** in `refresh_tokens` | Rotation on every refresh |
+| ⬚ | OTP service: 6-digit numeric, hashed in `otp_store`, 10-min expiry, attempt-capped, single-use | Deleted on successful verify |
+| ⬚ | `authenticate` middleware — reads JWT from cookie, attaches `req.user` | `server/src/middleware/authenticate.ts` |
+| ⬚ | `requireRole` middleware — admin gate, always after `authenticate` | |
+| ⬚ | Token blacklist service — logout + "This wasn't me" only; 24h auto-cleanup | Do not expand scope |
+| ⬚ | Email service abstraction + Resend client | `server/src/lib/email.ts` — used by all phases |
+| ⬚ | Ownership-check helper — `WHERE userId = currentUser.id` unless admin | `server/src/lib/ownership.ts` |
+| ⬚ | `POST /auth/signup` | Creates user, sends OTP |
+| ⬚ | `POST /auth/verify-otp` | Flips `email_verified`, sets both cookies |
+| ⬚ | `POST /auth/resend-otp` | Rate: 3/hr |
+| ⬚ | `POST /auth/complete-profile` | One-time: name + phone (D67) |
+| ⬚ | `POST /auth/login` | Rate: 5/15min; sends security alert email (IP + UA, D65) |
+| ⬚ | `POST /auth/refresh` | Rotates refresh token |
+| ⬚ | `POST /auth/logout` | Blacklists access token JTI |
+| ⬚ | `POST /auth/forgot-password` | Rate: 5/hr; neutral response whether email exists |
+| ⬚ | `POST /auth/reset-password` | OTP-based, single-use |
+| ⬚ | `GET /auth/invalidate` | "This wasn't me" link handler |
+| ⬚ | `GET /auth/me` | Returns `UserDTO`; `401` without valid cookie |
+| ⬚ | Apply per-route rate limiters (use factory from EP7) | Per rate-limit matrix in LLD §6 |
+| ⬚ | External: Resend API key + verified `support@gstnoticesupport.in` domain | Blocks email testing |
+
+### EP9 — Booking & Document Upload Backend (backend_plan Phases 3 + 4)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Booking Zod schema — service type, contact fields, GSTN format-only, both consents required | `server/src/schemas/booking.schema.ts` |
+| ⬚ | Server-side price derivation from `serviceType` — never from client | ₹2,999 / ₹5,999 / ₹9,999 / ₹14,999 |
+| ⬚ | Booking state machine enforcement — legal transitions only | `server/src/lib/stateMachine.ts` |
+| ⬚ | `POST /bookings` | Creates booking at `status=document_upload`, `payment_status=pending`; emails user + admin |
+| ⬚ | `GET /bookings` | Lists current user's bookings; ownership enforced |
+| ⬚ | `GET /bookings/:id` | Detail + documents + latest payment; `403` for other users |
+| ⬚ | `POST /bookings/:id/cancel` | Allowed only at `draft_ready` + `payment_status=pending` |
+| ⬚ | S3 client — Mumbai `ap-south-1`, private bucket, SSE-S3 | `server/src/lib/s3.ts` |
+| ⬚ | Pre-signed PUT URL generation — PDF only, ≤5 MB, ≤8 files/booking, 5-min expiry | All constraints validated server-side before issuing URL |
+| ⬚ | S3 key format: `{userId}/{bookingId}/{yyyyMMdd}-{sanitizedName}-{4rand}.pdf` | Sanitize filename; preserve original for display |
+| ⬚ | `POST /bookings/:id/upload-url` | Rate: 15/hr |
+| ⬚ | `POST /bookings/:id/confirm-upload` | Persists `booking_documents` row; `DUPLICATE_KEY` on duplicate `s3Key` |
+| ⬚ | `GET /bookings/:id/documents` | |
+| ⬚ | `GET /bookings/:id/draft-url` | 15-min pre-signed GET; gated to `status ∈ {filing, complete}` |
+| ⬚ | External: AWS credentials + bucket name + CORS config (`PUT` from frontend origin only) | Blocks S3 testing |
+
+### EP10 — Auth Frontend & Route Protection (frontend, backend_plan Phase 2)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Login page (`/login`) — RHF + zodResolver + TanStack Query mutation | |
+| ⬚ | Signup page (`/signup`) — email + password | |
+| ⬚ | OTP verification page (`/verify-otp`) | |
+| ⬚ | Forgot password + reset password pages | |
+| ⬚ | Complete profile page (`/complete-profile`) — name + phone (D67) | One-time, post-OTP-verify |
+| ⬚ | Auth check helper for Server Components — reads JWT cookie, redirects to `/login` if absent | |
+| ⬚ | Admin role guard — redirects to `/dashboard` if `role !== admin` | |
+
+### EP11 — User Dashboard & Booking Flow Frontend (frontend, backend_plan Phases 3 + 4)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Dashboard home — booking list with status badges | SSR Server Component |
+| ⬚ | Booking Step 1 — service selection + pre-deposit disclosure for GSTAT/Commissioner | KB2 §7 — must appear here |
+| ⬚ | Booking Step 2 — personal info + GSTN + consents | RHF + zodResolver |
+| ⬚ | Booking Step 3 — document upload (multi-file, PDF, ≤5 MB each) | Pre-signed PUT flow |
+| ⬚ | Booking detail page — status timeline, documents, admin note, draft viewer | |
+| ⬚ | Draft viewer — fetches pre-signed GET URL per load; gated to `filing/complete` | Never store pre-signed URL in state |
+| ⬚ | Payment History page — offset pagination + Razorpay receipt links (D64) | |
+| ⬚ | My Profile page — view + update name/phone (`PATCH /user/profile`) | |
+
+### EP12 — Payment Integration (backend_plan Phase 5)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | `POST /payments/:bookingId/initiate` — create Razorpay Order, insert `payment_records` row at `status=created` | Gated: `status=draft_ready` + `payment_status=pending`; rate: 5/hr |
+| ⬚ | `POST /webhooks/razorpay` — `express.raw()`, HMAC-SHA256 verify, idempotency, transition → `filing` | Layer 1; exempt from rate limiting; always returns 200 |
+| ⬚ | `GET /payments/verify` — signature verify + Razorpay Fetch Payment API; returns outcome enum | Layer 2; rate: 7/hr; no redirect |
+| ⬚ | Idempotency: `razorpay_payment_id` unique constraint — no double-transition | Validated via `payment_records` lookup before any state change |
+| ⬚ | Payment confirmed emails — user + admin | Fire inside webhook + verify handlers |
+| ⬚ | Failed payment email — admin only | |
+| ⬚ | Pay-to-unlock screen frontend — Razorpay modal integration | Pre-deposit disclosure for GSTAT/Commissioner (KB2 §7) |
+| ⬚ | `/payment/verify` page frontend — reads outcome enum; shows status + WhatsApp link on Inconclusive | SSR; reads Razorpay query params |
+| ⬚ | External: Razorpay test-mode keys (unblocks dev); live-mode KYC approval needed before prod | Start KYC early — longest external blocker |
+
+### EP13 — Admin Dashboard (backend_plan Phase 6)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | `GET /admin/bookings` — list all bookings; filter by status | Auth: admin only |
+| ⬚ | `GET /admin/bookings/:id` — detail including user info, all documents, all payment attempts | |
+| ⬚ | `PATCH /admin/bookings/:id/status` — transitions `→ in_review` and `→ complete` only | Illegal transitions → `INVALID_TRANSITION` |
+| ⬚ | `POST /admin/bookings/:id/draft-upload-url` — two-step pre-signed PUT, PDF only | Blocked at `filing/complete/cancelled`; confirmed upload sets `draft_s3_key` + auto-transitions to `draft_ready` |
+| ⬚ | `POST /admin/bookings/:id/confirm-draft-upload` | Emails user: draft ready |
+| ⬚ | `PATCH /admin/bookings/:id/note` — admin note ≤5000 chars | Visible to user |
+| ⬚ | `POST /admin/bookings/:id/mark-paid` — Layer 3 override; calls Razorpay Fetch Payment API first | Uses Phase 5 idempotency service; records `source=admin_override` + `performed_by_admin_id` (D66) |
+| ⬚ | `GET /admin/stats` — total bookings by status + revenue | |
+| ⬚ | Admin frontend — bookings table, detail view, status controls, draft upload, note editor, mark-paid | |
+
+### EP14 — Email Notifications (backend_plan Phase 7)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | React Email templates for all 14 HLD §12.2 events — navy + green branding, typed props | `server/src/emails/` |
+| ⬚ | Matrix completeness audit — every event mapped to trigger, recipients, and template | |
+| ⬚ | Verify Resend sending domain passes SPF/DKIM/DMARC | External: domain DNS config |
+| ⬚ | Confirm contact-form email (admin only) and Calendly (handled by Calendly directly) | |
+
+### EP15 — Phase 2 Hardening & Launch (backend_plan Phase 8)
+| Status | Task | Notes |
+|---|---|---|
+| ⬚ | Rate-limit audit — every endpoint has its limiter attached and tested | Per LLD §6 matrix |
+| ⬚ | Account deletion — soft-delete, block when booking active, email confirmation; schedule S3 hard-delete after 7 days | `DELETE /user` |
+| ⬚ | `PATCH /user/profile` + `GET /user/payment-history` confirmed (offset pagination, D64) | |
+| ⬚ | Sentry integration with PII scrubbing + source maps | |
+| ⬚ | Security pass — Helmet config, CORS per env, cookie flags (`Domain=.gstnoticesupport.in`, Secure, HttpOnly, SameSite=Lax) | |
+| ⬚ | GitHub Actions CI/CD for `server/` — build + deploy on push to `staging`/`main` | |
+| ⬚ | NeonDB staging branch — mirror production schema; validate staging deploy | |
+| ⬚ | Cross-subdomain auth validation — authenticated request from frontend domain reaches API subdomain with cookie | |
+| ⬚ | Live Razorpay smoke test — real ₹ payment transitions booking to `filing` end-to-end | Requires live-mode KYC approval |
+| ⬚ | Production Razorpay key starts with `rzp_live_` — deploying with test key is a critical error | |
 
 ---
 
