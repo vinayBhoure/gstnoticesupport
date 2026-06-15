@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description: pricingMeta.description,
 };
 
-const [card1, card2, card3, card4] = pricingTable.cards;
+const [card1, card2, card3, card4, card5] = pricingTable.cards;
 
 export default function PricingPage() {
   return (
@@ -68,10 +68,9 @@ export default function PricingPage() {
               </div>
             </AnimateIn>
 
-            {/* SCN Reply — Most Popular */}
+            {/* SCN Reply */}
             <AnimateIn delay={80}>
-              <div className={`${styles.pCard} ${styles.popular}`}>
-                <span className={styles.popularBadge} aria-label={card2.popularAriaLabel}>{card2.popularBadge}</span>
+              <div className={styles.pCard}>
                 <span className={styles.noticeTag}>{card2.noticeTag}</span>
                 <h3>{card2.title}</h3>
                 <div className={styles.price}>{card2.priceDisplay}</div>
@@ -132,6 +131,25 @@ export default function PricingPage() {
               </div>
             </AnimateIn>
 
+            {/* Representation Before Authority — consultation-based */}
+            <AnimateIn delay={320}>
+              <div className={styles.pCard}>
+                <span className={styles.noticeTag}>{card5.noticeTag}</span>
+                <h3>{card5.title}</h3>
+                <div className={styles.price}>{card5.priceDisplay}</div>
+                <p className={styles.priceSub}>{card5.priceSub}</p>
+                <ul className={styles.incList}>
+                  {card5.features.map(feature => (
+                    <li key={feature}><Check className={styles.ic} aria-hidden="true" />{feature}</li>
+                  ))}
+                </ul>
+                <div className={styles.cardBottom}>
+                  <div className={styles.pdSpacer} aria-hidden="true" />
+                  <Link className="btn btn-primary" href={card5.href}>{card5.ctaLabel}</Link>
+                </div>
+              </div>
+            </AnimateIn>
+
           </div>
         </div>
       </section>
@@ -148,6 +166,9 @@ export default function PricingPage() {
               </p>
             </div>
             <div className={styles.repAction}>
+              <Link className="btn btn-primary" href={pricingRepresentation.detailsHref}>
+                {pricingRepresentation.detailsLabel}
+              </Link>
               <RequestCallbackButton className="btn btn-secondary on-dark">
                 {pricingRepresentation.ctaLabel}
               </RequestCallbackButton>

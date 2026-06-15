@@ -34,7 +34,7 @@ COPY: nav labels exactly `Services` / `About` / `Resources` / `Pricing`; CTAs `R
 
 Persistent left sidebar (≥lg), main content fills remaining width. Header strip: logo, tap-to-call phone, account menu.
 - **User sidebar links:** `Dashboard` (/dashboard) · `My Services` (/dashboard/services) · `Payments` (/dashboard/payments) · `Settings` (/dashboard/settings).
-- **Admin sidebar links:** `Overview` (/admin) · `Bookings` (/admin/bookings) · `Settings` (/admin/settings).
+- **Admin sidebar links:** `Overview` (/admin) · `Bookings` (/admin/bookings) · `Users` (/admin/users) · `Settings` (/admin/settings).
 RESPONSIVE: <lg sidebar → slide-in drawer via header hamburger. Admin: minimal fallback only (drawer + scrollable/stacked tables).
 STATES: active link highlighted; collapsed drawer (mobile) defaults closed.
 
@@ -229,3 +229,37 @@ and services list (mobile stacked view, all bookings).
     Row 3: Booking date · Reference number (mono / 14px / --neutral-600) — inline, · separator.
 - Padding: 16px. Min height: 88px. Min tap target: 48px (whole card satisfies this).
 STATES: default · hover · Draft Ready (amber left border) · loading (skeleton).
+
+## Admin Stat Card
+Non-interactive metric tile (admin Overview). Never clickable, no motion.
+- Surface: --neutral-white · 12px radius · 1px --neutral-200 · --shadow-sm · 24px padding.
+- Structure: label (14px/500/--neutral-600) → metric (36–48px/700/--primary-navy) → optional sub-line (14px/--neutral-600).
+- Status-count variant: replaces metric with up to six rows, each = Service Status Badge + count.
+- Revenue variant: metric prefixed ₹; paid bookings only.
+STATES: loading (skeleton) · loaded · error (inline "—" + retry).
+
+## Admin Data Table
+Desktop-primary master table for admin lists (bookings, users).
+- Controls slot above: search input + filter selects (Form Field Primitives) + optional "Clear filters" [Tertiary]; wraps on narrow widths.
+- Header: --neutral-50 · 14px/600 · sticky on scroll. Sortable headers = buttons with aria-sort; others plain.
+- Rows: 48px min height · 1px --neutral-200 divider · hover --neutral-50 · whole row clickable + focusable (Enter opens) · trailing chevron.
+- Status cells use Service Status Badge (never color-only).
+- Footer: pagination (page size fixed per screen).
+RESPONSIVE (<lg, minimal fallback): horizontal scroll, columns preserved — NOT collapsed to cards.
+STATES: loading (skeleton rows) · populated · empty-no-data · empty-no-results (filtered) · error (retry).
+
+## Document List Row
+Single downloadable file row inside a documents card (admin Booking Detail).
+- Left → right: file-text icon (16px/--neutral-600) · filename (16px/--neutral-900, truncates) · uploaded date (14px/--neutral-600) · uploader chip ("User") · Download [Secondary].
+- 56px min height · 1px --neutral-200 divider · all targets ≥48px.
+STATES: default · hover · preparing · error (retry).
+
+## Confirmation Dialog (destructive)
+Modal for irreversible admin actions (currently: delete user). Centered overlay.
+- Surface: --neutral-white · 12px radius · --shadow-md · max-width ~480px · scrim (--primary-navy, low opacity).
+- Structure: title (H3/--primary-navy) → body (16px/--neutral-600) → optional typed-confirmation field (Form Field Primitives) → action row.
+- Actions: one destructive [Primary] + one [Secondary] "Cancel". No red (system has no destructive-red token); weight carried by copy + typed-confirmation friction.
+- Typed-confirmation variant: destructive action disabled until typed value string-matches required value (e.g. user's email); mismatch shows inline error.
+- Focus trapped; Esc + scrim click = cancel; focus returns to trigger on close.
+MOTION: none.
+STATES: idle (disabled until match) · ready · submitting · error · success (closes; caller shows result).

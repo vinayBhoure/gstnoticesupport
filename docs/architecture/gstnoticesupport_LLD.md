@@ -81,6 +81,8 @@ A two-zone GST litigation services platform: public marketing site + authenticat
 | Razorpay flow | Orders flow, not Payment Links | Clean booking↔payment linkage (HLD D45) |
 | Payment reliability | 3-layer: webhook (HMAC-SHA256 signature verified) → verify page → admin override | HLD §10 / KB2 §5 |
 | Payment verify screen states | Loading, Inconclusive, Tampered | Success/Failed redirect to service detail page |
+| Admin user management | View + delete only; no profile editing | Keeps admin write surface minimal |
+| Admin user deletion | Soft (HLD §7.4); blocked while any booking active; typed-email confirm | Consistency with user self-deletion; retains financial/audit records |
 
 ---
 
@@ -93,7 +95,7 @@ A two-zone GST litigation services platform: public marketing site + authenticat
 | Public Marketing Site (Next.js SSG) | Homepage, service pages, pricing, about, contact, FAQ, terms, privacy |
 | Auth Service (nodejs (express js)) | Signup, OTP verify, login, forgot password, session/blacklist management |
 | User Dashboard (Next.js SSR) | Bookings list, booking detail, booking flow, draft viewer, payment history |
-| Admin Dashboard (Next.js SSR, desktop-first) | Bookings list, booking detail, draft upload, settings |
+| Admin Dashboard (Next.js SSR, desktop-first) | Bookings list, booking detail, draft upload, users list, user detail, settings |
 | Booking Service (nodejs (express js)) | Booking CRUD, state transitions, intake validation, status gates |
 | Document Service (nodejs (express js)) | Pre-signed URL generation, metadata persistence, access control |
 | Payment Service (nodejs (express js)) | Razorpay order creation, webhook handler, verification, admin override |

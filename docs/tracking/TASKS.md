@@ -69,6 +69,15 @@
 |---|---|---|
 | ✅ | Extract all static copy into `client/src/data/` (14 files, 24 types) | All pages/components now render-only; verified pixel-identical against pre-refactor build |
 
+### EP4-Addendum 2 — 5th Service + UI Polish (2026-06-15)
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | Add "Representation Before Authority" as full 5th service across all surfaces | New page, data file, nav/footer, home cards, pricing card, sitemap, reciprocal related links, schema (no offers for consultation) |
+| ✅ | Remove "Most Popular" badge and green highlight from SCN Reply | `home.tsx`, `pricing.tsx`, `page.tsx`, `pricing/page.tsx` |
+| ✅ | Add "Pre-deposit required by law" amber badge to Commissioner Appeal cards | Home notice card + home pricing tier — matches existing GSTAT badge |
+| ✅ | Change rotating headline text colour to accent-green (`--accent-green`) | `RotatingHeadline.module.css` — WCAG AA (~5.9:1 on white) |
+| ✅ | Apply serif typeface to navbar brand name | `globals.css` `.brand .bn` → `Georgia,'Times New Roman',serif` |
+
 ### EP5 — Phase 1 Hardening & Launch
 | Status | Task | Notes |
 |---|---|---|

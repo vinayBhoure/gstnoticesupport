@@ -1297,6 +1297,119 @@ Returns a pre-signed S3 `GET` URL to download a user-uploaded document. URL expi
 
 ---
 
+### 7.3 `GET /admin/users`
+> **Auth:** 🛡️ Admin · **Rate limit:** None
+
+Returns a paginated list of registered users for the Admin Users screen. Soft-deleted users
+(`deletedAt IS NOT NULL`) are excluded. Supports search by name or email.
+
+#### Query params
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `page` | integer | No | Page number. Default `1`. |
+| `limit` | integer | No | Page size. Default `25`, max `100`. |
+| `search` | string | No | Case-insensitive partial match against `name` or `email`. |
+
+#### `200 OK`
+```jsonc
+{
+  "success": true,
+  "data": {
+    "users": [
+      {
+        "id": "e2c1a7b0-1234-4abc-9def-0a1b2c3d4e5f",
+        "name": "Rohit Sharma",
+        "email": "rohit.sharma@example.com",
+        "phone": "+919876543210",
+        "interestedServices": ["ASMT10_REPLY", "SCN_REPLY"]
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 25,
+      "total": 142,
+      "totalPages": 6
+    }
+  }
+}
+```
+
+#### Errors
+| Status | Code | Condition |
+|--------|------|-----------|
+| 400 | `VALIDATION_ERROR` | `page` or `limit` is not a positive integer, or `limit` exceeds `100` |
+
+---
+
+### 7.4 `GET /admin/users/:id`
+> **Auth:** 🛡️ Admin · **Rate limit:** None
+
+Returns full detail for a single user for the Admin User Detail screen, including whether the
+delete action should be enabled.
+
+#### Path params
+| Param | Type | Description |
+|-------|------|-------------|
+| `id` | uuid | User ID |
+
+#### `200 OK`
+```jsonc
+{
+  "success": true,
+  "data": {
+    "id": "e2c1a7b0-1234-4abc-9def-0a1b2c3d4e5f",
+    "name": "Rohit Sharma",
+    "email": "rohit.sharma@example.com",
+    "phone": "+919876543210",
+    "interestedServices": ["ASMT10_REPLY", "SCN_REPLY"],
+    "activeBookingCount": 0
+  }
+}
+```
+
+> `activeBookingCount` = count of this user's bookings with `status` in
+> (`document_upload`, `in_review`, `draft_ready`, `filing`). Frontend uses this to enable/disable
+> the "Delete user" control and populate the disabled-reason copy.
+
+#### Errors
+| Status | Code | Condition |
+|--------|------|-----------|
+| 404 | `NOT_FOUND` | User ID does not exist, or user is soft-deleted (`deletedAt` set) |
+
+---
+
+### 7.5 `DELETE /admin/users/:id`
+> **Auth:** 🛡️ Admin · **Rate limit:** 10 requests / 1 hr (admin)
+
+Soft-deletes a user (HLD §7.4): sets `deletedAt` on the `users` row. Bookings and
+`payment_records` for this user are retained. Associated S3 documents are hard-deleted 7 days
+later via scheduled job. Blocked if the user has any booking in an active state.
+
+#### Path params
+| Param | Type | Description |
+|-------|------|-------------|
+| `id` | uuid | User ID |
+
+#### `200 OK`
+```jsonc
+{
+  "success": true,
+  "data": {
+    "id": "e2c1a7b0-1234-4abc-9def-0a1b2c3d4e5f",
+    "deletedAt": "2026-06-14T10:30:00.000Z"
+  }
+}
+```
+
+#### Errors
+| Status | Code | Condition |
+|--------|------|-----------|
+| 404 | `NOT_FOUND` | User ID does not exist or is already soft-deleted |
+| 409 | `USER_HAS_ACTIVE_BOOKING` | User has ≥1 booking in `document_upload`, `in_review`, `draft_ready`, or `filing` — deletion blocked |
+| 429 | `RATE_LIMITED` | 10 requests within 1 hour |
+
+---
+
 ## 8. Public
 
 ---
