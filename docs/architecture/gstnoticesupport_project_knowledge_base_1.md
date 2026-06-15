@@ -212,12 +212,16 @@ A professional services platform that helps Indian businesses, CAs, and Advocate
 | Cancel service (Draft Ready stage only) | ✅ | ❌ |
 | Delete own account (with restrictions) | ✅ | ❌ |
 | View all bookings (across users) | ❌ | ✅ |
-| Download user-uploaded documents | ❌ | ✅ |
+| Download user-uploaded documents | ❌ | ✅ |a
 | Upload prepared draft PDF | ❌ | ✅ |
 | Add/edit notes on a booking | ❌ | ✅ |
 | Change service status manually | ❌ | ✅ |
 | Cancel any service | ❌ | ✅ |
 | View dashboard analytics (overview page) | ❌ | ✅ |
+| View all users (across users) | ❌ | ✅ |
+| View user detail | ❌ | ✅ |
+| Delete a user (soft; blocked on active booking) | ❌ | ✅ |
+| Edit a user's profile | ❌ | ❌ (out of scope) |
 
 ---
 
@@ -521,6 +525,12 @@ When user clicks a booking from the Services Table, they see:
 
 ### Data Handling on Deletion
 - **TBD:** Should personal data be hard-deleted or soft-deleted? Should documents be retained for legal/compliance reasons? See Open Questions (Section 20).
+
+### Admin-Initiated User Deletion (Users page)
+- Allowed only when the user has no active booking (Document Upload / In Review / Draft Ready / Filing) — same block as self-deletion.
+- When blocked: delete control visible but disabled, reason shown.
+- When allowed: admin types the TARGET user's email to confirm (string match, no OTP).
+- Soft delete (HLD §7.4): user flagged deletedAt; bookings + payment records retained; S3 docs hard-deleted after 7 days.
 
 ---
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   Info, CheckCircle2, ShieldCheck, Clock, Check, AlertTriangle,
-  ArrowLeft,
+  ArrowLeft, ArrowRight,
 } from 'lucide-react';
 import styles from '../service.module.css';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: content.meta.description,
 };
 
-const [relatedPrior] = content.related?.cards ?? [];
+const [relatedPrior, relatedNext] = content.related?.cards ?? [];
 
 export default function GstatAppealPage() {
   return (
@@ -217,7 +217,7 @@ export default function GstatAppealPage() {
             <h2>{content.related?.heading}</h2>
             <p>{content.related?.sub}</p>
           </div>
-          <div className={styles.relatedSingle}>
+          <div className={styles.relatedGrid}>
             <Link
               className={`card card-elev ${styles.relatedCard}`}
               href={relatedPrior.href}
@@ -230,6 +230,19 @@ export default function GstatAppealPage() {
                 <p className={styles.rcDesc}>{relatedPrior.description}</p>
                 <span className={styles.rcPrice}>{relatedPrior.priceDisplay}</span>
               </div>
+            </Link>
+            <Link
+              className={`card card-elev ${styles.relatedCard}`}
+              href={relatedNext.href}
+              aria-label={relatedNext.ariaLabel}
+            >
+              <div className={styles.rcLeft}>
+                <span className={styles.rcLabel}>{relatedNext.stageLabel}</span>
+                <h3>{relatedNext.title}</h3>
+                <p className={styles.rcDesc}>{relatedNext.description}</p>
+                <span className={styles.rcPrice}>{relatedNext.priceDisplay}</span>
+              </div>
+              <div className={styles.rcArrow} aria-hidden="true"><ArrowRight size={20} /></div>
             </Link>
           </div>
         </div>

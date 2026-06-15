@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/services/scn-reply', priority: 0.9, changeFrequency: 'monthly' },
     { path: '/services/commissioner-appeal', priority: 0.9, changeFrequency: 'monthly' },
     { path: '/services/gstat-appeal', priority: 0.9, changeFrequency: 'monthly' },
+    { path: '/services/representation-before-authority', priority: 0.9, changeFrequency: 'monthly' },
     { path: '/pricing', priority: 0.9, changeFrequency: 'monthly' },
     { path: '/about', priority: 0.7, changeFrequency: 'monthly' },
     { path: '/faq', priority: 0.7, changeFrequency: 'monthly' },

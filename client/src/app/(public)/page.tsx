@@ -9,6 +9,7 @@ import { AnimateIn } from '@/components/ui/AnimateIn';
 import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
 import { CountUp } from '@/components/ui/CountUp';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { RotatingHeadline } from '@/components/ui/RotatingHeadline';
 import {
   homeMeta, homeHero, homeNotices, homeSteps, homeTrust, homeOutcomes,
   homeSecurity, homePricing, homeTestimonialsHead, homeFaqHead,
@@ -31,10 +32,10 @@ export const metadata: Metadata = {
   // page-level openGraph object would shallow-replace the root one (Next 16).
 };
 
-const [notice1, notice2, notice3, notice4] = homeNotices.cards;
+const [notice1, notice2, notice3, notice4, notice5] = homeNotices.cards;
 const [step1, step2, step3, step4] = homeSteps.items;
 const [stat1, stat2, stat3, stat4] = homeOutcomes.stats;
-const [tier1, tier2, tier3, tier4] = homePricing.tiers;
+const [tier1, tier2, tier3, tier4, tier5] = homePricing.tiers;
 
 export default function HomePage() {
   return (
@@ -48,7 +49,7 @@ export default function HomePage() {
                   <MapPin style={{ width: 14, height: 14, color: 'var(--accent-green)' }} />
                   {homeHero.badge}
                 </span>
-                <h1>{homeHero.heading}</h1>
+                <RotatingHeadline lead={homeHero.headingLead} phrases={homeHero.headingPhrases} />
                 <p className={styles.sub}>
                   {homeHero.sub}
                 </p>
@@ -120,6 +121,9 @@ export default function HomePage() {
                 <h3>{notice3.title}</h3>
                 <p className={styles.desc}>{notice3.description}</p>
                 <div className={styles.price}>{notice3.priceDisplay} <small>{notice3.priceNote}</small></div>
+                <span className={`badge badge-amber ${styles.badgeAmber}`}>
+                  <AlertTriangle style={{ width: 13, height: 13 }} />{notice3.badge}
+                </span>
                 <div className={styles.foot}><span className={styles.getlink}>{homeNotices.getHelpLabel} <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
               </Link>
             </AnimateIn>
@@ -132,6 +136,15 @@ export default function HomePage() {
                 <span className={`badge badge-amber ${styles.badgeAmber}`}>
                   <AlertTriangle style={{ width: 13, height: 13 }} />{notice4.badge}
                 </span>
+                <div className={styles.foot}><span className={styles.getlink}>{homeNotices.getHelpLabel} <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
+              </Link>
+            </AnimateIn>
+            <AnimateIn delay={400}>
+              <Link className={`card ${styles.noticeCard}`} href={notice5.href}>
+                <div className={styles.icWrap}><notice5.Icon style={{ width: 23, height: 23 }} /></div>
+                <h3>{notice5.title}</h3>
+                <p className={styles.desc}>{notice5.description}</p>
+                <div className={styles.price}>{notice5.priceDisplay} <small>{notice5.priceNote}</small></div>
                 <div className={styles.foot}><span className={styles.getlink}>{homeNotices.getHelpLabel} <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
               </Link>
             </AnimateIn>
@@ -299,8 +312,7 @@ export default function HomePage() {
               </div>
             </AnimateIn>
             <AnimateIn delay={100}>
-              <div className={`card ${styles.tier} ${styles.popular}`}>
-                <span className={`badge badge-green ${styles.popBadge}`}>{tier2.popularBadge}</span>
+              <div className={`card ${styles.tier}`}>
                 <h3>{tier2.title}</h3>
                 <div className={styles.price}>{tier2.priceDisplay}</div>
                 <ul>
@@ -309,7 +321,7 @@ export default function HomePage() {
                   ))}
                 </ul>
                 <div className={styles.tierFoot}>
-                  <Link className="btn btn-primary btn-block" href={tier2.href}>{homePricing.ctaLabel}</Link>
+                  <Link className="btn btn-secondary btn-block" href={tier2.href}>{homePricing.ctaLabel}</Link>
                 </div>
               </div>
             </AnimateIn>
@@ -323,6 +335,9 @@ export default function HomePage() {
                   ))}
                 </ul>
                 <div className={styles.tierFoot}>
+                  <span className="badge badge-amber">
+                    <AlertTriangle style={{ width: 13, height: 13 }} />{tier3.predepositBadge}
+                  </span>
                   <Link className="btn btn-secondary btn-block" href={tier3.href}>{homePricing.ctaLabel}</Link>
                 </div>
               </div>
@@ -341,6 +356,20 @@ export default function HomePage() {
                     <AlertTriangle style={{ width: 13, height: 13 }} />{tier4.predepositBadge}
                   </span>
                   <Link className="btn btn-secondary btn-block" href={tier4.href}>{homePricing.ctaLabel}</Link>
+                </div>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={400}>
+              <div className={`card ${styles.tier}`}>
+                <h3>{tier5.title}</h3>
+                <div className={styles.price}>{tier5.priceDisplay}</div>
+                <ul>
+                  {tier5.features.map(f => (
+                    <li key={f}><Check className={styles.ic} />{f}</li>
+                  ))}
+                </ul>
+                <div className={styles.tierFoot}>
+                  <Link className="btn btn-secondary btn-block" href={tier5.href}>View Details</Link>
                 </div>
               </div>
             </AnimateIn>
