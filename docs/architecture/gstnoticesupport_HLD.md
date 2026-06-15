@@ -633,6 +633,13 @@ Cloudflare provides DDoS protection, basic WAF rules, and IP reputation filterin
 
 No personally identifiable information, document content, or session tokens are ever placed in URL query parameters. This applies to all redirects, all email links, and all third-party integrations.
 
+### 14.11 Users Page (Admin)
+Master list of all registered users (soft-deleted users excluded).
+- List columns: Name, Email, Mobile, Interested Services. Row click → User Detail. Search by name/email.
+- User Detail: read-only Name, Mobile, Email, Interested Services only. No booking history; no profile editing.
+- Delete User: soft delete per §7.4. Permitted ONLY when the user has no active booking (none in document_upload/in_review/draft_ready/filing); otherwise the control is visible but disabled with a reason. Confirmation requires the admin to type the target user's email (string match, no OTP). Mirrors the user self-deletion guard (§22.8).
+Admin still CANNOT edit any user profile field — view and delete only.
+
 ---
 
 ## 15. Performance & SEO Architecture
@@ -963,6 +970,7 @@ This appendix consolidates every architectural decision locked during the requir
 - Hard delete S3 documents 7 days after account deletion
 - Account deletion blocked while any service is active
 - Confirmation by typing own email — no OTP
+- Admin may delete any user from the admin Users page, subject to the same active-booking block as user self-deletion;    deletion is soft (§7.4), confirmed by typing the target user's email.
 
 ### 22.9 Notifications
 - Email-only via Resend

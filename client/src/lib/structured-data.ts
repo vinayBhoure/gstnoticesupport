@@ -33,13 +33,13 @@ export function organizationSchema(): Record<string, unknown> {
 type ServiceInput = {
   name: string;
   description: string;
-  price: number;
+  price?: number;
   path: string;
 };
 
 export function serviceSchema({ name, description, price, path }: ServiceInput): Record<string, unknown> {
   const url = `${SITE_URL}${path}`;
-  return {
+  const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Service',
     serviceType: name,
@@ -55,12 +55,19 @@ export function serviceSchema({ name, description, price, path }: ServiceInput):
       '@type': 'Country',
       name: 'India',
     },
-    offers: {
+  };
+
+  // Consultation-based services have no fixed price — omit the Offer rather
+  // than emit a misleading price of 0.
+  if (price !== undefined) {
+    schema.offers = {
       '@type': 'Offer',
       price: String(price),
       priceCurrency: 'INR',
       url,
       availability: 'https://schema.org/InStock',
-    },
-  };
+    };
+  }
+
+  return schema;
 }

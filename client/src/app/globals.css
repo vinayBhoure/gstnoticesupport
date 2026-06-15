@@ -34,7 +34,7 @@ body{overflow-x:clip;}
 .nav.scrolled .row{height:62px;}
 .brand{display:flex;align-items:center;gap:11px;}
 .brand img{height:40px;width:40px;border-radius:7px;border:1px solid var(--neutral-200);object-fit:cover;}
-.brand .bn{font-weight:700;font-size:17px;color:var(--primary-navy);letter-spacing:-.01em;}
+.brand .bn{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:var(--primary-navy);letter-spacing:-.01em;}
 .brand .bn span{color:var(--accent-green);}
 .nav .links{display:flex;align-items:center;gap:26px;margin-left:6px;}
 .nav .links a,.nav .links button{font-size:15px;font-weight:500;color:var(--neutral-900);background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 0;}

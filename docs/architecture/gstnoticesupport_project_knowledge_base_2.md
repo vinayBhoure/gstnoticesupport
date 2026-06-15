@@ -445,6 +445,7 @@ Items added to out-of-scope list from this session, supplementing KB1 Section 19
 | In-platform pre-deposit payment or tracking | Not in scope | Fully external, user pays government directly |
 | Team section with individual names and credentials | Not in scope (regulatory) | CA rules prohibit public disclosure |
 | CIN / GSTIN in footer | Deferred until company registered | Not a placeholder — field absent until real data available |
+| Admin editing of user profile data | Out of scope | Admin Users section is view + delete only |
 
 ---
 
@@ -518,6 +519,10 @@ Chronological log of confirmed decisions made in this session.
 | D56 | Pre-deposit disclosure at four mandatory points: pricing cards, booking Step 1, Draft Ready email, Pay to Unlock screen | Trust protection — user must understand platform fee ≠ total cost |
 | D57 | Pre-deposit percentage not stated on website — referenced as "as per GST Act / CGST Act" | Avoids specific financial expectations against unknown disputed amounts |
 | D58 | Admin communicates specific pre-deposit amount via booking notes field before user pays | Operational responsibility, not platform-enforced |
+| D59 | Admin Users section added (list + detail) | Operational need to view registered users |
+| D60 | User view shows only name, mobile, email, interested services; no booking history | Bookings live in the Bookings zone |
+| D61 | Admin can delete a user — soft, blocked while any booking active, typed-email confirm | Consistency + record retention |
+| D62 | Admin still cannot edit user profiles | Write surface kept minimal |
 
 ---
 

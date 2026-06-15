@@ -12,7 +12,7 @@
 @media (prefers-reduced-motion:reduce){.scrollHint svg{animation:none;}}
 
 /* ---------- PRICING GRID ---------- */
-.pricingGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-items:stretch;}
+.pricingGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;align-items:stretch;}
 .pCard{background:#fff;border:1.5px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:32px 28px;display:flex;flex-direction:column;gap:0;position:relative;transition:box-shadow .15s,border-color .15s,transform .15s ease;height:100%;}
 .pCard:hover{box-shadow:var(--shadow-md);border-color:var(--primary-navy);transform:translateY(-3px);}
 .pCard.popular{border-color:var(--accent-green);}
