@@ -5,6 +5,45 @@
 
 ---
 
+## [2026-06-15] — style: homepage UI polish — badge cleanup, pre-deposit enforcement, animated text colour, navbar serif font
+
+**Most Popular badge removed from SCN Reply**
+- Removed `popular: true`, `popularBadge: 'Most Popular'`, and the corresponding amber badge render from the SCN Reply card on the homepage pricing tiers (`home.tsx`, `page.tsx`) and the pricing page card (`pricing.tsx`, `pricing/page.tsx`). The green highlight/ring and `btn-primary` CTA were reverted to the standard tier styling.
+
+**Pre-deposit badge added to Commissioner Appeal**
+- Commissioner Appeal now shows an amber "Pre-deposit required by law" badge on the homepage notice-card grid (matching the GSTAT notice card) and on the homepage pricing tiers — aligning both appeal services at all visible pre-deposit touchpoints (`home.tsx`, `page.tsx`).
+- Legal reference: Commissioner Appeal pre-deposit = 10% of disputed tax (Section 107(6) CGST Act); GSTAT Appeal = 20% (Section 112(8) CGST Act).
+
+**Rotating headline colour → accent-green**
+- Added `color: var(--accent-green)` to `.rotator` in `RotatingHeadline.module.css`. All rotating phrases inherit the WCAG-AA compliant brand green (#0B8B4E, ~5.9:1 on white). No other text, gradients, or branding colours changed.
+
+**Navbar brand name → serif typeface**
+- Added `font-family: Georgia,'Times New Roman',serif` to `.brand .bn` in `globals.css`. The "GSTNoticeSupport" wordmark near the logo now renders in serif on desktop and mobile (drawer inherits automatically). Footer brand (`.fbrand`) is unaffected.
+
+---
+
+## [2026-06-14] — feat: add "Representation Before Authority" as a full 5th service
+
+**New service (consultation-based, no fixed fee)**
+- Added **Representation Before Authority** — personal/virtual appearance before the GST Officer or Appellate Authority — promoted from a half-present mention to a first-class service across all surfaces.
+- New dedicated page `/services/representation-before-authority` (SSG), modelled on the existing service-page template (hero, what-is, 5 deliverables via `doGrid5`, documents, steps, consultation pricing block, related services).
+- New data file `client/src/data/services/representation-before-authority.tsx` (`representationContent: ServicePageContent`). **Copy is placeholder pending review.**
+- New WhatsApp deep link `WHATSAPP_LINKS.representation`.
+
+**Listings**
+- Nav dropdown (desktop + mobile drawer) and footer services column (`common.ts`).
+- Home notice-card grid and home pricing tiers (`home.tsx`) — shown as `Custom` / `Custom Quote`, consultation-based.
+- Pricing page: 5th table card (`Custom · consultation-based`, "View Service Details") + existing Representation callout heading aligned to "Representation Before Authority" and given a "View Service Details" link.
+- Sitemap entry (priority 0.9); GSTAT page gains a reciprocal "Representation Before Authority" related card.
+- Notice/tier/pricing grids widened from 4 to 5 columns at desktop.
+
+**SEO**
+- `serviceSchema()` / `ServiceSchemaInput.price` made optional — consultation services emit a Schema.org `Service` with **no `offers`** (avoids a misleading price of 0). Existing 4 fixed-fee services unchanged.
+
+**Verification:** `tsc --noEmit` clean; dev-server smoke test — all affected routes 200; new page renders correct title/h1 and JSON-LD without `offers`; sitemap, nav, footer, pricing, and GSTAT reciprocal link confirmed.
+
+---
+
 ## [2026-06-11] — refactor: extract all static content into `client/src/data/` layer
 
 **Content data layer (developer-facing; zero visible change to rendered site)**

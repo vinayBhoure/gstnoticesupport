@@ -64,9 +64,6 @@ export const pricingTable: SectionHead & { cards: PricingTableCard[] } = {
       ],
       ctaLabel: 'Book SCN Reply',
       href: '/services/scn-reply',
-      popular: true,
-      popularBadge: 'Most Popular',
-      popularAriaLabel: 'Most popular service',
     },
     {
       noticeTag: 'APL-01 first appeal',
@@ -110,14 +107,31 @@ export const pricingTable: SectionHead & { cards: PricingTableCard[] } = {
       ctaLabel: 'Book GSTAT Appeal',
       href: '/services/gstat-appeal',
     },
+    {
+      noticeTag: 'Personal hearing · appearance',
+      title: 'Representation Before Authority',
+      priceDisplay: 'Custom',
+      priceSub: 'Consultation-based · offline',
+      features: [
+        'Personal hearing appearance',
+        'Oral submissions before authority',
+        'Written synopsis where required',
+        'Post-hearing outcome guidance',
+        'Fee confirmed to your case',
+      ],
+      ctaLabel: 'View Service Details',
+      href: '/services/representation-before-authority',
+    },
   ],
 };
 
 export const pricingRepresentation = {
   tag: 'Consultation-based · offline service',
-  heading: 'Representation Before Tax Authority',
+  heading: 'Representation Before Authority',
   body: 'Handling where physical or virtual appearance before the GST Officer or Appellate Authority is required. Pricing depends on case complexity, jurisdiction, and hearing schedule. This service is discussed and confirmed offline before any engagement.',
   ctaLabel: 'Request a Callback for Representation',
+  detailsLabel: 'View Service Details',
+  detailsHref: '/services/representation-before-authority',
 } as const;
 
 export type PaymentPolicyItem = {

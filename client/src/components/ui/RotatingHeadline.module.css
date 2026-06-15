@@ -1,0 +1,40 @@
+/* Animated tail of the hero <h1>. Inherits all h1 typography (font, size,
+   weight, colour, letter-spacing) — only motion + reserved height live here. */
+
+/* Block so the rotating phrase sits on its own line beneath the lead.
+   Reserved height = one h1 line-height (1.1em); overflow hidden clips the
+   incoming/outgoing phrase so surrounding content never shifts (no CLS). */
+.rotator {
+  display: block;
+  position: relative;
+  height: 1.1em;
+  overflow: hidden;
+  color: var(--accent-green);
+}
+
+/* Every phrase stacks in the same box; only the active one is visible.
+   Outgoing slides up + fades, incoming slides in from below + fades. */
+.phrase {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 0.5s ease, transform 0.3s ease;
+  will-change: opacity, transform;
+}
+
+.phrase[data-state='active'] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.phrase[data-state='exit'] {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phrase {
+    transition: none;
+  }
+}

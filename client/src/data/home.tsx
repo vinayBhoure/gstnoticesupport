@@ -18,6 +18,18 @@ export const homeMeta = {
 export const homeHero = {
   badge: 'Trusted GST Litigation Experts · Pan-India',
   heading: 'GST Notice? Get Expert Legal Support in 24 Hours.',
+  // headingLead + headingPhrases drive the animated hero <h1> (RotatingHeadline).
+  // phrases[0] is the SSR/first-paint default, so the static h1 still reads
+  // "GST Notice? Get Expert Legal Support in 24 Hours." — matching the SEO title.
+  headingLead: 'GST Notice? Get Expert Legal Support',
+  headingPhrases: [
+    'in 24 Hours.',
+    'for ASMT 10 Reply.',
+    'for SCN Reply.',
+    'for GSTAT Appeal.',
+    'for Representation Before Authority.',
+    'for Search Cases.',
+  ],
   sub: 'Our team of ICAI-registered CAs and Bar Council-enrolled Advocates prepare your reply, appeal, or representation — fully managed, fixed fee.',
   bookLabel: 'Book Service',
   whatsappHref: WHATSAPP_LINKS.home,
@@ -59,6 +71,7 @@ export const homeNotices: SectionHead & { getHelpLabel: string; cards: NoticeCar
       description: 'Filed as an APL-01 against an unfavourable adjudicating authority order. We draft the grounds of appeal, compile supporting documents, and represent you before the Commissioner (Appeals).',
       priceDisplay: '₹9,999',
       priceNote: 'fixed fee',
+      badge: 'Pre-deposit required by law',
     },
     {
       href: '/services/gstat-appeal',
@@ -68,6 +81,14 @@ export const homeNotices: SectionHead & { getHelpLabel: string; cards: NoticeCar
       priceDisplay: '₹14,999',
       priceNote: 'fixed fee',
       badge: 'Pre-deposit required by law',
+    },
+    {
+      href: '/services/representation-before-authority',
+      Icon: UserCheck,
+      title: 'Representation Before Authority',
+      description: 'Physical or virtual appearance before the GST Officer or Appellate Authority at a personal hearing. Our CAs and Advocates argue your case on your behalf. Consultation-based — fee is confirmed to your case before any engagement.',
+      priceDisplay: 'Custom',
+      priceNote: 'consultation-based',
     },
   ],
 };
@@ -152,14 +173,13 @@ export const homePricing: SectionHead & { ctaLabel: string; tiers: PricingTier[]
       priceDisplay: '₹5,999',
       features: ['DRC-01 / DRC-01A case review', 'Detailed reply with case law', 'Filing on GST portal', 'Acknowledgement shared'],
       href: '/services/scn-reply',
-      popular: true,
-      popularBadge: 'Most Popular',
     },
     {
       title: 'Commissioner Appeal',
       priceDisplay: '₹9,999',
       features: ['APL-01 appeal drafting', 'Grounds of appeal & statement', 'Filing before Commissioner (Appeals)', 'Acknowledgement shared'],
       href: '/services/commissioner-appeal',
+      predepositBadge: 'Pre-deposit required by law',
     },
     {
       title: 'GSTAT Appeal',
@@ -167,6 +187,12 @@ export const homePricing: SectionHead & { ctaLabel: string; tiers: PricingTier[]
       features: ['APL-05 tribunal filing', 'Grounds of appeal & statement', 'Filing before Appellate Tribunal', 'Acknowledgement shared'],
       href: '/services/gstat-appeal',
       predepositBadge: 'Pre-deposit required by law',
+    },
+    {
+      title: 'Representation Before Authority',
+      priceDisplay: 'Custom Quote',
+      features: ['Personal hearing appearance', 'Oral submissions before authority', 'Written synopsis where required', 'Consultation-based pricing'],
+      href: '/services/representation-before-authority',
     },
   ],
 };
