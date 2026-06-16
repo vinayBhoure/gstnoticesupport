@@ -93,6 +93,8 @@ model User {
   name               String        @db.VarChar(255)
   email              String        @unique @db.VarChar(255)
   hashedPassword     String        @map("hashed_password") @db.VarChar(255)
+  // Collected at complete-profile (D67); nullable until then.
+  phone              String?       @db.VarChar(20)
   role               UserRole      @default(user)
   emailVerified      Boolean       @default(false) @map("email_verified")
   termsAccepted      Boolean       @default(false) @map("terms_accepted")

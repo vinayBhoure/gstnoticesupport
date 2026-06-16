@@ -99,54 +99,54 @@
 ### EP7 — Backend Core Infrastructure (backend_plan Phase 0)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Typed env loader — validate required vars at boot, fail fast with clear message | `server/src/lib/env.ts` |
-| ⬚ | Rate-limit factory utility (`createRateLimiter`) — not yet attached to routes | `server/src/lib/rateLimiter.ts` |
-| ⬚ | Full directory layout: `routes/ controllers/ services/ repositories/ validators/ middleware/ lib/` | Per `backend_plan.md §Ph0` |
-| ⬚ | Central `routes/index.ts` router registry — one route file + one line to register | |
-| ⬚ | Structured request logging middleware | Morgan or custom; no PII in log output |
-| ⬚ | Global 404 handler (before existing `errorHandler`) | |
-| ⬚ | Confirm `GET /health` returns standard envelope shape | Already exists; verify envelope compliance |
-| ⬚ | Update `.env.example` with all Phase 2 vars | DB, JWT, S3, Razorpay, Resend keys |
+| ✅ | Typed env loader — validate required vars at boot, fail fast with clear message | `server/src/lib/env.ts` |
+| ✅ | Rate-limit factory utility (`createRateLimiter`) — not yet attached to routes | `server/src/lib/rateLimiter.ts` |
+| ✅ | Full directory layout: `routes/ controllers/ services/ repositories/ middleware/ lib/` | Per `backend_plan.md §Ph0` |
+| ✅ | Central `routes/index.ts` router registry — one route file + one line to register | |
+| ✅ | Structured request logging middleware (pino-http) | Suppresses `/health`; no PII |
+| ✅ | Global 404 handler (before existing `errorHandler`) | `server/src/middleware/notFound.ts` |
+| ✅ | Confirm `GET /health` returns standard envelope shape | `{ success: true, data: { status: 'ok' }, ... }` |
+| ✅ | Update `.env.example` with all Phase 2 vars | DB, JWT, S3, Razorpay, Resend keys |
 
 ### EP6 — Database Schema & Repository Layer (backend_plan Phase 1)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Prisma init in `server/` pointing at locked `schema.prisma` | `npx prisma init` |
-| ⬚ | Prisma client singleton in `server/src/lib/prisma.ts` | Single instance, reused across app |
-| ⬚ | `schema.prisma` — 7 tables, 7 enums, all indexes, `onDelete` rules | users, bookings, booking_documents, payment_records, otp_store, refresh_tokens, token_blacklist |
-| ⬚ | `payment_records` includes `source` enum + `performed_by_admin_id` nullable FK | D66 — add before first migration |
-| ⬚ | NeonDB dev branch connection — supply `DATABASE_URL` | External: NeonDB account needed |
-| ⬚ | First migration — `npx prisma migrate dev --name initial_schema` | Must match `schema.prisma` exactly |
-| ⬚ | Admin seed script — single admin user, `role = admin`, `email_verified = true` | No promotion endpoint ever |
-| ⬚ | Prisma middleware in `lib/prisma.ts` for soft-delete global filter on User | Auto-exclude `deleted_at IS NOT NULL` |
-| ⬚ | Verify: `prisma migrate status` clean; tables visible in Neon console | Acceptance criterion |
-| ⬚ | Verify: re-run migration on a fresh Neon branch reproduces schema identically | Staging-branch workflow validation |
+| ✅ | Prisma 6.x installed in `server/` | Pinned to 6.x — Prisma 7 requires Node 20.19+; project runs 20.12.2 |
+| ✅ | Prisma client singleton in `server/src/lib/prisma.ts` | Single instance; soft-delete middleware wired |
+| ✅ | `schema.prisma` — 7 tables, 8 enums, all indexes, `onDelete` rules | users, bookings, booking_documents, payment_records, otp_store, refresh_tokens, token_blacklist |
+| ✅ | `payment_records` includes `source` enum + `performed_by_admin_id` nullable FK | D66 applied before migration |
+| ✅ | NeonDB connection wired via `DATABASE_URL` in `server/.env` | Credentials in .env (not committed) |
+| ✅ | First migration — `20260616142630_initial_schema` applied to NeonDB | `prisma migrate status` clean |
+| ✅ | Admin seed script — `role=admin`, `email_verified=true`, bcrypt cost 12 | `prisma/seed.ts`; runs via `npx prisma db seed` |
+| ✅ | Prisma middleware in `lib/prisma.ts` for soft-delete global filter on User | Auto-excludes `deletedAt IS NOT NULL` |
+| ✅ | `user.repository.ts` — first domain repository: find, create, update, softDelete | Type-safe; no Prisma in services |
+| ⬚ | Verify: re-run migration on a fresh Neon branch reproduces schema identically | Staging-branch workflow validation (deferred to staging setup) |
 
 ### EP8 — Auth Backend (backend_plan Phase 2)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | bcrypt password hashing service (cost 12) | `server/src/lib/bcrypt.ts` |
-| ⬚ | JWT service: issue + verify access token (15 min, carries `id/role/email/jti`) | HTTP-only, Secure, SameSite=Lax cookie |
-| ⬚ | JWT service: issue + verify refresh token (7 days) — stored **hashed** in `refresh_tokens` | Rotation on every refresh |
-| ⬚ | OTP service: 6-digit numeric, hashed in `otp_store`, 10-min expiry, attempt-capped, single-use | Deleted on successful verify |
-| ⬚ | `authenticate` middleware — reads JWT from cookie, attaches `req.user` | `server/src/middleware/authenticate.ts` |
-| ⬚ | `requireRole` middleware — admin gate, always after `authenticate` | |
-| ⬚ | Token blacklist service — logout + "This wasn't me" only; 24h auto-cleanup | Do not expand scope |
-| ⬚ | Email service abstraction + Resend client | `server/src/lib/email.ts` — used by all phases |
-| ⬚ | Ownership-check helper — `WHERE userId = currentUser.id` unless admin | `server/src/lib/ownership.ts` |
-| ⬚ | `POST /auth/signup` | Creates user, sends OTP |
-| ⬚ | `POST /auth/verify-otp` | Flips `email_verified`, sets both cookies |
-| ⬚ | `POST /auth/resend-otp` | Rate: 3/hr |
-| ⬚ | `POST /auth/complete-profile` | One-time: name + phone (D67) |
-| ⬚ | `POST /auth/login` | Rate: 5/15min; sends security alert email (IP + UA, D65) |
-| ⬚ | `POST /auth/refresh` | Rotates refresh token |
-| ⬚ | `POST /auth/logout` | Blacklists access token JTI |
-| ⬚ | `POST /auth/forgot-password` | Rate: 5/hr; neutral response whether email exists |
-| ⬚ | `POST /auth/reset-password` | OTP-based, single-use |
-| ⬚ | `GET /auth/invalidate` | "This wasn't me" link handler |
-| ⬚ | `GET /auth/me` | Returns `UserDTO`; `401` without valid cookie |
-| ⬚ | Apply per-route rate limiters (use factory from EP7) | Per rate-limit matrix in LLD §6 |
-| ⬚ | External: Resend API key + verified `support@gstnoticesupport.in` domain | Blocks email testing |
+| ✅ | bcrypt password hashing service (cost 12) | Used inline in `auth.service.ts` / `otp.service.ts` (no separate lib file) |
+| ✅ | JWT service: issue + verify access token (15 min, carries `id/role/email/jti`) | `lib/jwt.ts`; HTTP-only, Secure(prod), SameSite=Lax cookie |
+| ✅ | JWT service: issue + verify refresh token (7 days) — stored **hashed** in `refresh_tokens` | **No rotation** — refresh mints access token only (api_contract §1.6) |
+| ✅ | OTP service: 6-digit numeric, hashed in `otp_store`, 10-min expiry, attempt-capped (5), single-use | `otp.service.ts`; deleted on successful verify |
+| ✅ | `authenticate` middleware — reads JWT from cookie, attaches `req.user` | `server/src/middleware/authenticate.ts` (checks blacklist) |
+| ✅ | `requireRole` middleware — admin gate, always after `authenticate` | `server/src/middleware/requireRole.ts` |
+| ✅ | Token blacklist service — logout + "This wasn't me" only | `token.service.ts`; opportunistic cleanup (scheduled job → Ph8) |
+| ✅ | Email service abstraction + Resend client | `server/src/lib/email.ts` + `notification.service.ts` + `emails/templates.ts` |
+| ⬚ | Ownership-check helper — `WHERE userId = currentUser.id` unless admin | Deferred to EP9 — no user-owned resources exist in auth phase |
+| ✅ | `POST /auth/signup` | Creates user, sends OTP + account-created→admin |
+| ✅ | `POST /auth/verify-otp` | Flips `email_verified`, sets both cookies |
+| ✅ | `POST /auth/resend-otp` | Rate: 3/hr |
+| ✅ | `POST /auth/complete-profile` | One-time: name + phone (D67); added `User.phone` column |
+| ✅ | `POST /auth/login` | Rate: 5/15min; sends security alert email (IP + UA, D65) |
+| ✅ | `POST /auth/refresh` | Mints new access token only (no rotation) |
+| ✅ | `POST /auth/logout` | Blacklists access token JTI + revokes refresh row |
+| ✅ | `POST /auth/forgot-password` | Rate: 5/hr; neutral response whether email exists |
+| ✅ | `POST /auth/reset-password` | OTP-based, single-use; revokes all refresh tokens |
+| ✅ | `GET /auth/invalidate` | "This wasn't me" link handler |
+| ✅ | `GET /auth/me` | Returns `UserDTO`; `401` without valid cookie |
+| ✅ | Apply per-route rate limiters (use factory from EP7) | login/otp-verify/resend/forgot/reset per matrix |
+| ⬚ | External: Resend API key + verified `support@gstnoticesupport.in` domain | Key set in `.env`; domain verification → confirm before prod (Ph7/8) |
 
 ### EP9 — Booking & Document Upload Backend (backend_plan Phases 3 + 4)
 | Status | Task | Notes |
