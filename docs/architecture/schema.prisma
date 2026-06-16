@@ -75,6 +75,15 @@ enum PaymentRecordStatus {
   @@map("pay_rec_status_enum")
 }
 
+// D66 (2026-06-16) — records how a payment was captured for admin audit
+enum PaymentSource {
+  webhook
+  verify
+  admin_override
+
+  @@map("payment_source_enum")
+}
+
 // =============================================================================
 // CORE MODELS (locked 4-table structure per LLD)
 // =============================================================================
@@ -89,14 +98,18 @@ model User {
   termsAccepted      Boolean       @default(false) @map("terms_accepted")
   allowPromotions    Boolean       @default(false) @map("allow_promotions")
   interestedServices ServiceType[] @default([]) @map("interested_services")
+  // database.md §3 — users are soft-deleted; never call prisma.user.delete()
+  deletedAt          DateTime?     @map("deleted_at") @db.Timestamptz(6)
   createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  bookings      Booking[]
-  otpEntries    OtpStore[]
-  refreshTokens RefreshToken[]
+  bookings        Booking[]
+  otpEntries      OtpStore[]
+  refreshTokens   RefreshToken[]
+  adminOverrides  PaymentRecord[] @relation("AdminPaymentOverrides")
 
   @@index([role])
+  @@index([deletedAt])
   @@map("users")
 }
 
@@ -158,14 +171,19 @@ model PaymentRecord {
   razorpayOrderId   String              @unique @map("razorpay_order_id") @db.VarChar(255)
   // Nullable until payment captured. UNIQUE is the single source of payment
   // idempotency (LLD §11 "Context Handoff for Engineers").
-  razorpayPaymentId String?             @unique @map("razorpay_payment_id") @db.VarChar(255)
-  amountPaise       Int                 @map("amount_paise")
-  currency          String              @default("INR") @db.VarChar(3)
-  status            PaymentRecordStatus @default(created)
-  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  razorpayPaymentId  String?             @unique @map("razorpay_payment_id") @db.VarChar(255)
+  amountPaise        Int                 @map("amount_paise")
+  currency           String              @default("INR") @db.VarChar(3)
+  status             PaymentRecordStatus @default(created)
+  // D66 (2026-06-16) — audit trail for admin mark-paid override
+  source             PaymentSource       @default(webhook)
+  performedByAdminId String?             @map("performed_by_admin_id") @db.Uuid
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking          Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  // onDelete: SetNull — if the admin account is ever deleted, audit reference becomes null
+  performedByAdmin User?   @relation("AdminPaymentOverrides", fields: [performedByAdminId], references: [id], onDelete: SetNull)
 
   @@index([bookingId])
   @@index([status])

@@ -53,7 +53,7 @@ Turn the current bare scaffold (Express + TS + health check + `errorHandler.ts` 
 - Typed environment loader (validate required env vars at boot; fail fast with a clear message if missing).
 - Security middleware chain: Helmet, CORS (credentials enabled, origin from env, per-environment), `cookie-parser`, JSON body parser (with the Razorpay webhook route deliberately excluded — see Phase 5).
 - `express-rate-limit` factory utility (per-endpoint limiter builder; not yet attached to routes).
-- Directory layout: `routes/ controllers/ services/ repositories/ validators/ middleware/ lib/` and a central `routes/index.ts` router registry.
+- Directory layout: `routes/ controllers/ services/ repositories/ schemas/ dto/ middleware/ lib/ types/` and a central `routes/index.ts` router registry. (Authoritative layout in `backend.md §1.1`; `validators/` is `schemas/` per `RULES.md §3.1`.)
 - Structured request logging + a global 404 handler ahead of the existing error handler.
 
 **Dependencies / prerequisites**
