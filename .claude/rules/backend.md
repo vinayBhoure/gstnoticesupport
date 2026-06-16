@@ -11,9 +11,27 @@
 
 | Layer | File location | Responsibility | May import from |
 |---|---|---|---|
-| Controller | `src/api/controllers/` | HTTP only: parse request, call service, send response | Services only |
+| Controller | `src/controllers/` | HTTP only: parse request, call service, send response | Services only |
 | Service | `src/services/` | Business logic: validation, state transitions, orchestration | Repositories, other services, lib utilities |
 | Repository | `src/repositories/` | Data access only: all Prisma queries live here | Prisma client only |
+
+**Full directory layout (`server/src/`):**
+
+```
+routes/         → Router files, one per domain (auth, booking, document, payment, admin)
+controllers/    → Request handlers, thin (asyncHandler-wrapped)
+services/       → Business logic
+repositories/   → All Prisma queries
+schemas/        → Zod schemas shared between client and server (RULES.md §3.1)
+dto/            → DTO types + mapper functions (database.md §5.2)
+middleware/     → errorHandler, notFound, requestLogger, validate, authenticate, requireRole
+lib/            → env, logger, rateLimiter, prisma, jwt, s3, email, razorpay
+types/          → Express type extensions (req.user, req.validated)
+utils/          → ApiError, asyncHandler, envelope
+index.ts        → Entry point, middleware chain
+```
+
+> **Note (updated 2026-06-16):** Previous version had `src/api/controllers/`. Changed to flat `src/controllers/` to match the established project implementation. See `feature/phase-2/backend-foundation`.
 
 **Why:** A controller that contains business logic cannot be unit-tested without an HTTP layer. A service that calls Prisma directly cannot be tested without a database. The separation makes each layer independently replaceable and testable.
 
@@ -259,31 +277,60 @@ router.post('/bookings', authenticate, validate(createBookingSchema), asyncHandl
 
 ### 5.2 — The `validate` middleware implementation
 
+Three separate validators for body, query, and params. Parsed results attach to `req.validated`; never mutate `req.body` directly. Errors call `next(err)` — never throw synchronously in middleware.
+
 ```ts
 // src/middleware/validate.ts
+import type { Request, Response, NextFunction } from 'express';
 import type { ZodSchema } from 'zod';
+import { ApiError } from '../utils/ApiError';
 
-export function validate(schema: ZodSchema) {
-  return (req: Request, _res: Response, next: NextFunction) => {
+function formatZodError(schema: ZodSchema, input: unknown): string {
+  const result = schema.safeParse(input);
+  if (result.success) return '';
+  return result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+}
+
+export function validateBody(schema: ZodSchema) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.body);
-    if (!result.success) {
-      throw new ApiError(400, result.error.errors.map(e => e.message).join(', '));
-    }
-    req.body = result.data; // replace with the parsed + coerced values
+    if (!result.success) { next(new ApiError(400, formatZodError(schema, req.body))); return; }
+    req.validated = { ...req.validated, body: result.data };
+    next();
+  };
+}
+
+export function validateQuery(schema: ZodSchema) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const result = schema.safeParse(req.query);
+    if (!result.success) { next(new ApiError(400, formatZodError(schema, req.query))); return; }
+    req.validated = { ...req.validated, query: result.data };
+    next();
+  };
+}
+
+export function validateParams(schema: ZodSchema) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const result = schema.safeParse(req.params);
+    if (!result.success) { next(new ApiError(400, formatZodError(schema, req.params))); return; }
+    req.validated = { ...req.validated, params: result.data };
     next();
   };
 }
 ```
 
+`req.validated` and `req.user` types are declared in `src/types/express.d.ts`.
+
 ---
 
-### 5.3 — Never trust `req.params` or `req.query` without validation.
+### 5.3 — Read validated values from `req.validated`, never from raw `req.body`/`req.query`/`req.params`.
 
 ```ts
-// ✅ DO — parse and validate route params
-const idSchema = z.string().cuid();
-const id = idSchema.safeParse(req.params.id);
-if (!id.success) throw new ApiError(400, 'Invalid booking ID');
+// ✅ DO — in a controller, after validateBody middleware ran
+const { email, password } = req.validated.body as LoginInput;
+
+// ✅ DO — params validated via validateParams
+const { id } = req.validated.params as { id: string };
 ```
 
 ---
