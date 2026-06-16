@@ -37,6 +37,13 @@ export const userRepository = {
     });
   },
 
+  async updatePassword(id: string, hashedPassword: string): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data: { hashedPassword, updatedAt: new Date() },
+    });
+  },
+
   async softDelete(id: string): Promise<User> {
     // database.md §3.1 — never call prisma.user.delete()
     return prisma.user.update({
