@@ -5,6 +5,31 @@
 
 ---
 
+## [2026-06-16] — feat(backend): Phase 2 — Authentication & Identity
+
+**Response envelope aligned to `api_contract.md`**
+- `ApiError(statusCode, code, message, details?)` now carries a named error code; errors serialise as `{ success:false, error:{ code, message, details? } }`.
+- Success envelope is `{ success:true, message?, data }` (+ `paginated()` helper); `validate`, `rateLimiter`, `notFound`, and `errorHandler` all emit the contract shape. Unknown errors → `INTERNAL_ERROR` (500), logged via pino.
+
+**Auth primitives**
+- JWT: 15-min access token (`sub`, `role`, `email`, `jti`) + 7-day refresh token; secrets `JWT_ACCESS_SECRET`/`JWT_REFRESH_SECRET`. Refresh tokens stored **SHA-256-hashed** in `refresh_tokens`. Refresh issues a new access token only — **no rotation** (api_contract §1.6).
+- OTP: 6-digit, bcrypt-hashed in `otp_store`, 10-min expiry, 5-attempt cap, single active OTP per user, single-use.
+- Cookies (`utils/cookies.ts`): `access_token` (Path=/) + `refresh_token` (Path=/api/v1/auth/refresh); `HttpOnly; SameSite=Lax; Secure` in prod; `Domain` from `COOKIE_DOMAIN` (unset in dev).
+- Token blacklist (`token_blacklist`) for logout + "This wasn't me" only; opportunistic expiry cleanup.
+
+**Endpoints (`/api/v1/auth`)** — signup, verify-otp, resend-otp, complete-profile, login, refresh, logout, forgot-password, reset-password, invalidate, me. Per-route rate limits (login 5/15m, otp-verify 5/10m, resend 3/h, forgot 5/h, reset 5/10m). `authenticate` + `requireRole` middleware added.
+
+**Email (Resend)** — `lib/email.ts` abstraction (best-effort, never logs PII/OTP) + `notification.service.ts` for signup OTP, password-reset OTP, login security alert (IP + sanitised UA + invalidation link, D65), and account-created→admin. Brand-styled templates in `emails/templates.ts`.
+
+**Schema / data**
+- Added `User.phone` (nullable) + migration `add_phone_to_users` — required by complete-profile (D67); the field was previously referenced by the repository but absent from the schema.
+- Soft-delete guard in `lib/prisma.ts` reimplemented as a Prisma **client extension** (`$extends`) — Prisma 6 removed `$use` middleware.
+- New repositories: `otp`, `refresh-token`, `token-blacklist`; `user.repository.updatePassword` added.
+- DTO: `dto/user.dto.ts` (`toUserDTO`, includes `phone`).
+- New env vars: `API_URL` (required), `COOKIE_DOMAIN` (optional); `ADMIN_EMAIL` now loaded at boot.
+
+---
+
 ## [2026-06-16] — feat(backend): Phase 0 + Phase 1 — server foundation hardening and Prisma data layer
 
 **Backend Phase 0 — Foundation Hardening**

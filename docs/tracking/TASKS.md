@@ -125,28 +125,28 @@
 ### EP8 — Auth Backend (backend_plan Phase 2)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | bcrypt password hashing service (cost 12) | `server/src/lib/bcrypt.ts` |
-| ⬚ | JWT service: issue + verify access token (15 min, carries `id/role/email/jti`) | HTTP-only, Secure, SameSite=Lax cookie |
-| ⬚ | JWT service: issue + verify refresh token (7 days) — stored **hashed** in `refresh_tokens` | Rotation on every refresh |
-| ⬚ | OTP service: 6-digit numeric, hashed in `otp_store`, 10-min expiry, attempt-capped, single-use | Deleted on successful verify |
-| ⬚ | `authenticate` middleware — reads JWT from cookie, attaches `req.user` | `server/src/middleware/authenticate.ts` |
-| ⬚ | `requireRole` middleware — admin gate, always after `authenticate` | |
-| ⬚ | Token blacklist service — logout + "This wasn't me" only; 24h auto-cleanup | Do not expand scope |
-| ⬚ | Email service abstraction + Resend client | `server/src/lib/email.ts` — used by all phases |
-| ⬚ | Ownership-check helper — `WHERE userId = currentUser.id` unless admin | `server/src/lib/ownership.ts` |
-| ⬚ | `POST /auth/signup` | Creates user, sends OTP |
-| ⬚ | `POST /auth/verify-otp` | Flips `email_verified`, sets both cookies |
-| ⬚ | `POST /auth/resend-otp` | Rate: 3/hr |
-| ⬚ | `POST /auth/complete-profile` | One-time: name + phone (D67) |
-| ⬚ | `POST /auth/login` | Rate: 5/15min; sends security alert email (IP + UA, D65) |
-| ⬚ | `POST /auth/refresh` | Rotates refresh token |
-| ⬚ | `POST /auth/logout` | Blacklists access token JTI |
-| ⬚ | `POST /auth/forgot-password` | Rate: 5/hr; neutral response whether email exists |
-| ⬚ | `POST /auth/reset-password` | OTP-based, single-use |
-| ⬚ | `GET /auth/invalidate` | "This wasn't me" link handler |
-| ⬚ | `GET /auth/me` | Returns `UserDTO`; `401` without valid cookie |
-| ⬚ | Apply per-route rate limiters (use factory from EP7) | Per rate-limit matrix in LLD §6 |
-| ⬚ | External: Resend API key + verified `support@gstnoticesupport.in` domain | Blocks email testing |
+| ✅ | bcrypt password hashing service (cost 12) | Used inline in `auth.service.ts` / `otp.service.ts` (no separate lib file) |
+| ✅ | JWT service: issue + verify access token (15 min, carries `id/role/email/jti`) | `lib/jwt.ts`; HTTP-only, Secure(prod), SameSite=Lax cookie |
+| ✅ | JWT service: issue + verify refresh token (7 days) — stored **hashed** in `refresh_tokens` | **No rotation** — refresh mints access token only (api_contract §1.6) |
+| ✅ | OTP service: 6-digit numeric, hashed in `otp_store`, 10-min expiry, attempt-capped (5), single-use | `otp.service.ts`; deleted on successful verify |
+| ✅ | `authenticate` middleware — reads JWT from cookie, attaches `req.user` | `server/src/middleware/authenticate.ts` (checks blacklist) |
+| ✅ | `requireRole` middleware — admin gate, always after `authenticate` | `server/src/middleware/requireRole.ts` |
+| ✅ | Token blacklist service — logout + "This wasn't me" only | `token.service.ts`; opportunistic cleanup (scheduled job → Ph8) |
+| ✅ | Email service abstraction + Resend client | `server/src/lib/email.ts` + `notification.service.ts` + `emails/templates.ts` |
+| ⬚ | Ownership-check helper — `WHERE userId = currentUser.id` unless admin | Deferred to EP9 — no user-owned resources exist in auth phase |
+| ✅ | `POST /auth/signup` | Creates user, sends OTP + account-created→admin |
+| ✅ | `POST /auth/verify-otp` | Flips `email_verified`, sets both cookies |
+| ✅ | `POST /auth/resend-otp` | Rate: 3/hr |
+| ✅ | `POST /auth/complete-profile` | One-time: name + phone (D67); added `User.phone` column |
+| ✅ | `POST /auth/login` | Rate: 5/15min; sends security alert email (IP + UA, D65) |
+| ✅ | `POST /auth/refresh` | Mints new access token only (no rotation) |
+| ✅ | `POST /auth/logout` | Blacklists access token JTI + revokes refresh row |
+| ✅ | `POST /auth/forgot-password` | Rate: 5/hr; neutral response whether email exists |
+| ✅ | `POST /auth/reset-password` | OTP-based, single-use; revokes all refresh tokens |
+| ✅ | `GET /auth/invalidate` | "This wasn't me" link handler |
+| ✅ | `GET /auth/me` | Returns `UserDTO`; `401` without valid cookie |
+| ✅ | Apply per-route rate limiters (use factory from EP7) | login/otp-verify/resend/forgot/reset per matrix |
+| ⬚ | External: Resend API key + verified `support@gstnoticesupport.in` domain | Key set in `.env`; domain verification → confirm before prod (Ph7/8) |
 
 ### EP9 — Booking & Document Upload Backend (backend_plan Phases 3 + 4)
 | Status | Task | Notes |
