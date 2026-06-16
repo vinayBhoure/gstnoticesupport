@@ -2,17 +2,21 @@ import type { Request, Response, NextFunction } from 'express';
 import type { ZodSchema } from 'zod';
 import { ApiError } from '../utils/ApiError';
 
-function formatZodError(schema: ZodSchema, input: unknown): string {
-  const result = schema.safeParse(input);
-  if (result.success) return '';
-  return result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+type IssueLike = { path: PropertyKey[]; message: string };
+
+function toValidationError(issues: IssueLike[]): ApiError {
+  const details = issues.map((i) => ({
+    field: i.path.map(String).join('.'),
+    message: i.message,
+  }));
+  return new ApiError(400, 'VALIDATION_ERROR', 'Validation failed', details);
 }
 
 export function validateBody(schema: ZodSchema) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
-      next(new ApiError(400, formatZodError(schema, req.body)));
+      next(toValidationError(result.error.issues));
       return;
     }
     req.validated = { ...req.validated, body: result.data };
@@ -24,7 +28,7 @@ export function validateQuery(schema: ZodSchema) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.query);
     if (!result.success) {
-      next(new ApiError(400, formatZodError(schema, req.query)));
+      next(toValidationError(result.error.issues));
       return;
     }
     req.validated = { ...req.validated, query: result.data };
@@ -36,7 +40,7 @@ export function validateParams(schema: ZodSchema) {
   return (req: Request, _res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.params);
     if (!result.success) {
-      next(new ApiError(400, formatZodError(schema, req.params)));
+      next(toValidationError(result.error.issues));
       return;
     }
     req.validated = { ...req.validated, params: result.data };

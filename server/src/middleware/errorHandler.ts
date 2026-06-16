@@ -1,22 +1,27 @@
 import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/ApiError";
+import { logger } from "../lib/logger";
 
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): void {
   if (err instanceof ApiError) {
     res.status(err.statusCode).json({
       success: false,
-      data: null,
-      error: err.message,
-      statusCode: err.statusCode,
+      error: {
+        code: err.code,
+        message: err.message,
+        ...(err.details ? { details: err.details } : {}),
+      },
     });
     return;
   }
 
-  console.error("Unhandled error:", err);
+  // Programmer error — never expose stack trace to the client
+  logger.error({ err }, "Unhandled error");
   res.status(500).json({
     success: false,
-    data: null,
-    error: "An unexpected error occurred",
-    statusCode: 500,
+    error: {
+      code: "INTERNAL_ERROR",
+      message: "An unexpected error occurred",
+    },
   });
 }
