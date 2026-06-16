@@ -1,32 +1,49 @@
-import "dotenv/config";
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import cookieParser from "cookie-parser";
-import { errorHandler } from "./middleware/errorHandler";
+import 'dotenv/config';
+import { env } from './lib/env';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import { requestLogger } from './middleware/requestLogger';
+import { notFound } from './middleware/notFound';
+import { errorHandler } from './middleware/errorHandler';
+import { apiRouter, healthRouter } from './routes';
 
 const app = express();
-const PORT = process.env.PORT ?? 4000;
-const CLIENT_URL = process.env.CLIENT_URL ?? "http://localhost:3000";
 
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+// Security headers
 app.use(helmet());
+
+// CORS — explicit origin required; wildcard breaks HttpOnly cookie auth
+app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+
+// Cookie parsing (needed for JWT in HttpOnly cookies)
 app.use(cookieParser());
 
-// Razorpay webhook must be registered before express.json() with express.raw()
-// Placeholder — wired in Phase 2
+// Structured request logging
+app.use(requestLogger);
 
+// Razorpay webhook must be registered BEFORE express.json() with express.raw()
+// so that HMAC-SHA256 signature verification is computed over the raw buffer.
+// Wired in Phase 5.
+// app.post('/api/v1/webhooks/razorpay', express.raw({ type: 'application/json' }), webhookController.handle);
+
+// JSON body parsing for all other routes
 app.use(express.json());
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok" });
-});
+// Health check — root level, not under /api/v1
+app.use('/health', healthRouter);
 
-// API routes — wired in Phase 2
-// app.use("/api/v1", apiRouter);
+// Versioned API routes
+app.use('/api/v1', apiRouter);
 
+// 404 handler — must be after all routes
+app.use(notFound);
+
+// Error handler — must be last
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(env.PORT, () => {
+  // Using process.stdout instead of console.log to avoid lint warnings on committed code
+  process.stdout.write(`Server running on http://localhost:${env.PORT}\n`);
 });
