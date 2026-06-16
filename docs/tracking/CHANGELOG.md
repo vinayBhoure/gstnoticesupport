@@ -5,6 +5,30 @@
 
 ---
 
+## [2026-06-16] — feat(backend): Phase 0 + Phase 1 — server foundation hardening and Prisma data layer
+
+**Backend Phase 0 — Foundation Hardening**
+- Zod-validated env loader at boot (`server/src/lib/env.ts`); process exits with descriptive message on any missing var.
+- pino + pino-http request logging; auth headers and cookies auto-redacted; `/health` route suppressed from logs.
+- `createRateLimiter` factory utility (`server/src/lib/rateLimiter.ts`); not yet attached to routes.
+- Full directory scaffold: `routes/ controllers/ services/ repositories/ middleware/ lib/`.
+- Central `routes/index.ts` router registry; `GET /health` returns standard envelope `{ success, data, error, statusCode }`.
+- Zod validation middleware: `validateBody / validateQuery / validateParams` — attaches to `req.validated`, never mutates `req.body`.
+- Global 404 handler + `notFound.ts` middleware.
+- `.env.example` updated with all Phase 0–5 environment variable placeholders.
+
+**Backend Phase 1 — Prisma Data Layer**
+- Prisma 6.x pinned (`@prisma/client@6`, `prisma@6`) — Prisma 7 requires Node 20.19+; project runs 20.12.2.
+- Full `server/prisma/schema.prisma`: 8 enums (incl. `PaymentSource` per D66), 7 tables with all indexes and `onDelete` rules.
+- `PaymentRecord` now carries `source` (PaymentSource) + `performedByAdminId` nullable FK for admin audit trail (D66).
+- `User.deletedAt` nullable — soft-delete enforced at repository and via Prisma middleware.
+- `server/src/lib/prisma.ts` — Prisma singleton + `$use` middleware auto-excluding soft-deleted users from all find operations.
+- Migration `20260616142630_initial_schema` applied to NeonDB; `prisma migrate status` clean.
+- `server/prisma/seed.ts` — admin seeded via `ADMIN_EMAIL/NAME/PASSWORD` env vars; bcrypt cost 12; idempotent upsert.
+- `server/src/repositories/user.repository.ts` — first domain repository: `findById`, `findByEmail`, `create`, `updateEmailVerified`, `updateProfile`, `softDelete`.
+
+---
+
 ## [2026-06-15] — style: homepage UI polish — badge cleanup, pre-deposit enforcement, animated text colour, navbar serif font
 
 **Most Popular badge removed from SCN Reply**

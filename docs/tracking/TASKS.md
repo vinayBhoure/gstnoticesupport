@@ -99,28 +99,28 @@
 ### EP7 — Backend Core Infrastructure (backend_plan Phase 0)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Typed env loader — validate required vars at boot, fail fast with clear message | `server/src/lib/env.ts` |
-| ⬚ | Rate-limit factory utility (`createRateLimiter`) — not yet attached to routes | `server/src/lib/rateLimiter.ts` |
-| ⬚ | Full directory layout: `routes/ controllers/ services/ repositories/ validators/ middleware/ lib/` | Per `backend_plan.md §Ph0` |
-| ⬚ | Central `routes/index.ts` router registry — one route file + one line to register | |
-| ⬚ | Structured request logging middleware | Morgan or custom; no PII in log output |
-| ⬚ | Global 404 handler (before existing `errorHandler`) | |
-| ⬚ | Confirm `GET /health` returns standard envelope shape | Already exists; verify envelope compliance |
-| ⬚ | Update `.env.example` with all Phase 2 vars | DB, JWT, S3, Razorpay, Resend keys |
+| ✅ | Typed env loader — validate required vars at boot, fail fast with clear message | `server/src/lib/env.ts` |
+| ✅ | Rate-limit factory utility (`createRateLimiter`) — not yet attached to routes | `server/src/lib/rateLimiter.ts` |
+| ✅ | Full directory layout: `routes/ controllers/ services/ repositories/ middleware/ lib/` | Per `backend_plan.md §Ph0` |
+| ✅ | Central `routes/index.ts` router registry — one route file + one line to register | |
+| ✅ | Structured request logging middleware (pino-http) | Suppresses `/health`; no PII |
+| ✅ | Global 404 handler (before existing `errorHandler`) | `server/src/middleware/notFound.ts` |
+| ✅ | Confirm `GET /health` returns standard envelope shape | `{ success: true, data: { status: 'ok' }, ... }` |
+| ✅ | Update `.env.example` with all Phase 2 vars | DB, JWT, S3, Razorpay, Resend keys |
 
 ### EP6 — Database Schema & Repository Layer (backend_plan Phase 1)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Prisma init in `server/` pointing at locked `schema.prisma` | `npx prisma init` |
-| ⬚ | Prisma client singleton in `server/src/lib/prisma.ts` | Single instance, reused across app |
-| ⬚ | `schema.prisma` — 7 tables, 7 enums, all indexes, `onDelete` rules | users, bookings, booking_documents, payment_records, otp_store, refresh_tokens, token_blacklist |
-| ⬚ | `payment_records` includes `source` enum + `performed_by_admin_id` nullable FK | D66 — add before first migration |
-| ⬚ | NeonDB dev branch connection — supply `DATABASE_URL` | External: NeonDB account needed |
-| ⬚ | First migration — `npx prisma migrate dev --name initial_schema` | Must match `schema.prisma` exactly |
-| ⬚ | Admin seed script — single admin user, `role = admin`, `email_verified = true` | No promotion endpoint ever |
-| ⬚ | Prisma middleware in `lib/prisma.ts` for soft-delete global filter on User | Auto-exclude `deleted_at IS NOT NULL` |
-| ⬚ | Verify: `prisma migrate status` clean; tables visible in Neon console | Acceptance criterion |
-| ⬚ | Verify: re-run migration on a fresh Neon branch reproduces schema identically | Staging-branch workflow validation |
+| ✅ | Prisma 6.x installed in `server/` | Pinned to 6.x — Prisma 7 requires Node 20.19+; project runs 20.12.2 |
+| ✅ | Prisma client singleton in `server/src/lib/prisma.ts` | Single instance; soft-delete middleware wired |
+| ✅ | `schema.prisma` — 7 tables, 8 enums, all indexes, `onDelete` rules | users, bookings, booking_documents, payment_records, otp_store, refresh_tokens, token_blacklist |
+| ✅ | `payment_records` includes `source` enum + `performed_by_admin_id` nullable FK | D66 applied before migration |
+| ✅ | NeonDB connection wired via `DATABASE_URL` in `server/.env` | Credentials in .env (not committed) |
+| ✅ | First migration — `20260616142630_initial_schema` applied to NeonDB | `prisma migrate status` clean |
+| ✅ | Admin seed script — `role=admin`, `email_verified=true`, bcrypt cost 12 | `prisma/seed.ts`; runs via `npx prisma db seed` |
+| ✅ | Prisma middleware in `lib/prisma.ts` for soft-delete global filter on User | Auto-excludes `deletedAt IS NOT NULL` |
+| ✅ | `user.repository.ts` — first domain repository: find, create, update, softDelete | Type-safe; no Prisma in services |
+| ⬚ | Verify: re-run migration on a fresh Neon branch reproduces schema identically | Staging-branch workflow validation (deferred to staging setup) |
 
 ### EP8 — Auth Backend (backend_plan Phase 2)
 | Status | Task | Notes |
