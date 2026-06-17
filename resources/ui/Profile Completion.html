@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Complete your profile · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     AUTH CARD SHELL — inherited
+     ============================================================ */
+  html, body { min-height: 100%; }
+  body { background: var(--neutral-50); display: flex; flex-direction: column; }
+
+  .auth-page {
+    flex: 1; display: flex; flex-direction: column;
+    padding: 32px 24px 48px;
+    min-height: 100vh;
+  }
+
+  .auth-top {
+    width: 100%; max-width: 1080px; margin: 0 auto 40px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .auth-top .brand { display: inline-flex; align-items: center; gap: 11px; }
+  .auth-top .brand img { height: 36px; width: 36px; border-radius: 7px; border: 1px solid var(--neutral-200); object-fit: cover; }
+  .auth-top .brand .bn { font-weight: 700; font-size: 16px; color: var(--primary-navy); letter-spacing: -.01em; }
+  .auth-top .brand .bn span { color: var(--accent-green); }
+
+  .auth-wrap {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    width: 100%; max-width: 480px; margin: 0 auto; gap: 20px;
+  }
+
+  .auth-card {
+    width: 100%; background: #fff;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-sm);
+    padding: 40px;
+  }
+  .auth-card .wordmark {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 24px;
+  }
+  .auth-card .wordmark img { height: 32px; width: 32px; border-radius: 6px; border: 1px solid var(--neutral-200); }
+  .auth-card .wordmark .bn { font-weight: 700; font-size: 15px; color: var(--primary-navy); letter-spacing: -.01em; }
+  .auth-card .wordmark .bn span { color: var(--accent-green); }
+
+  .auth-card h2 { font-size: 28px; line-height: 1.2; letter-spacing: -.01em; }
+  .auth-card .subhead {
+    font-size: 16px; color: var(--neutral-600); line-height: 1.55;
+    margin-top: 10px; margin-bottom: 32px;
+  }
+
+  /* Trust strip */
+  .trust-strip {
+    width: 100%; display: flex; flex-direction: column; align-items: center;
+    gap: 8px; margin-top: 8px; padding: 0 8px; text-align: center;
+  }
+  .trust-strip .row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 8px 18px; font-size: 13px; color: var(--neutral-600); line-height: 1.5;
+  }
+  .trust-strip .row .item { display: inline-flex; align-items: center; gap: 6px; }
+  .trust-strip .row .item .ic { width: 14px; height: 14px; color: var(--accent-green); flex: 0 0 auto; }
+  .trust-strip .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: var(--neutral-600); }
+  .trust-strip .pols { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font-size: 13px; color: var(--neutral-600); }
+  .trust-strip .pols a { color: var(--neutral-600); }
+  .trust-strip .pols a:hover { color: var(--primary-navy); }
+  .trust-strip .copy { font-size: 12px; color: var(--neutral-600); margin-top: 2px; }
+
+  /* Submit spinner */
+  .btn .spinner {
+    width: 18px; height: 18px; display: none;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  .btn[data-loading="true"] .label { display: none; }
+  .btn[data-loading="true"] .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .btn[data-loading="true"] .spinner { animation: none; border-top-color: rgba(255,255,255,.6); }
+  }
+
+  /* ============================================================
+     FORM FIELDS — standard field wrapper
+     ============================================================ */
+  .profile-form { display: flex; flex-direction: column; gap: 24px; }
+
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field > label {
+    font-size: 14px; font-weight: 500; color: var(--primary-navy); line-height: 1.4;
+  }
+  .field .helper {
+    font-size: 13px; color: var(--neutral-600); line-height: 1.5; margin-top: 2px;
+  }
+  .field .error {
+    display: none;
+    font-size: 13px; font-weight: 500; color: var(--warning-amber);
+    line-height: 1.4; align-items: flex-start; gap: 6px;
+  }
+  .field .error .ic { width: 14px; height: 14px; flex: 0 0 auto; margin-top: 2px; }
+  .field[data-invalid="true"] .error { display: flex; }
+  .field[data-invalid="true"] .helper { display: none; }
+
+  /* ============================================================
+     PHONE FIELD — +91 prefix group
+     (Flagged: no Input primitive in components.md)
+     ============================================================ */
+  .input-group {
+    display: flex;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--r-btn);
+    overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+    background: #fff;
+  }
+  .input-group:focus-within {
+    border-color: var(--primary-deep-blue);
+    box-shadow: 0 0 0 3px rgba(27,58,107,.15);
+  }
+  .input-group.invalid {
+    border-color: var(--warning-amber);
+    box-shadow: 0 0 0 3px rgba(217,119,6,.12);
+  }
+  .input-prefix {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 14px;
+    min-height: 48px;
+    background: var(--neutral-50);
+    border-right: 1px solid var(--neutral-200);
+    font-size: 15px; font-weight: 500; color: var(--neutral-600);
+    white-space: nowrap; flex-shrink: 0;
+    user-select: none;
+  }
+  .input-group .input {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    flex: 1;
+    min-width: 0;
+  }
+  .input-group .input:focus {
+    outline: none;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* ============================================================
+     SERVICES MULTI-SELECT — checkbox tile group
+     ⚠️ New pattern — not in components.md.
+     Promote to: components.md → Checkbox Group after sign-off.
+     Each tile ≥52px tall, full-width, checked state green-bordered.
+     ============================================================ */
+  .service-group {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  .service-option {
+    display: flex; align-items: center; gap: 13px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--neutral-200);
+    border-radius: var(--r-btn);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    min-height: 52px;
+    /* whole tile is the tap target */
+  }
+  .service-option:hover { border-color: var(--primary-navy); }
+  .service-option:focus-within {
+    border-color: var(--primary-deep-blue);
+    box-shadow: 0 0 0 3px rgba(27,58,107,.15);
+  }
+  .service-option.checked {
+    border-color: var(--accent-green);
+    background: #F0FAF5;
+  }
+
+  /* Custom checkbox inside tile */
+  .service-option input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 20px; height: 20px; flex: 0 0 20px;
+    border: 1.5px solid var(--neutral-200);
+    border-radius: 5px; background: #fff; cursor: pointer;
+    transition: border-color .15s, background .15s;
+    position: relative;
+  }
+  .service-option input[type="checkbox"]:hover { border-color: var(--primary-navy); }
+  .service-option input[type="checkbox"]:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.3); }
+  .service-option input[type="checkbox"]:checked {
+    background: var(--accent-green); border-color: var(--accent-green);
+  }
+  .service-option input[type="checkbox"]:checked::after {
+    content: ""; position: absolute; left: 5px; top: 1px;
+    width: 6px; height: 11px;
+    border-right: 2px solid #fff; border-bottom: 2px solid #fff;
+    transform: rotate(45deg);
+  }
+
+  .service-label {
+    font-size: 15px; color: var(--neutral-900); line-height: 1.4; font-weight: 500;
+  }
+  .service-option.checked .service-label { color: var(--primary-navy); }
+
+  /* ============================================================
+     SUBMIT ROW — disabled reason beneath button
+     ============================================================ */
+  .submit-section { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .submit-reason {
+    display: none;
+    font-size: 13px; font-weight: 500; color: var(--warning-amber);
+    line-height: 1.4; align-items: flex-start; gap: 6px;
+  }
+  .submit-reason .ic { width: 14px; height: 14px; flex: 0 0 auto; margin-top: 2px; }
+  .submit-reason.show { display: flex; }
+
+  /* ============================================================
+     SERVER ERROR BANNER
+     ============================================================ */
+  .server-error {
+    display: none;
+    align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    background: #FFF8EF; border: 1px solid #F0D9B5;
+    border-radius: var(--r-btn);
+    margin-bottom: 24px;
+  }
+  .server-error.show { display: flex; }
+  .server-error .ic { width: 18px; height: 18px; flex: 0 0 auto; color: var(--warning-amber); margin-top: 2px; }
+  .server-error .body { font-size: 14px; color: var(--neutral-900); line-height: 1.5; }
+
+  /* Progress indicator — step N of 3 */
+  .auth-progress {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 28px;
+  }
+  .auth-progress .step-pip {
+    height: 4px; border-radius: 2px; flex: 1;
+    background: var(--neutral-200);
+    transition: background .2s;
+  }
+  .auth-progress .step-pip.done { background: var(--accent-green); }
+  .auth-progress .step-pip.active { background: var(--primary-deep-blue); }
+  .auth-progress .step-label {
+    font-size: 12px; font-weight: 500; color: var(--neutral-600); white-space: nowrap;
+  }
+
+  /* Visually hidden */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 640px) {
+    .auth-page { padding: 20px 16px 32px; }
+    .auth-top { margin-bottom: 24px; }
+    .auth-card { padding: 28px 22px; border-radius: 12px; }
+    .auth-card h2 { font-size: 24px; }
+    .auth-card .subhead { font-size: 15px; margin-bottom: 24px; }
+    .profile-form { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="auth-page">
+
+  <!-- TOP BAR -->
+  <header class="auth-top" data-screen-label="Profile Completion">
+    <a class="brand" href="Homepage.html" aria-label="GST Notice Support home">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+  </header>
+
+  <main id="main" class="auth-wrap">
+
+    <!-- ============================================================
+         AUTH CARD — Profile Completion
+         ============================================================ -->
+    <section class="auth-card" aria-labelledby="profileHeading">
+
+      <!-- Wordmark -->
+      <div class="wordmark" aria-hidden="true">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </div>
+
+      <!-- Step progress indicator (3-step onboarding: Signup → Verify → Profile) -->
+      <div class="auth-progress" aria-label="Step 3 of 3">
+        <div class="step-pip done" aria-hidden="true"></div>
+        <div class="step-pip done" aria-hidden="true"></div>
+        <div class="step-pip active" aria-hidden="true"></div>
+        <span class="step-label" aria-hidden="true">Step 3 of 3</span>
+      </div>
+
+      <h2 id="profileHeading">Complete your profile</h2>
+      <p class="subhead">Two quick details so we can reach you about your case.</p>
+
+      <!-- Server error banner -->
+      <div class="server-error" id="serverError" role="alert" aria-live="polite">
+        <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+        <div class="body">
+          Something went wrong saving your profile. Please try again.
+        </div>
+      </div>
+
+      <form class="profile-form" id="profileForm" novalidate>
+
+        <!-- ── Phone Number ── -->
+        <div class="field" id="field-phone">
+          <label for="phone">Phone Number</label>
+          <div class="input-group" id="phoneGroup">
+            <span class="input-prefix" aria-hidden="true">+91</span>
+            <input
+              class="input"
+              type="tel"
+              id="phone"
+              name="phone"
+              inputmode="tel"
+              autocomplete="tel-national"
+              placeholder="10-digit mobile number"
+              maxlength="10"
+              required
+              aria-describedby="err-phone"
+              aria-invalid="false"
+              aria-label="Phone number, India +91"
+            />
+          </div>
+          <span class="error" id="err-phone" role="alert">
+            <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+            <span class="msg">Enter a valid 10-digit mobile number.</span>
+          </span>
+        </div>
+
+        <!-- ── Services Interested — multi-select checkbox group ──
+             ⚠️ New pattern — not in components.md.
+             Promote to: components.md → Checkbox Group after sign-off. -->
+        <fieldset class="field" id="field-services" style="border:none;padding:0;margin:0;">
+          <legend style="font-size:14px;font-weight:500;color:var(--primary-navy);line-height:1.4;margin-bottom:7px;float:left;width:100%;">
+            Services Interested
+          </legend>
+          <div class="service-group" id="serviceGroup" role="group" aria-describedby="err-services services-helper">
+
+            <label class="service-option" for="svc-asmt">
+              <input type="checkbox" id="svc-asmt" name="services" value="asmt10" />
+              <span class="service-label">ASMT-10 Reply</span>
+            </label>
+
+            <label class="service-option" for="svc-scn">
+              <input type="checkbox" id="svc-scn" name="services" value="scn" />
+              <span class="service-label">Show Cause Notice (SCN) Reply</span>
+            </label>
+
+            <label class="service-option" for="svc-comm">
+              <input type="checkbox" id="svc-comm" name="services" value="commissioner" />
+              <span class="service-label">Commissioner Appeal</span>
+            </label>
+
+            <label class="service-option" for="svc-gstat">
+              <input type="checkbox" id="svc-gstat" name="services" value="gstat" />
+              <span class="service-label">GSTAT Appeal</span>
+            </label>
+          </div>
+          <span class="helper" id="services-helper" style="margin-top:8px;display:block;">
+            Select all that apply. You can book any service later, regardless of choice.
+          </span>
+          <span class="error" id="err-services" role="alert" style="margin-top:6px;">
+            <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+            <span class="msg">Select at least one service to continue.</span>
+          </span>
+        </fieldset>
+
+        <!-- ── Submit ── -->
+        <div class="submit-section">
+          <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            id="submitBtn"
+            disabled
+          >
+            <span class="label">Go to Dashboard</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+          <span class="submit-reason" id="submitReason" role="status" aria-live="polite">
+            <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+            <span id="submitReasonMsg">Complete both fields to continue.</span>
+          </span>
+        </div>
+
+      </form>
+
+    </section>
+
+    <!-- TRUST STRIP -->
+    <aside class="trust-strip" aria-label="Legal identity">
+      <div class="row">
+        <span class="item">
+          <i data-lucide="shield-check" class="ic" aria-hidden="true"></i>
+          SSL Secured · 256-bit encryption
+        </span>
+        <span class="item">GST Notice Support Pvt. Ltd.</span>
+      </div>
+      <div class="row">
+        <span class="mono">CIN: U74999KA2024PTC000000</span>
+        <span class="mono">GSTIN: 29ABCDE1234F1Z5</span>
+      </div>
+      <div class="pols">
+        <a href="Privacy Policy.html">Privacy Policy</a>
+        <span aria-hidden="true">·</span>
+        <a href="Terms of Service.html">Terms</a>
+        <span aria-hidden="true">·</span>
+        <a href="Refund Policy.html">Refund Policy</a>
+      </div>
+      <div class="copy">© 2026 GST Notice Support Pvt. Ltd.</div>
+    </aside>
+
+  </main>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <path d="M50 24 L72 32 V52 C72 66 62 75 50 79 C38 75 28 66 28 52 V32 Z" fill="none" stroke="#0B8B4E" stroke-width="3"/>
+    <path d="M42 52 L48 58 L60 44" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  /* ============================================================
+     DOM REFS
+     ============================================================ */
+  const form        = document.getElementById('profileForm');
+  const phoneInput  = document.getElementById('phone');
+  const phoneGroup  = document.getElementById('phoneGroup');
+  const fieldPhone  = document.getElementById('field-phone');
+  const fieldSvc    = document.getElementById('field-services');
+  const submitBtn   = document.getElementById('submitBtn');
+  const submitReason = document.getElementById('submitReason');
+  const submitReasonMsg = document.getElementById('submitReasonMsg');
+  const serverError = document.getElementById('serverError');
+  const serviceCheckboxes = Array.from(document.querySelectorAll('input[name="services"]'));
+  const serviceOptions = Array.from(document.querySelectorAll('.service-option'));
+
+  /* ============================================================
+     VALIDATION HELPERS
+     ============================================================ */
+  const PHONE_RE = /^[6-9]\d{9}$/;   // Indian mobile: starts 6-9, 10 digits
+
+  function phoneValid() {
+    return PHONE_RE.test(phoneInput.value.replace(/\s/g, ''));
+  }
+  function servicesValid() {
+    return serviceCheckboxes.some(cb => cb.checked);
+  }
+
+  function setPhoneInvalid(invalid) {
+    fieldPhone.dataset.invalid = invalid ? 'true' : 'false';
+    phoneInput.setAttribute('aria-invalid', invalid ? 'true' : 'false');
+    phoneGroup.classList.toggle('invalid', invalid);
+  }
+
+  function setServicesInvalid(invalid) {
+    fieldSvc.dataset.invalid = invalid ? 'true' : 'false';
+  }
+
+  /* ============================================================
+     SUBMIT BUTTON STATE
+     (Disabled with reason until both fields valid)
+     ============================================================ */
+  let phoneTouched    = false;
+  let servicesTouched = false;
+
+  function updateSubmit() {
+    const pOk = phoneValid();
+    const sOk = servicesValid();
+    const allOk = pOk && sOk;
+    submitBtn.disabled = !allOk;
+
+    if (!allOk && (phoneTouched || servicesTouched)) {
+      submitReason.classList.add('show');
+      if (!pOk && !sOk) {
+        submitReasonMsg.textContent = 'Enter your phone number and select at least one service.';
+      } else if (!pOk) {
+        submitReasonMsg.textContent = 'Enter a valid 10-digit mobile number.';
+      } else {
+        submitReasonMsg.textContent = 'Select at least one service to continue.';
+      }
+    } else {
+      submitReason.classList.remove('show');
+    }
+  }
+
+  /* ============================================================
+     PHONE FIELD EVENTS
+     ============================================================ */
+  // Strip non-digits on input
+  phoneInput.addEventListener('input', () => {
+    phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 10);
+    if (phoneTouched) {
+      setPhoneInvalid(!phoneValid() && phoneInput.value.length > 0);
+    }
+    if (phoneValid()) setPhoneInvalid(false);
+    updateSubmit();
+  });
+
+  phoneInput.addEventListener('blur', () => {
+    phoneTouched = true;
+    if (phoneInput.value.length > 0) {
+      setPhoneInvalid(!phoneValid());
+    }
+    updateSubmit();
+  });
+
+  /* ============================================================
+     SERVICE CHECKBOX EVENTS
+     ============================================================ */
+  serviceCheckboxes.forEach((cb, idx) => {
+    cb.addEventListener('change', () => {
+      servicesTouched = true;
+      // Sync .checked class on parent tile
+      serviceOptions[idx].classList.toggle('checked', cb.checked);
+      // Clear services error once at least one is selected
+      if (servicesValid()) setServicesInvalid(false);
+      updateSubmit();
+    });
+  });
+
+  /* ============================================================
+     FORM SUBMIT
+     ============================================================ */
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    serverError.classList.remove('show');
+    phoneTouched = true;
+    servicesTouched = true;
+
+    const pOk = phoneValid();
+    const sOk = servicesValid();
+    setPhoneInvalid(!pOk);
+    setServicesInvalid(!sOk);
+    updateSubmit();
+
+    if (!pOk || !sOk) {
+      if (!pOk) phoneInput.focus();
+      else serviceCheckboxes[0].focus();
+      return;
+    }
+
+    // Loading
+    submitBtn.dataset.loading = 'true';
+    submitBtn.disabled = true;
+
+    // Simulate server save (900ms)
+    setTimeout(() => {
+      submitBtn.dataset.loading = 'false';
+      if(typeof GNS!=='undefined'){
+        var pendingEmail = sessionStorage.getItem('gns_pending_email')||'user@demo.in';
+        GNS.setSession({isLoggedIn:true,type:'user',email:pendingEmail,name:'Rajesh Kumar'});
+      }
+      window.location.href = 'Dashboard Home.html';
+    }, 900);
+  });
+
+  // Initial state
+  updateSubmit();
+</script>
+<script src="js/app-state.js"></script>
+</body>
+</html>

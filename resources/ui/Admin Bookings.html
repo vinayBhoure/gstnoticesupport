@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · Bookings · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* === APP SHELL — identical structure to Admin Overview.html === */
+  :root{ --sidebar-w:264px; --header-h:64px; }
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);}
+  .app{display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--neutral-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;}
+  .sidebar .brand{display:inline-flex;align-items:center;gap:10px;height:var(--header-h);padding:0 20px;flex:0 0 auto;border-bottom:1px solid var(--neutral-200);}
+  .sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .sidebar .brand .bn span{color:var(--accent-green);}
+  .sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+  .nav-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:8px 12px 6px;}
+  .nav-link{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:44px;line-height:1.2;transition:background .15s,color .15s;}
+  .nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);transition:color .15s;}
+  .nav-link:hover{background:var(--neutral-50);}
+  .nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .nav-link[aria-current="page"]{background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;}
+  .nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+  .sidebar .side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+  .side-help{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;}
+  .side-help .ic{width:18px;height:18px;color:var(--neutral-600);}
+  .side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+  .side-help:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+
+  .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+  .topbar{height:var(--header-h);flex:0 0 auto;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);border-bottom:1px solid var(--neutral-200);display:flex;align-items:center;gap:16px;padding:0 32px;}
+  .topbar .hamburger{display:none;width:44px;height:44px;align-items:center;justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);}
+  .topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+  .topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+  .topbar .mobile-brand .bn span{color:var(--accent-green);}
+  .topbar .spacer{flex:1;}
+  .topbar .tap-call{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;}
+  .topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+  .topbar .tap-call:hover{border-color:var(--primary-navy);}
+  .topbar .tap-call:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .num{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+  .acct{position:relative;}
+  .acct-btn{display:inline-flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;}
+  .acct-btn:hover{border-color:var(--primary-navy);}
+  .acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-avatar{width:32px;height:32px;border-radius:50%;flex:0 0 auto;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+  .acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);}
+  .acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+  .acct-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:6px;z-index:70;}
+  .acct-menu.open{display:block;}
+  .acct-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;}
+  .acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+  .acct-menu a:hover{background:var(--neutral-50);}
+  .acct-menu a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+  .content{flex:1;padding:32px;}
+  .content-inner{max-width:1100px;margin:0 auto;}
+
+  /* Page header */
+  .page-head{margin-bottom:24px;}
+  .page-head h1{font-size:36px;letter-spacing:-.01em;line-height:1.15;}
+  .page-head .sub{font-size:15px;color:var(--neutral-600);margin-top:6px;}
+
+  /* === CONTROLS BAR === */
+  .controls-bar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);padding:14px 16px;margin-bottom:16px;
+  }
+  .search-wrap{flex:1;min-width:220px;position:relative;}
+  .search-wrap .ic-search{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--neutral-600);pointer-events:none;}
+  .search-wrap .input{padding-left:36px;}
+  .select-wrap{position:relative;flex:0 0 auto;}
+  .select-wrap .ic-chev{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--neutral-600);pointer-events:none;}
+  .filter-select{
+    appearance:none;min-height:48px;padding:0 34px 0 14px;
+    font-size:15px;font-family:inherit;color:var(--neutral-900);
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    cursor:pointer;min-width:144px;transition:border-color .15s,color .15s;
+  }
+  .filter-select:focus{outline:none;border-color:var(--primary-deep-blue);box-shadow:0 0 0 3px rgba(27,58,107,.15);}
+  .filter-select.active{border-color:var(--primary-navy);font-weight:500;}
+  .btn-tertiary{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 2px;min-height:44px;
+    background:none;border:none;color:var(--accent-green);font-weight:600;font-size:14px;
+    cursor:pointer;font-family:inherit;white-space:nowrap;
+  }
+  .btn-tertiary:hover{color:var(--accent-green-hover);}
+  .btn-tertiary:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);border-radius:4px;}
+
+  /* === TABLE CARD === */
+  .table-card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);overflow:hidden;}
+  .table-scroll{overflow-x:auto;}
+  .admin-table{width:100%;border-collapse:collapse;min-width:880px;}
+
+  /* Th — plain and sortable */
+  .admin-table th{background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);padding:0;white-space:nowrap;}
+  .th-plain{display:block;padding:13px 20px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--neutral-600);text-align:left;}
+  .sort-btn{
+    display:flex;align-items:center;gap:5px;width:100%;padding:13px 20px;
+    border:none;background:none;cursor:pointer;font-family:inherit;
+    font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--neutral-600);text-align:left;transition:color .15s;
+  }
+  .sort-btn:hover{color:var(--primary-navy);}
+  .sort-btn:focus-visible{outline:none;box-shadow:inset 0 0 0 2px rgba(11,139,78,.5);}
+  .sort-btn[data-active]{color:var(--primary-navy);}
+  .sort-btn .si{width:14px;height:14px;flex:0 0 auto;color:var(--neutral-600);}
+  .sort-btn[data-active] .si{color:var(--accent-green);}
+
+  /* Rows */
+  .admin-table td{padding:14px 20px;border-bottom:1px solid var(--neutral-200);font-size:15px;color:var(--neutral-900);vertical-align:middle;}
+  .admin-table tbody tr:last-child td{border-bottom:none;}
+  .admin-table tbody tr{cursor:pointer;transition:background .12s;}
+  .admin-table tbody tr:hover{background:var(--neutral-50);}
+  .admin-table tbody tr:focus-visible{outline:none;box-shadow:inset 0 0 0 3px rgba(11,139,78,.4);}
+  .t-name-wrap .nm{display:block;font-weight:600;color:var(--primary-navy);line-height:1.3;}
+  .t-name-wrap .ref{display:block;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:var(--neutral-600);margin-top:2px;user-select:all;}
+  .t-date{color:var(--neutral-600);font-size:14px;white-space:nowrap;}
+  .t-arrow{width:48px;padding-right:20px;text-align:right;}
+  .t-arrow .ic{width:17px;height:17px;color:var(--neutral-200);}
+  .admin-table tbody tr:hover .t-arrow .ic,
+  .admin-table tbody tr:focus-visible .t-arrow .ic{color:var(--accent-green);}
+
+  /* Service Status Badge (components.md) */
+  .status-badge{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;padding:3px 9px;border-radius:var(--r-badge);white-space:nowrap;line-height:1.4;}
+  .status-badge .ic{width:13px;height:13px;flex:0 0 auto;}
+  .s-upload{background:var(--neutral-50);color:var(--neutral-900);border:1px solid var(--neutral-200);}
+  .s-review{background:var(--primary-deep-blue);color:#fff;}
+  .s-draft{background:var(--warning-amber);color:var(--neutral-900);}
+  .s-filing{background:var(--primary-navy);color:#fff;}
+  .s-complete{background:var(--accent-green);color:#fff;}
+  .s-cancelled{background:var(--neutral-200);color:var(--neutral-600);}
+
+  /* Payment badge — new pattern, flagged for components.md addition */
+  .pay-badge{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;padding:3px 9px;border-radius:var(--r-badge);white-space:nowrap;line-height:1.4;}
+  .pay-badge .ic{width:13px;height:13px;flex:0 0 auto;}
+  .pay-paid{background:var(--accent-green);color:#fff;}
+  .pay-pending{background:var(--neutral-50);color:var(--neutral-900);border:1px solid var(--neutral-200);}
+  .pay-failed{background:#FFF8EF;color:var(--warning-amber);border:1px solid #F0D9B5;}
+
+  /* Empty state inside table card */
+  .table-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:56px 24px;text-align:center;}
+  .table-empty .ic-big{width:40px;height:40px;color:var(--neutral-200);}
+  .table-empty p{font-size:16px;color:var(--neutral-600);}
+
+  /* === PAGINATION === */
+  .pagination{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    padding:13px 20px;border-top:1px solid var(--neutral-200);
+  }
+  .page-info{font-size:14px;color:var(--neutral-600);}
+  .page-controls{display:flex;align-items:center;gap:3px;}
+  .page-btn{
+    min-width:36px;height:36px;padding:0 10px;display:inline-flex;align-items:center;
+    justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    background:#fff;color:var(--neutral-900);font-size:14px;font-weight:500;
+    cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s;
+  }
+  .page-btn:hover{background:var(--neutral-50);border-color:var(--primary-navy);}
+  .page-btn[aria-current="page"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);font-weight:600;}
+  .page-btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
+  .page-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .page-ellipsis{padding:0 4px;font-size:14px;color:var(--neutral-600);display:inline-flex;align-items:center;height:36px;}
+
+  /* === ERROR === */
+  .error-card{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid var(--neutral-200);border-left:3px solid var(--warning-amber);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:20px 24px;}
+  .error-card .ic-lead{width:22px;height:22px;flex:0 0 auto;color:var(--warning-amber);}
+  .error-card .txt{flex:1;font-size:15px;line-height:1.5;color:var(--neutral-900);}
+  .error-card .txt b{font-weight:600;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:var(--r-btn);font-size:15px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s,color .15s;font-family:inherit;}
+  .btn .ic{width:18px;height:18px;flex:0 0 auto;}
+  .btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+  .btn-secondary{background:transparent;border-color:var(--primary-navy);color:var(--primary-navy);}
+  .btn-secondary:hover{background:var(--primary-navy);color:#fff;}
+
+  /* === SKELETONS === */
+  .skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  @media (prefers-reduced-motion:reduce){.skel{animation:none;}}
+  .skel-bar{height:80px;border-radius:var(--r-card);margin-bottom:16px;}
+  .skel-th{height:42px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);}
+  .skel-row{display:block;height:60px;border-bottom:1px solid var(--neutral-200);}
+  .skel-row:last-child{border-bottom:none;}
+
+  [hidden]{display:none !important;}
+  .scrim{display:none;position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;}
+  .scrim.open{display:block;}
+
+  /* === RESPONSIVE (<lg — minimal fallback) === */
+  @media (max-width:1023px){
+    .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+    .sidebar.open{transform:translateX(0);}
+    @media (prefers-reduced-motion:reduce){.sidebar{transition:none;}}
+    .main{margin-left:0;}
+    .topbar{padding:0 16px;}
+    .topbar .hamburger{display:inline-flex;}
+    .topbar .mobile-brand{display:inline-flex;}
+    .topbar .num{display:none;}
+    .content{padding:20px 16px 48px;}
+    .page-head h1{font-size:28px;}
+    .acct-name{display:none;}
+    .search-wrap{flex:1 1 100%;}
+  }
+
+  /* === STATE SWITCHER === */
+  .state-switch{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;align-items:center;gap:6px;background:#fff;border:1px dashed #c4ccd9;border-radius:10px;padding:7px 9px;box-shadow:var(--shadow-md);font-size:12px;}
+  .state-switch .lbl{font-weight:600;color:var(--neutral-600);margin-right:2px;}
+  .state-switch button{border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:inherit;}
+  .state-switch button[aria-pressed="true"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+  .state-switch button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- SIDEBAR — components.md → App Shell [admin links] -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <a class="brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Admin navigation">
+      <span class="nav-label">Admin</span>
+      <a class="nav-link" href="Admin Overview.html">
+        <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Overview
+      </a>
+      <a class="nav-link" href="Admin Bookings.html" aria-current="page">
+        <i data-lucide="folder-open" class="ic" aria-hidden="true"></i> Bookings
+      </a>
+      <a class="nav-link" href="Admin Users.html">
+        <i data-lucide="users" class="ic" aria-hidden="true"></i> Users
+      </a>
+      <a class="nav-link" href="Admin Settings.html">
+        <i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html">
+        <i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support
+      </a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+      <span class="spacer"></span>
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+      </a>
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">AD</span>
+          <span class="acct-name">Admin</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+          <a href="Admin Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="content" data-screen-label="Admin Bookings">
+      <div class="content-inner">
+
+        <div class="page-head">
+          <h1>Bookings</h1>
+          <p class="sub" id="totalCount">35 bookings</p>
+        </div>
+
+        <!-- ===== POPULATED / EMPTY ===== -->
+        <div id="mainView">
+
+          <!-- Controls bar -->
+          <div class="controls-bar" role="search" aria-label="Filter bookings">
+            <div class="search-wrap">
+              <i data-lucide="search" class="ic-search" aria-hidden="true"></i>
+              <input type="search" class="input" id="searchInput"
+                placeholder="Search by name or reference"
+                aria-label="Search by name or reference"
+                autocomplete="off" />
+            </div>
+
+            <div class="select-wrap">
+              <select class="filter-select" id="statusFilter" aria-label="Filter by status">
+                <option value="">Status</option>
+                <option value="upload">Document Upload</option>
+                <option value="review">In Review</option>
+                <option value="draft">Draft Ready</option>
+                <option value="filing">Filing</option>
+                <option value="complete">Complete</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <i data-lucide="chevron-down" class="ic-chev" aria-hidden="true"></i>
+            </div>
+
+            <div class="select-wrap">
+              <select class="filter-select" id="serviceFilter" aria-label="Filter by service">
+                <option value="">Service</option>
+                <option value="ASMT-10 Reply">ASMT-10 Reply</option>
+                <option value="SCN Reply (Section 74)">SCN Reply (Section 74)</option>
+                <option value="SCN Reply (Section 73)">SCN Reply (Section 73)</option>
+                <option value="Commissioner Appeal">Commissioner Appeal</option>
+                <option value="GSTAT Appeal">GSTAT Appeal</option>
+              </select>
+              <i data-lucide="chevron-down" class="ic-chev" aria-hidden="true"></i>
+            </div>
+
+            <div class="select-wrap">
+              <select class="filter-select" id="paymentFilter" aria-label="Filter by payment status">
+                <option value="">Payment</option>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+                <option value="Failed">Failed</option>
+              </select>
+              <i data-lucide="chevron-down" class="ic-chev" aria-hidden="true"></i>
+            </div>
+
+            <button class="btn-tertiary" id="clearBtn" type="button" hidden>
+              <i data-lucide="x" style="width:14px;height:14px" aria-hidden="true"></i>
+              Clear filters
+            </button>
+          </div>
+
+          <!-- Table card -->
+          <div class="table-card">
+            <div class="table-scroll" id="tableScroll">
+              <table class="admin-table" id="bookingsTable">
+                <thead>
+                  <tr>
+                    <th scope="col"><span class="th-plain">User Name</span></th>
+                    <th scope="col"><span class="th-plain">Service</span></th>
+                    <th scope="col" id="thBookDate" aria-sort="none">
+                      <button class="sort-btn" data-sort="bookDate" aria-label="Sort by booking date">
+                        Booking Date
+                        <i data-lucide="chevrons-up-down" class="si" aria-hidden="true"></i>
+                      </button>
+                    </th>
+                    <th scope="col" id="thUpdated" aria-sort="descending">
+                      <button class="sort-btn" data-sort="updated" data-active="desc" aria-label="Sort by last updated, currently descending">
+                        Updated
+                        <i data-lucide="chevron-down" class="si" aria-hidden="true"></i>
+                      </button>
+                    </th>
+                    <th scope="col"><span class="th-plain">Payment</span></th>
+                    <th scope="col"><span class="th-plain">Status</span></th>
+                    <th scope="col" aria-hidden="true"><span class="th-plain"></span></th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+
+            <!-- empty state -->
+            <div class="table-empty" id="tableEmpty" hidden>
+              <i data-lucide="folder-open" class="ic-big" aria-hidden="true"></i>
+              <p id="emptyMsg">No bookings yet.</p>
+              <button class="btn-tertiary" id="clearBtnEmpty" type="button" style="margin-top:2px" hidden>
+                <i data-lucide="x" style="width:14px;height:14px" aria-hidden="true"></i>
+                Clear filters
+              </button>
+            </div>
+
+            <!-- pagination -->
+            <div class="pagination" id="pagination" hidden></div>
+          </div>
+
+        </div>
+
+        <!-- ===== ERROR ===== -->
+        <div id="errorView" hidden>
+          <div class="error-card" role="alert">
+            <i data-lucide="alert-circle" class="ic-lead" aria-hidden="true"></i>
+            <p class="txt"><b>Couldn't load bookings.</b> Check your connection and try again.</p>
+            <button class="btn btn-secondary" id="retryBtn" type="button">
+              <i data-lucide="rotate-cw" class="ic" aria-hidden="true"></i> Retry
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== LOADING ===== -->
+        <div id="loadingView" hidden aria-hidden="true">
+          <div class="skel skel-bar"></div>
+          <div class="table-card">
+            <div class="skel-th"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row" style="border-bottom:none"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- State switcher (review aid) -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">State</span>
+  <button data-state="populated" aria-pressed="true">Populated</button>
+  <button data-state="empty-data" aria-pressed="false">Empty</button>
+  <button data-state="no-results" aria-pressed="false">No results</button>
+  <button data-state="loading" aria-pressed="false">Loading</button>
+  <button data-state="error" aria-pressed="false">Error</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="18" y="22" width="14" height="56" rx="3" fill="#1B3A6B"/>
+    <rect x="38" y="22" width="48" height="8" rx="2" fill="#E5E9F0" opacity=".5"/>
+    <rect x="38" y="34" width="48" height="7" rx="2" fill="#E5E9F0"/>
+    <rect x="38" y="45" width="48" height="7" rx="2" fill="#E5E9F0" opacity=".8"/>
+    <rect x="38" y="56" width="48" height="7" rx="2" fill="#E5E9F0" opacity=".6"/>
+    <rect x="38" y="67" width="48" height="7" rx="2" fill="#E5E9F0" opacity=".4"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  /* ============================================================
+     Data — 35 bookings, default order: Updated desc
+     [id, name, service, bookDate, updated, payment, status]
+     ============================================================ */
+  const RAW = [
+    ['GNS-2026-0571','Meena Iyer',       'SCN Reply (Section 74)', '11 Jun 2026','11 Jun 2026','Pending','review'],
+    ['GNS-2026-0569','Suresh Patel',     'ASMT-10 Reply',          '10 Jun 2026','10 Jun 2026','Pending','draft'],
+    ['GNS-2026-0565','Arvind Shah',      'Commissioner Appeal',    '09 Jun 2026','08 Jun 2026','Pending','draft'],
+    ['GNS-2026-0558','Priya Sharma',     'ASMT-10 Reply',          '07 Jun 2026','07 Jun 2026','Paid',   'filing'],
+    ['GNS-2026-0552','Rajiv Menon',      'GSTAT Appeal',           '05 Jun 2026','06 Jun 2026','Paid',   'review'],
+    ['GNS-2026-0547','Kavita Rao',       'SCN Reply (Section 73)', '03 Jun 2026','05 Jun 2026','Pending','review'],
+    ['GNS-2026-0541','Deepak Nair',      'GSTAT Appeal',           '01 Jun 2026','04 Jun 2026','Pending','draft'],
+    ['GNS-2026-0535','Anitha Krishnan',  'ASMT-10 Reply',          '30 May 2026','02 Jun 2026','Paid',   'complete'],
+    ['GNS-2026-0528','Ramesh Gupta',     'SCN Reply (Section 74)', '27 May 2026','01 Jun 2026','Paid',   'complete'],
+    ['GNS-2026-0521','Sunita Verma',     'Commissioner Appeal',    '24 May 2026','30 May 2026','Paid',   'complete'],
+    ['GNS-2026-0517','Rajesh Kumar',     'ASMT-10 Reply',          '22 May 2026','28 May 2026','Pending','draft'],
+    ['GNS-2026-0510','Vinod Sharma',     'SCN Reply (Section 74)', '19 May 2026','25 May 2026','Paid',   'filing'],
+    ['GNS-2026-0502','Geeta Pillai',     'GSTAT Appeal',           '15 May 2026','22 May 2026','Failed', 'draft'],
+    ['GNS-2026-0498','Arun Reddy',       'ASMT-10 Reply',          '12 May 2026','20 May 2026','Paid',   'complete'],
+    ['GNS-2026-0489','Nandita Singh',    'SCN Reply (Section 73)', '09 May 2026','18 May 2026','Paid',   'review'],
+    ['GNS-2026-0481','Sanjay Mehta',     'Commissioner Appeal',    '05 May 2026','15 May 2026','Paid',   'complete'],
+    ['GNS-2026-0473','Lakshmi Nair',     'ASMT-10 Reply',          '01 May 2026','12 May 2026','Paid',   'complete'],
+    ['GNS-2026-0465','Mohan Das',        'SCN Reply (Section 74)', '28 Apr 2026','09 May 2026','Failed', 'draft'],
+    ['GNS-2026-0458','Rekha Joshi',      'GSTAT Appeal',           '24 Apr 2026','05 May 2026','Paid',   'complete'],
+    ['GNS-2026-0451','Vikram Bose',      'ASMT-10 Reply',          '20 Apr 2026','02 May 2026','Paid',   'complete'],
+    ['GNS-2026-0443','Pooja Nambiar',    'SCN Reply (Section 74)', '16 Apr 2026','28 Apr 2026','Paid',   'complete'],
+    ['GNS-2026-0436','Harish Chandra',   'Commissioner Appeal',    '12 Apr 2026','25 Apr 2026','Paid',   'complete'],
+    ['GNS-2026-0429','Smita Kulkarni',   'ASMT-10 Reply',          '08 Apr 2026','22 Apr 2026','Paid',   'filing'],
+    ['GNS-2026-0421','Dinesh Rao',       'SCN Reply (Section 73)', '04 Apr 2026','19 Apr 2026','Paid',   'complete'],
+    ['GNS-2026-0413','Fatima Sheikh',    'GSTAT Appeal',           '01 Apr 2026','16 Apr 2026','Paid',   'complete'],
+    ['GNS-2026-0405','Naresh Kumar',     'ASMT-10 Reply',          '25 Mar 2026','12 Apr 2026','Paid',   'complete'],
+    ['GNS-2026-0397','Bhavana Iyer',     'SCN Reply (Section 74)', '20 Mar 2026','09 Apr 2026','Paid',   'complete'],
+    ['GNS-2026-0389','Prakash Shetty',   'Commissioner Appeal',    '15 Mar 2026','05 Apr 2026','Paid',   'complete'],
+    ['GNS-2026-0381','Usha Menon',       'ASMT-10 Reply',          '10 Mar 2026','01 Apr 2026','Paid',   'complete'],
+    ['GNS-2026-0373','Girish Nayak',     'SCN Reply (Section 74)', '05 Mar 2026','28 Mar 2026','Paid',   'cancelled'],
+    ['GNS-2026-0365','Madhuri Patil',    'GSTAT Appeal',           '28 Feb 2026','25 Mar 2026','Paid',   'complete'],
+    ['GNS-2026-0357','Kiran Bhat',       'ASMT-10 Reply',          '20 Feb 2026','20 Mar 2026','Paid',   'complete'],
+    ['GNS-2026-0349','Rohit Desai',      'SCN Reply (Section 73)', '14 Feb 2026','15 Mar 2026','Pending','upload'],
+    ['GNS-2026-0341','Anjali Kapoor',    'Commissioner Appeal',    '08 Feb 2026','10 Mar 2026','Paid',   'complete'],
+    ['GNS-2026-0333','Sunil Tiwari',     'ASMT-10 Reply',          '02 Feb 2026','05 Mar 2026','Failed', 'cancelled'],
+  ];
+
+  const ALL = RAW.map(([id,name,service,bookDate,updated,payment,status]) =>
+    ({id,name,service,bookDate,updated,payment,status}));
+
+  const STATUS_CFG = {
+    upload:   {cls:'s-upload',   icon:'file-text',    label:'Document Upload'},
+    review:   {cls:'s-review',   icon:'search',       label:'In Review'},
+    draft:    {cls:'s-draft',    icon:'alert-circle', label:'Draft Ready'},
+    filing:   {cls:'s-filing',   icon:'clock',        label:'Filing'},
+    complete: {cls:'s-complete', icon:'check-circle', label:'Complete'},
+    cancelled:{cls:'s-cancelled',icon:'x-circle',     label:'Cancelled'},
+  };
+  const PAY_CFG = {
+    Paid:    {cls:'pay-paid',    icon:'check-circle', label:'Paid'},
+    Pending: {cls:'pay-pending', icon:'clock',        label:'Pending'},
+    Failed:  {cls:'pay-failed',  icon:'alert-circle', label:'Failed'},
+  };
+
+  /* ============================================================
+     State
+     ============================================================ */
+  let sortField  = 'updated';
+  let sortDir    = 'desc';
+  let curPage    = 1;
+  let emptyMode  = false;   // review aid: simulate no data at all
+  const PER_PAGE = 25;
+
+  const $  = id => document.getElementById(id);
+
+  function getFilters(){
+    return {
+      search:  $('searchInput').value.trim().toLowerCase(),
+      status:  $('statusFilter').value,
+      service: $('serviceFilter').value,
+      payment: $('paymentFilter').value,
+    };
+  }
+  function hasActive(f){ return !!(f.search || f.status || f.service || f.payment); }
+
+  function filtered(src, f){
+    return src.filter(b => {
+      if(f.search && !b.name.toLowerCase().includes(f.search) && !b.id.toLowerCase().includes(f.search)) return false;
+      if(f.status  && b.status   !== f.status)   return false;
+      if(f.service && b.service  !== f.service)   return false;
+      if(f.payment && b.payment  !== f.payment)   return false;
+      return true;
+    });
+  }
+  function sorted(src){ return [...src].sort((a,b)=>{
+    const va = new Date(sortField==='bookDate' ? a.bookDate : a.updated);
+    const vb = new Date(sortField==='bookDate' ? b.bookDate : b.updated);
+    return sortDir==='asc' ? va-vb : vb-va;
+  });}
+
+  /* ============================================================
+     Render
+     ============================================================ */
+  function render(){
+    const source = emptyMode ? [] : ALL;
+    const f      = getFilters();
+    const rows   = sorted(filtered(source, f));
+
+    /* total count in header — always reflects data source */
+    $('totalCount').textContent = source.length + ' bookings';
+
+    /* clear button */
+    $('clearBtn').hidden = !hasActive(f);
+
+    /* active state on selects */
+    ['statusFilter','serviceFilter','paymentFilter'].forEach(id => {
+      $(id).classList.toggle('active', $(id).value !== '');
+    });
+
+    const scroll = $('tableScroll');
+    const empty  = $('tableEmpty');
+    const pag    = $('pagination');
+    const body   = $('tableBody');
+
+    if(rows.length === 0){
+      scroll.hidden = true; pag.hidden = true; empty.hidden = false;
+      const filtered_empty = hasActive(f);
+      $('emptyMsg').textContent = filtered_empty ? 'No bookings match these filters.' : 'No bookings yet.';
+      $('clearBtnEmpty').hidden = !filtered_empty;
+      empty.querySelector('.ic-big').setAttribute('data-lucide', filtered_empty ? 'search' : 'folder-open');
+      lucide.createIcons();
+      return;
+    }
+
+    empty.hidden = false; // keep rendered but hidden
+    empty.hidden = true;
+    scroll.hidden = false; pag.hidden = false;
+
+    /* paginate */
+    const start    = (curPage - 1) * PER_PAGE;
+    const pageRows = rows.slice(start, start + PER_PAGE);
+
+    body.innerHTML = '';
+    pageRows.forEach(r => {
+      const sc = STATUS_CFG[r.status] || STATUS_CFG.upload;
+      const pc = PAY_CFG[r.payment]   || PAY_CFG.Pending;
+      const tr = document.createElement('tr');
+      tr.tabIndex = 0;
+      tr.setAttribute('aria-label',
+        r.name + ' — ' + r.service + ' — ' + sc.label + ' — ' + pc.label + '. Open booking.');
+      tr.innerHTML =
+        '<td><div class="t-name-wrap"><span class="nm">' + esc(r.name) + '</span>' +
+          '<span class="ref">' + r.id + '</span></div></td>' +
+        '<td>' + esc(r.service) + '</td>' +
+        '<td class="t-date">' + r.bookDate + '</td>' +
+        '<td class="t-date">' + r.updated  + '</td>' +
+        '<td><span class="pay-badge ' + pc.cls + '">' +
+          '<i data-lucide="' + pc.icon + '" class="ic" aria-hidden="true"></i> ' + pc.label +
+        '</span></td>' +
+        '<td><span class="status-badge ' + sc.cls + '">' +
+          '<i data-lucide="' + sc.icon + '" class="ic" aria-hidden="true"></i> ' + sc.label +
+        '</span></td>' +
+        '<td class="t-arrow"><i data-lucide="chevron-right" class="ic" aria-hidden="true"></i></td>';
+      const go = () => { window.location.href = 'Admin Booking Detail.html?id=' + r.id; };
+      tr.addEventListener('click', go);
+      tr.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();go();} });
+      body.appendChild(tr);
+    });
+
+    renderPagination(rows.length);
+    lucide.createIcons();
+  }
+
+  function renderPagination(total){
+    const pag   = $('pagination');
+    const pages = Math.ceil(total / PER_PAGE);
+    const s     = (curPage - 1) * PER_PAGE + 1;
+    const e     = Math.min(curPage * PER_PAGE, total);
+    const info  = '<span class="page-info">Showing ' + s + '–' + e + ' of ' + total + '</span>';
+
+    if(pages <= 1){ pag.innerHTML = info; return; }
+
+    let btns = '';
+    for(let p = 1; p <= pages; p++){
+      const show = pages <= 7 || p===1 || p===pages || Math.abs(p-curPage)<=1;
+      const ellipsis = !show && Math.abs(p-curPage)===2;
+      if(show){
+        btns += '<button class="page-btn" data-page="' + p + '"' +
+          (p===curPage ? ' aria-current="page"' : '') +
+          ' aria-label="Page ' + p + '">' + p + '</button>';
+      } else if(ellipsis){
+        btns += '<span class="page-ellipsis" aria-hidden="true">…</span>';
+      }
+    }
+
+    pag.innerHTML = info +
+      '<div class="page-controls">' +
+        '<button class="page-btn" id="prevBtn" aria-label="Previous page"' + (curPage===1?' disabled':'') + '>' +
+          '<i data-lucide="chevron-left" style="width:15px;height:15px"></i>' +
+        '</button>' +
+        btns +
+        '<button class="page-btn" id="nextBtn" aria-label="Next page"' + (curPage===pages?' disabled':'') + '>' +
+          '<i data-lucide="chevron-right" style="width:15px;height:15px"></i>' +
+        '</button>' +
+      '</div>';
+
+    pag.querySelectorAll('[data-page]').forEach(b =>
+      b.addEventListener('click', () => { curPage = +b.dataset.page; render(); }));
+    const p = $('prevBtn'), n = $('nextBtn');
+    if(p) p.addEventListener('click', () => { curPage--; render(); });
+    if(n) n.addEventListener('click', () => { curPage++; render(); });
+    lucide.createIcons();
+  }
+
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ============================================================
+     Sort headers
+     ============================================================ */
+  function syncSortHeaders(){
+    const fields = [{id:'thBookDate',key:'bookDate'},{id:'thUpdated',key:'updated'}];
+    fields.forEach(({id,key}) => {
+      const th  = $(id);
+      const btn = th.querySelector('.sort-btn');
+      const isActive = sortField === key;
+      if(isActive){
+        th.setAttribute('aria-sort', sortDir==='asc' ? 'ascending' : 'descending');
+        btn.dataset.active = sortDir;
+        btn.querySelector('.si').setAttribute('data-lucide', sortDir==='asc' ? 'chevron-up' : 'chevron-down');
+        btn.setAttribute('aria-label', 'Sort by ' + (key==='bookDate'?'booking date':'last updated') +
+          ', currently ' + (sortDir==='asc'?'ascending':'descending'));
+      } else {
+        th.setAttribute('aria-sort','none');
+        delete btn.dataset.active;
+        btn.querySelector('.si').setAttribute('data-lucide','chevrons-up-down');
+        btn.setAttribute('aria-label', 'Sort by ' + (key==='bookDate'?'booking date':'last updated'));
+      }
+    });
+    lucide.createIcons();
+  }
+
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.sort;
+      if(sortField === key){ sortDir = sortDir==='asc'?'desc':'asc'; }
+      else { sortField = key; sortDir = 'desc'; }
+      curPage = 1;
+      syncSortHeaders();
+      render();
+    });
+  });
+
+  /* ============================================================
+     Filters
+     ============================================================ */
+  $('searchInput').addEventListener('input', () => { curPage = 1; render(); });
+  $('statusFilter').addEventListener('change', () => { curPage = 1; render(); });
+  $('serviceFilter').addEventListener('change', () => { curPage = 1; render(); });
+  $('paymentFilter').addEventListener('change', () => { curPage = 1; render(); });
+
+  function clearFilters(){
+    $('searchInput').value = '';
+    $('statusFilter').value = '';
+    $('serviceFilter').value = '';
+    $('paymentFilter').value = '';
+    ['statusFilter','serviceFilter','paymentFilter'].forEach(id => $(id).classList.remove('active'));
+    curPage = 1;
+    render();
+  }
+  $('clearBtn').addEventListener('click', clearFilters);
+  $('clearBtnEmpty').addEventListener('click', clearFilters);
+
+  /* ============================================================
+     Mobile drawer
+     ============================================================ */
+  const sidebar   = $('sidebar');
+  const scrim     = $('scrim');
+  const hamburger = $('hamburger');
+  function openDrawer(){ sidebar.classList.add('open'); scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open')); hamburger.setAttribute('aria-expanded','true'); }
+  function closeDrawer(){ sidebar.classList.remove('open'); scrim.classList.remove('open'); scrim.hidden=true; hamburger.setAttribute('aria-expanded','false'); }
+  hamburger.addEventListener('click', () => sidebar.classList.contains('open') ? closeDrawer() : openDrawer());
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeDrawer(); closeAcct(); } });
+
+  const acctBtn  = $('acctBtn');
+  const acctMenu = $('acctMenu');
+  function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+  acctBtn.addEventListener('click', e => { e.stopPropagation(); const o=acctMenu.classList.toggle('open'); acctBtn.setAttribute('aria-expanded',String(o)); });
+  document.addEventListener('click', e => { if(!e.target.closest('.acct')) closeAcct(); });
+
+  /* ============================================================
+     State switcher (review aid)
+     ============================================================ */
+  const mainView    = $('mainView');
+  const errorView   = $('errorView');
+  const loadingView = $('loadingView');
+
+  function setState(state){
+    mainView.hidden    = state==='loading' || state==='error';
+    errorView.hidden   = state !== 'error';
+    loadingView.hidden = state !== 'loading';
+
+    if(state==='populated'){
+      emptyMode = false;
+      clearFilters();
+    } else if(state==='empty-data'){
+      emptyMode = true;
+      clearFilters();
+    } else if(state==='no-results'){
+      emptyMode = false;
+      $('statusFilter').value  = 'complete';
+      $('paymentFilter').value = 'Failed';
+      curPage = 1;
+      render();
+    }
+    document.querySelectorAll('.state-switch button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.state === state)));
+  }
+
+  document.querySelectorAll('.state-switch button').forEach(b =>
+    b.addEventListener('click', () => setState(b.dataset.state)));
+  $('retryBtn').addEventListener('click', () => setState('populated'));
+
+  /* init */
+  render();
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+})();
+</script>
+</body>
+</html>

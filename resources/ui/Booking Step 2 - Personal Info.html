@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book Service — Step 2: Case Details · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     BOOKING STEP 2 — Personal Info  /dashboard/book/details
+     Focused flow shell — no sidebar, no mobile bottom tab bar.
+     design.md §1–§7 | components.md → Stepper, Form Field Primitive
+     ============================================================ */
+
+  body {
+    background: var(--neutral-50);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── skip link ──────────────────────────────────────────────── */
+  .skip-link {
+    position: absolute;
+    left: -999px;
+    top: 0;
+    background: var(--primary-navy);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 0 0 var(--r-btn) 0;
+    z-index: 200;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .skip-link:focus { left: 0; }
+
+  /* ============================================================
+     TOP BAR — identical to Step 1
+     ============================================================ */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--neutral-white);
+    border-bottom: 1px solid var(--neutral-200);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    flex-shrink: 0;
+  }
+  .top-bar__logo { height: 34px; width: auto; display: block; }
+
+  .btn-exit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--neutral-600);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 48px;
+    padding: 0 4px;
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .btn-exit:hover { color: var(--primary-navy); }
+  .btn-exit:focus-visible {
+    outline: none;
+    border-radius: var(--r-btn);
+    box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+  }
+
+  /* ============================================================
+     STEPPER — Step 1 complete, Step 2 active, Step 3 upcoming
+     design.md §5.1 — 300ms ease-out
+     ============================================================ */
+  .stepper-rail {
+    background: var(--neutral-white);
+    border-bottom: 1px solid var(--neutral-200);
+    padding: 0 32px;
+    flex-shrink: 0;
+  }
+  .stepper {
+    display: flex;
+    align-items: center;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 18px 0;
+    list-style: none;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .step__num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 300ms ease-out, border-color 300ms ease-out, color 300ms ease-out;
+  }
+  .step__label {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 300ms ease-out;
+  }
+  /* active */
+  .step[data-state="active"] .step__num {
+    background: var(--accent-green);
+    color: #fff;
+    border: 2px solid var(--accent-green);
+  }
+  .step[data-state="active"] .step__label {
+    color: var(--primary-navy);
+    font-weight: 600;
+  }
+  /* upcoming */
+  .step[data-state="upcoming"] .step__num {
+    background: transparent;
+    color: var(--neutral-600);
+    border: 2px solid var(--neutral-200);
+  }
+  .step[data-state="upcoming"] .step__label { color: var(--neutral-600); }
+  /* complete */
+  .step[data-state="complete"] .step__num {
+    background: var(--accent-green);
+    color: #fff;
+    border: 2px solid var(--accent-green);
+  }
+  .step[data-state="complete"] .step__label { color: var(--neutral-600); }
+
+  .step-connector {
+    flex: 1;
+    min-width: 32px;
+    height: 1px;
+    background: var(--neutral-200);
+    margin: 0 8px;
+    transition: background 300ms ease-out;
+  }
+  .step-connector[data-complete="true"] { background: var(--accent-green); }
+
+  /* ============================================================
+     MAIN CONTENT AREA — max-width 540px (form width)
+     ============================================================ */
+  .main {
+    flex: 1;
+    padding: 48px 32px 120px;
+  }
+  .content {
+    max-width: 540px;
+    margin: 0 auto;
+  }
+  .content__heading {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    margin-bottom: 8px;
+  }
+  .content__sub {
+    font-size: 16px;
+    color: var(--neutral-600);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  /* ============================================================
+     FORM  (components.md → Form Field Primitive)
+     Single-column. Labels above. 48px min-height inputs.
+     ============================================================ */
+  .booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ── field wrapper ─────────────────────────────────────────── */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--neutral-900);
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .field__label .req {
+    color: var(--warning-amber);
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  /* ── text / email / tel inputs ─────────────────────────────── */
+  .field__input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--neutral-900);
+    background: var(--neutral-white);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--r-btn);
+    transition: border-color .15s, box-shadow .15s;
+    line-height: 1.5;
+  }
+  .field__input::placeholder { color: var(--neutral-600); font-size: 15px; }
+  .field__input:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px rgba(11,139,78,.18);
+  }
+  /* error state */
+  .field__input.is-error {
+    border-color: var(--warning-amber);
+    box-shadow: none;
+  }
+  .field__input.is-error:focus {
+    box-shadow: 0 0 0 3px rgba(217,119,6,.18);
+  }
+  /* mono (GSTIN) */
+  .field__input--mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: .04em;
+    font-size: 15px;
+    text-transform: uppercase;
+  }
+
+  /* ── hint text ─────────────────────────────────────────────── */
+  .field__hint {
+    font-size: 13px;
+    color: var(--neutral-600);
+    line-height: 1.4;
+  }
+
+  /* ── error message (adjacent to field) ────────────────────── */
+  .field__error {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--warning-amber);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .field__error.is-visible {
+    display: flex;
+  }
+
+  /* ── phone input with +91 prefix ──────────────────────────── */
+  .phone-wrap {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--r-btn);
+    overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+    background: var(--neutral-white);
+  }
+  .phone-wrap:focus-within {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px rgba(11,139,78,.18);
+  }
+  .phone-wrap.is-error {
+    border-color: var(--warning-amber);
+    box-shadow: none;
+  }
+  .phone-wrap.is-error:focus-within {
+    box-shadow: 0 0 0 3px rgba(217,119,6,.18);
+  }
+  .phone-prefix {
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--neutral-900);
+    background: var(--neutral-50);
+    border-right: 1px solid var(--neutral-200);
+    white-space: nowrap;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .phone-input {
+    flex: 1;
+    min-height: 48px;
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--neutral-900);
+    background: transparent;
+    border: none;
+    outline: none;
+    line-height: 1.5;
+  }
+  .phone-input::placeholder { color: var(--neutral-600); font-size: 15px; }
+
+  /* ============================================================
+     FILING FOR — segmented toggle
+     role="radiogroup" + role="radio" per button.
+     Arrow-key navigation. ≥48px tap target.
+     ============================================================ */
+  .seg-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .seg-toggle {
+    display: flex;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--r-btn);
+    overflow: hidden;
+    background: var(--neutral-white);
+  }
+  .seg-btn {
+    flex: 1;
+    min-height: 48px;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--neutral-600);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .seg-btn + .seg-btn {
+    border-left: 1px solid var(--neutral-200);
+  }
+  .seg-btn:hover:not([aria-checked="true"]) {
+    background: var(--neutral-50);
+    color: var(--neutral-900);
+  }
+  .seg-btn[aria-checked="true"] {
+    background: var(--accent-green);
+    color: #fff;
+    font-weight: 600;
+  }
+  .seg-btn:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px rgba(11,139,78,.7);
+  }
+
+  /* ============================================================
+     CONDITIONAL CLIENT NAME FIELD
+     CSS show/hide with max-height animation (same pattern as
+     pre-deposit disclosure in Step 1).
+     ============================================================ */
+  .client-name-region {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      max-height .28s ease-out,
+      opacity    .22s ease-out;
+  }
+  .client-name-region.is-open {
+    max-height: 120px;
+    opacity: 1;
+  }
+
+  /* ============================================================
+     PRIVACY NOTE  (design.md §6)
+     ============================================================ */
+  .privacy-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--neutral-600);
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+  .privacy-note svg {
+    color: var(--accent-green);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ============================================================
+     FOOTER BAR
+     Desktop: Back (left) | Continue (right)
+     Mobile:  Back link (top) | Continue full-width (bottom)
+     ============================================================ */
+  .footer-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 90;
+    background: var(--neutral-white);
+    border-top: 1px solid var(--neutral-200);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--neutral-600);
+    cursor: pointer;
+    min-height: 48px;
+    padding: 0 8px;
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .btn-back:hover { color: var(--primary-navy); }
+  .btn-back:focus-visible {
+    outline: none;
+    border-radius: var(--r-btn);
+    box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+  }
+
+  .btn-continue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--accent-green);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-btn);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    min-height: 48px;
+    padding: 13px 28px;
+    cursor: pointer;
+    transition: background .15s ease, transform .1s ease;
+  }
+  .btn-continue:hover:not(:disabled) { background: var(--accent-green-hover); }
+  .btn-continue:active:not(:disabled) {
+    background: var(--accent-green-hover);
+    transform: translateY(1px);
+  }
+  .btn-continue:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+  }
+  .btn-continue:disabled {
+    background: var(--neutral-200);
+    color: var(--neutral-600);
+    cursor: not-allowed;
+  }
+
+  /* loading spinner inside button */
+  .spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .65s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .btn-continue.is-loading .spinner { display: block; }
+  .btn-continue.is-loading .btn-label { display: none; }
+  .btn-continue.is-loading .btn-arrow { display: none; }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 767px) {
+    .top-bar, .stepper-rail { padding: 0 20px; }
+    .main { padding: 28px 20px 108px; }
+    .footer-bar {
+      padding: 12px 20px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    /* Back link above, Continue full-width below */
+    .btn-back {
+      order: -1;             /* visually above Continue */
+      justify-content: center;
+      min-height: 40px;
+    }
+    .btn-continue { width: 100%; }
+    .content__heading { font-size: 26px; }
+    .content__sub { font-size: 15px; margin-bottom: 24px; }
+  }
+
+  @media (max-width: 479px) {
+    .step__label { display: none; }
+    .step-connector { min-width: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .client-name-region,
+    .seg-btn,
+    .field__input,
+    .phone-wrap,
+    .spinner { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<!-- ==============================================================
+     TOP BAR — logo · Save & Exit [Tertiary]
+============================================================== -->
+<header class="top-bar" role="banner">
+  <a href="Dashboard Home.html" aria-label="GST Notice Support — back to dashboard">
+    <img src="assets/logo.png" alt="GST Notice Support" class="top-bar__logo" />
+  </a>
+  <a href="Dashboard Home.html" class="btn-exit" aria-label="Save progress and exit to dashboard">
+    Save &amp; Exit
+    <i data-lucide="x" width="15" height="15"></i>
+  </a>
+</header>
+
+<!-- ==============================================================
+     STEPPER — Step 1 complete · Step 2 active · Step 3 upcoming
+     300ms ease-out — design.md §5.1
+============================================================== -->
+<nav class="stepper-rail" aria-label="Booking progress">
+  <ol class="stepper">
+    <li class="step" data-state="complete" id="step-1">
+      <div class="step__num" aria-hidden="true">
+        <!-- check icon for complete state -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="step__label">Service</span>
+    </li>
+    <li class="step-connector" role="presentation" aria-hidden="true" data-complete="true" id="conn-1"></li>
+    <li class="step" data-state="active" aria-current="step" id="step-2">
+      <div class="step__num" aria-hidden="true">2</div>
+      <span class="step__label">Details</span>
+    </li>
+    <li class="step-connector" role="presentation" aria-hidden="true" id="conn-2"></li>
+    <li class="step" data-state="upcoming" id="step-3">
+      <div class="step__num" aria-hidden="true">3</div>
+      <span class="step__label">Documents</span>
+    </li>
+  </ol>
+</nav>
+
+<!-- ==============================================================
+     MAIN CONTENT — max-width 540px form area
+============================================================== -->
+<main class="main" id="main">
+  <div class="content">
+
+    <h2 class="content__heading">Your Case Details</h2>
+    <p class="content__sub">These details will be used to prepare your response.</p>
+
+    <form
+      class="booking-form"
+      id="booking-form"
+      novalidate
+      autocomplete="off"
+    >
+
+      <!-- 1. Full Name -->
+      <div class="field" id="field-name">
+        <label class="field__label" for="full-name">
+          Full Name <span class="req" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="text"
+          id="full-name"
+          name="fullName"
+          class="field__input"
+          placeholder="As per PAN / Aadhaar"
+          autocomplete="off"
+          required
+          aria-required="true"
+          aria-describedby="err-name"
+        />
+        <span class="field__error" id="err-name" role="alert" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Enter your full name
+        </span>
+      </div>
+
+      <!-- 2. Email Address -->
+      <div class="field" id="field-email">
+        <label class="field__label" for="email">
+          Email Address <span class="req" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="field__input"
+          placeholder="you@example.com"
+          autocomplete="off"
+          required
+          aria-required="true"
+          aria-describedby="err-email"
+          inputmode="email"
+        />
+        <span class="field__error" id="err-email" role="alert" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Enter a valid email address
+        </span>
+      </div>
+
+      <!-- 3. Mobile Number (+91 prefix) -->
+      <div class="field" id="field-mobile">
+        <label class="field__label" for="mobile">
+          Mobile Number <span class="req" aria-hidden="true">*</span>
+        </label>
+        <div class="phone-wrap" id="phone-wrap">
+          <span class="phone-prefix" aria-hidden="true">+91</span>
+          <input
+            type="tel"
+            id="mobile"
+            name="mobile"
+            class="phone-input"
+            placeholder="10-digit mobile number"
+            maxlength="10"
+            inputmode="numeric"
+            autocomplete="off"
+            required
+            aria-required="true"
+            aria-label="Mobile number, +91 prefix, 10 digits"
+            aria-describedby="err-mobile"
+          />
+        </div>
+        <span class="field__error" id="err-mobile" role="alert" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Enter a valid 10-digit mobile number
+        </span>
+      </div>
+
+      <!-- 4. GSTIN (mono) -->
+      <div class="field" id="field-gstin">
+        <label class="field__label" for="gstin">
+          GSTIN <span class="req" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="text"
+          id="gstin"
+          name="gstin"
+          class="field__input field__input--mono"
+          placeholder="e.g. 29ABCDE1234F1Z5"
+          maxlength="15"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          required
+          aria-required="true"
+          aria-label="GSTIN — 15-character GST Identification Number, e.g. 29ABCDE1234F1Z5"
+          aria-describedby="err-gstin"
+        />
+        <span class="field__error" id="err-gstin" role="alert" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Enter a valid 15-character GSTIN
+        </span>
+      </div>
+
+      <!-- 5. Organisation Name -->
+      <div class="field" id="field-org">
+        <label class="field__label" for="org-name">
+          Organisation Name <span class="req" aria-hidden="true">*</span>
+        </label>
+        <input
+          type="text"
+          id="org-name"
+          name="orgName"
+          class="field__input"
+          placeholder="Registered business name"
+          autocomplete="off"
+          required
+          aria-required="true"
+          aria-describedby="err-org"
+        />
+        <span class="field__error" id="err-org" role="alert" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Enter your organisation name
+        </span>
+      </div>
+
+      <!-- 6. Filing For — segmented toggle -->
+      <div class="seg-group field" id="field-filing">
+        <div
+          class="field__label"
+          id="filing-label"
+        >
+          Filing For <span class="req" aria-hidden="true">*</span>
+        </div>
+        <div
+          role="radiogroup"
+          aria-labelledby="filing-label"
+          aria-required="true"
+          class="seg-toggle"
+          id="filing-toggle"
+        >
+          <button
+            type="button"
+            role="radio"
+            aria-checked="true"
+            class="seg-btn"
+            data-value="myself"
+            tabindex="0"
+            id="seg-myself"
+          >Myself</button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked="false"
+            class="seg-btn"
+            data-value="client"
+            tabindex="-1"
+            id="seg-client"
+          >A Client</button>
+        </div>
+      </div>
+
+      <!-- Conditional: Client Name — shown when "A Client" selected -->
+      <div
+        class="client-name-region"
+        id="client-name-region"
+        aria-hidden="true"
+      >
+        <div class="field" id="field-client-name">
+          <label class="field__label" for="client-name">
+            Client Name <span class="req" aria-hidden="true">*</span>
+          </label>
+          <input
+            type="text"
+            id="client-name"
+            name="clientName"
+            class="field__input"
+            placeholder="Full name of the client"
+            autocomplete="off"
+            aria-required="false"
+            aria-describedby="err-client-name"
+            tabindex="-1"
+          />
+          <span class="field__error" id="err-client-name" role="alert" aria-live="polite">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Enter client name
+          </span>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- Privacy note — design.md §6 -->
+    <p class="privacy-note" style="margin-top: 32px;">
+      <i data-lucide="lock" width="15" height="15" stroke-width="1.5"></i>
+      Your details are used only for preparing your GST response. We never share them.
+    </p>
+
+  </div>
+</main>
+
+<!-- ==============================================================
+     FOOTER BAR
+     Desktop: Back (left) | Continue (right)
+     Mobile:  Back link above | Continue full-width below
+============================================================== -->
+<footer class="footer-bar">
+  <a
+    href="Booking Step 1 - Service Selection.html"
+    class="btn-back"
+    id="btn-back"
+    aria-label="Back to Step 1, Service Selection"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back
+  </a>
+
+  <button
+    type="submit"
+    form="booking-form"
+    class="btn-continue"
+    id="btn-continue"
+    disabled
+    aria-disabled="true"
+    aria-label="Continue to step 3, Documents"
+  >
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="btn-label">Continue</span>
+    <svg class="btn-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
+</footer>
+
+<!-- ==============================================================
+     SCRIPT
+     – Segmented toggle: selection + arrow-key nav
+     – Client Name: conditional reveal + focus management
+     – Field validation on blur (specific, adjacent errors)
+     – Continue: enable when all visible fields valid; loading state
+     – Step transition: Step 2 → complete, Step 3 → active
+============================================================== -->
+<script>
+(function () {
+  'use strict';
+
+  lucide.createIcons();
+
+  /* ── GSTIN: force uppercase on input ──────────────────────── */
+  var gstinInput = document.getElementById('gstin');
+  gstinInput.addEventListener('input', function () {
+    var pos = this.selectionStart;
+    this.value = this.value.toUpperCase();
+    this.setSelectionRange(pos, pos);
+  });
+
+  /* ── Mobile: digits only ───────────────────────────────────── */
+  var mobileInput = document.getElementById('mobile');
+  mobileInput.addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+  });
+
+  /* ================================================================
+     SEGMENTED TOGGLE — Filing For
+     ARIA radiogroup pattern: arrow keys move + auto-select
+     ================================================================ */
+  var segBtns        = Array.from(document.querySelectorAll('.seg-btn'));
+  var clientRegion   = document.getElementById('client-name-region');
+  var clientInput    = document.getElementById('client-name');
+  var filingValue    = 'myself'; /* default */
+
+  function selectSeg(btn) {
+    segBtns.forEach(function (b) {
+      b.setAttribute('aria-checked', 'false');
+      b.setAttribute('tabindex', '-1');
+    });
+    btn.setAttribute('aria-checked', 'true');
+    btn.setAttribute('tabindex', '0');
+    filingValue = btn.getAttribute('data-value');
+
+    var isClient = (filingValue === 'client');
+
+    if (isClient) {
+      clientRegion.classList.add('is-open');
+      clientRegion.setAttribute('aria-hidden', 'false');
+      clientInput.setAttribute('aria-required', 'true');
+      clientInput.setAttribute('tabindex', '0');
+      /* focus management — move focus to Client Name on reveal */
+      setTimeout(function () { clientInput.focus(); }, 80);
+    } else {
+      clientRegion.classList.remove('is-open');
+      clientRegion.setAttribute('aria-hidden', 'true');
+      clientInput.setAttribute('aria-required', 'false');
+      clientInput.setAttribute('tabindex', '-1');
+      clientInput.value = '';
+      hideError('err-client-name', 'field-client-name');
+    }
+
+    checkFormValidity();
+  }
+
+  segBtns.forEach(function (btn, idx) {
+    btn.addEventListener('click', function () {
+      selectSeg(btn);
+      btn.focus();
+    });
+    btn.addEventListener('keydown', function (e) {
+      var next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        next = segBtns[(idx + 1) % segBtns.length];
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        next = segBtns[(idx - 1 + segBtns.length) % segBtns.length];
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectSeg(btn);
+        return;
+      }
+      if (next) { selectSeg(next); next.focus(); }
+    });
+  });
+
+  /* ================================================================
+     VALIDATION RULES
+     ================================================================ */
+  var GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function isValid(fieldId) {
+    switch (fieldId) {
+      case 'full-name':
+        return document.getElementById('full-name').value.trim().length > 0;
+      case 'email':
+        return EMAIL_RE.test(document.getElementById('email').value.trim());
+      case 'mobile':
+        return /^[6-9]\d{9}$/.test(document.getElementById('mobile').value.trim());
+      case 'gstin':
+        return GSTIN_RE.test(document.getElementById('gstin').value.trim());
+      case 'org-name':
+        return document.getElementById('org-name').value.trim().length > 0;
+      case 'client-name':
+        return document.getElementById('client-name').value.trim().length > 0;
+      default:
+        return true;
+    }
+  }
+
+  function showError(errId, fieldId) {
+    document.getElementById(errId).classList.add('is-visible');
+    var inp = document.getElementById(fieldId);
+    if (inp) {
+      inp.classList.add('is-error');
+      /* phone wrap special case */
+      var wrap = document.getElementById('phone-wrap');
+      if (fieldId === 'mobile' && wrap) wrap.classList.add('is-error');
+    }
+  }
+
+  function hideError(errId, fieldId) {
+    document.getElementById(errId).classList.remove('is-visible');
+    var inp = document.getElementById(fieldId);
+    if (inp) {
+      inp.classList.remove('is-error');
+      var wrap = document.getElementById('phone-wrap');
+      if (fieldId === 'mobile' && wrap) wrap.classList.remove('is-error');
+    }
+  }
+
+  /* ── Blur handlers ─────────────────────────────────────────── */
+  function attachBlur(inputId, errId) {
+    var el = document.getElementById(inputId);
+    if (!el) return;
+    el.addEventListener('blur', function () {
+      if (el.value.trim() === '' && el.getAttribute('aria-required') !== 'true' && inputId === 'client-name') {
+        /* skip validation if not required */
+        checkFormValidity();
+        return;
+      }
+      if (!isValid(inputId)) {
+        showError(errId, inputId);
+      } else {
+        hideError(errId, inputId);
+      }
+      checkFormValidity();
+    });
+    el.addEventListener('input', function () {
+      /* Clear error optimistically once user starts correcting */
+      if (isValid(inputId)) {
+        hideError(errId, inputId);
+        checkFormValidity();
+      }
+    });
+  }
+
+  attachBlur('full-name',   'err-name');
+  attachBlur('email',        'err-email');
+  attachBlur('mobile',       'err-mobile');
+  attachBlur('gstin',        'err-gstin');
+  attachBlur('org-name',     'err-org');
+  attachBlur('client-name',  'err-client-name');
+
+  /* ── Master validity check ─────────────────────────────────── */
+  var btnContinue = document.getElementById('btn-continue');
+
+  function checkFormValidity() {
+    var required = ['full-name', 'email', 'mobile', 'gstin', 'org-name'];
+    if (filingValue === 'client') required.push('client-name');
+    var allValid = required.every(function (id) { return isValid(id); });
+    btnContinue.disabled = !allValid;
+    btnContinue.setAttribute('aria-disabled', allValid ? 'false' : 'true');
+  }
+
+  /* Live validity on input so Continue enables as soon as last field fills */
+  ['full-name','email','mobile','gstin','org-name','client-name'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', checkFormValidity);
+  });
+
+  /* ================================================================
+     FORM SUBMIT — validate all, show all errors, then loading state
+     ================================================================ */
+  document.getElementById('booking-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+  });
+
+  btnContinue.addEventListener('click', function () {
+    if (btnContinue.disabled) return;
+
+    /* Validate all visible fields; show errors for any that fail */
+    var fields = [
+      { id: 'full-name',  err: 'err-name'       },
+      { id: 'email',      err: 'err-email'       },
+      { id: 'mobile',     err: 'err-mobile'      },
+      { id: 'gstin',      err: 'err-gstin'       },
+      { id: 'org-name',   err: 'err-org'         }
+    ];
+    if (filingValue === 'client') {
+      fields.push({ id: 'client-name', err: 'err-client-name' });
+    }
+
+    var firstError = null;
+    fields.forEach(function (f) {
+      if (!isValid(f.id)) {
+        showError(f.err, f.id);
+        if (!firstError) firstError = document.getElementById(f.id);
+      }
+    });
+
+    if (firstError) {
+      firstError.focus();
+      return;
+    }
+
+    /* ── Stepper transition: Step 2 → complete, Step 3 → active ── */
+    var s2   = document.getElementById('step-2');
+    var s3   = document.getElementById('step-3');
+    var c2   = document.getElementById('conn-2');
+
+    s2.setAttribute('data-state', 'complete');
+    s2.removeAttribute('aria-current');
+    s2.querySelector('.step__num').innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    c2.setAttribute('data-complete', 'true');
+    s3.setAttribute('data-state', 'active');
+    s3.setAttribute('aria-current', 'step');
+
+    /* ── Loading state ─────────────────────────────────────────── */
+    btnContinue.classList.add('is-loading');
+    btnContinue.disabled = true;
+    btnContinue.setAttribute('aria-label', 'Loading, please wait');
+
+    /* Production: POST data, navigate to /dashboard/book/documents */
+    console.info('[Booking] Step 2 complete — filing for:', filingValue);
+  });
+
+}());
+</script>
+<script src="js/app-state.js"></script>
+<script>
+// Wire Step 2 Continue → Step 3 navigation
+(function(){
+  var btn = document.getElementById('btn-continue');
+  if(!btn) return;
+  btn.addEventListener('click', function(){
+    if(btn.disabled || btn.getAttribute('aria-disabled')==='true') return;
+    sessionStorage.setItem('gns_booking_step2','done');
+    var sp = btn.querySelector('.spinner');
+    var lb = btn.querySelector('.btn-label');
+    if(sp) sp.style.display='inline-block';
+    if(lb) lb.style.visibility='hidden';
+    btn.disabled = true;
+    setTimeout(function(){ window.location.href='Booking Step 3 - Document Upload.html'; }, 700);
+  });
+})();
+</script>
+</body>
+</html>

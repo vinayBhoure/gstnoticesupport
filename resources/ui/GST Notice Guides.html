@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GST Notice Guides · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+
+/* ── NAVBAR ── */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid var(--neutral-200);}
+.nav .row{display:flex;align-items:center;gap:28px;height:76px;transition:height .15s ease;}
+.nav.scrolled .row{height:62px;}
+.brand{display:flex;align-items:center;gap:11px;}
+.brand img{height:40px;width:40px;border-radius:7px;border:1px solid var(--neutral-200);object-fit:cover;}
+.brand .bn{font-weight:700;font-size:17px;color:var(--primary-navy);letter-spacing:-.01em;}
+.brand .bn span{color:var(--accent-green);}
+.nav .links{display:flex;align-items:center;gap:26px;margin-left:6px;}
+.nav .links a,.nav .links button{font-size:15px;font-weight:500;color:var(--neutral-900);background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 0;}
+.nav .links a:hover,.nav .links button:hover,.nav .links a[aria-current="page"]{color:var(--accent-green);}
+.nav .links a[aria-current="page"]{font-weight:600;}
+.nav .right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+.nav .right .btn{min-height:44px;padding:10px 16px;font-size:14px;}
+.nav .ph{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--primary-navy);white-space:nowrap;}
+.nav .ph .ic{width:17px;height:17px;color:var(--accent-green);}
+.has-drop{position:relative;}
+.drop-menu{position:absolute;top:calc(100% + 10px);left:0;min-width:300px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:8px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;}
+.has-drop:hover .drop-menu,.has-drop:focus-within .drop-menu{opacity:1;visibility:visible;transform:translateY(0);}
+.nav .drop-menu a{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:4px;padding:10px 14px !important;border-radius:var(--r-btn);text-align:left !important;}
+.nav .drop-menu a:hover{background:var(--neutral-50);}
+.nav .drop-menu a strong{font-size:14px;font-weight:600;color:var(--primary-navy);display:block;width:100%;}
+.nav .drop-menu a small{font-size:13px;color:var(--neutral-600);font-weight:400;display:block;width:100%;}
+.hamburger{display:none;align-items:center;justify-content:center;width:48px;height:48px;background:none;border:none;cursor:pointer;color:var(--primary-navy);border-radius:var(--r-btn);}
+.hamburger:hover{background:var(--neutral-50);}
+.drawer-overlay{position:fixed;inset:0;background:rgba(10,37,64,.5);z-index:110;opacity:0;transition:opacity .2s ease;}
+.drawer-overlay.show{opacity:1;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(86vw,360px);background:#fff;z-index:120;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(10,37,64,.12);}
+.drawer.open{transform:translateX(0);}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--neutral-200);}
+.drawer-head .brand img{height:36px;width:36px;border-radius:7px;border:1px solid var(--neutral-200);}
+.drawer-head .brand .bn{font-weight:700;font-size:16px;color:var(--primary-navy);}
+.drawer-head .brand .bn span{color:var(--accent-green);}
+.drawer-close{width:44px;height:44px;background:none;border:none;cursor:pointer;color:var(--neutral-900);border-radius:var(--r-btn);display:flex;align-items:center;justify-content:center;}
+.drawer-close:hover{background:var(--neutral-50);}
+.drawer-nav{display:flex;flex-direction:column;padding:16px 20px;overflow-y:auto;flex:1;min-height:0;}
+.drawer-nav a{padding:13px 8px;font-size:16px;font-weight:500;color:var(--neutral-900);border-radius:var(--r-btn);min-height:48px;display:flex;align-items:center;}
+.drawer-nav a:hover{background:var(--neutral-50);color:var(--accent-green);}
+.drawer-divider{height:1px;background:var(--neutral-200);margin:10px 0;}
+.drawer-foot{padding:18px 20px;border-top:1px solid var(--neutral-200);display:flex;flex-direction:column;gap:12px;flex-shrink:0;}
+.drawer-foot .ph{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--primary-navy);}
+.drawer-foot .ph .ic{color:var(--accent-green);}
+.drawer-services-toggle{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:13px 8px;font-size:16px;font-weight:600;color:var(--primary-navy);border-radius:var(--r-btn);min-height:48px;text-align:left;}
+.drawer-services-toggle:hover{background:var(--neutral-50);color:var(--accent-green);}
+.drawer-services-toggle:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);}
+.drawer-services-chev{transition:transform .25s ease;flex:0 0 auto;color:var(--neutral-600);}
+.drawer-services-toggle[aria-expanded="true"] .drawer-services-chev{transform:rotate(90deg);}
+.drawer-services-menu{overflow:hidden;max-height:0;transition:max-height .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+.drawer-services-menu.open{max-height:280px;overflow-y:auto;}
+.drawer-services-menu a{padding:11px 8px 11px 22px;font-size:15px;font-weight:400;color:var(--neutral-900);border-radius:var(--r-btn);min-height:44px;display:flex;align-items:center;}
+.drawer-services-menu a:hover{background:var(--neutral-50);color:var(--accent-green);}
+body.drawer-open{overflow:hidden;}
+
+/* ── PAGE HERO — 100vh minus sticky navbar ── */
+.page-hero{
+  min-height:calc(100vh - 76px);
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;
+  padding:48px 0;
+}
+.page-hero h1{max-width:22ch;margin:0 auto 20px;}
+.page-hero .sub{font-size:20px;line-height:1.6;color:var(--neutral-600);max-width:60ch;margin:0 auto 32px;}
+.page-hero .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+
+/* ── MISSION & VISION ── */
+.mv-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--neutral-200);border:1px solid var(--neutral-200);border-radius:var(--r-card);overflow:hidden;}
+.mv-panel{background:var(--neutral-50);padding:48px 40px;}
+.mv-panel .mv-label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent-green);margin-bottom:16px;}
+.mv-panel .mv-label::before{content:"";width:6px;height:6px;border-radius:1px;background:var(--accent-green);}
+.mv-panel h3{font-size:22px;color:var(--primary-navy);margin-bottom:14px;}
+.mv-panel p{font-size:16px;color:var(--neutral-900);line-height:1.75;}
+
+/* ── TEAM CARDS ── */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+.team-card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .15s;}
+.team-card:hover{box-shadow:var(--shadow-md);}
+/* Photo placeholder — replace with real <img> when photos are available */
+.team-photo{width:100%;aspect-ratio:3/4;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative;}
+.team-photo .ph-icon{width:56px;height:56px;border-radius:50%;background:var(--neutral-200);display:flex;align-items:center;justify-content:center;color:var(--neutral-600);}
+.team-photo .ph-label{font-size:12px;font-weight:600;color:var(--neutral-600);text-transform:uppercase;letter-spacing:.08em;text-align:center;padding:0 16px;}
+.team-photo .ph-flag{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--warning-amber);font-weight:600;background:rgba(217,119,6,.1);border:1px solid #F0D9B5;border-radius:var(--r-badge);padding:3px 10px;white-space:nowrap;}
+.team-body{padding:24px 24px 20px;display:flex;flex-direction:column;gap:10px;flex:1;}
+.team-body h3{font-size:20px;color:var(--primary-navy);margin:0;}
+.team-cred-badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--neutral-600);background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-badge);padding:4px 10px;width:fit-content;}
+.team-reg{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;color:var(--neutral-600);user-select:text;}
+.team-spec{font-size:15px;color:var(--neutral-600);line-height:1.55;}
+.team-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--neutral-200);display:flex;align-items:center;}
+.team-linkedin{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:var(--r-btn);color:var(--neutral-600);transition:color .15s,background .15s;}
+.team-linkedin:hover{color:var(--primary-deep-blue);background:var(--neutral-50);}
+.team-linkedin:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(27,58,107,.3);}
+
+/* ── COMPANY IDENTITY ── */
+.company-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:start;}
+.company-text p{font-size:16px;color:var(--neutral-900);line-height:1.75;}
+.company-text p + p{margin-top:18px;}
+.company-ref{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:32px;}
+.company-ref h3{font-size:20px;color:var(--primary-navy);margin-bottom:24px;}
+.company-ref .ref-row{display:flex;flex-direction:column;gap:16px;}
+.ref-item{display:flex;flex-direction:column;gap:4px;padding-bottom:16px;border-bottom:1px solid var(--neutral-200);}
+.ref-item:last-child{border-bottom:none;padding-bottom:0;}
+.ref-item .ref-label{font-size:12px;font-weight:600;color:var(--neutral-600);text-transform:uppercase;letter-spacing:.08em;}
+.ref-item .ref-value{font-size:15px;color:var(--neutral-900);line-height:1.5;}
+.ref-item .ref-value.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;user-select:text;}
+.ref-item .ref-placeholder{color:var(--warning-amber);font-style:italic;}
+
+/* ── WHY CHOOSE US ── */
+.why-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:32px;}
+.why-item{display:flex;align-items:flex-start;gap:20px;}
+.why-item .ic-wrap{width:48px;height:48px;border-radius:var(--r-btn);background:var(--neutral-50);border:1px solid var(--neutral-200);color:var(--primary-deep-blue);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.why-item .why-body{display:flex;flex-direction:column;gap:6px;}
+.why-item h3{font-size:18px;color:var(--primary-navy);}
+.why-item p{font-size:15px;color:var(--neutral-600);line-height:1.6;}
+
+/* ── FINAL CTA ── */
+.cta-banner{background:var(--primary-navy);padding:80px 0;text-align:center;}
+.cta-banner h2{color:#fff;margin-bottom:14px;}
+.cta-banner p{font-size:18px;color:rgba(255,255,255,.72);margin-bottom:36px;}
+.cta-banner .btn-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+
+/* ── FOOTER ── */
+.footer{background:var(--primary-navy);color:#C7D2E0;padding:64px 0 28px;border-top:1px solid rgba(255,255,255,.1);}
+.footer .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:36px;}
+.footer .fbrand{display:flex;align-items:center;gap:11px;margin-bottom:18px;}
+.footer .fbrand img{height:38px;width:38px;border-radius:7px;}
+.footer .fbrand .bn{font-weight:700;font-size:16px;color:#fff;}
+.footer .fbrand .bn span{color:var(--accent-green);}
+.footer h5{color:#fff;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px;}
+.footer ul{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:14px;}
+.footer ul a:hover{color:#fff;}
+.footer .mono{font-family:'JetBrains Mono',monospace;font-size:13px;color:#9FB0C4;}
+.footer .addr{font-size:14px;color:#9FB0C4;line-height:1.6;margin-top:4px;}
+.footer .btn-wa{margin-top:14px;}
+.footer .strip{border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding-top:22px;display:flex;flex-wrap:wrap;align-items:center;gap:16px;font-size:13px;color:#9FB0C4;}
+.footer .strip .pols{display:flex;gap:14px;}
+.footer .strip .pols a:hover{color:#fff;}
+.footer .strip .ssl{display:inline-flex;align-items:center;gap:6px;color:var(--accent-green);font-weight:600;margin-left:auto;}
+
+/* ── WHATSAPP + MOBILE BAR ── */
+.wa-float{position:fixed;right:24px;bottom:24px;z-index:90;display:inline-flex;align-items:center;gap:9px;background:var(--wa-green);color:#073b1e;font-weight:700;font-size:14px;padding:13px 18px;border-radius:var(--r-btn);box-shadow:var(--shadow-md);opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .2s,transform .2s,visibility .2s;}
+.wa-float.show{opacity:1;visibility:visible;transform:translateY(0);}
+.wa-float:hover{background:#1ebe5b;}
+.mobile-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:95;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(6px);border-top:1px solid var(--neutral-200);padding:8px 14px;gap:10px;align-items:center;transform:translateY(100%);transition:transform .2s ease;padding-bottom:max(8px,env(safe-area-inset-bottom));}
+.mobile-bar.show{transform:translateY(0);}
+.mobile-bar .btn{min-height:48px;flex:1;font-size:14px;padding:10px 12px;}
+
+/* ── RESPONSIVE ── */
+@media (max-width:1024px){
+  h1{font-size:32px;}
+  h2{font-size:28px;}
+  body{padding-bottom:72px;}
+  .nav .links{display:none;}
+  .hamburger{display:flex;}
+  .nav-cta{display:none;}
+  .mobile-bar{display:flex;}
+  .wa-float{bottom:84px;}
+  .team-grid{grid-template-columns:1fr;}
+  .company-grid{grid-template-columns:1fr;gap:32px;}
+  .mv-grid{grid-template-columns:1fr;}
+  .why-grid{grid-template-columns:1fr;}
+  .footer .cols{grid-template-columns:1fr 1fr;}
+  .footer .strip .ssl{margin-left:0;}
+}
+
+@media (max-width:1024px){
+  .page-hero{min-height:calc(100vh - 76px);padding:40px 0;}
+}
+@media (max-width:640px){
+  .container{padding:0 20px;}
+  .section{padding:48px 0;}
+  .nav .ph .ph-num{display:none;}
+  .page-hero{min-height:auto;padding:48px 0 56px;}
+  .page-hero .sub{font-size:17px;}
+  .page-hero .cta-row{flex-direction:column;}
+  .page-hero .cta-row .btn{width:100%;}
+  .mv-panel{padding:32px 24px;}
+  .cta-banner{padding:56px 0;}
+  .cta-banner .btn-row{flex-direction:column;}
+  .cta-banner .btn-row .btn{width:100%;}
+  .why-item{flex-direction:column;gap:14px;}
+  .footer .cols{grid-template-columns:1fr;}
+  .footer .strip{flex-direction:column;align-items:flex-start;}
+  .footer .strip .ssl{margin-left:0;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;animation:none !important;}
+}
+
+
+.legal-hero{padding:88px 0 56px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);}
+.legal-hero .crumbs{font-size:13px;color:var(--neutral-600);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.legal-hero .crumbs a{color:var(--neutral-600);} .legal-hero .crumbs a:hover{color:var(--accent-green);}
+.legal-hero .crumbs .sep{color:var(--neutral-300);}
+.legal-hero h1{max-width:24ch;margin:0 0 14px;}
+.legal-hero .meta{font-size:14px;color:var(--neutral-600);display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;}
+.legal-hero .meta .dot{width:3px;height:3px;background:var(--neutral-300);border-radius:50%;}
+.legal-hero .lead{margin-top:22px;font-size:18px;line-height:1.6;color:var(--neutral-900);max-width:62ch;}
+.legal-wrap{padding:64px 0 96px;}
+.legal-wrap .lw-grid{display:grid;grid-template-columns:240px 1fr;gap:64px;align-items:flex-start;}
+.toc{position:sticky;top:96px;display:flex;flex-direction:column;gap:2px;padding:18px 14px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-card);}
+.toc h6{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:4px 8px 10px;margin:0 0 6px;border-bottom:1px solid var(--neutral-200);}
+.toc a{font-size:14px;color:var(--neutral-900);padding:8px 10px;border-radius:var(--r-btn);line-height:1.4;}
+.toc a:hover{background:#fff;color:var(--accent-green);}
+.toc a.active{background:#fff;color:var(--primary-navy);font-weight:600;}
+.article{max-width:72ch;}
+.article section{margin-bottom:48px;scroll-margin-top:96px;}
+.article h2{font-size:28px;margin:0 0 18px;color:var(--primary-navy);}
+.article h3{font-size:18px;margin:24px 0 10px;color:var(--primary-navy);}
+.article p{font-size:16px;line-height:1.7;color:var(--neutral-900);margin:0 0 14px;max-width:65ch;}
+.article ul, .article ol{padding-left:22px;margin:8px 0 16px;display:flex;flex-direction:column;gap:8px;}
+.article ul li, .article ol li{font-size:16px;line-height:1.65;color:var(--neutral-900);}
+.article .callout{display:flex;gap:14px;padding:18px 20px;background:var(--neutral-50);border-left:3px solid var(--primary-deep-blue);border-radius:0 var(--r-btn) var(--r-btn) 0;margin:18px 0 24px;}
+.article .callout .ic{flex:0 0 auto;color:var(--primary-deep-blue);margin-top:2px;}
+.article .callout p{margin:0;font-size:15px;color:var(--neutral-900);}
+.article .callout.amber{border-left-color:var(--accent-amber);background:#FFFBEB;}
+.article .callout.amber .ic{color:var(--accent-amber);}
+.article a{color:var(--accent-green);font-weight:500;}
+.article a:hover{text-decoration:underline;}
+.article .ref{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--neutral-600);background:var(--neutral-50);padding:2px 6px;border-radius:4px;border:1px solid var(--neutral-200);}
+.article-cta{background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:28px;margin-top:48px;display:flex;flex-direction:column;gap:14px;align-items:flex-start;}
+.article-cta h3{font-size:20px;margin:0;color:var(--primary-navy);}
+.article-cta p{margin:0;font-size:15px;color:var(--neutral-600);}
+.article-cta .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
+.idx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.idx-card{display:flex;flex-direction:column;padding:24px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);transition:border-color .15s, box-shadow .15s;text-decoration:none;color:inherit;}
+.idx-card:hover{border-color:var(--primary-navy);box-shadow:var(--shadow-md);}
+.idx-card .ic-wrap{width:42px;height:42px;border-radius:var(--r-btn);background:var(--neutral-50);display:flex;align-items:center;justify-content:center;color:var(--primary-deep-blue);margin-bottom:14px;}
+.idx-card .tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--primary-deep-blue);margin-bottom:8px;}
+.idx-card h3{font-size:18px;margin:0 0 10px;color:var(--primary-navy);line-height:1.35;}
+.idx-card .desc{font-size:14px;color:var(--neutral-600);line-height:1.55;flex:1;margin:0 0 16px;}
+.idx-card .meta{font-size:13px;color:var(--neutral-600);display:flex;align-items:center;gap:14px;margin-top:auto;}
+.idx-card .meta .dot{width:3px;height:3px;background:var(--neutral-300);border-radius:50%;}
+.idx-card .more{display:inline-flex;align-items:center;gap:5px;font-size:14px;font-weight:600;color:var(--accent-green);margin-top:14px;}
+.idx-filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:32px;}
+.idx-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--r-btn);background:#fff;border:1px solid var(--neutral-200);color:var(--neutral-900);cursor:pointer;min-height:36px;border:1px solid var(--neutral-200);}
+.idx-chip:hover{border-color:var(--primary-navy);}
+.idx-chip.active{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+@media (max-width:900px){
+  .legal-wrap .lw-grid{grid-template-columns:1fr;gap:32px;}
+  .toc{position:static;}
+  .idx-grid{grid-template-columns:1fr;}
+}
+
+
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<!-- NAVBAR (components.md → Navbar) -->
+<header class="nav" id="nav">
+  <div class="container row">
+    <a class="brand" href="Homepage.html" aria-label="GST Notice Support home">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav class="links" aria-label="Primary">
+      <div class="has-drop">
+        <button aria-haspopup="true" aria-expanded="false">Services <i data-lucide="chevron-down" style="width:15px;height:15px"></i></button>
+        <div class="drop-menu" role="menu">
+          <a href="ASMT-10 Reply Service.html" role="menuitem"><strong>ASMT-10 Scrutiny Notice</strong><small>Section 61 — return discrepancies</small></a>
+          <a href="SCN Reply Service.html" role="menuitem"><strong>Show Cause Notice (SCN)</strong><small>DRC-01 / DRC-01A demands</small></a>
+          <a href="Commissioner Appeal Service.html" role="menuitem"><strong>Commissioner Appeal</strong><small>APL-01 first appeal</small></a>
+          <a href="GSTAT Appeal Service.html" role="menuitem"><strong>GSTAT Appeal</strong><small>APL-05 tribunal filing</small></a>
+        </div>
+      </div>
+      <a href="About.html">About</a>
+      <a href="FAQ.html">Resources</a>
+      <a href="Pricing.html">Pricing</a>
+    </nav>
+    <div class="right">
+      <a class="ph" href="tel:+919800000000" aria-label="Call +91 98000 00000">
+        <i data-lucide="phone" class="ic"></i><span class="ph-num">+91 98000 00000</span>
+      </a>
+      <a class="btn btn-secondary nav-cta" href="Contact.html#callback">Request Callback</a>
+      <a class="btn btn-primary nav-cta" href="Pricing.html">Book a Service</a>
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+        <i data-lucide="menu" style="width:24px;height:24px"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile drawer -->
+<div class="drawer-overlay" id="drawerOverlay" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Mobile menu" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="brand">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </span>
+    <button class="drawer-close" id="drawerClose" aria-label="Close menu">
+      <i data-lucide="x" style="width:24px;height:24px"></i>
+    </button>
+  </div>
+  <nav class="drawer-nav" aria-label="Mobile primary">
+    <button class="drawer-services-toggle" id="drawerServicesToggle" aria-expanded="false" aria-controls="drawerServicesMenu">
+      <span>Services</span>
+      <i data-lucide="chevron-right" class="drawer-services-chev" style="width:18px;height:18px"></i>
+    </button>
+    <div class="drawer-services-menu" id="drawerServicesMenu" aria-hidden="true">
+      <a href="ASMT-10 Reply Service.html">ASMT-10 Scrutiny Notice</a>
+      <a href="SCN Reply Service.html">Show Cause Notice (SCN)</a>
+      <a href="Commissioner Appeal Service.html">Commissioner Appeal</a>
+      <a href="GSTAT Appeal Service.html">GSTAT Appeal</a>
+    </div>
+    <span class="drawer-divider"></span>
+    <a href="About.html">About</a>
+    <a href="FAQ.html">Resources</a>
+    <a href="Pricing.html">Pricing</a>
+  </nav>
+  <div class="drawer-foot">
+    <a class="ph" href="tel:+919800000000">
+      <i data-lucide="phone" class="ic" style="width:17px;height:17px"></i>+91 98000 00000
+    </a>
+    <a class="btn btn-secondary btn-block" href="Contact.html#callback">Request Callback</a>
+    <a class="btn btn-primary btn-block" href="Pricing.html">Book a Service</a>
+  </div>
+</aside>
+<main id="main">
+<section class="legal-hero">
+  <div class="container">
+    <div class="crumbs">
+      <a href="Homepage.html">Home</a><span class="sep">/</span>
+      <span>GST Notice Guides</span>
+    </div>
+    <h1>GST Notice Guides</h1>
+    <div class="meta">
+      <span>Plain-English walkthroughs</span><span class="dot"></span>
+      <span>Written by ICAI &amp; Bar Council professionals</span><span class="dot"></span>
+      <span>Updated for FY 2025–26</span>
+    </div>
+    <p class="lead">Step-by-step guides covering the most common GST notices and appeal procedures — what to read first, what to gather, and what to file.</p>
+  </div>
+</section>
+<section class="section bg-white">
+  <div class="container">
+    <div class="idx-filters" role="tablist" aria-label="Guide categories">
+      <button class="idx-chip active" data-cat="all">All</button>
+      <button class="idx-chip" data-cat="scrutiny">Scrutiny &amp; SCN</button>
+      <button class="idx-chip" data-cat="appeal">Appeals</button>
+      <button class="idx-chip" data-cat="process">Process &amp; Filing</button>
+    </div>
+    <div class="idx-grid" id="guidesGrid">
+      <div data-cat="scrutiny"><a class="idx-card" href="ASMT-10 Reply Service.html">
+    <div class="ic-wrap"><i data-lucide="file-search" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>Section 61</span>
+    <h3>ASMT-10 Scrutiny Notice — full reply walkthrough</h3>
+    <p class="desc">What the officer is looking at, what your reply must address, and the 30-day clock you cannot miss.</p>
+    <div class="meta"><span>14 min read</span><span class="dot"></span><span>Updated Mar 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+      <div data-cat="scrutiny"><a class="idx-card" href="SCN Reply Service.html">
+    <div class="ic-wrap"><i data-lucide="file-warning" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>DRC-01 / DRC-01A</span>
+    <h3>Show Cause Notice — Section 73 vs 74 strategy</h3>
+    <p class="desc">Choosing the right defence depending on whether the SCN alleges fraud, suppression, or just non-disclosure.</p>
+    <div class="meta"><span>18 min read</span><span class="dot"></span><span>Updated Feb 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+      <div data-cat="appeal"><a class="idx-card" href="Commissioner Appeal Service.html">
+    <div class="ic-wrap"><i data-lucide="gavel" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>APL-01</span>
+    <h3>First Appeal before the Commissioner — preparing the bundle</h3>
+    <p class="desc">Timelines, the 10% pre-deposit, grounds of appeal, and what makes a strong condonation request.</p>
+    <div class="meta"><span>16 min read</span><span class="dot"></span><span>Updated Mar 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+      <div data-cat="appeal"><a class="idx-card" href="GSTAT Appeal Service.html">
+    <div class="ic-wrap"><i data-lucide="landmark" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>APL-05</span>
+    <h3>GSTAT Appeal — what changes at the tribunal</h3>
+    <p class="desc">The 20% pre-deposit, evidentiary standards, and oral hearing rights at the Appellate Tribunal.</p>
+    <div class="meta"><span>20 min read</span><span class="dot"></span><span>Updated Feb 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+      <div data-cat="process"><a class="idx-card" href="FAQ.html">
+    <div class="ic-wrap"><i data-lucide="monitor" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>Portal</span>
+    <h3>GST portal — uploads, attachments, and acknowledgements</h3>
+    <p class="desc">Common DSC/EVC errors, file size limits, and reading ARN and acknowledgement formats.</p>
+    <div class="meta"><span>9 min read</span><span class="dot"></span><span>Updated Mar 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+      <div data-cat="process"><a class="idx-card" href="Pricing.html">
+    <div class="ic-wrap"><i data-lucide="clipboard-list" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>Procedure</span>
+    <h3>What does a typical engagement cost?</h3>
+    <p class="desc">Fixed professional fees, government fees, pre-deposits, and what you should budget for end-to-end.</p>
+    <div class="meta"><span>7 min read</span><span class="dot"></span><span>Updated Mar 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+      <div data-cat="scrutiny"><a class="idx-card" href="ASMT-10 Reply Service.html">
+    <div class="ic-wrap"><i data-lucide="wallet" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>ITC</span>
+    <h3>ITC mismatch in GSTR-2A vs 3B — defending the credit</h3>
+    <p class="desc">How to reconcile supplier-side defaults, Rule 36(4), and what evidence the department typically accepts.</p>
+    <div class="meta"><span>15 min read</span><span class="dot"></span><span>Updated Jan 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+      <div data-cat="appeal"><a class="idx-card" href="Commissioner Appeal Service.html">
+    <div class="ic-wrap"><i data-lucide="clock" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>Limitation</span>
+    <h3>Missed the appeal window? — condonation strategy</h3>
+    <p class="desc">When the Commissioner can condone delay under Section 107(4), and the affidavit you should attach.</p>
+    <div class="meta"><span>11 min read</span><span class="dot"></span><span>Updated Feb 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+      <div data-cat="process"><a class="idx-card" href="FAQ.html">
+    <div class="ic-wrap"><i data-lucide="shield-check" style="width:22px;height:22px"></i></div>
+    <span class="tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent-green);display:inline-block"></span>Compliance</span>
+    <h3>Engagement letter, fees, and data handling — what to expect</h3>
+    <p class="desc">How we onboard a case, how documents are kept confidential, and how invoices and receipts work.</p>
+    <div class="meta"><span>8 min read</span><span class="dot"></span><span>Updated Mar 2026</span></div>
+    <span class="more">Read guide <i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+  </a></div>
+    </div>
+
+    <div class="article-cta" style="margin-top:64px;">
+      <h3>Have a notice in front of you?</h3>
+      <p>Skip the reading — upload your notice and a qualified professional will revert within 24 hours.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="Pricing.html"><i data-lucide="upload-cloud" class="ic"></i>Upload Your Notice</a>
+        <a class="btn btn-secondary" href="Contact.html#callback">Request a Callback</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="footer">
+  <div class="container">
+    <div class="cols">
+      <div>
+        <div class="fbrand"><img src="assets/logo.png" alt="" /><span class="bn">GST<span>Notice</span>Support</span></div>
+        <div>GST Notice Support Pvt. Ltd.</div>
+        <div class="mono" style="margin-top:10px">[PLACEHOLDER — CIN]</div>
+        <div class="mono">[PLACEHOLDER — GSTIN]</div>
+        <div class="addr">[PLACEHOLDER — Full registered address]</div>
+      </div>
+      <div>
+        <h5>Services</h5>
+        <ul>
+          <li><a href="ASMT-10 Reply Service.html">ASMT-10 Scrutiny Notice</a></li>
+          <li><a href="SCN Reply Service.html">Show Cause Notice (SCN)</a></li>
+          <li><a href="Commissioner Appeal Service.html">Commissioner Appeal</a></li>
+          <li><a href="GSTAT Appeal Service.html">GSTAT Appeal</a></li>
+          <li><a href="Pricing.html">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="GST Notice Guides.html">GST Notice Guides</a></li>
+          <li><a href="Blog.html">Blog</a></li>
+          <li><a href="FAQ.html">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact</h5>
+        <ul>
+          <li><a href="tel:+919800000000"><i data-lucide="phone" style="width:14px;height:14px;display:inline;vertical-align:-2px;margin-right:6px;color:var(--accent-green)"></i>+91 98000 00000</a></li>
+          <li><a href="mailto:hello@gstnoticesupport.in">hello@gstnoticesupport.in</a></li>
+          <li class="mono" style="margin-top:6px">Grievance Officer</li>
+          <li>Ananya Rao · <a href="mailto:grievance@gstnoticesupport.in">grievance@gstnoticesupport.in</a></li>
+        </ul>
+        <a class="btn btn-wa" href="https://wa.me/919800000000" target="_blank" rel="noopener">
+          <i data-lucide="message-circle" class="ic"></i>Chat on WhatsApp
+        </a>
+      </div>
+    </div>
+    <div class="strip">
+      <div class="pols">
+        <a href="Privacy Policy.html">Privacy Policy</a>
+        <span aria-hidden="true">|</span>
+        <a href="Terms of Service.html">Terms</a>
+        <span aria-hidden="true">|</span>
+        <a href="Refund Policy.html">Refund Policy</a>
+      </div>
+      <span class="ssl"><i data-lucide="lock" style="width:14px;height:14px"></i>Secured · 256-bit SSL</span>
+      <div>© 2026 GST Notice Support Pvt. Ltd. All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+<!-- WhatsApp float -->
+<a class="wa-float" id="waFloat" href="https://wa.me/919800000000" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <i data-lucide="message-circle" style="width:18px;height:18px"></i>WhatsApp
+</a>
+
+<!-- Sticky mobile bottom bar -->
+<div class="mobile-bar" id="mobileBar" aria-label="Quick actions">
+  <a class="btn btn-secondary" href="tel:+919800000000"><i data-lucide="phone" class="ic"></i>Call Now</a>
+  <a class="btn btn-primary" href="Pricing.html">Book a Service</a>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // Nav shrink + scroll affordances
+  const nav = document.getElementById('nav');
+  const wa  = document.getElementById('waFloat');
+  const bar = document.getElementById('mobileBar');
+  function onScroll(){
+    const y = window.scrollY;
+    nav.classList.toggle('scrolled', y > 12);
+    const show = y > 240;
+    wa.classList.toggle('show', show);
+    bar.classList.toggle('show', show);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // Mobile drawer
+  const hamburger     = document.getElementById('hamburger');
+  const drawer        = document.getElementById('drawer');
+  const drawerOverlay = document.getElementById('drawerOverlay');
+  const drawerClose   = document.getElementById('drawerClose');
+
+  function openDrawer(){
+    drawerOverlay.hidden = false;
+    requestAnimationFrame(() => {
+      drawer.classList.add('open');
+      drawerOverlay.classList.add('show');
+    });
+    hamburger.setAttribute('aria-expanded','true');
+    drawer.setAttribute('aria-hidden','false');
+    document.body.classList.add('drawer-open');
+    drawerClose.focus();
+  }
+  function closeDrawer(){
+    drawer.classList.remove('open');
+    drawerOverlay.classList.remove('show');
+    hamburger.setAttribute('aria-expanded','false');
+    drawer.setAttribute('aria-hidden','true');
+    document.body.classList.remove('drawer-open');
+    setTimeout(() => { drawerOverlay.hidden = true; }, 250);
+    hamburger.focus();
+  }
+  hamburger.addEventListener('click', openDrawer);
+  drawerClose.addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+  });
+
+  // Drawer services collapsible
+  const servicesToggle = document.getElementById('drawerServicesToggle');
+  const servicesMenu   = document.getElementById('drawerServicesMenu');
+  servicesToggle.addEventListener('click', () => {
+    const expanded = servicesToggle.getAttribute('aria-expanded') === 'true';
+    servicesToggle.setAttribute('aria-expanded', String(!expanded));
+    servicesMenu.classList.toggle('open', !expanded);
+    servicesMenu.setAttribute('aria-hidden', String(expanded));
+  });
+</script>
+<script>
+  const chips = document.querySelectorAll('.idx-chip');
+  const cards = document.querySelectorAll('#guidesGrid > [data-cat], #blogGrid > [data-cat]');
+  chips.forEach(c => c.addEventListener('click', () => {
+    chips.forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    const cat = c.dataset.cat;
+    cards.forEach(card => {
+      card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+    });
+  }));
+</script>
+</body>
+</html>

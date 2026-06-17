@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Log in · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     AUTH CARD SHELL — inherited
+     ============================================================ */
+  html, body { min-height: 100%; }
+  body { background: var(--neutral-50); display: flex; flex-direction: column; }
+
+  .auth-page {
+    flex: 1; display: flex; flex-direction: column;
+    padding: 32px 24px 48px;
+    min-height: 100vh;
+  }
+
+  .auth-top {
+    width: 100%; max-width: 1080px; margin: 0 auto 40px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .auth-top .brand { display: inline-flex; align-items: center; gap: 11px; }
+  .auth-top .brand img { height: 36px; width: 36px; border-radius: 7px; border: 1px solid var(--neutral-200); object-fit: cover; }
+  .auth-top .brand .bn { font-weight: 700; font-size: 16px; color: var(--primary-navy); letter-spacing: -.01em; }
+  .auth-top .brand .bn span { color: var(--accent-green); }
+  .auth-top .back {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 14px; font-weight: 500; color: var(--neutral-600);
+    padding: 8px 4px; border-radius: var(--r-btn);
+  }
+  .auth-top .back:hover { color: var(--primary-navy); }
+  .auth-top .back:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.3); }
+
+  .auth-wrap {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    width: 100%; max-width: 480px; margin: 0 auto; gap: 20px;
+  }
+
+  .auth-card {
+    width: 100%; background: #fff;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-sm);
+    padding: 40px;
+  }
+  .auth-card .wordmark {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 24px;
+  }
+  .auth-card .wordmark img { height: 32px; width: 32px; border-radius: 6px; border: 1px solid var(--neutral-200); }
+  .auth-card .wordmark .bn { font-weight: 700; font-size: 15px; color: var(--primary-navy); letter-spacing: -.01em; }
+  .auth-card .wordmark .bn span { color: var(--accent-green); }
+
+  .auth-card h2 { font-size: 28px; line-height: 1.2; letter-spacing: -.01em; }
+  .auth-card .subhead {
+    font-size: 16px; color: var(--neutral-600); line-height: 1.55;
+    margin-top: 10px; margin-bottom: 32px;
+  }
+
+  /* Trust strip */
+  .trust-strip {
+    width: 100%; display: flex; flex-direction: column; align-items: center;
+    gap: 8px; margin-top: 8px; padding: 0 8px; text-align: center;
+  }
+  .trust-strip .row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 8px 18px; font-size: 13px; color: var(--neutral-600); line-height: 1.5;
+  }
+  .trust-strip .row .item { display: inline-flex; align-items: center; gap: 6px; }
+  .trust-strip .row .item .ic { width: 14px; height: 14px; color: var(--accent-green); flex: 0 0 auto; }
+  .trust-strip .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: var(--neutral-600); }
+  .trust-strip .pols { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font-size: 13px; color: var(--neutral-600); }
+  .trust-strip .pols a { color: var(--neutral-600); }
+  .trust-strip .pols a:hover { color: var(--primary-navy); }
+  .trust-strip .copy { font-size: 12px; color: var(--neutral-600); margin-top: 2px; }
+
+  /* Submit spinner */
+  .btn .spinner {
+    width: 18px; height: 18px; display: none;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  .btn[data-loading="true"] .label { display: none; }
+  .btn[data-loading="true"] .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .btn[data-loading="true"] .spinner { animation: none; border-top-color: rgba(255,255,255,.6); }
+  }
+
+  .auth-foot {
+    margin-top: 24px; text-align: center;
+    font-size: 14px; color: var(--neutral-600);
+  }
+  .auth-foot a {
+    color: var(--accent-green); font-weight: 600;
+    text-decoration: underline; text-underline-offset: 2px; padding: 4px 2px;
+  }
+  .auth-foot a:hover { color: var(--accent-green-hover); }
+  .auth-foot a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.3); border-radius: 4px; }
+
+  /* ============================================================
+     FORM FIELDS
+     ============================================================ */
+  .login-form { display: flex; flex-direction: column; gap: 20px; }
+
+  .field { display: flex; flex-direction: column; gap: 7px; }
+
+  /* Label row: label left, "Forgot password?" right */
+  .field .label-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  }
+  .field .label-row label { font-size: 14px; font-weight: 500; color: var(--primary-navy); line-height: 1.4; }
+  .field .label-row .forgot {
+    font-size: 13px; font-weight: 600; color: var(--accent-green);
+    text-decoration: underline; text-underline-offset: 2px;
+    white-space: nowrap; flex-shrink: 0;
+    padding: 2px 0;
+  }
+  .field .label-row .forgot:hover { color: var(--accent-green-hover); }
+  .field .label-row .forgot:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.3); border-radius: 4px; }
+
+  .field .input-wrap { position: relative; }
+  .field .input.has-toggle { padding-right: 48px; }
+
+  /* Password toggle */
+  .pw-toggle {
+    position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+    width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; border: none; cursor: pointer; color: var(--neutral-600);
+    border-radius: var(--r-btn);
+  }
+  .pw-toggle:hover { color: var(--primary-navy); }
+  .pw-toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.3); }
+  .pw-toggle svg { width: 18px; height: 18px; }
+  .pw-toggle .ic-hide { display: none; }
+  .pw-toggle[aria-pressed="true"] .ic-show { display: none; }
+  .pw-toggle[aria-pressed="true"] .ic-hide { display: block; }
+
+  /* ============================================================
+     BANNERS — generic (no field-level leak per WCAG / security)
+     All error states surface here, NOT on individual fields.
+     ============================================================ */
+  .auth-banner {
+    display: none;
+    align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--r-btn);
+    margin-bottom: 4px;
+    font-size: 14px; line-height: 1.5; color: var(--neutral-900);
+  }
+  .auth-banner.show { display: flex; }
+  .auth-banner .ic { width: 18px; height: 18px; flex: 0 0 auto; margin-top: 2px; }
+
+  /* Error (wrong creds, rate-limit) */
+  .auth-banner.banner-error {
+    background: #FFF8EF; border: 1px solid #F0D9B5;
+  }
+  .auth-banner.banner-error .ic { color: var(--warning-amber); }
+
+  /* Unverified email — informational, not amber */
+  .auth-banner.banner-info {
+    background: var(--neutral-50); border: 1px solid var(--neutral-200);
+  }
+  .auth-banner.banner-info .ic { color: var(--primary-deep-blue); }
+  .auth-banner .banner-action {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 6px;
+    font-weight: 600; color: var(--accent-green);
+    text-decoration: underline; text-underline-offset: 2px;
+    background: none; border: none; cursor: pointer; font-size: 14px;
+    padding: 2px 0; font-family: inherit;
+  }
+  .auth-banner .banner-action:hover { color: var(--accent-green-hover); }
+  .auth-banner .banner-action:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.3); border-radius: 4px; }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 640px) {
+    .auth-page { padding: 20px 16px 32px; }
+    .auth-top { margin-bottom: 24px; }
+    .auth-top .back .lbl { display: none; }
+    .auth-card { padding: 28px 22px; border-radius: 12px; }
+    .auth-card h2 { font-size: 24px; }
+    .auth-card .subhead { font-size: 15px; margin-bottom: 24px; }
+    .login-form { gap: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="auth-page">
+
+  <!-- TOP BAR -->
+  <header class="auth-top" data-screen-label="Login">
+    <a class="brand" href="Homepage.html" aria-label="GST Notice Support home">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <a class="back" href="Homepage.html">
+      <i data-lucide="arrow-left" style="width:15px;height:15px" aria-hidden="true"></i>
+      <span class="lbl">Back to home</span>
+    </a>
+  </header>
+
+  <main id="main" class="auth-wrap">
+
+    <!-- ============================================================
+         AUTH CARD — Login
+         ============================================================ -->
+    <section class="auth-card" aria-labelledby="loginHeading">
+
+      <!-- Wordmark -->
+      <div class="wordmark" aria-hidden="true">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </div>
+
+      <h2 id="loginHeading">Welcome back</h2>
+      <p class="subhead">Log in to track and manage your GST notice responses.</p>
+
+      <!-- ── Error banner — generic, no field attribution (security) ──
+           Announced via aria-live="assertive"; NOT wired to any
+           specific input via aria-describedby to avoid disclosing
+           which credential was wrong. -->
+      <div
+        class="auth-banner banner-error"
+        id="bannerError"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+        <span id="bannerErrorMsg">Email or password is incorrect.</span>
+      </div>
+
+      <!-- ── Unverified email banner ── -->
+      <div
+        class="auth-banner banner-info"
+        id="bannerUnverified"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <i data-lucide="mail" class="ic" aria-hidden="true"></i>
+        <div>
+          <div>Your email address hasn't been verified yet.</div>
+          <button
+            type="button"
+            class="banner-action"
+            id="resendVerifyBtn"
+            aria-label="Resend verification code to your email"
+          >
+            <i data-lucide="send" style="width:14px;height:14px" aria-hidden="true"></i>
+            Resend verification code
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Rate-limit banner ── -->
+      <div
+        class="auth-banner banner-error"
+        id="bannerRateLimit"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <i data-lucide="lock" class="ic" aria-hidden="true"></i>
+        <span>Too many attempts. Try again in a few minutes.</span>
+      </div>
+
+      <form class="login-form" id="loginForm" novalidate>
+
+        <!-- Email Address -->
+        <div class="field" id="field-email">
+          <label for="email">Email Address</label>
+          <input
+            class="input"
+            type="email"
+            id="email"
+            name="email"
+            autocomplete="email"
+            inputmode="email"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="field" id="field-password">
+          <div class="label-row">
+            <label for="password">Password</label>
+            <a class="forgot" href="Forgot Password.html" id="forgotLink">Forgot password?</a>
+          </div>
+          <div class="input-wrap">
+            <input
+              class="input has-toggle"
+              type="password"
+              id="password"
+              name="password"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="pw-toggle"
+              id="pwToggle"
+              aria-label="Show password"
+              aria-pressed="false"
+              aria-controls="password"
+            >
+              <i data-lucide="eye" class="ic-show" aria-hidden="true"></i>
+              <i data-lucide="eye-off" class="ic-hide" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          class="btn btn-primary btn-block"
+          id="submitBtn"
+          style="margin-top:4px;"
+        >
+          <span class="label">Log In</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+
+      </form>
+
+      <p class="auth-foot">
+        New here? <a href="Signup.html">Create an account</a>
+      </p>
+
+    </section>
+
+    <!-- TRUST STRIP -->
+    <aside class="trust-strip" aria-label="Legal identity">
+      <div class="row">
+        <span class="item">
+          <i data-lucide="shield-check" class="ic" aria-hidden="true"></i>
+          SSL Secured · 256-bit encryption
+        </span>
+        <span class="item">GST Notice Support Pvt. Ltd.</span>
+      </div>
+      <div class="row">
+        <span class="mono">CIN: U74999KA2024PTC000000</span>
+        <span class="mono">GSTIN: 29ABCDE1234F1Z5</span>
+      </div>
+      <div class="pols">
+        <a href="Privacy Policy.html">Privacy Policy</a>
+        <span aria-hidden="true">·</span>
+        <a href="Terms of Service.html">Terms</a>
+        <span aria-hidden="true">·</span>
+        <a href="Refund Policy.html">Refund Policy</a>
+      </div>
+      <div class="copy">© 2026 GST Notice Support Pvt. Ltd.</div>
+    </aside>
+
+  </main>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <path d="M50 24 L72 32 V52 C72 66 62 75 50 79 C38 75 28 66 28 52 V32 Z" fill="none" stroke="#0B8B4E" stroke-width="3"/>
+    <rect x="44" y="46" width="12" height="10" rx="2" fill="#fff" opacity=".9"/>
+    <path d="M50 38 L50 48" stroke="#0B8B4E" stroke-width="3" stroke-linecap="round"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  /* ============================================================
+     DOM REFS
+     ============================================================ */
+  const form            = document.getElementById('loginForm');
+  const emailInput      = document.getElementById('email');
+  const passwordInput   = document.getElementById('password');
+  const submitBtn       = document.getElementById('submitBtn');
+  const pwToggle        = document.getElementById('pwToggle');
+  const bannerError     = document.getElementById('bannerError');
+  const bannerErrorMsg  = document.getElementById('bannerErrorMsg');
+  const bannerUnverified= document.getElementById('bannerUnverified');
+  const bannerRateLimit = document.getElementById('bannerRateLimit');
+  const resendVerifyBtn = document.getElementById('resendVerifyBtn');
+
+  /* ============================================================
+     DEMO CREDENTIALS
+     email                  password      → outcome
+     ─────────────────────────────────────────────────────────────
+     user@demo.in           demo1234      → success (dashboard)
+     unverified@demo.in     (any)         → unverified banner
+     locked@demo.in         (any)         → rate-limit banner
+     (anything else)        (any)         → generic error
+     ============================================================ */
+
+  /* ============================================================
+     HELPERS
+     ============================================================ */
+  function hideBanners() {
+    bannerError.classList.remove('show');
+    bannerUnverified.classList.remove('show');
+    bannerRateLimit.classList.remove('show');
+  }
+
+  /* ============================================================
+     PASSWORD SHOW / HIDE
+     ============================================================ */
+  pwToggle.addEventListener('click', () => {
+    const showing = passwordInput.type === 'text';
+    passwordInput.type = showing ? 'password' : 'text';
+    pwToggle.setAttribute('aria-pressed', String(!showing));
+    pwToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  });
+
+  /* ============================================================
+     RESEND VERIFY → OTP screen
+     ============================================================ */
+  resendVerifyBtn.addEventListener('click', () => {
+    window.location.href = 'OTP Verification.html';
+  });
+
+  /* ============================================================
+     FORM SUBMIT
+     ============================================================ */
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    hideBanners();
+
+    const email    = emailInput.value.trim().toLowerCase();
+    const password = passwordInput.value;
+
+    // Basic client-side presence check only — no field-level messages
+    // (we must not disclose which field is wrong to the user)
+    if (!email || !password) {
+      bannerErrorMsg.textContent = 'Please enter your email address and password.';
+      bannerError.classList.add('show');
+      if (!email) emailInput.focus();
+      else passwordInput.focus();
+      return;
+    }
+
+    // Loading
+    submitBtn.dataset.loading = 'true';
+    submitBtn.disabled = true;
+
+    // Simulate server (850ms)
+    setTimeout(() => {
+      submitBtn.dataset.loading = 'false';
+      submitBtn.disabled = false;
+
+      if (email === 'locked@demo.in') {
+        bannerRateLimit.classList.add('show');
+        emailInput.focus();
+
+      } else if (email === 'unverified@demo.in') {
+        bannerUnverified.classList.add('show');
+        // Don't focus email — direct attention to banner action
+        resendVerifyBtn.focus();
+
+      } else if (email === 'admin@demo.in' && password === 'admin1234') {
+        if(typeof GNS!=='undefined') GNS.setSession({isLoggedIn:true,type:'admin',email:'admin@demo.in',name:'Admin'});
+        window.location.href = 'Admin Overview.html';
+
+      } else if (email === 'user@demo.in' && password === 'demo1234') {
+        if(typeof GNS!=='undefined') GNS.setSession({isLoggedIn:true,type:'user',email:'user@demo.in',name:'Rajesh Kumar'});
+        window.location.href = 'Dashboard Home.html';
+
+      } else {
+        // Generic incorrect credentials — no field attribution
+        bannerErrorMsg.textContent = 'Email or password is incorrect.';
+        bannerError.classList.add('show');
+        // Focus email (conventional UX) without indicating which was wrong
+        emailInput.focus();
+      }
+    }, 850);
+  });
+
+  // Clear banners on field interaction (fresh attempt signals)
+  [emailInput, passwordInput].forEach(el => {
+    el.addEventListener('input', () => hideBanners());
+  });
+</script>
+<script src="js/app-state.js"></script>
+</body>
+</html>

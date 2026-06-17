@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Payment History · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ================================================================
+   APP SHELL — identical to Dashboard Home shell
+   components.md → App Shell (sidebar)
+   ================================================================ */
+:root { --sidebar-w: 264px; --header-h: 64px; --tab-bar-h: 64px; }
+html, body { min-height: 100%; }
+body { background: var(--neutral-50); }
+.app { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w); flex: 0 0 var(--sidebar-w);
+  background: #fff; border-right: 1px solid var(--neutral-200);
+  display: flex; flex-direction: column;
+  position: fixed; inset: 0 auto 0 0; height: 100vh; z-index: 60;
+}
+.sidebar .brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: var(--header-h); padding: 0 20px; flex: 0 0 auto;
+  border-bottom: 1px solid var(--neutral-200);
+}
+.sidebar .brand img { height: 30px; width: 30px; border-radius: 6px; border: 1px solid var(--neutral-200); object-fit: cover; }
+.sidebar .brand .bn { font-weight: 700; font-size: 15px; color: var(--primary-navy); letter-spacing: -.01em; }
+.sidebar .brand .bn span { color: var(--accent-green); }
+
+.sidebar nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px; border-radius: var(--r-btn);
+  font-size: 15px; font-weight: 500; color: var(--neutral-900);
+  min-height: 44px; line-height: 1.2;
+  transition: background .15s, color .15s;
+}
+.nav-link .ic { width: 20px; height: 20px; flex: 0 0 auto; color: var(--neutral-600); transition: color .15s; }
+.nav-link:hover { background: var(--neutral-50); }
+.nav-link:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.35); }
+.nav-link[aria-current="page"] { background: rgba(11,139,78,.08); color: var(--primary-navy); font-weight: 600; }
+.nav-link[aria-current="page"] .ic { color: var(--accent-green); }
+
+.sidebar .side-foot { padding: 12px; border-top: 1px solid var(--neutral-200); }
+.side-help {
+  display: flex; align-items: center; gap: 12px; padding: 11px 12px;
+  border-radius: var(--r-btn); font-size: 14px; font-weight: 500;
+  color: var(--neutral-600); min-height: 44px;
+}
+.side-help .ic { width: 18px; height: 18px; color: var(--neutral-600); }
+.side-help:hover { background: var(--neutral-50); color: var(--primary-navy); }
+.side-help:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.35); }
+
+/* ── Main column ────────────────────────────────────────────── */
+.main { flex: 1; margin-left: var(--sidebar-w); display: flex; flex-direction: column; min-width: 0; }
+
+/* ── Topbar ─────────────────────────────────────────────────── */
+.topbar {
+  height: var(--header-h); flex: 0 0 auto;
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,.92); backdrop-filter: saturate(180%) blur(6px);
+  border-bottom: 1px solid var(--neutral-200);
+  display: flex; align-items: center; gap: 16px; padding: 0 32px;
+}
+.topbar .hamburger {
+  display: none; width: 44px; height: 44px;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--neutral-200); border-radius: var(--r-btn);
+  background: #fff; cursor: pointer; color: var(--primary-navy);
+}
+.topbar .hamburger:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.35); }
+.topbar .mobile-brand { display: none; align-items: center; gap: 9px; }
+.topbar .mobile-brand img { height: 28px; width: 28px; border-radius: 6px; border: 1px solid var(--neutral-200); }
+.topbar .mobile-brand .bn { font-weight: 700; font-size: 14px; color: var(--primary-navy); }
+.topbar .mobile-brand .bn span { color: var(--accent-green); }
+.topbar .spacer { flex: 1; }
+.topbar .tap-call {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 14px; min-height: 44px;
+  border: 1px solid var(--neutral-200); border-radius: var(--r-btn);
+  font-size: 14px; font-weight: 600; color: var(--primary-navy); background: #fff;
+}
+.topbar .tap-call .ic { width: 16px; height: 16px; color: var(--accent-green); }
+.topbar .tap-call:hover { border-color: var(--primary-navy); }
+.topbar .tap-call:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.35); }
+.topbar .tap-call .num { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }
+.acct { position: relative; }
+.acct-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 6px 10px 6px 6px; min-height: 44px;
+  border: 1px solid var(--neutral-200); border-radius: var(--r-btn);
+  background: #fff; cursor: pointer;
+}
+.acct-btn:hover { border-color: var(--primary-navy); }
+.acct-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.35); }
+.acct-avatar {
+  width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--primary-navy); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+}
+.acct-name { font-size: 14px; font-weight: 600; color: var(--primary-navy); line-height: 1.2; }
+.acct-btn .chev { width: 16px; height: 16px; color: var(--neutral-600); }
+.acct-menu {
+  display: none; position: absolute; right: 0; top: calc(100% + 8px);
+  min-width: 200px; background: #fff;
+  border: 1px solid var(--neutral-200); border-radius: var(--r-card);
+  box-shadow: var(--shadow-md); padding: 6px; z-index: 70;
+}
+.acct-menu.open { display: block; }
+.acct-menu a {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: var(--r-btn); font-size: 14px; font-weight: 500;
+  color: var(--neutral-900); min-height: 44px;
+}
+.acct-menu a .ic { width: 17px; height: 17px; color: var(--neutral-600); }
+.acct-menu a:hover { background: var(--neutral-50); }
+.acct-menu a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.35); }
+.acct-menu .divider { height: 1px; background: var(--neutral-200); margin: 6px 4px; }
+
+/* ── Scrim ───────────────────────────────────────────────────── */
+.scrim { display: none; position: fixed; inset: 0; background: rgba(10,37,64,.4); z-index: 55; }
+.scrim.open { display: block; }
+
+/* ── Content area ────────────────────────────────────────────── */
+.content { flex: 1; padding: 32px; }
+.content-inner { max-width: 1100px; margin: 0 auto; }
+
+/* ── Screen-reader only ──────────────────────────────────────── */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ================================================================
+   SERVICE STATUS BADGE  (components.md → Service Status Badge)
+   ================================================================ */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto;
+  font-size: 14px; font-weight: 500; line-height: 1.3;
+  padding: 4px 10px; min-height: 24px; border-radius: var(--r-badge);
+  white-space: nowrap;
+}
+.status-badge .ic { width: 16px; height: 16px; flex: 0 0 auto; }
+.status-badge.s-upload  { background: var(--neutral-50);        color: var(--neutral-900); border: 1px solid var(--neutral-200); }
+.status-badge.s-review  { background: var(--primary-deep-blue); color: #fff; }
+.status-badge.s-draft   { background: var(--warning-amber);     color: var(--neutral-900); }
+.status-badge.s-filing  { background: var(--primary-navy);      color: #fff; }
+.status-badge.s-complete{ background: var(--accent-green);      color: #fff; }
+.status-badge.s-cancelled{ background: var(--neutral-200);      color: var(--neutral-600); }
+
+/* ================================================================
+   PAGE HEADER
+   ================================================================ */
+.page-head {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 32px;
+}
+.page-head h2 { font-size: 36px; letter-spacing: -.01em; line-height: 1.15; }
+
+/* ================================================================
+   PAYMENT TABLE (≥lg)
+   ================================================================ */
+.payment-table-wrap {
+  background: #fff;
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+/* Head */
+.payment-table thead tr {
+  border-bottom: 1px solid var(--neutral-200);
+  background: var(--neutral-50);
+}
+.payment-table th {
+  padding: 13px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--neutral-600);
+  text-align: left;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.payment-table th.col-receipt,
+.payment-table th.col-view { text-align: center; }
+
+/* Body rows */
+.payment-table tbody tr {
+  border-bottom: 1px solid var(--neutral-200);
+  transition: background .12s;
+  min-height: 56px;
+}
+.payment-table tbody tr:last-child { border-bottom: none; }
+.payment-table tbody tr:hover { background: var(--neutral-50); }
+
+.payment-table td {
+  padding: 16px;
+  vertical-align: middle;
+}
+
+/* Column-specific */
+.col-date  { color: var(--neutral-600); font-size: 14px; white-space: nowrap; }
+.col-service { color: var(--primary-navy); font-weight: 600; white-space: nowrap; }
+.col-ref   { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: var(--neutral-600); white-space: nowrap; }
+.col-amount{ color: var(--primary-navy); font-weight: 600; white-space: nowrap; }
+.col-status{ white-space: nowrap; }
+.col-receipt{ text-align: center; }
+.col-view  { text-align: center; }
+
+/* ── Receipt icon (table) ────────────────────────────────────── */
+.receipt-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.receipt-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-btn);
+  transition: background .15s, color .15s;
+}
+.receipt-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+.receipt-available {
+  color: var(--accent-green);
+  cursor: pointer;
+}
+.receipt-available:hover { background: rgba(11,139,78,.08); }
+
+.receipt-disabled {
+  color: var(--neutral-200);
+  cursor: not-allowed;
+}
+/* Tooltip */
+.receipt-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--neutral-900);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+  z-index: 10;
+}
+.receipt-wrap:hover .receipt-tooltip,
+.receipt-wrap:focus-within .receipt-tooltip { opacity: 1; }
+
+/* ── View chevron (table) ────────────────────────────────────── */
+.view-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-btn);
+  color: var(--neutral-600);
+  transition: color .15s, background .15s;
+}
+.view-link:hover { background: var(--neutral-50); color: var(--primary-navy); }
+.view-link:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.4); }
+
+/* ================================================================
+   PAYMENT CARDS (< lg mobile)
+   ================================================================ */
+.payment-cards {
+  display: none; /* shown via responsive breakpoint */
+  flex-direction: column;
+  gap: 12px;
+}
+.payment-card {
+  background: #fff;
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pc-row1 { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.pc-service { font-size: 16px; font-weight: 600; color: var(--primary-navy); line-height: 1.35; }
+.pc-row2 {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--neutral-600);
+}
+.pc-date  { color: var(--neutral-600); }
+.pc-sep   { color: var(--neutral-200); font-size: 10px; }
+.pc-amount{ color: var(--primary-navy); font-weight: 600; font-size: 16px; }
+.pc-row3  { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: var(--neutral-600); }
+.pc-row4  { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--neutral-200); }
+
+/* Tertiary actions in card */
+.card-action {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; font-weight: 600;
+  min-height: 40px; padding: 4px 0;
+  background: none; border: none;
+  cursor: pointer; font-family: inherit;
+  transition: color .15s;
+  text-decoration: none;
+}
+.card-action.action-receipt { color: var(--accent-green); }
+.card-action.action-receipt:hover { color: var(--accent-green-hover); }
+.card-action.action-receipt:focus-visible { outline: none; border-radius: 4px; box-shadow: 0 0 0 3px rgba(11,139,78,.4); }
+.card-action.action-receipt.is-disabled { color: var(--neutral-200); cursor: not-allowed; pointer-events: none; }
+.card-action.action-view { color: var(--neutral-600); }
+.card-action.action-view:hover { color: var(--primary-navy); }
+.card-action.action-view:focus-visible { outline: none; border-radius: 4px; box-shadow: 0 0 0 3px rgba(11,139,78,.4); }
+
+/* ================================================================
+   EMPTY STATE
+   ================================================================ */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 72px 24px; max-width: 420px; margin: 0 auto;
+}
+.empty-state .ic-big { width: 72px; height: 72px; color: var(--neutral-200); margin-bottom: 8px; }
+.empty-state h3 { font-size: 24px; font-weight: 600; margin-top: 16px; }
+.empty-state p { font-size: 16px; color: var(--neutral-600); line-height: 1.6; margin-top: 10px; margin-bottom: 28px; max-width: 36ch; }
+
+/* ================================================================
+   SKELETON LOADERS
+   ================================================================ */
+.skel {
+  background: linear-gradient(90deg, var(--neutral-200) 25%, #eef1f6 37%, var(--neutral-200) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 6px;
+}
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+/* Skeleton table rows */
+.skel-table-wrap {
+  background: #fff; border: 1px solid var(--neutral-200);
+  border-radius: var(--r-card); box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.skel-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px; border-bottom: 1px solid var(--neutral-200);
+}
+.skel-row:last-child { border-bottom: none; }
+.skel-row .sk { height: 14px; border-radius: 4px; flex-shrink: 0; }
+.skel-row .sk-date    { width: 90px; }
+.skel-row .sk-service { flex: 1; max-width: 200px; }
+.skel-row .sk-ref     { width: 130px; }
+.skel-row .sk-amount  { width: 70px; }
+.skel-row .sk-badge   { width: 90px; height: 22px; }
+.skel-row .sk-icon    { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+.skel-head {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 16px; background: var(--neutral-50);
+  border-bottom: 1px solid var(--neutral-200);
+}
+.skel-head .sk-h { height: 11px; border-radius: 4px; background: var(--neutral-200); }
+
+/* Skeleton mobile cards */
+.skel-card {
+  background: #fff; border: 1px solid var(--neutral-200);
+  border-radius: var(--r-card); box-shadow: var(--shadow-sm);
+  padding: 16px; display: flex; flex-direction: column; gap: 10px;
+}
+
+/* ================================================================
+   MOBILE BOTTOM TAB BAR  (components.md → Mobile Bottom Tab Bar)
+   Fixed bottom, authenticated, <lg only. Active: Payments.
+   ================================================================ */
+.mobile-tab-bar {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--tab-bar-h);
+  background: var(--neutral-white);
+  border-top: 1px solid var(--neutral-200);
+  box-shadow: var(--shadow-sm);
+  z-index: 80;
+}
+.tab-item {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  font-size: 12px; font-weight: 400; color: var(--neutral-600);
+  text-decoration: none;
+  min-height: var(--tab-bar-h);
+  padding: 8px 4px;
+  border-top: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.tab-item svg { width: 24px; height: 24px; flex-shrink: 0; }
+.tab-item[aria-current="page"] {
+  color: var(--primary-navy);
+  font-weight: 500;
+  border-top-color: var(--accent-green);
+}
+.tab-item:focus-visible { outline: none; background: var(--neutral-50); }
+
+/* ================================================================
+   REVIEW STATE SWITCHER (not part of product UI)
+   ================================================================ */
+.state-switch {
+  position: fixed; right: 16px; bottom: 80px; z-index: 100;
+  display: flex; align-items: center; gap: 6px;
+  background: #fff; border: 1px dashed #c4ccd9; border-radius: 10px;
+  padding: 7px 9px; box-shadow: var(--shadow-md); font-size: 12px;
+}
+.state-switch .lbl { font-weight: 600; color: var(--neutral-600); margin-right: 2px; }
+.state-switch button {
+  border: 1px solid var(--neutral-200); background: #fff; color: var(--neutral-600);
+  font-size: 12px; font-weight: 600; padding: 5px 9px; border-radius: 6px;
+  cursor: pointer; font-family: inherit;
+}
+.state-switch button[aria-pressed="true"] { background: var(--primary-navy); color: #fff; border-color: var(--primary-navy); }
+.state-switch button:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.35); }
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 1023px) {
+  /* Sidebar → drawer */
+  .sidebar { transform: translateX(-100%); transition: transform .2s ease; box-shadow: var(--shadow-md); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .topbar { padding: 0 16px; }
+  .topbar .hamburger { display: inline-flex; }
+  .topbar .mobile-brand { display: inline-flex; }
+  .topbar .tap-call .num { display: none; }
+  .acct-name { display: none; }
+
+  /* Content */
+  .content { padding: 24px 16px calc(var(--tab-bar-h) + 24px); }
+
+  /* Page header: button stacks full-width below heading */
+  .page-head { flex-direction: column; align-items: stretch; }
+  .page-head h2 { font-size: 28px; }
+  .page-head .btn { width: 100%; }
+
+  /* Table → cards */
+  .payment-table-wrap { display: none; }
+  .payment-cards { display: flex; }
+
+  /* Skeleton: hide table skeleton, show card skeleton */
+  .skel-table-wrap { display: none; }
+  .skel-mobile-cards { display: flex; flex-direction: column; gap: 12px; }
+
+  /* Mobile tab bar */
+  .mobile-tab-bar { display: flex; }
+
+  /* State switcher — above tab bar */
+  .state-switch { bottom: calc(var(--tab-bar-h) + 12px); }
+}
+
+@media (min-width: 1024px) {
+  /* Hide mobile-only skeleton */
+  .skel-mobile-cards { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar { transition: none !important; }
+  .skel { animation: none !important; background: var(--neutral-200); }
+}
+
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- ============================================================
+       SIDEBAR  components.md → App Shell (sidebar)
+       Active link: Payments
+  ============================================================ -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+    <a class="brand" href="Dashboard Home.html" aria-label="GST Notice Support dashboard home">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Dashboard navigation">
+      <a class="nav-link" href="Dashboard Home.html">
+        <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i>
+        Dashboard
+      </a>
+      <a class="nav-link" href="Services List.html">
+        <i data-lucide="folder-open" class="ic" aria-hidden="true"></i>
+        My Services
+      </a>
+      <a class="nav-link" href="Payment History.html" aria-current="page">
+        <i data-lucide="credit-card" class="ic" aria-hidden="true"></i>
+        Payments
+      </a>
+      <a class="nav-link" href="Settings.html">
+        <i data-lucide="settings" class="ic" aria-hidden="true"></i>
+        Settings
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html">
+        <i data-lucide="life-buoy" class="ic" aria-hidden="true"></i>
+        Help &amp; Support
+      </a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <!-- ============================================================
+       MAIN COLUMN
+  ============================================================ -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Dashboard Home.html" aria-label="GST Notice Support dashboard home">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+      <span class="spacer"></span>
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+      </a>
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">RK</span>
+          <span class="acct-name">Rajesh Kumar</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+          <a href="My Profile.html" role="menuitem"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+          <a href="Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main id="main" class="content" data-screen-label="Payment History">
+      <div class="content-inner">
+
+        <!-- Page header -->
+        <div class="page-head">
+          <h2>Payment History</h2>
+          <a href="Booking Step 1 - Service Selection.html" class="btn btn-primary">
+            <i data-lucide="plus" class="ic" aria-hidden="true"></i>
+            Book New Service
+          </a>
+        </div>
+
+        <!-- ══════════ POPULATED VIEW ══════════ -->
+        <div id="populatedView">
+
+          <!-- ── Desktop table (≥lg) ──────────────────────────── -->
+          <div class="payment-table-wrap" role="region" aria-label="Payment history table">
+            <table class="payment-table" aria-label="Your payment history">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Service</th>
+                  <th scope="col">Reference</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="col-receipt">Receipt</th>
+                  <th scope="col" class="col-view"><span class="sr-only">View service</span></th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <!-- Row 1 — Complete, Receipt available -->
+                <tr class="payment-row">
+                  <td class="col-date">28 May 2026</td>
+                  <td class="col-service">ASMT-10 Reply</td>
+                  <td class="col-ref">GNS-2026-0517</td>
+                  <td class="col-amount">₹4,999</td>
+                  <td class="col-status">
+                    <span class="status-badge s-complete">
+                      <i data-lucide="check-circle" class="ic" aria-hidden="true"></i>
+                      Complete
+                    </span>
+                  </td>
+                  <td class="col-receipt">
+                    <div class="receipt-wrap">
+                      <a href="Service Detail.html" class="receipt-link receipt-available"
+                         aria-label="Download receipt for ASMT-10 Reply, 28 May 2026, ₹4,999">
+                        <i data-lucide="download-cloud" width="22" height="22" stroke-width="1.5" aria-hidden="true"></i>
+                      </a>
+                    </div>
+                  </td>
+                  <td class="col-view">
+                    <a href="Service Detail.html" class="view-link" aria-label="View ASMT-10 Reply service details">
+                      <i data-lucide="chevron-right" width="20" height="20" stroke-width="1.8" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- Row 2 — Filing, Receipt available -->
+                <tr class="payment-row">
+                  <td class="col-date">15 Apr 2026</td>
+                  <td class="col-service">Show Cause Notice Reply</td>
+                  <td class="col-ref">GNS-2026-0463</td>
+                  <td class="col-amount">₹6,999</td>
+                  <td class="col-status">
+                    <span class="status-badge s-filing">
+                      <i data-lucide="clock" class="ic" aria-hidden="true"></i>
+                      Filing
+                    </span>
+                  </td>
+                  <td class="col-receipt">
+                    <div class="receipt-wrap">
+                      <a href="Service Detail.html" class="receipt-link receipt-available"
+                         aria-label="Download receipt for Show Cause Notice Reply, 15 Apr 2026, ₹6,999">
+                        <i data-lucide="download-cloud" width="22" height="22" stroke-width="1.5" aria-hidden="true"></i>
+                      </a>
+                    </div>
+                  </td>
+                  <td class="col-view">
+                    <a href="Service Detail.html" class="view-link" aria-label="View Show Cause Notice Reply service details">
+                      <i data-lucide="chevron-right" width="20" height="20" stroke-width="1.8" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- Row 3 — In Review, Receipt pending -->
+                <tr class="payment-row">
+                  <td class="col-date">02 Mar 2026</td>
+                  <td class="col-service">Commissioner Appeal</td>
+                  <td class="col-ref">GNS-2026-0391</td>
+                  <td class="col-amount">₹9,999</td>
+                  <td class="col-status">
+                    <span class="status-badge s-review">
+                      <i data-lucide="search" class="ic" aria-hidden="true"></i>
+                      In Review
+                    </span>
+                  </td>
+                  <td class="col-receipt">
+                    <div class="receipt-wrap">
+                      <span class="receipt-link receipt-disabled"
+                            role="button"
+                            aria-disabled="true"
+                            tabindex="0"
+                            aria-describedby="tip-row3">
+                        <i data-lucide="download-cloud" width="22" height="22" stroke-width="1.5" aria-hidden="true"></i>
+                      </span>
+                      <span class="receipt-tooltip" id="tip-row3" role="tooltip">
+                        Receipt will be available shortly
+                      </span>
+                    </div>
+                  </td>
+                  <td class="col-view">
+                    <a href="Service Detail.html" class="view-link" aria-label="View Commissioner Appeal service details">
+                      <i data-lucide="chevron-right" width="20" height="20" stroke-width="1.8" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+          <!-- /payment-table-wrap -->
+
+          <!-- ── Mobile cards (<lg) ──────────────────────────── -->
+          <div class="payment-cards" aria-label="Payment history">
+
+            <!-- Card 1 — Complete, Receipt available -->
+            <article class="payment-card" aria-label="ASMT-10 Reply, 28 May 2026">
+              <div class="pc-row1">
+                <span class="pc-service">ASMT-10 Reply</span>
+                <span class="status-badge s-complete">
+                  <i data-lucide="check-circle" class="ic" aria-hidden="true"></i>
+                  Complete
+                </span>
+              </div>
+              <div class="pc-row2">
+                <span class="pc-date">28 May 2026</span>
+                <span class="pc-sep" aria-hidden="true">●</span>
+                <span class="pc-amount">₹4,999</span>
+              </div>
+              <div class="pc-row3">GNS-2026-0517</div>
+              <div class="pc-row4">
+                <a href="Service Detail.html" class="card-action action-receipt"
+                   aria-label="Download receipt for ASMT-10 Reply, 28 May 2026, ₹4,999">
+                  <i data-lucide="download-cloud" width="16" height="16" stroke-width="1.5" aria-hidden="true"></i>
+                  Download Receipt
+                </a>
+                <a href="Service Detail.html" class="card-action action-view" aria-label="View ASMT-10 Reply service">
+                  View Service
+                  <i data-lucide="arrow-right" width="14" height="14" stroke-width="1.8" aria-hidden="true"></i>
+                </a>
+              </div>
+            </article>
+
+            <!-- Card 2 — Filing, Receipt available -->
+            <article class="payment-card" aria-label="Show Cause Notice Reply, 15 Apr 2026">
+              <div class="pc-row1">
+                <span class="pc-service">Show Cause Notice Reply</span>
+                <span class="status-badge s-filing">
+                  <i data-lucide="clock" class="ic" aria-hidden="true"></i>
+                  Filing
+                </span>
+              </div>
+              <div class="pc-row2">
+                <span class="pc-date">15 Apr 2026</span>
+                <span class="pc-sep" aria-hidden="true">●</span>
+                <span class="pc-amount">₹6,999</span>
+              </div>
+              <div class="pc-row3">GNS-2026-0463</div>
+              <div class="pc-row4">
+                <a href="Service Detail.html" class="card-action action-receipt"
+                   aria-label="Download receipt for Show Cause Notice Reply, 15 Apr 2026, ₹6,999">
+                  <i data-lucide="download-cloud" width="16" height="16" stroke-width="1.5" aria-hidden="true"></i>
+                  Download Receipt
+                </a>
+                <a href="Service Detail.html" class="card-action action-view" aria-label="View Show Cause Notice Reply service">
+                  View Service
+                  <i data-lucide="arrow-right" width="14" height="14" stroke-width="1.8" aria-hidden="true"></i>
+                </a>
+              </div>
+            </article>
+
+            <!-- Card 3 — In Review, Receipt pending -->
+            <article class="payment-card" aria-label="Commissioner Appeal, 02 Mar 2026">
+              <div class="pc-row1">
+                <span class="pc-service">Commissioner Appeal</span>
+                <span class="status-badge s-review">
+                  <i data-lucide="search" class="ic" aria-hidden="true"></i>
+                  In Review
+                </span>
+              </div>
+              <div class="pc-row2">
+                <span class="pc-date">02 Mar 2026</span>
+                <span class="pc-sep" aria-hidden="true">●</span>
+                <span class="pc-amount">₹9,999</span>
+              </div>
+              <div class="pc-row3">GNS-2026-0391</div>
+              <div class="pc-row4">
+                <span class="card-action action-receipt is-disabled"
+                      role="button"
+                      aria-disabled="true"
+                      aria-label="Receipt for Commissioner Appeal not yet available">
+                  <i data-lucide="download-cloud" width="16" height="16" stroke-width="1.5" aria-hidden="true"></i>
+                  Download Receipt
+                </span>
+                <a href="Service Detail.html" class="card-action action-view" aria-label="View Commissioner Appeal service">
+                  View Service
+                  <i data-lucide="arrow-right" width="14" height="14" stroke-width="1.8" aria-hidden="true"></i>
+                </a>
+              </div>
+            </article>
+
+          </div>
+          <!-- /payment-cards -->
+
+        </div>
+        <!-- /populatedView -->
+
+        <!-- ══════════ EMPTY VIEW ══════════ -->
+        <div id="emptyView" hidden>
+          <div class="empty-state">
+            <i data-lucide="receipt" class="ic-big" aria-hidden="true"></i>
+            <h3>No payments yet</h3>
+            <p>Payments will appear here after you unlock your first draft.</p>
+            <a href="Services List.html" class="btn btn-tertiary">
+              View My Services
+              <i data-lucide="arrow-right" width="15" height="15" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- ══════════ LOADING VIEW ══════════ -->
+        <div id="loadingView" hidden aria-hidden="true" aria-label="Loading payments">
+
+          <!-- Desktop skeleton table -->
+          <div class="skel-table-wrap">
+            <div class="skel-head">
+              <div class="sk-h" style="width:70px"></div>
+              <div class="sk-h" style="width:140px;margin-left:16px"></div>
+              <div class="sk-h" style="width:110px;margin-left:16px"></div>
+              <div class="sk-h" style="width:60px;margin-left:16px"></div>
+              <div class="sk-h" style="width:80px;margin-left:16px"></div>
+            </div>
+            <div class="skel-row">
+              <div class="skel sk sk-date"></div>
+              <div class="skel sk sk-service"></div>
+              <div class="skel sk sk-ref"></div>
+              <div class="skel sk sk-amount"></div>
+              <div class="skel sk sk-badge"></div>
+              <div class="skel sk-icon skel" style="margin-left:auto"></div>
+              <div class="skel sk-icon skel"></div>
+            </div>
+            <div class="skel-row">
+              <div class="skel sk sk-date"></div>
+              <div class="skel sk sk-service" style="max-width:160px"></div>
+              <div class="skel sk sk-ref"></div>
+              <div class="skel sk sk-amount"></div>
+              <div class="skel sk sk-badge"></div>
+              <div class="skel sk-icon skel" style="margin-left:auto"></div>
+              <div class="skel sk-icon skel"></div>
+            </div>
+            <div class="skel-row">
+              <div class="skel sk sk-date"></div>
+              <div class="skel sk sk-service" style="max-width:180px"></div>
+              <div class="skel sk sk-ref"></div>
+              <div class="skel sk sk-amount" style="width:80px"></div>
+              <div class="skel sk sk-badge"></div>
+              <div class="skel sk-icon skel" style="margin-left:auto"></div>
+              <div class="skel sk-icon skel"></div>
+            </div>
+          </div>
+
+          <!-- Mobile skeleton cards -->
+          <div class="skel-mobile-cards">
+            <div class="skel-card">
+              <div style="display:flex;justify-content:space-between;gap:12px">
+                <div class="skel" style="height:18px;width:55%;border-radius:4px"></div>
+                <div class="skel" style="height:22px;width:80px;border-radius:var(--r-badge)"></div>
+              </div>
+              <div class="skel" style="height:14px;width:50%;border-radius:4px"></div>
+              <div class="skel" style="height:13px;width:42%;border-radius:4px"></div>
+              <div style="display:flex;gap:16px;padding-top:10px;border-top:1px solid var(--neutral-200)">
+                <div class="skel" style="height:14px;width:36%;border-radius:4px"></div>
+                <div class="skel" style="height:14px;width:28%;border-radius:4px"></div>
+              </div>
+            </div>
+            <div class="skel-card">
+              <div style="display:flex;justify-content:space-between;gap:12px">
+                <div class="skel" style="height:18px;width:65%;border-radius:4px"></div>
+                <div class="skel" style="height:22px;width:70px;border-radius:var(--r-badge)"></div>
+              </div>
+              <div class="skel" style="height:14px;width:45%;border-radius:4px"></div>
+              <div class="skel" style="height:13px;width:40%;border-radius:4px"></div>
+              <div style="display:flex;gap:16px;padding-top:10px;border-top:1px solid var(--neutral-200)">
+                <div class="skel" style="height:14px;width:36%;border-radius:4px"></div>
+                <div class="skel" style="height:14px;width:28%;border-radius:4px"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /loadingView -->
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============================================================
+     MOBILE BOTTOM TAB BAR  (components.md → Mobile Bottom Tab Bar)
+     Active: Payments  |  <lg only  |  No focused booking flow
+============================================================ -->
+<nav class="mobile-tab-bar" aria-label="Primary navigation">
+  <a href="Dashboard Home.html" class="tab-item" aria-label="Dashboard">
+    <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+    <span>Dashboard</span>
+  </a>
+  <a href="Services List.html" class="tab-item" aria-label="My Services">
+    <i data-lucide="folder-open" aria-hidden="true"></i>
+    <span>My Services</span>
+  </a>
+  <a href="Payment History.html" class="tab-item" aria-current="page" aria-label="Payments, current page">
+    <i data-lucide="credit-card" aria-hidden="true"></i>
+    <span>Payments</span>
+  </a>
+  <a href="Settings.html" class="tab-item" aria-label="Settings">
+    <i data-lucide="settings" aria-hidden="true"></i>
+    <span>Settings</span>
+  </a>
+</nav>
+
+<!-- Review state switcher (remove in production) -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">State</span>
+  <button data-state="populated" aria-pressed="true">Populated</button>
+  <button data-state="empty"     aria-pressed="false">Empty</button>
+  <button data-state="loading"   aria-pressed="false">Loading</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="22" y="26" width="20" height="48" rx="3" fill="#1B3A6B"/>
+    <rect x="48" y="26" width="30" height="6"  rx="2" fill="#0B8B4E"/>
+    <rect x="48" y="38" width="30" height="8"  rx="2" fill="#E5E9F0"/>
+    <rect x="48" y="50" width="30" height="8"  rx="2" fill="#E5E9F0"/>
+    <rect x="48" y="62" width="30" height="8"  rx="2" fill="#E5E9F0"/>
+  </svg>
+</template>
+
+<script>
+(function () {
+  'use strict';
+
+  lucide.createIcons();
+
+  /* ── Mobile drawer ───────────────────────────────────────────── */
+  var sidebar   = document.getElementById('sidebar');
+  var scrim     = document.getElementById('scrim');
+  var hamburger = document.getElementById('hamburger');
+
+  function openDrawer() {
+    sidebar.classList.add('open');
+    scrim.hidden = false;
+    requestAnimationFrame(function () { scrim.classList.add('open'); });
+    hamburger.setAttribute('aria-expanded', 'true');
+  }
+  function closeDrawer() {
+    sidebar.classList.remove('open');
+    scrim.classList.remove('open');
+    scrim.hidden = true;
+    hamburger.setAttribute('aria-expanded', 'false');
+  }
+  hamburger.addEventListener('click', function () {
+    sidebar.classList.contains('open') ? closeDrawer() : openDrawer();
+  });
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeDrawer(); closeAcct(); }
+  });
+
+  /* ── Account menu ────────────────────────────────────────────── */
+  var acctBtn  = document.getElementById('acctBtn');
+  var acctMenu = document.getElementById('acctMenu');
+
+  function closeAcct() {
+    acctMenu.classList.remove('open');
+    acctBtn.setAttribute('aria-expanded', 'false');
+  }
+  acctBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var open = acctMenu.classList.toggle('open');
+    acctBtn.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.acct')) closeAcct();
+  });
+
+  /* ── State switcher ──────────────────────────────────────────── */
+  var populatedView = document.getElementById('populatedView');
+  var emptyView     = document.getElementById('emptyView');
+  var loadingView   = document.getElementById('loadingView');
+  var stateBtns     = document.querySelectorAll('.state-switch button');
+
+  function setState(state) {
+    populatedView.hidden = (state !== 'populated');
+    emptyView.hidden     = (state !== 'empty');
+    loadingView.hidden   = (state !== 'loading');
+    loadingView.setAttribute('aria-hidden', state !== 'loading' ? 'true' : 'false');
+    stateBtns.forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.state === state));
+    });
+    /* Re-create icons for newly visible content */
+    lucide.createIcons();
+  }
+
+  stateBtns.forEach(function (b) {
+    b.addEventListener('click', function () { setState(b.dataset.state); });
+  });
+
+}());
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+})();
+</script>
+</body>
+</html>

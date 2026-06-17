@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Services · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ============================================================
+   APP SHELL (sidebar) — reused from Dashboard Home
+   ============================================================ */
+:root{ --sidebar-w:264px; --header-h:64px; --tabbar-h:64px; }
+html,body{min-height:100%;}
+body{background:var(--neutral-50);}
+.app{display:flex;min-height:100vh;}
+
+.sidebar{
+  width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:#fff;
+  border-right:1px solid var(--neutral-200);display:flex;flex-direction:column;
+  position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;
+}
+.sidebar .brand{
+  display:inline-flex;align-items:center;gap:10px;
+  height:var(--header-h);padding:0 20px;flex:0 0 auto;
+  border-bottom:1px solid var(--neutral-200);
+}
+.sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+.sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+.sidebar .brand .bn span{color:var(--accent-green);}
+.sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+.nav-link{
+  display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);
+  font-size:15px;font-weight:500;color:var(--neutral-900);min-height:44px;
+  transition:background .15s,color .15s;
+}
+.nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);}
+.nav-link:hover{background:var(--neutral-50);}
+.nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.nav-link[aria-current="page"]{background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;}
+.nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+.side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+.side-help{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;}
+.side-help .ic{width:18px;height:18px;color:var(--neutral-600);}
+.side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+
+/* Main */
+.main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+
+/* Topbar */
+.topbar{
+  height:var(--header-h);flex:0 0 auto;position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);
+  border-bottom:1px solid var(--neutral-200);
+  display:flex;align-items:center;gap:16px;padding:0 32px;
+}
+.topbar .hamburger{display:none;width:44px;height:44px;align-items:center;justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);}
+.topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+.topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+.topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+.topbar .mobile-brand .bn span{color:var(--accent-green);}
+.topbar .spacer{flex:1;}
+.topbar .tap-call{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;}
+.topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+.topbar .tap-call:hover{border-color:var(--primary-navy);}
+.topbar .tap-call .num{font-family:'JetBrains Mono',monospace;font-size:13px;}
+.acct{position:relative;}
+.acct-btn{display:inline-flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;}
+.acct-btn:hover{border-color:var(--primary-navy);}
+.acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.acct-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+.acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);}
+.acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+.acct-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:6px;z-index:70;}
+.acct-menu.open{display:block;}
+.acct-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;}
+.acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+.acct-menu a:hover{background:var(--neutral-50);}
+.acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+/* Content */
+.content{flex:1;padding:32px;}
+.content-inner{max-width:1100px;margin:0 auto;}
+
+/* Page header */
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:24px;}
+.page-head h1{font-size:36px;letter-spacing:-.01em;}
+
+/* ============================================================
+   FILTER CHIPS
+   ============================================================ */
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.chip{
+  display:inline-flex;align-items:center;padding:9px 16px;min-height:38px;
+  border:1.5px solid var(--neutral-200);border-radius:var(--r-badge);
+  font-size:14px;font-weight:500;color:var(--neutral-600);background:#fff;cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;font-family:inherit;
+}
+.chip:hover{border-color:var(--primary-navy);color:var(--primary-navy);}
+.chip:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.chip[aria-checked="true"]{background:var(--primary-navy);border-color:var(--primary-navy);color:#fff;}
+
+/* ============================================================
+   DESKTOP TABLE (≥lg)
+   ============================================================ */
+.tbl-wrap{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid var(--neutral-200);}
+th{
+  padding:12px 16px;font-size:13px;font-weight:600;color:var(--neutral-600);
+  text-align:left;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;
+}
+.trow{position:relative;border-bottom:1px solid var(--neutral-200);cursor:pointer;}
+.trow:last-child{border-bottom:none;}
+.trow:hover td{background:var(--neutral-50);}
+.trow:focus-within td:first-child{background:rgba(11,139,78,.04);}
+td{padding:0 16px;height:56px;vertical-align:middle;font-size:14px;color:var(--neutral-600);}
+td.td-service{font-size:16px;font-weight:600;color:var(--primary-navy);}
+/* Stretched link covers entire row */
+.row-anchor{color:inherit;display:block;}
+.row-anchor::after{content:"";position:absolute;inset:0;z-index:1;}
+.row-anchor:focus-visible{outline:none;}
+.trow:focus-within{outline:none;box-shadow:inset 0 0 0 2px rgba(11,139,78,.4);}
+.td-chev{width:40px;text-align:right;}
+.td-chev .cic{width:18px;height:18px;color:var(--neutral-200);}
+.td-date{white-space:nowrap;}
+.td-nextact{}
+
+/* ============================================================
+   SKELETON LOADERS
+   ============================================================ */
+.skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+@keyframes shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+@media(prefers-reduced-motion:reduce){.skel{animation:none;}}
+.skel-row td{padding:18px 16px;}
+.skel-line{height:14px;display:block;}
+
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+.status-badge{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;font-size:14px;font-weight:500;padding:4px 10px;min-height:24px;border-radius:var(--r-badge);white-space:nowrap;}
+.status-badge .ic{width:16px;height:16px;flex:0 0 auto;}
+.s-upload{background:var(--neutral-50);color:var(--neutral-900);border:1px solid var(--neutral-200);}
+.s-review{background:var(--primary-deep-blue);color:#fff;}
+.s-draft{background:var(--warning-amber);color:#fff;}
+.s-filing{background:var(--primary-navy);color:#fff;}
+.s-complete{background:var(--accent-green);color:#fff;}
+.s-cancelled{background:var(--neutral-200);color:var(--neutral-600);}
+
+/* ============================================================
+   MOBILE CARDS (<lg) — Booking Summary Card
+   ============================================================ */
+.cards-stack{display:flex;flex-direction:column;gap:12px;}
+.booking-card{
+  display:flex;flex-direction:column;gap:9px;background:#fff;
+  border:1px solid var(--neutral-200);border-radius:var(--r-card);
+  box-shadow:var(--shadow-sm);padding:16px;min-height:88px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.booking-card:hover{border-color:#cdd5e2;box-shadow:var(--shadow-md);}
+.booking-card:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.booking-card.draft-ready{border-left:3px solid var(--warning-amber);}
+.bc-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.bc-type{font-size:16px;font-weight:600;color:var(--primary-navy);line-height:1.35;}
+.bc-next{font-size:14px;color:var(--neutral-600);}
+.bc-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:14px;color:var(--neutral-600);}
+.bc-meta .mono{font-family:'JetBrains Mono',monospace;font-size:13px;}
+.bc-meta .sep{color:var(--neutral-200);}
+
+/* ============================================================
+   EMPTY STATES
+   ============================================================ */
+.empty-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:64px 24px;}
+.empty-wrap .ic-big{width:64px;height:64px;color:var(--neutral-200);}
+.empty-wrap h3{font-size:20px;font-weight:600;margin-top:16px;}
+.empty-wrap p{font-size:16px;color:var(--neutral-600);margin-top:8px;margin-bottom:20px;}
+
+/* ============================================================
+   MOBILE BOTTOM TAB BAR (authenticated)
+   ============================================================ */
+.tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;height:var(--tabbar-h);background:#fff;border-top:1px solid var(--neutral-200);box-shadow:var(--shadow-sm);grid-template-columns:repeat(4,1fr);}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--neutral-600);text-decoration:none;position:relative;min-height:48px;}
+.tab .ic{width:24px;height:24px;stroke-width:1.5;}
+.tab .lbl{font-size:12px;font-weight:500;line-height:1;}
+.tab:focus-visible{outline:none;box-shadow:inset 0 0 0 3px rgba(11,139,78,.35);border-radius:6px;}
+.tab[aria-current="page"]{color:var(--primary-navy);}
+.tab[aria-current="page"]::after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:2px;background:var(--accent-green);border-radius:0 0 2px 2px;}
+
+/* Drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;opacity:0;transition:opacity .2s;}
+.scrim.open{opacity:1;}
+.drawer{position:fixed;inset:0 auto 0 0;width:84%;max-width:320px;z-index:80;background:#fff;transform:translateX(-100%);transition:transform .2s ease;display:flex;flex-direction:column;box-shadow:var(--shadow-md);}
+.drawer.open{transform:translateX(0);}
+@media(prefers-reduced-motion:reduce){.drawer,.scrim{transition:none;}}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--neutral-200);}
+.drawer-head .brand{display:inline-flex;align-items:center;gap:8px;}
+.drawer-head .brand img{height:26px;width:26px;border-radius:6px;border:1px solid var(--neutral-200);}
+.drawer-head .brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+.drawer-head .brand .bn span{color:var(--accent-green);}
+.drawer-head .close{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--neutral-600);cursor:pointer;border-radius:var(--r-btn);}
+.drawer-acct{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--neutral-200);}
+.drawer-acct .avatar{width:42px;height:42px;border-radius:50%;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex:0 0 auto;}
+.drawer-acct .who .nm{font-size:15px;font-weight:600;color:var(--primary-navy);}
+.drawer-acct .who .em{font-size:13px;color:var(--neutral-600);}
+.drawer nav{flex:1;padding:8px;}
+.d-link{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:48px;}
+.d-link .ic{width:20px;height:20px;color:var(--neutral-600);flex:0 0 auto;}
+.d-link:hover,.d-link:active{background:var(--neutral-50);}
+.d-link.wa .ic{color:var(--wa-green);}
+.d-link.logout{font-weight:600;}
+.d-divider{height:1px;background:var(--neutral-200);margin:8px 4px;}
+.drawer-foot{padding:14px 16px;border-top:1px solid var(--neutral-200);}
+.drawer-foot .legal{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--neutral-600);}
+.drawer-foot .legal a{color:var(--neutral-600);}
+
+[hidden]{display:none !important;}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:1023px){
+  .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .topbar{padding:0 16px;}
+  .topbar .hamburger{display:inline-flex;}
+  .topbar .mobile-brand{display:inline-flex;}
+  .topbar .tap-call .num{display:none;}
+  .content{padding:24px 16px calc(var(--tabbar-h) + 28px);}
+  .page-head h1{font-size:28px;}
+  .tbl-wrap{display:none;}
+  .cards-stack-wrap{display:block !important;}
+  .tabbar{display:grid;}
+  .acct-name{display:none;}
+}
+@media(min-width:1024px){
+  .cards-stack-wrap{display:none;}
+}
+
+/* ============================================================
+   PREVIEW STATE SWITCHER
+   ============================================================ */
+.state-switch{
+  position:fixed;right:16px;bottom:16px;z-index:100;
+  display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+  background:#fff;border:1px dashed #c4ccd9;border-radius:10px;
+  padding:7px 9px;box-shadow:var(--shadow-md);font-size:12px;
+}
+.state-switch .lbl{font-weight:600;color:var(--neutral-600);margin-right:2px;}
+.state-switch button{border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:inherit;}
+.state-switch button[aria-pressed="true"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar" aria-label="Primary">
+  <a class="brand" href="Dashboard Home.html" aria-label="GST Notice Support dashboard home">
+    <img src="assets/logo.png" alt="" />
+    <span class="bn">GST<span>Notice</span>Support</span>
+  </a>
+  <nav aria-label="Dashboard navigation">
+    <a class="nav-link" href="Dashboard Home.html"><i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Dashboard</a>
+    <a class="nav-link" href="Services List.html" aria-current="page"><i data-lucide="folder-open" class="ic" aria-hidden="true"></i> My Services</a>
+    <a class="nav-link" href="Payment History.html"><i data-lucide="credit-card" class="ic" aria-hidden="true"></i> Payments</a>
+    <a class="nav-link" href="Settings.html"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+  </nav>
+  <div class="side-foot">
+    <a class="side-help" href="Contact.html"><i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support</a>
+  </div>
+</aside>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+      <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+    </button>
+    <a class="mobile-brand" href="Dashboard Home.html">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <span class="spacer"></span>
+    <a class="tap-call" href="tel:+918041000000">
+      <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+      <span class="num">+91 80 4100 0000</span>
+    </a>
+    <div class="acct">
+      <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+        <span class="acct-avatar" aria-hidden="true">RK</span>
+        <span class="acct-name">Rajesh Kumar</span>
+        <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+      </button>
+      <div class="acct-menu" id="acctMenu" role="menu">
+        <a href="My Profile.html" role="menuitem"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+        <a href="Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+        <div class="divider"></div>
+        <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="content" data-screen-label="Services List">
+    <div class="content-inner">
+
+      <!-- Page header -->
+      <div class="page-head">
+        <h1>My Services</h1>
+        <a class="btn btn-primary" href="Booking Step 1 - Service Selection.html" id="bookBtn">
+          <i data-lucide="plus" class="ic" aria-hidden="true"></i> Book New Service
+        </a>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="filter-bar" role="radiogroup" aria-label="Filter by status">
+        <button class="chip" role="radio" aria-checked="true" data-filter="all">All</button>
+        <button class="chip" role="radio" aria-checked="false" data-filter="active">Active</button>
+        <button class="chip" role="radio" aria-checked="false" data-filter="complete">Complete</button>
+        <button class="chip" role="radio" aria-checked="false" data-filter="cancelled">Cancelled</button>
+      </div>
+
+      <!-- POPULATED: Desktop table -->
+      <div class="tbl-wrap" id="tableWrap">
+        <table aria-label="Bookings">
+          <thead>
+            <tr>
+              <th scope="col">Service</th>
+              <th scope="col">Date</th>
+              <th scope="col">Status</th>
+              <th scope="col">Next Action</th>
+              <th scope="col"><span class="sr-only">View</span></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- POPULATED: Mobile cards -->
+      <div class="cards-stack-wrap" id="cardsWrap">
+        <div class="cards-stack" id="cardsBody"></div>
+      </div>
+
+      <!-- EMPTY: filtered (no results) -->
+      <div id="emptyFiltered" hidden>
+        <div class="empty-wrap">
+          <i data-lucide="search-x" class="ic-big" aria-hidden="true"></i>
+          <h3 id="emptyFilteredMsg">No Active services.</h3>
+          <button class="btn-tertiary" id="clearFilter" style="display:inline-flex;align-items:center;gap:5px;min-height:44px;">Clear filter</button>
+        </div>
+      </div>
+
+      <!-- EMPTY: new user (no bookings at all) -->
+      <div id="emptyAll" hidden>
+        <div class="empty-wrap">
+          <i data-lucide="folder-open" class="ic-big" aria-hidden="true"></i>
+          <h3>No services yet.</h3>
+          <p>Book your first service to get started.</p>
+          <a class="btn btn-primary" href="Booking Step 1 - Service Selection.html"><i data-lucide="plus" class="ic" aria-hidden="true"></i> Book New Service</a>
+        </div>
+      </div>
+
+      <!-- LOADING: skeleton rows (desktop) / skeleton cards (mobile) -->
+      <div id="loadingView" hidden aria-hidden="true">
+        <div class="tbl-wrap" id="skeletonTable">
+          <table>
+            <thead><tr><th>Service</th><th>Date</th><th>Status</th><th>Next Action</th><th></th></tr></thead>
+            <tbody>
+              <tr class="skel-row"><td><span class="skel skel-line" style="width:60%"></span></td><td><span class="skel skel-line" style="width:80px"></span></td><td><span class="skel skel-line" style="width:90px"></span></td><td><span class="skel skel-line" style="width:70%"></span></td><td></td></tr>
+              <tr class="skel-row"><td><span class="skel skel-line" style="width:55%"></span></td><td><span class="skel skel-line" style="width:80px"></span></td><td><span class="skel skel-line" style="width:90px"></span></td><td><span class="skel skel-line" style="width:60%"></span></td><td></td></tr>
+              <tr class="skel-row"><td><span class="skel skel-line" style="width:65%"></span></td><td><span class="skel skel-line" style="width:80px"></span></td><td><span class="skel skel-line" style="width:90px"></span></td><td><span class="skel skel-line" style="width:50%"></span></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="cards-stack-wrap" style="display:none">
+          <div class="cards-stack">
+            <div style="background:#fff;border:1px solid var(--neutral-200);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:88px;"><span class="skel skel-line" style="width:60%;height:18px"></span><span class="skel skel-line" style="width:80%"></span><span class="skel skel-line" style="width:50%"></span></div>
+            <div style="background:#fff;border:1px solid var(--neutral-200);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:88px;"><span class="skel skel-line" style="width:55%;height:18px"></span><span class="skel skel-line" style="width:75%"></span><span class="skel skel-line" style="width:45%"></span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- MOBILE BOTTOM TAB BAR -->
+<nav class="tabbar" aria-label="Primary">
+  <a class="tab" href="Dashboard Home.html"><i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i><span class="lbl">Dashboard</span></a>
+  <a class="tab" href="Services List.html" aria-current="page"><i data-lucide="folder-open" class="ic" aria-hidden="true"></i><span class="lbl">Services</span></a>
+  <a class="tab" href="Payment History.html"><i data-lucide="credit-card" class="ic" aria-hidden="true"></i><span class="lbl">Payments</span></a>
+  <a class="tab" href="Settings.html"><i data-lucide="settings" class="ic" aria-hidden="true"></i><span class="lbl">Settings</span></a>
+</nav>
+
+<!-- DRAWER (mobile, narrowed) -->
+<aside class="drawer" id="drawer" aria-label="Account and help" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="brand"><img src="assets/logo.png" alt="" /><span class="bn">GST<span>Notice</span>Support</span></span>
+    <button class="close" id="drawerClose" aria-label="Close menu"><i data-lucide="x" style="width:22px;height:22px" aria-hidden="true"></i></button>
+  </div>
+  <div class="drawer-acct">
+    <span class="avatar" aria-hidden="true">RK</span>
+    <span class="who"><span class="nm">Rajesh Kumar</span><span class="em">rajesh.kumar@firm.in</span></span>
+  </div>
+  <nav aria-label="Account menu">
+    <a class="d-link" href="My Profile.html"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+    <a class="d-link" href="Contact.html"><i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support</a>
+    <a class="d-link wa" href="https://wa.me/918041000000" target="_blank" rel="noopener"><i data-lucide="message-circle" class="ic" aria-hidden="true"></i> Chat on WhatsApp</a>
+    <div class="d-divider"></div>
+    <a class="d-link logout" href="Login.html"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+  </nav>
+  <div class="drawer-foot">
+    <div class="legal"><a href="Privacy Policy.html">Privacy Policy</a><a href="Terms of Service.html">Terms</a><a href="Refund Policy.html">Refund Policy</a></div>
+  </div>
+</aside>
+
+<!-- Preview state switcher -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">State</span>
+  <button data-pstate="populated" aria-pressed="true">Populated</button>
+  <button data-pstate="empty-filtered" aria-pressed="false">Empty (filtered)</button>
+  <button data-pstate="empty-all" aria-pressed="false">Empty (new user)</button>
+  <button data-pstate="loading" aria-pressed="false">Loading</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="22" y="26" width="20" height="48" rx="3" fill="#1B3A6B"/>
+    <rect x="48" y="26" width="30" height="4" rx="1" fill="#5A6878"/>
+    <rect x="48" y="34" width="30" height="8" rx="2" fill="#fff"/>
+    <rect x="48" y="46" width="30" height="8" rx="2" fill="#fff"/>
+    <rect x="48" y="58" width="30" height="8" rx="2" fill="#fff"/>
+  </svg>
+</template>
+
+<script>
+lucide.createIcons();
+
+/* ============================================================
+   DATA
+   ============================================================ */
+const BOOKINGS = [
+  { id:'GNS-2026-0517', service:'ASMT-10 Reply',            date:'02 Jun 2026', status:'Draft Ready',  badge:'s-draft',    icon:'alert-circle', next:'Payment required',    group:'active', draftReady:true  },
+  { id:'GNS-2026-0489', service:'SCN Reply (Section 74)',   date:'28 May 2026', status:'In Review',    badge:'s-review',   icon:'search',       next:'Under review',        group:'active', draftReady:false },
+  { id:'GNS-2026-0421', service:'Commissioner Appeal (CIT-A)', date:'14 Apr 2026', status:'Filing',    badge:'s-filing',   icon:'clock',        next:'Filing in progress',  group:'active', draftReady:false },
+  { id:'GNS-2026-0389', service:'GSTAT Appeal',             date:'12 Feb 2026', status:'Complete',     badge:'s-complete', icon:'check-circle', next:'Complete',            group:'complete', draftReady:false },
+  { id:'GNS-2026-0341', service:'SCN Reply (Section 73)',   date:'05 Jan 2026', status:'Cancelled',    badge:'s-cancelled',icon:'x-circle',     next:'Cancelled',           group:'cancelled', draftReady:false },
+];
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function badgeHTML(b){
+  return `<span class="status-badge ${b.badge}"><i data-lucide="${b.icon}" class="ic" aria-hidden="true"></i> ${b.status}</span>`;
+}
+
+function renderTable(list){
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = list.map(b => `
+    <tr class="trow${b.draftReady ? ' draft-row' : ''}">
+      <td class="td-service">
+        <a class="row-anchor" href="Service Detail.html" aria-label="${b.service} — ${b.next}. View details.">${b.service}</a>
+      </td>
+      <td class="td-date">${b.date}</td>
+      <td>${badgeHTML(b)}</td>
+      <td class="td-nextact">${b.next}</td>
+      <td class="td-chev"><i data-lucide="chevron-right" class="cic" aria-hidden="true"></i></td>
+    </tr>`).join('');
+  lucide.createIcons();
+}
+
+function renderCards(list){
+  const wrap = document.getElementById('cardsBody');
+  wrap.innerHTML = list.map(b => `
+    <a class="booking-card${b.draftReady ? ' draft-ready' : ''}" href="Service Detail.html" aria-label="${b.service} — ${b.next}. View details.">
+      <div class="bc-row1">
+        <span class="bc-type">${b.service}</span>
+        ${badgeHTML(b)}
+      </div>
+      <p class="bc-next">${b.next}</p>
+      <div class="bc-meta">
+        <span>${b.date}</span>
+        <span class="sep" aria-hidden="true">·</span>
+        <span class="mono">${b.id}</span>
+      </div>
+    </a>`).join('');
+  lucide.createIcons();
+}
+
+/* ============================================================
+   FILTER
+   ============================================================ */
+let activeFilter = 'all';
+
+function applyFilter(filter){
+  activeFilter = filter;
+  const chips = document.querySelectorAll('.chip');
+  chips.forEach(c => c.setAttribute('aria-checked', String(c.dataset.filter === filter)));
+
+  const list = filter === 'all' ? BOOKINGS : BOOKINGS.filter(b => b.group === filter);
+
+  const tableWrap    = document.getElementById('tableWrap');
+  const cardsWrap    = document.getElementById('cardsWrap');
+  const emptyFilt    = document.getElementById('emptyFiltered');
+  const emptyAll     = document.getElementById('emptyAll');
+  const loadingView  = document.getElementById('loadingView');
+
+  loadingView.hidden = true;
+  emptyAll.hidden    = true;
+
+  if(list.length > 0){
+    tableWrap.hidden   = false;
+    cardsWrap.hidden   = false;
+    emptyFilt.hidden   = true;
+    renderTable(list);
+    renderCards(list);
+  } else {
+    tableWrap.hidden   = true;
+    cardsWrap.hidden   = true;
+    emptyFilt.hidden   = false;
+    const label = filter === 'all' ? '' : filter.charAt(0).toUpperCase() + filter.slice(1);
+    document.getElementById('emptyFilteredMsg').textContent = `No ${label} services.`;
+  }
+}
+
+document.querySelectorAll('.chip').forEach(c =>
+  c.addEventListener('click', () => applyFilter(c.dataset.filter))
+);
+document.getElementById('clearFilter').addEventListener('click', () => applyFilter('all'));
+
+// Initial render
+applyFilter('all');
+
+/* ============================================================
+   PREVIEW STATE SWITCHER
+   ============================================================ */
+function setPreviewState(state){
+  const tableWrap   = document.getElementById('tableWrap');
+  const cardsWrap   = document.getElementById('cardsWrap');
+  const emptyFilt   = document.getElementById('emptyFiltered');
+  const emptyAll    = document.getElementById('emptyAll');
+  const loadingView = document.getElementById('loadingView');
+
+  // Reset chips to All
+  document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-checked', c.dataset.filter === 'all' ? 'true' : 'false'));
+
+  tableWrap.hidden = cardsWrap.hidden = emptyFilt.hidden = emptyAll.hidden = loadingView.hidden = true;
+
+  if(state === 'populated'){
+    tableWrap.hidden = false; cardsWrap.hidden = false;
+    renderTable(BOOKINGS); renderCards(BOOKINGS);
+  } else if(state === 'empty-filtered'){
+    emptyFilt.hidden = false;
+    document.getElementById('emptyFilteredMsg').textContent = 'No Active services.';
+    // Show Active chip selected
+    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-checked', c.dataset.filter === 'active' ? 'true' : 'false'));
+  } else if(state === 'empty-all'){
+    emptyAll.hidden = false;
+  } else if(state === 'loading'){
+    loadingView.hidden = false;
+    lucide.createIcons();
+  }
+
+  document.querySelectorAll('[data-pstate]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.pstate === state)));
+}
+
+document.querySelectorAll('[data-pstate]').forEach(b =>
+  b.addEventListener('click', () => setPreviewState(b.dataset.pstate))
+);
+
+/* ============================================================
+   SHELL — sidebar drawer + account menu
+   ============================================================ */
+const sidebar   = document.getElementById('sidebar');
+const scrim     = document.getElementById('scrim');
+const hamburger = document.getElementById('hamburger');
+const drawer    = document.getElementById('drawer');
+const drawerClose = document.getElementById('drawerClose');
+
+function openSidebar(){ sidebar.classList.add('open'); scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open')); hamburger.setAttribute('aria-expanded','true'); }
+function closeSidebar(){ sidebar.classList.remove('open'); scrim.classList.remove('open'); scrim.hidden=true; hamburger.setAttribute('aria-expanded','false'); }
+
+// On mobile, hamburger opens narrowed drawer instead of sidebar
+function handleHamburger(){
+  if(window.innerWidth < 1024){
+    drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false');
+    scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open'));
+    hamburger.setAttribute('aria-expanded','true');
+  } else {
+    openSidebar();
+  }
+}
+function closeAll(){
+  closeSidebar();
+  drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true');
+  scrim.classList.remove('open'); scrim.hidden=true;
+  hamburger.setAttribute('aria-expanded','false');
+  closeAcct();
+}
+hamburger.addEventListener('click', handleHamburger);
+if(drawerClose) drawerClose.addEventListener('click', closeAll);
+scrim.addEventListener('click', closeAll);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeAll(); });
+
+const acctBtn  = document.getElementById('acctBtn');
+const acctMenu = document.getElementById('acctMenu');
+function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+acctBtn.addEventListener('click', e=>{ e.stopPropagation(); const open=acctMenu.classList.toggle('open'); acctBtn.setAttribute('aria-expanded',String(open)); });
+document.addEventListener('click', e=>{ if(!e.target.closest('.acct')) closeAcct(); });
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+})();
+</script>
+</body>
+</html>

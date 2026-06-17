@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Draft Viewer (Mobile) · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ============================================================
+   DRAFT VIEWER — MOBILE
+   SHELL: App Shell header (top) + Mobile Bottom Tab Bar (bottom)
+   PDF viewer replaced by download-prompt card
+   ============================================================ */
+:root{ --header-h:60px; --tabbar-h:64px; }
+html,body{ min-height:100%; }
+body{ background:var(--neutral-50); }
+
+/* ---------- App Shell header ---------- */
+.topbar{
+  height:var(--header-h); position:sticky; top:0; z-index:50;
+  background:rgba(255,255,255,.94); backdrop-filter:saturate(180%) blur(6px);
+  border-bottom:1px solid var(--neutral-200);
+  display:flex; align-items:center; gap:10px; padding:0 14px;
+}
+.topbar .hamburger{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--neutral-200); border-radius:var(--r-btn); background:#fff; cursor:pointer; color:var(--primary-navy); flex:0 0 auto; }
+.topbar .hamburger:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); }
+.topbar .brand{ display:inline-flex; align-items:center; gap:8px; }
+.topbar .brand img{ height:26px; width:26px; border-radius:6px; border:1px solid var(--neutral-200); }
+.topbar .brand .bn{ font-weight:700; font-size:14px; color:var(--primary-navy); letter-spacing:-.01em; }
+.topbar .brand .bn span{ color:var(--accent-green); }
+.topbar .spacer{ flex:1; }
+.topbar .tap-call{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--neutral-200); border-radius:var(--r-btn); background:#fff; color:var(--accent-green); flex:0 0 auto; }
+.topbar .tap-call:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); }
+.topbar .tap-call .ic{ width:19px; height:19px; }
+
+/* ---------- Content ---------- */
+.content{ padding:20px 16px calc(var(--tabbar-h) + 28px); }
+
+/* Back link */
+.back-link{ display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:500; color:var(--neutral-600); min-height:44px; margin-bottom:2px; }
+.back-link:hover{ color:var(--primary-navy); }
+.back-link:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); border-radius:6px; }
+.back-link .ic{ width:16px; height:16px; }
+
+/* Breadcrumb */
+.breadcrumb{ display:flex; align-items:center; gap:5px; font-size:12px; color:var(--neutral-600); margin-bottom:18px; flex-wrap:wrap; }
+.breadcrumb a{ color:var(--neutral-600); font-weight:500; }
+.breadcrumb a:hover{ color:var(--primary-navy); }
+.breadcrumb .sep{ color:var(--neutral-200); }
+.breadcrumb .current{ color:var(--primary-navy); font-weight:600; }
+
+/* Page header */
+.page-head{ margin-bottom:20px; }
+.page-head h1{ font-size:24px; letter-spacing:-.01em; line-height:1.2; }
+
+/* ---------- Download-prompt card ---------- */
+.download-card{
+  background:var(--neutral-50); border:1px solid var(--neutral-200);
+  border-radius:var(--r-card); box-shadow:var(--shadow-sm);
+  padding:28px 24px; display:flex; flex-direction:column;
+  align-items:center; text-align:center; gap:0;
+}
+.download-card .card-icon{ width:64px; height:64px; color:var(--neutral-600); margin-bottom:16px; }
+.download-card .card-icon.expired-ic{ color:var(--neutral-600); }
+.download-card h2{ font-size:20px; font-weight:600; margin-bottom:10px; }
+.download-card p{ font-size:15px; color:var(--neutral-600); line-height:1.6; margin-bottom:22px; max-width:30ch; }
+.download-card .btn-stack{ display:flex; flex-direction:column; gap:12px; width:100%; }
+.download-card .btn{ width:100%; }
+
+/* ---------- Expiry notice ---------- */
+.expiry-notice{
+  display:flex; align-items:flex-start; gap:10px;
+  padding:12px 14px; margin-top:14px;
+  background:var(--neutral-50); border:1px solid var(--neutral-200);
+  border-left:2px solid var(--warning-amber); border-radius:8px;
+}
+.expiry-notice .ic{ width:17px; height:17px; color:var(--warning-amber); flex:0 0 auto; margin-top:1px; }
+.expiry-notice p{ font-size:14px; color:var(--neutral-900); line-height:1.5; }
+
+/* Read-only note */
+.readonly-note{ font-size:14px; color:var(--neutral-600); text-align:center; margin-top:14px; line-height:1.5; }
+.readonly-note a{ color:var(--primary-navy); font-weight:500; }
+
+[hidden]{ display:none !important; }
+
+/* ============================================================
+   MOBILE BOTTOM TAB BAR (authenticated)
+   ============================================================ */
+.tabbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:60;
+  height:var(--tabbar-h); background:#fff; border-top:1px solid var(--neutral-200);
+  box-shadow:var(--shadow-sm); display:grid; grid-template-columns:repeat(4,1fr);
+}
+.tab{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--neutral-600); text-decoration:none; position:relative; min-height:48px; }
+.tab .ic{ width:24px; height:24px; stroke-width:1.5; }
+.tab .lbl{ font-size:12px; font-weight:500; line-height:1; }
+.tab:focus-visible{ outline:none; box-shadow:inset 0 0 0 3px rgba(11,139,78,.35); border-radius:6px; }
+.tab[aria-current="page"]{ color:var(--primary-navy); }
+.tab[aria-current="page"]::after{ content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:28px; height:2px; background:var(--accent-green); border-radius:0 0 2px 2px; }
+
+/* ============================================================
+   DRAWER (narrowed — account / help / logout)
+   ============================================================ */
+.scrim{ position:fixed; inset:0; background:rgba(10,37,64,.4); z-index:70; opacity:0; transition:opacity .2s; }
+.scrim.open{ opacity:1; }
+.drawer{ position:fixed; inset:0 auto 0 0; width:84%; max-width:320px; z-index:80; background:#fff; transform:translateX(-100%); transition:transform .2s ease; display:flex; flex-direction:column; box-shadow:var(--shadow-md); }
+.drawer.open{ transform:translateX(0); }
+@media(prefers-reduced-motion:reduce){ .drawer,.scrim{ transition:none; } }
+.drawer-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--neutral-200); }
+.drawer-head .brand{ display:inline-flex; align-items:center; gap:8px; }
+.drawer-head .brand img{ height:26px; width:26px; border-radius:6px; border:1px solid var(--neutral-200); }
+.drawer-head .brand .bn{ font-weight:700; font-size:14px; color:var(--primary-navy); }
+.drawer-head .brand .bn span{ color:var(--accent-green); }
+.drawer-head .close{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--neutral-600); cursor:pointer; border-radius:var(--r-btn); }
+.drawer-head .close:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); }
+.drawer-acct{ display:flex; align-items:center; gap:12px; padding:16px; border-bottom:1px solid var(--neutral-200); }
+.drawer-acct .avatar{ width:42px; height:42px; border-radius:50%; background:var(--primary-navy); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:15px; font-weight:600; flex:0 0 auto; }
+.drawer-acct .who .nm{ font-size:15px; font-weight:600; color:var(--primary-navy); line-height:1.3; }
+.drawer-acct .who .em{ font-size:13px; color:var(--neutral-600); line-height:1.3; }
+.drawer nav{ flex:1; padding:8px; display:flex; flex-direction:column; gap:2px; overflow-y:auto; }
+.d-link{ display:flex; align-items:center; gap:12px; padding:12px; border-radius:var(--r-btn); font-size:15px; font-weight:500; color:var(--neutral-900); min-height:48px; }
+.d-link .ic{ width:20px; height:20px; color:var(--neutral-600); flex:0 0 auto; }
+.d-link:hover,.d-link:active{ background:var(--neutral-50); }
+.d-link.wa .ic{ color:var(--wa-green); }
+.d-divider{ height:1px; background:var(--neutral-200); margin:8px 4px; }
+.drawer-foot{ padding:14px 16px; border-top:1px solid var(--neutral-200); }
+.drawer-foot .legal{ display:flex; flex-wrap:wrap; gap:6px 12px; font-size:13px; color:var(--neutral-600); }
+.drawer-foot .legal a{ color:var(--neutral-600); }
+
+/* ============================================================
+   PREVIEW STATE SWITCHER
+   ============================================================ */
+.state-switch{ position:fixed; right:10px; bottom:calc(var(--tabbar-h) + 10px); z-index:100; display:flex; gap:5px; background:#fff; border:1px dashed #c4ccd9; border-radius:9px; padding:6px 7px; box-shadow:var(--shadow-md); font-size:11px; }
+.state-switch button{ border:1px solid var(--neutral-200); background:#fff; color:var(--neutral-600); font-size:11px; font-weight:600; padding:5px 8px; border-radius:6px; cursor:pointer; font-family:inherit; }
+.state-switch button[aria-pressed="true"]{ background:var(--primary-navy); color:#fff; border-color:var(--primary-navy); }
+</style>
+</head>
+<body>
+
+<!-- APP SHELL HEADER -->
+<header class="topbar">
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="drawer" aria-expanded="false">
+    <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+  </button>
+  <a class="brand" href="Dashboard Home Mobile.html" aria-label="GST Notice Support home">
+    <img src="assets/logo.png" alt="" />
+    <span class="bn">GST<span>Notice</span>Support</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="tap-call" href="tel:+918041000000" aria-label="Call us: +91 80 4100 0000">
+    <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+  </a>
+</header>
+
+<!-- CONTENT -->
+<main id="main" class="content" data-screen-label="Draft Viewer (mobile)">
+
+  <!-- Back link — keyboard-reachable first -->
+  <a class="back-link" href="Service Detail.html">
+    <i data-lucide="arrow-left" class="ic" aria-hidden="true"></i> Back to Service
+  </a>
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="Dashboard Home Mobile.html">Dashboard</a>
+    <span class="sep" aria-hidden="true">›</span>
+    <a href="Services List.html">My Services</a>
+    <span class="sep" aria-hidden="true">›</span>
+    <a href="Service Detail.html">ASMT-10 Reply</a>
+    <span class="sep" aria-hidden="true">›</span>
+    <span class="current">View Draft</span>
+  </nav>
+
+  <!-- Page header -->
+  <div class="page-head">
+    <h1>Draft Reply — ASMT-10 Reply</h1>
+  </div>
+
+  <!-- ===== LOADED STATE — download-prompt card ===== -->
+  <div id="stateLoaded">
+    <div class="download-card">
+      <i data-lucide="file-text" class="card-icon" aria-hidden="true"></i>
+      <h2>Your Draft is Ready</h2>
+      <p>Tap below to open your draft reply.</p>
+      <div class="btn-stack">
+        <a class="btn btn-primary" href="Draft Viewer.html" aria-label="Open draft reply PDF for ASMT-10 Reply">
+          <i data-lucide="external-link" class="ic" aria-hidden="true"></i> Open Draft PDF
+        </a>
+        <a class="btn btn-secondary" href="Draft Viewer.html" aria-label="Download draft reply for ASMT-10 Reply">
+          <i data-lucide="download" class="ic" aria-hidden="true"></i> Download PDF
+        </a>
+      </div>
+    </div>
+
+    <!-- Expiry notice -->
+    <div class="expiry-notice" role="status" aria-live="polite">
+      <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+      <p>This link expires in <strong id="expiryTimer">15:00</strong>. Refresh the page to generate a new one if needed.</p>
+    </div>
+
+    <!-- Read-only note -->
+    <p class="readonly-note">
+      This is a read-only preview. To confirm this draft, <a href="Service Detail.html">return to the service page</a>.
+    </p>
+  </div>
+
+  <!-- ===== EXPIRED STATE ===== -->
+  <div id="stateExpired" hidden>
+    <div class="download-card">
+      <i data-lucide="lock" class="card-icon expired-ic" aria-hidden="true"></i>
+      <h2>Link Expired</h2>
+      <p>Your preview link has expired. Generate a new one to continue.</p>
+      <div class="btn-stack">
+        <button class="btn btn-primary" id="generateNewLink">Generate New Link</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MOBILE BOTTOM TAB BAR -->
+<nav class="tabbar" aria-label="Primary">
+  <a class="tab" href="Dashboard Home Mobile.html"><i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i><span class="lbl">Dashboard</span></a>
+  <a class="tab" href="Services List.html" aria-current="page"><i data-lucide="folder-open" class="ic" aria-hidden="true"></i><span class="lbl">Services</span></a>
+  <a class="tab" href="Payment History.html"><i data-lucide="credit-card" class="ic" aria-hidden="true"></i><span class="lbl">Payments</span></a>
+  <a class="tab" href="Settings.html"><i data-lucide="settings" class="ic" aria-hidden="true"></i><span class="lbl">Settings</span></a>
+</nav>
+
+<!-- DRAWER -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Account and help" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="brand"><img src="assets/logo.png" alt="" /><span class="bn">GST<span>Notice</span>Support</span></span>
+    <button class="close" id="drawerClose" aria-label="Close menu"><i data-lucide="x" style="width:22px;height:22px" aria-hidden="true"></i></button>
+  </div>
+  <div class="drawer-acct">
+    <span class="avatar" aria-hidden="true">RK</span>
+    <span class="who">
+      <span class="nm">Rajesh Kumar</span>
+      <span class="em">rajesh.kumar@firm.in</span>
+    </span>
+  </div>
+  <nav aria-label="Account menu">
+    <a class="d-link" href="My Profile.html"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+    <a class="d-link" href="Contact.html"><i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support</a>
+    <a class="d-link wa" href="https://wa.me/918041000000" target="_blank" rel="noopener"><i data-lucide="message-circle" class="ic" aria-hidden="true"></i> Chat on WhatsApp</a>
+    <div class="d-divider" aria-hidden="true"></div>
+    <a class="d-link" href="Login.html"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+  </nav>
+  <div class="drawer-foot">
+    <div class="legal"><a href="Privacy Policy.html">Privacy Policy</a><a href="Terms of Service.html">Terms</a><a href="Refund Policy.html">Refund Policy</a></div>
+  </div>
+</aside>
+
+<!-- Preview state switcher -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <button data-vstate="loaded"  aria-pressed="true">Loaded</button>
+  <button data-vstate="expired" aria-pressed="false">Expired</button>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  /* State switcher */
+  const stateLoaded  = document.getElementById('stateLoaded');
+  const stateExpired = document.getElementById('stateExpired');
+
+  function setViewerState(state){
+    stateLoaded.hidden  = (state !== 'loaded');
+    stateExpired.hidden = (state !== 'expired');
+    document.querySelectorAll('[data-vstate]').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.vstate === state))
+    );
+  }
+
+  document.querySelectorAll('[data-vstate]').forEach(b =>
+    b.addEventListener('click', () => setViewerState(b.dataset.vstate))
+  );
+
+  /* Expiry countdown */
+  let secondsLeft = 15 * 60;
+  const timerEl = document.getElementById('expiryTimer');
+  const interval = setInterval(() => {
+    secondsLeft--;
+    if(secondsLeft <= 0){ clearInterval(interval); setViewerState('expired'); return; }
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    timerEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  }, 1000);
+
+  /* Generate new link */
+  document.getElementById('generateNewLink').addEventListener('click', () => {
+    secondsLeft = 15 * 60;
+    if(timerEl) timerEl.textContent = '15:00';
+    setViewerState('loaded');
+  });
+
+  /* Drawer */
+  const drawer = document.getElementById('drawer');
+  const scrim  = document.getElementById('scrim');
+  const ham    = document.getElementById('hamburger');
+  const dClose = document.getElementById('drawerClose');
+  function openDrawer(){ drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open')); ham.setAttribute('aria-expanded','true'); }
+  function closeDrawer(){ drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); scrim.classList.remove('open'); scrim.hidden=true; ham.setAttribute('aria-expanded','false'); }
+  ham.addEventListener('click', openDrawer);
+  dClose.addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+</script>
+</body>
+</html>
