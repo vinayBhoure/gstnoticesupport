@@ -1,0 +1,12 @@
+{
+  "name": "gst-postman-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Newman-driven API tests for gstnoticesupport.in (Postman collection: GST Notice Support).",
+  "scripts": {
+    "test": "bash run-newman.sh"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1"
+  }
+}

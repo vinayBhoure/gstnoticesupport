@@ -158,6 +158,7 @@
 | ✅ | `GET /bookings` | Lists current user's bookings; ownership enforced, newest-first |
 | ✅ | `GET /bookings/:id` | Detail + documents + latest payment; 404 for foreign bookings (D69) |
 | ✅ | `POST /bookings/:id/cancel` | Allowed only at `draft_ready` + `payment_status=pending`; 409 INVALID_TRANSITION otherwise |
+| ✅ | API test suite — Postman collection "GST Notice Support" + Newman runner (booking lifecycle) | `test/postman/`; 11 requests / 38 assertions green; admin-login auth, creds injected from `server/.env` at runtime |
 | ⬚ | S3 client — Mumbai `ap-south-1`, private bucket, SSE-S3 | `server/src/lib/s3.ts` |
 | ⬚ | Pre-signed PUT URL generation — PDF only, ≤5 MB, ≤8 files/booking, 5-min expiry | All constraints validated server-side before issuing URL |
 | ⬚ | S3 key format: `{userId}/{bookingId}/{yyyyMMdd}-{sanitizedName}-{4rand}.pdf` | Sanitize filename; preserve original for display |
