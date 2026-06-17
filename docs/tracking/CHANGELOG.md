@@ -5,6 +5,27 @@
 
 ---
 
+## [2026-06-17] — feat(backend): Phase 3 — Booking Lifecycle
+
+**4 new endpoints under `/api/v1/bookings`** — all `authenticate`-gated, no rate limiters.
+
+- `POST /bookings` — Creates a booking at `status=document_upload`, `paymentStatus=pending`. Price derived server-side; any client-supplied price is stripped by Zod. Sends confirmation emails to user and admin (best-effort). Returns `BookingDetailDTO` (no `draftS3Key`).
+- `GET /bookings` — Lists the authenticated user's bookings newest-first as `BookingSummaryDTO[]`.
+- `GET /bookings/:id` — Returns `BookingDetailWithRelations` (detail + `documents[]` + `latestPayment`). Returns 404 for both non-existent and foreign-user bookings (no existence leak, D69).
+- `POST /bookings/:id/cancel` — Allowed only when `status=draft_ready` AND `paymentStatus=pending`. Sends cancellation emails (best-effort). Returns updated `BookingDetailDTO`.
+
+**New modules**
+- `schemas/booking.schema.ts` — `createBookingSchema` (GSTN regex, consent refines, no price field) + `bookingIdParamSchema`.
+- `lib/pricing.ts` — `SERVICE_PRICING` in paise; reused by Phase 5 payment flow.
+- `services/booking-state-machine.ts` — Pure `ALLOWED_TRANSITIONS` map, `assertTransition`, `assertUserCancellable` (D70).
+- `repositories/booking.repository.ts` — Ownership-baked queries; includes `documents`/`paymentRecords` on detail fetch.
+- `dto/booking.dto.ts` — Explicit summary/detail/document/payment/detail-with-relations mappers; `draftS3Key` and `s3Key` never included.
+- `services/booking.service.ts` — Business logic; emails are best-effort (never block transitions).
+
+**Email templates** — `bookingCreatedUser/Admin`, `bookingCancelledUser/Admin` added to `emails/templates.ts`; `notification.service.ts` extended with `sendBookingCreated` + `sendBookingCancelled`.
+
+---
+
 ## [2026-06-16] — feat(backend): Phase 2 — Authentication & Identity
 
 **Response envelope aligned to `api_contract.md`**

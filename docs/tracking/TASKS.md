@@ -151,13 +151,13 @@
 ### EP9 — Booking & Document Upload Backend (backend_plan Phases 3 + 4)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Booking Zod schema — service type, contact fields, GSTN format-only, both consents required | `server/src/schemas/booking.schema.ts` |
-| ⬚ | Server-side price derivation from `serviceType` — never from client | ₹2,999 / ₹5,999 / ₹9,999 / ₹14,999 |
-| ⬚ | Booking state machine enforcement — legal transitions only | `server/src/lib/stateMachine.ts` |
-| ⬚ | `POST /bookings` | Creates booking at `status=document_upload`, `payment_status=pending`; emails user + admin |
-| ⬚ | `GET /bookings` | Lists current user's bookings; ownership enforced |
-| ⬚ | `GET /bookings/:id` | Detail + documents + latest payment; `403` for other users |
-| ⬚ | `POST /bookings/:id/cancel` | Allowed only at `draft_ready` + `payment_status=pending` |
+| ✅ | Booking Zod schema — service type, contact fields, GSTN format-only, both consents required | `server/src/schemas/booking.schema.ts` (D69) |
+| ✅ | Server-side price derivation from `serviceType` — never from client | `lib/pricing.ts` — SERVICE_PRICING map in paise |
+| ✅ | Booking state machine enforcement — legal transitions only | `services/booking-state-machine.ts` (D70) |
+| ✅ | `POST /bookings` | Creates booking at `status=document_upload`, `payment_status=pending`; emails user + admin |
+| ✅ | `GET /bookings` | Lists current user's bookings; ownership enforced, newest-first |
+| ✅ | `GET /bookings/:id` | Detail + documents + latest payment; 404 for foreign bookings (D69) |
+| ✅ | `POST /bookings/:id/cancel` | Allowed only at `draft_ready` + `payment_status=pending`; 409 INVALID_TRANSITION otherwise |
 | ⬚ | S3 client — Mumbai `ap-south-1`, private bucket, SSE-S3 | `server/src/lib/s3.ts` |
 | ⬚ | Pre-signed PUT URL generation — PDF only, ≤5 MB, ≤8 files/booking, 5-min expiry | All constraints validated server-side before issuing URL |
 | ⬚ | S3 key format: `{userId}/{bookingId}/{yyyyMMdd}-{sanitizedName}-{4rand}.pdf` | Sanitize filename; preserve original for display |
