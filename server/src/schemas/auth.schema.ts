@@ -70,7 +70,7 @@ export const resetPasswordSchema = z.object({
 });
 
 export const invalidateQuerySchema = z.object({
-  ref: z.string().min(1, 'Missing session reference'),
+  ref: z.string().uuid('Invalid session reference format'),
 });
 
 export type SignupInput = z.infer<typeof signupSchema>;

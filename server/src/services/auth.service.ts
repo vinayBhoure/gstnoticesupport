@@ -5,6 +5,7 @@ import { tokenService } from './token.service';
 import { notificationService } from './notification.service';
 import { verifyRefreshToken, hashToken } from '../lib/jwt';
 import { refreshTokenRepository } from '../repositories/refresh-token.repository';
+import { tokenBlacklistRepository } from '../repositories/token-blacklist.repository';
 import { ApiError } from '../utils/ApiError';
 import { toUserDTO, type UserDTO } from '../dto/user.dto';
 import type {
@@ -168,6 +169,10 @@ export const authService = {
   // We keep no access-token registry, so an unknown/expired jti is blacklisted harmlessly
   // and still returns success (cannot reliably distinguish a 404 here).
   async invalidate(jti: string): Promise<void> {
+    const alreadyBlacklisted = await tokenBlacklistRepository.existsByJti(jti);
+    if (alreadyBlacklisted) {
+      throw new ApiError(404, 'NOT_FOUND', 'Session reference not found or already invalidated');
+    }
     await tokenService.blacklistAccessJti(jti);
   },
 
