@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-06-17] — test(api): Postman + Newman booking API test suite
+
+**Automated API tests under `test/postman/`** — Postman collection **"GST Notice Support"** runnable headlessly via Newman.
+
+- Scope: Phase 3 Booking Lifecycle (4 endpoints) + admin login. **11 requests / 38 assertions, all green.**
+- Covers: auth gate (401), login cookie set (`access_token` + `refresh_token`), create success (201, `document_upload`/`pending`, client price stripped, no `draftS3Key`), list (newest-first, summary shape), detail (`documents[]` + `latestPayment`, no `draftS3Key`), invalid GSTN / false consent / invalid uuid → 400, non-existent → 404, cancel at `document_upload` → 409 `INVALID_TRANSITION`.
+- **Auth:** logs in as the seeded admin; credentials read from `server/.env` at runtime by `run-newman.sh` and injected as Newman env-vars — never committed. Newman cookie jar carries the session.
+- Files: collection JSON, environment (placeholders only), `run-newman.sh`, `package.json` (pins Newman), `README.md`. Run with `cd test/postman && npm install && npm test`.
+- Out of scope until later phases: OTP success-path (bcrypt-hashed, no plaintext read) and cancel **success** path (needs `draft_ready` via admin draft upload, Phase 6).
+
+---
+
 ## [2026-06-17] — feat(backend): Phase 3 — Booking Lifecycle
 
 **4 new endpoints under `/api/v1/bookings`** — all `authenticate`-gated, no rate limiters.
