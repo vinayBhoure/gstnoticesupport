@@ -123,3 +123,89 @@ export function accountCreatedAdmin(data: { userEmail: string; userId: string })
     `),
   };
 }
+
+// ============================================================
+// Phase 3 — Booking lifecycle templates
+// ============================================================
+
+export function bookingCreatedUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Booking confirmed — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your booking has been received. Please upload your supporting documents so our team can start reviewing your case.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'Upload documents')}</p>
+      <p style="color:${MUTED};">You will receive a notification once our team has reviewed your submission.</p>
+    `),
+  };
+}
+
+export function bookingCreatedAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+  gstn: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: `New booking — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A new booking has been submitted:</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+        <li>GSTN: ${escapeHtml(data.gstn)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'View in admin panel')}</p>
+    `),
+  };
+}
+
+export function bookingCancelledUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+}): EmailContent {
+  return {
+    subject: 'Booking cancelled — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your booking has been cancelled as requested.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p>If you need further assistance, please contact us via WhatsApp or create a new booking.</p>
+    `),
+  };
+}
+
+export function bookingCancelledAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+}): EmailContent {
+  return {
+    subject: `Booking cancelled — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A booking has been cancelled by the user:</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+      </ul>
+    `),
+  };
+}
