@@ -180,7 +180,8 @@ async function runTests() {
     );
 
     // 1.3 — GET /bookings/:id without auth → 401
-    const fakeId = '00000000-0000-0000-0000-000000000001';
+    // Use a v4-valid UUID (Zod v4 enforces strict UUID format, not just hex grouping)
+    const fakeId = '550e8400-e29b-41d4-a716-446655440001';
     res = await makeRequest('GET', `${API_BASE}/bookings/${fakeId}`);
     logTest(
       3,
@@ -191,6 +192,7 @@ async function runTests() {
     );
 
     // 1.4 — POST /bookings/:id/cancel without auth → 401
+    // fakeId is the same v4 UUID used above
     res = await makeRequest('POST', `${API_BASE}/bookings/${fakeId}/cancel`);
     logTest(
       4,
@@ -400,8 +402,8 @@ async function runTests() {
             res.statusCode === 400 && res.body?.error?.code === 'VALIDATION_ERROR',
           );
 
-          // 18 — non-existent ID → 404 NOT_FOUND
-          res = await makeRequest('GET', `${API_BASE}/bookings/00000000-0000-0000-0000-000000000099`, null, testState.cookies);
+          // 18 — non-existent ID (valid v4 UUID that doesn't exist in DB) → 404 NOT_FOUND
+          res = await makeRequest('GET', `${API_BASE}/bookings/550e8400-e29b-41d4-a716-446655440099`, null, testState.cookies);
           logTest(
             18,
             'GET /bookings/:id — non-existent → 404 NOT_FOUND',
@@ -433,8 +435,8 @@ async function runTests() {
           logTest(19, 'Cancel non-draft_ready — SKIPPED', 'SKIPPED', 'SKIPPED', true, 'create step failed');
         }
 
-        // 20 — Cancel non-existent booking → 404
-        res = await makeRequest('POST', `${API_BASE}/bookings/00000000-0000-0000-0000-000000000099/cancel`, null, testState.cookies);
+        // 20 — Cancel non-existent booking (valid v4 UUID that doesn't exist in DB) → 404
+        res = await makeRequest('POST', `${API_BASE}/bookings/550e8400-e29b-41d4-a716-446655440099/cancel`, null, testState.cookies);
         logTest(
           20,
           'POST /bookings/:id/cancel — non-existent → 404 NOT_FOUND',
