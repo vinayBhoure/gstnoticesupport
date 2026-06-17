@@ -49,4 +49,63 @@ export const notificationService = {
     const { subject, html } = templates.accountCreatedAdmin(data);
     await emailService.sendEmail({ to: env.ADMIN_EMAIL, subject, html });
   },
+
+  // ============================================================
+  // Phase 3 — Booking lifecycle notifications (best-effort)
+  // ============================================================
+
+  async sendBookingCreated(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+    gstn: string;
+  }): Promise<void> {
+    const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}`;
+    const adminDashboardUrl = `${env.CLIENT_URL}/admin/bookings/${encodeURIComponent(booking.id)}`;
+
+    const userMail = templates.bookingCreatedUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      dashboardUrl,
+    });
+    const adminMail = templates.bookingCreatedAdmin({
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      contactName: booking.contactName,
+      contactEmail: booking.contactEmail,
+      gstn: booking.gstn,
+      dashboardUrl: adminDashboardUrl,
+    });
+
+    await Promise.all([
+      emailService.sendEmail({ to: booking.contactEmail, ...userMail }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+    ]);
+  },
+
+  async sendBookingCancelled(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+  }): Promise<void> {
+    const userMail = templates.bookingCancelledUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+    });
+    const adminMail = templates.bookingCancelledAdmin({
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      contactName: booking.contactName,
+      contactEmail: booking.contactEmail,
+    });
+
+    await Promise.all([
+      emailService.sendEmail({ to: booking.contactEmail, ...userMail }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+    ]);
+  },
 };
