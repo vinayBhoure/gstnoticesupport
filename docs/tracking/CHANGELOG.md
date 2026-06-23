@@ -5,6 +5,24 @@
 
 ---
 
+## [2026-06-23] — feat(backend): Phase 4 — Document Handling (pre-signed S3)
+
+**4 new endpoints under `/api/v1/bookings/:id`** — all `authenticate`-gated, ownership enforced (404-collapse). Files never pass through Express; the browser PUTs/GETs S3 directly via pre-signed URLs.
+
+- `POST /bookings/:id/upload-url` — Validates server-side (PDF only, ≤5 MB, booking in `document_upload`, <8 files) then returns a 5-min pre-signed PUT URL. `ContentType`+`ContentLength` are signed so the declared size/type can't be exceeded. Errors: `INVALID_FILE_TYPE`, `FILE_TOO_LARGE`, `INVALID_STATUS`, `FILE_LIMIT_REACHED`. Rate: 7/hr/user.
+- `POST /bookings/:id/confirm-upload` — Records the `booking_documents` row after the browser upload. Rejects an `s3Key` not scoped to `{userId}/{bookingId}/` and duplicate keys (`DUPLICATE_KEY`).
+- `GET /bookings/:id/documents` — Lists document metadata; `s3Key` never exposed.
+- `GET /bookings/:id/draft-url` — 15-min pre-signed GET for the draft PDF, gated to `status ∈ {filing, complete}` (`DRAFT_NOT_ACCESSIBLE` otherwise). Rate: 15/hr/user.
+
+**New modules**
+- `lib/s3.ts` — S3 client (`ap-south-1`), pre-signed PUT/GET helpers, `buildDocumentKey`. Request checksums disabled for presigning; encryption via bucket-default SSE-S3.
+- `utils/sanitizeFilename.ts`, `schemas/document.schema.ts`, `repositories/document.repository.ts`, `services/document.service.ts`, `controllers/document.controller.ts`.
+- New env: `AWS_REGION`, `AWS_S3_BUCKET_NAME`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
+
+**Verified** — Newman suite extended to 22 requests / 68 assertions (all green); live S3 PUT→GET byte round-trip confirmed; unsigned public reads return 403. Admin draft *upload* (Phase 6) and the S3 hard-delete job (Phase 8) remain out of scope.
+
+---
+
 ## [2026-06-17] — test(api): Postman + Newman booking API test suite
 
 **Automated API tests under `test/postman/`** — Postman collection **"GST Notice Support"** runnable headlessly via Newman.

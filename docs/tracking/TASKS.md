@@ -158,15 +158,15 @@
 | ✅ | `GET /bookings` | Lists current user's bookings; ownership enforced, newest-first |
 | ✅ | `GET /bookings/:id` | Detail + documents + latest payment; 404 for foreign bookings (D69) |
 | ✅ | `POST /bookings/:id/cancel` | Allowed only at `draft_ready` + `payment_status=pending`; 409 INVALID_TRANSITION otherwise |
-| ✅ | API test suite — Postman collection "GST Notice Support" + Newman runner (booking lifecycle) | `test/postman/`; 11 requests / 38 assertions green; admin-login auth, creds injected from `server/.env` at runtime |
-| ⬚ | S3 client — Mumbai `ap-south-1`, private bucket, SSE-S3 | `server/src/lib/s3.ts` |
-| ⬚ | Pre-signed PUT URL generation — PDF only, ≤5 MB, ≤8 files/booking, 5-min expiry | All constraints validated server-side before issuing URL |
-| ⬚ | S3 key format: `{userId}/{bookingId}/{yyyyMMdd}-{sanitizedName}-{4rand}.pdf` | Sanitize filename; preserve original for display |
-| ⬚ | `POST /bookings/:id/upload-url` | Rate: 15/hr |
-| ⬚ | `POST /bookings/:id/confirm-upload` | Persists `booking_documents` row; `DUPLICATE_KEY` on duplicate `s3Key` |
-| ⬚ | `GET /bookings/:id/documents` | |
-| ⬚ | `GET /bookings/:id/draft-url` | 15-min pre-signed GET; gated to `status ∈ {filing, complete}` |
-| ⬚ | External: AWS credentials + bucket name + CORS config (`PUT` from frontend origin only) | Blocks S3 testing |
+| ✅ | API test suite — Postman collection "GST Notice Support" + Newman runner (booking lifecycle + document handling) | `test/postman/`; 22 requests / 68 assertions green; admin-login auth, creds injected from `server/.env` at runtime |
+| ✅ | S3 client — Mumbai `ap-south-1`, private bucket, SSE-S3 | `server/src/lib/s3.ts`; checksums off for presign, bucket-default SSE-S3 |
+| ✅ | Pre-signed PUT URL generation — PDF only, ≤5 MB, ≤8 files/booking, 5-min expiry | Constraints validated server-side; `ContentType`+`ContentLength` signed |
+| ✅ | S3 key format: `{userId}/{bookingId}/{yyyyMMdd}-{sanitizedName}-{4rand}.pdf` | `utils/sanitizeFilename.ts`; original `fileName` preserved for display |
+| ✅ | `POST /bookings/:id/upload-url` | Rate: 7/hr (per api_contract §4, supersedes earlier 15/hr note) |
+| ✅ | `POST /bookings/:id/confirm-upload` | Persists `booking_documents` row; `DUPLICATE_KEY` on duplicate `s3Key`; key-scope check |
+| ✅ | `GET /bookings/:id/documents` | Metadata only; `s3Key` never exposed |
+| ✅ | `GET /bookings/:id/draft-url` | 15-min pre-signed GET; gated to `status ∈ {filing, complete}`; rate 15/hr |
+| ✅ | External: AWS credentials + bucket + IAM (`PutObject`/`GetObject`/`DeleteObject`) | Live PUT→GET round-trip verified; unsigned public read → 403. Browser CORS to confirm when frontend uploads |
 
 ### EP10 — Auth Frontend & Route Protection (frontend, backend_plan Phase 2)
 | Status | Task | Notes |
