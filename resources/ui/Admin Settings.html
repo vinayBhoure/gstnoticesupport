@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · Settings · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* === APP SHELL === */
+  :root{ --sidebar-w:264px; --header-h:64px; }
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);}
+  .app{display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--neutral-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;}
+  .sidebar .brand{display:inline-flex;align-items:center;gap:10px;height:var(--header-h);padding:0 20px;flex:0 0 auto;border-bottom:1px solid var(--neutral-200);}
+  .sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .sidebar .brand .bn span{color:var(--accent-green);}
+  .sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+  .nav-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:8px 12px 6px;}
+  .nav-link{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:44px;line-height:1.2;transition:background .15s,color .15s;}
+  .nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);transition:color .15s;}
+  .nav-link:hover{background:var(--neutral-50);}
+  .nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .nav-link[aria-current="page"]{background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;}
+  .nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+  .sidebar .side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+  .side-help{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;}
+  .side-help .ic{width:18px;height:18px;color:var(--neutral-600);}
+  .side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+  .side-help:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+
+  .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+  .topbar{height:var(--header-h);flex:0 0 auto;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);border-bottom:1px solid var(--neutral-200);display:flex;align-items:center;gap:16px;padding:0 32px;}
+  .topbar .hamburger{display:none;width:44px;height:44px;align-items:center;justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);}
+  .topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+  .topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+  .topbar .mobile-brand .bn span{color:var(--accent-green);}
+  .topbar .spacer{flex:1;}
+  .topbar .tap-call{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;}
+  .topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+  .topbar .tap-call:hover{border-color:var(--primary-navy);}
+  .topbar .tap-call:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .num{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+  .acct{position:relative;}
+  .acct-btn{display:inline-flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;}
+  .acct-btn:hover{border-color:var(--primary-navy);}
+  .acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-avatar{width:32px;height:32px;border-radius:50%;flex:0 0 auto;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+  .acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);}
+  .acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+  .acct-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:6px;z-index:70;}
+  .acct-menu.open{display:block;}
+  .acct-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;}
+  .acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+  .acct-menu a:hover{background:var(--neutral-50);}
+  .acct-menu a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+  .content{flex:1;padding:32px;}
+  .content-inner{max-width:680px;margin:0 auto;}
+
+  /* === PAGE HEADER === */
+  .page-head{margin-bottom:32px;}
+  .page-head h1{font-size:36px;letter-spacing:-.01em;line-height:1.15;}
+
+  /* === CARDS === */
+  .card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:28px;margin-bottom:24px;}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+  .card-head h2{font-size:20px;font-weight:600;line-height:1.3;}
+  .card-head .ic{width:20px;height:20px;color:var(--neutral-600);flex:0 0 auto;}
+  .card-note{font-size:13px;color:var(--neutral-600);margin-top:-16px;margin-bottom:24px;}
+
+  /* === FORM FIELD PRIMITIVES (components.md) === */
+  .field{margin-bottom:18px;}
+  .field:last-of-type{margin-bottom:0;}
+  .field-label{display:block;font-size:14px;font-weight:500;color:var(--neutral-900);margin-bottom:6px;}
+  .field-label .req{color:var(--warning-amber);margin-left:2px;}
+
+  /* Password input wrapper — show/hide toggle inside */
+  .pw-wrap{position:relative;}
+  .pw-wrap input{
+    width:100%;min-height:48px;padding:0 48px 0 14px;
+    font-size:15px;font-family:inherit;color:var(--neutral-900);
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .pw-wrap input:focus{outline:none;border-color:var(--primary-deep-blue);box-shadow:0 0 0 3px rgba(27,58,107,.15);}
+  .pw-wrap input[aria-invalid="true"]{border-color:var(--warning-amber);}
+  .pw-wrap input[aria-invalid="true"]:focus{box-shadow:0 0 0 3px rgba(217,119,6,.18);}
+
+  .show-hide{
+    position:absolute;right:0;top:0;bottom:0;width:48px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:none;border:none;cursor:pointer;color:var(--neutral-600);
+    border-radius:0 var(--r-btn) var(--r-btn) 0;
+    transition:color .15s;
+  }
+  .show-hide:hover{color:var(--primary-navy);}
+  .show-hide:focus-visible{outline:none;box-shadow:inset 0 0 0 2px rgba(11,139,78,.5);}
+  .show-hide .ic{width:18px;height:18px;}
+
+  .field-error{
+    display:flex;align-items:flex-start;gap:7px;
+    font-size:13px;color:var(--warning-amber);line-height:1.5;
+    margin-top:7px;
+  }
+  .field-error .ic{width:14px;height:14px;flex:0 0 auto;margin-top:1px;}
+  .field-hint{font-size:13px;color:var(--neutral-600);margin-top:6px;line-height:1.5;}
+
+  /* Strength indicator */
+  .strength-row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+  .strength-track{flex:1;display:flex;gap:4px;}
+  .strength-seg{height:4px;flex:1;border-radius:2px;background:var(--neutral-200);transition:background .2s;}
+  .strength-lbl{font-size:13px;color:var(--neutral-600);min-width:40px;text-align:right;}
+
+  /* Submit row */
+  .submit-row{display:flex;align-items:center;gap:16px;margin-top:24px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 24px;border-radius:var(--r-btn);font-size:15px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s,color .15s;font-family:inherit;}
+  .btn .ic{width:17px;height:17px;flex:0 0 auto;}
+  .btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+  .btn-primary{background:var(--accent-green);color:#fff;border-color:var(--accent-green);}
+  .btn-primary:hover{background:var(--accent-green-hover);border-color:var(--accent-green-hover);}
+  .btn-primary:active{transform:translateY(1px);}
+  .btn-primary:disabled{background:var(--neutral-200);border-color:var(--neutral-200);color:var(--neutral-600);cursor:not-allowed;transform:none;}
+
+  /* Global error / success banners inside card */
+  .form-banner{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:14px 16px;border-radius:var(--r-btn);
+    font-size:14px;line-height:1.55;margin-top:24px;
+  }
+  .form-banner .ic{width:17px;height:17px;flex:0 0 auto;margin-top:1px;}
+  .form-banner.success{background:rgba(11,139,78,.07);border:1px solid rgba(11,139,78,.25);color:var(--primary-navy);}
+  .form-banner.success .ic{color:var(--accent-green);}
+  .form-banner.error{background:#FFF8EF;border:1px solid #F0D9B5;color:var(--neutral-900);}
+  .form-banner.error .ic{color:var(--warning-amber);}
+
+  /* === BUSINESS INFO CARD === */
+  .biz-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 32px;}
+  .biz-grid > div{min-width:0;}
+  .biz-grid dt{font-size:13px;font-weight:500;color:var(--neutral-600);margin-bottom:4px;}
+  .biz-grid dd{font-size:16px;font-weight:500;color:var(--neutral-900);overflow-wrap:break-word;line-height:1.4;}
+  .biz-grid dd.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;user-select:all;}
+
+  /* Skeleton */
+  .skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  @media (prefers-reduced-motion:reduce){.skel{animation:none;}}
+  .skel-field{height:14px;width:55%;margin-bottom:6px;}
+  .skel-val{height:20px;width:80%;}
+
+  [hidden]{display:none !important;}
+  .scrim{display:none;position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;}
+  .scrim.open{display:block;}
+
+  /* === RESPONSIVE (<lg) === */
+  @media (max-width:1023px){
+    .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+    .sidebar.open{transform:translateX(0);}
+    @media (prefers-reduced-motion:reduce){.sidebar{transition:none;}}
+    .main{margin-left:0;}
+    .topbar{padding:0 16px;}
+    .topbar .hamburger{display:inline-flex;}
+    .topbar .mobile-brand{display:inline-flex;}
+    .topbar .num{display:none;}
+    .content{padding:20px 16px 48px;}
+    .page-head h1{font-size:28px;}
+    .content-inner{max-width:100%;}
+    .biz-grid{grid-template-columns:1fr;}
+    .acct-name{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <a class="brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Admin navigation">
+      <span class="nav-label">Admin</span>
+      <a class="nav-link" href="Admin Overview.html">
+        <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Overview
+      </a>
+      <a class="nav-link" href="Admin Bookings.html">
+        <i data-lucide="folder-open" class="ic" aria-hidden="true"></i> Bookings
+      </a>
+      <a class="nav-link" href="Admin Users.html">
+        <i data-lucide="users" class="ic" aria-hidden="true"></i> Users
+      </a>
+      <a class="nav-link" href="Admin Settings.html" aria-current="page">
+        <i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html">
+        <i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support
+      </a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+      <span class="spacer"></span>
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+      </a>
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">AD</span>
+          <span class="acct-name">Admin</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+          <a href="Admin Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="content" data-screen-label="Admin Settings">
+      <div class="content-inner">
+
+        <div class="page-head">
+          <h1>Settings</h1>
+        </div>
+
+        <!-- ===== CHANGE PASSWORD ===== -->
+        <div class="card" role="region" aria-labelledby="pwHeading">
+          <div class="card-head">
+            <i data-lucide="lock" class="ic" aria-hidden="true"></i>
+            <h2 id="pwHeading">Change Password</h2>
+          </div>
+
+          <form id="pwForm" novalidate autocomplete="off">
+
+            <!-- Current Password -->
+            <div class="field" id="fCurrent">
+              <label class="field-label" for="currentPw">Current Password <span class="req" aria-hidden="true">*</span></label>
+              <div class="pw-wrap">
+                <input type="password" id="currentPw" name="currentPw"
+                       autocomplete="current-password"
+                       aria-required="true"
+                       aria-describedby="currentPwErr" />
+                <button type="button" class="show-hide" id="toggleCurrent"
+                        aria-label="Show current password" aria-controls="currentPw">
+                  <i data-lucide="eye" class="ic" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="field-error" id="currentPwErr" hidden role="alert">
+                <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+                <span id="currentPwErrMsg"></span>
+              </div>
+            </div>
+
+            <!-- New Password -->
+            <div class="field" id="fNew" style="margin-top:22px">
+              <label class="field-label" for="newPw">New Password <span class="req" aria-hidden="true">*</span></label>
+              <div class="pw-wrap">
+                <input type="password" id="newPw" name="newPw"
+                       autocomplete="new-password"
+                       aria-required="true"
+                       aria-describedby="newPwErr newPwHint" />
+                <button type="button" class="show-hide" id="toggleNew"
+                        aria-label="Show new password" aria-controls="newPw">
+                  <i data-lucide="eye" class="ic" aria-hidden="true"></i>
+                </button>
+              </div>
+              <!-- strength meter -->
+              <div class="strength-row" id="strengthRow" aria-hidden="true">
+                <div class="strength-track">
+                  <div class="strength-seg" id="s1"></div>
+                  <div class="strength-seg" id="s2"></div>
+                  <div class="strength-seg" id="s3"></div>
+                  <div class="strength-seg" id="s4"></div>
+                </div>
+                <span class="strength-lbl" id="strengthLbl"></span>
+              </div>
+              <p class="field-hint" id="newPwHint">Minimum 8 characters.</p>
+              <div class="field-error" id="newPwErr" hidden role="alert">
+                <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+                <span id="newPwErrMsg"></span>
+              </div>
+            </div>
+
+            <!-- Confirm New Password -->
+            <div class="field" id="fConfirm" style="margin-top:22px">
+              <label class="field-label" for="confirmPw">Confirm New Password <span class="req" aria-hidden="true">*</span></label>
+              <div class="pw-wrap">
+                <input type="password" id="confirmPw" name="confirmPw"
+                       autocomplete="new-password"
+                       aria-required="true"
+                       aria-describedby="confirmPwErr" />
+                <button type="button" class="show-hide" id="toggleConfirm"
+                        aria-label="Show confirm new password" aria-controls="confirmPw">
+                  <i data-lucide="eye" class="ic" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="field-error" id="confirmPwErr" hidden role="alert">
+                <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+                <span id="confirmPwErrMsg"></span>
+              </div>
+            </div>
+
+            <div class="submit-row">
+              <button type="submit" class="btn btn-primary" id="updateBtn">Update password</button>
+              <div id="formBanner" hidden></div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- ===== BUSINESS INFORMATION ===== -->
+        <div class="card" role="region" aria-labelledby="bizHeading">
+          <div class="card-head">
+            <i data-lucide="building-2" class="ic" aria-hidden="true"></i>
+            <h2 id="bizHeading">Business Information</h2>
+          </div>
+          <p class="card-note">Read-only — managed by configuration.</p>
+
+          <!-- loading skeleton -->
+          <div class="biz-grid" id="bizLoading" aria-hidden="true">
+            <div><div class="skel skel-field"></div><div class="skel skel-val"></div></div>
+            <div><div class="skel skel-field"></div><div class="skel skel-val"></div></div>
+            <div><div class="skel skel-field"></div><div class="skel skel-val"></div></div>
+            <div><div class="skel skel-field"></div><div class="skel skel-val"></div></div>
+            <div><div class="skel skel-field"></div><div class="skel skel-val"></div></div>
+            <div><div class="skel skel-field"></div><div class="skel skel-val"></div></div>
+          </div>
+
+          <!-- loaded -->
+          <dl class="biz-grid" id="bizLoaded" hidden>
+            <div>
+              <dt>Legal Name</dt>
+              <dd>GST Notice Support LLP</dd>
+            </div>
+            <div>
+              <dt>Business GSTIN</dt>
+              <dd class="mono">07AAFCG9876P1ZK</dd>
+            </div>
+            <div style="grid-column:1 / -1">
+              <dt>Registered Office</dt>
+              <dd>A-14, Sector 63, Noida — 201301, Uttar Pradesh, India</dd>
+            </div>
+            <div>
+              <dt>Support Email</dt>
+              <dd>support@gstnoticesupport.com</dd>
+            </div>
+            <div>
+              <dt>WhatsApp Number</dt>
+              <dd>+91 98765 00000</dd>
+            </div>
+            <div>
+              <dt>Notification Email</dt>
+              <dd>notify@gstnoticesupport.com</dd>
+            </div>
+          </dl>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  const $ = id => document.getElementById(id);
+
+  /* ============================================================
+     Show / hide password toggles
+     ============================================================ */
+  function wireToggle(toggleId, inputId){
+    const btn   = $(toggleId);
+    const input = $(inputId);
+    let visible = false;
+    btn.addEventListener('click', () => {
+      visible = !visible;
+      input.type = visible ? 'text' : 'password';
+      btn.setAttribute('aria-label', (visible ? 'Hide' : 'Show') + ' ' + input.labels[0].textContent.replace(' *','').toLowerCase());
+      btn.innerHTML = visible
+        ? '<i data-lucide="eye-off" class="ic" aria-hidden="true"></i>'
+        : '<i data-lucide="eye"     class="ic" aria-hidden="true"></i>';
+      lucide.createIcons();
+    });
+  }
+  wireToggle('toggleCurrent', 'currentPw');
+  wireToggle('toggleNew',     'newPw');
+  wireToggle('toggleConfirm', 'confirmPw');
+
+  /* ============================================================
+     Strength meter
+     ============================================================ */
+  const COLORS = ['var(--warning-amber)','var(--warning-amber)','#1B3A6B','var(--accent-green)'];
+  const LABELS = ['Weak','Fair','Good','Strong'];
+
+  function strength(pw){
+    if(!pw) return 0;
+    let s = 0;
+    if(pw.length >= 8)  s++;
+    if(pw.length >= 12) s++;
+    if(/[A-Z]/.test(pw) && /[0-9]/.test(pw)) s++;
+    if(/[^A-Za-z0-9]/.test(pw)) s++;
+    return Math.min(4, s);
+  }
+
+  $('newPw').addEventListener('input', () => {
+    const v = $('newPw').value;
+    const s = strength(v);
+    const segs = [$('s1'),$('s2'),$('s3'),$('s4')];
+    segs.forEach((seg, i) => {
+      seg.style.background = i < s ? COLORS[s-1] : 'var(--neutral-200)';
+    });
+    $('strengthLbl').textContent = v ? LABELS[s-1] || '' : '';
+    $('strengthLbl').style.color = v && s ? COLORS[s-1] : 'var(--neutral-600)';
+    /* clear errors on input */
+    setFieldError('newPwErr','newPwErrMsg','newPw','');
+  });
+
+  /* ============================================================
+     Inline validation helpers
+     ============================================================ */
+  function setFieldError(errId, msgId, inputId, msg){
+    const err   = $(errId);
+    const msgEl = $(msgId);
+    const inp   = $(inputId);
+    if(msg){
+      err.hidden = false;
+      msgEl.textContent = msg;
+      inp.setAttribute('aria-invalid','true');
+    } else {
+      err.hidden = true;
+      msgEl.textContent = '';
+      inp.removeAttribute('aria-invalid');
+    }
+  }
+
+  function showBanner(type, text){
+    const el = $('formBanner');
+    el.hidden = false;
+    el.innerHTML = '<div class="form-banner ' + type + '" role="alert">' +
+      '<i data-lucide="' + (type==='success' ? 'check-circle' : 'alert-circle') + '" class="ic" aria-hidden="true"></i>' +
+      '<span>' + text + '</span></div>';
+    lucide.createIcons();
+  }
+
+  function clearBanner(){ $('formBanner').hidden = true; $('formBanner').innerHTML = ''; }
+  function clearAllErrors(){
+    ['currentPwErr','newPwErr','confirmPwErr'].forEach(id => {
+      const errEl = $(id);
+      errEl.hidden = true;
+    });
+    ['currentPw','newPw','confirmPw'].forEach(id => $(id).removeAttribute('aria-invalid'));
+    clearBanner();
+  }
+
+  /* clear errors on input */
+  $('currentPw').addEventListener('input',  () => { setFieldError('currentPwErr','currentPwErrMsg','currentPw',''); clearBanner(); });
+  $('confirmPw').addEventListener('input',  () => { setFieldError('confirmPwErr','confirmPwErrMsg','confirmPw',''); clearBanner(); });
+
+  /* ============================================================
+     Form submit
+     ============================================================ */
+  $('pwForm').addEventListener('submit', e => {
+    e.preventDefault();
+    clearAllErrors();
+
+    const current  = $('currentPw').value;
+    const newPw    = $('newPw').value;
+    const confirm  = $('confirmPw').value;
+    let   valid    = true;
+
+    if(!current){
+      setFieldError('currentPwErr','currentPwErrMsg','currentPw','Enter your current password.');
+      valid = false;
+    }
+    if(newPw.length < 8){
+      setFieldError('newPwErr','newPwErrMsg','newPw','Password must be at least 8 characters.');
+      valid = false;
+    }
+    if(newPw && confirm && newPw !== confirm){
+      setFieldError('confirmPwErr','confirmPwErrMsg','confirmPw','New passwords don\'t match.');
+      valid = false;
+    }
+    if(!confirm && newPw){
+      setFieldError('confirmPwErr','confirmPwErrMsg','confirmPw','Please confirm your new password.');
+      valid = false;
+    }
+    if(!valid) return;
+
+    const btn = $('updateBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader" class="ic" aria-hidden="true"></i> Updating…';
+    lucide.createIcons();
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Update password';
+
+      /* simulate: "wrong123" = wrong current password; anything weak = error; else success */
+      if(current === 'wrong123'){
+        setFieldError('currentPwErr','currentPwErrMsg','currentPw','Incorrect current password.');
+        $('currentPw').focus();
+        return;
+      }
+
+      /* success */
+      $('currentPw').value = '';
+      $('newPw').value     = '';
+      $('confirmPw').value = '';
+      /* reset strength */
+      [$('s1'),$('s2'),$('s3'),$('s4')].forEach(s => s.style.background = 'var(--neutral-200)');
+      $('strengthLbl').textContent = '';
+      showBanner('success','Password updated.');
+    }, 1000);
+  });
+
+  /* ============================================================
+     Business info: simulate load delay
+     ============================================================ */
+  setTimeout(() => {
+    $('bizLoading').hidden = true;
+    $('bizLoaded').hidden  = false;
+  }, 750);
+
+  /* ============================================================
+     Mobile drawer + account menu
+     ============================================================ */
+  const sidebar   = $('sidebar');
+  const scrim     = $('scrim');
+  const hamburger = $('hamburger');
+  function openDrawer(){  sidebar.classList.add('open');    scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open'));    hamburger.setAttribute('aria-expanded','true'); }
+  function closeDrawer(){ sidebar.classList.remove('open'); scrim.classList.remove('open'); scrim.hidden=true; hamburger.setAttribute('aria-expanded','false'); }
+  hamburger.addEventListener('click', () => sidebar.classList.contains('open') ? closeDrawer() : openDrawer());
+  scrim.addEventListener('click', closeDrawer);
+
+  const acctBtn  = $('acctBtn');
+  const acctMenu = $('acctMenu');
+  function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+  acctBtn.addEventListener('click', e => { e.stopPropagation(); const o=acctMenu.classList.toggle('open'); acctBtn.setAttribute('aria-expanded',String(o)); });
+  document.addEventListener('click', e => { if(!e.target.closest('.acct')) closeAcct(); });
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeDrawer(); closeAcct(); } });
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+{
+  "info": {
+    "name": "GST Notice Support",
+    "description": "Automated API tests for gstnoticesupport.in. Scope: Phase 3 Booking Lifecycle (4 endpoints) and Phase 4 Document Handling (4 endpoints), plus the admin login required to reach them. Auth strategy: log in as the seeded admin (credentials injected at runtime via --env-var; never stored in this file). The document tests run against the booking created earlier, which stays in document_upload. confirm-upload only writes a DB row (it does not verify the S3 object), so the DB-side flow is fully covered here. Cases requiring a status past document_upload — upload-url INVALID_STATUS, FILE_LIMIT_REACHED (8 docs), and the draft-url happy path — need Phase 6 admin transitions or a manual DB seed and are verified manually.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth gate — Create booking unauthenticated (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Runs first, before login — the cookie jar is empty, so authenticate must reject.",
+              "pm.test('status is 401', function () { pm.response.to.have.status(401); });",
+              "const body = pm.response.json();",
+              "pm.test('envelope success=false', function () { pm.expect(body.success).to.eql(false); });",
+              "pm.test('error code UNAUTHORIZED', function () { pm.expect(body.error.code).to.eql('UNAUTHORIZED'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"serviceType\": \"asmt_10\",\n  \"contactName\": \"Ravi Kumar\",\n  \"contactEmail\": \"ravi@example.com\",\n  \"contactPhone\": \"+919876543210\",\n  \"organizationName\": \"Ravi Enterprises\",\n  \"filingFor\": \"self\",\n  \"gstn\": \"29AABCU9603R1ZX\",\n  \"consentInformationAccurate\": true,\n  \"consentContactAuthorized\": true\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] }
+      }
+    },
+    {
+      "name": "Login (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('envelope success=true', function () { pm.expect(body.success).to.eql(true); });",
+              "pm.test('returns user', function () { pm.expect(body.data.user).to.be.an('object'); });",
+              "const cookies = pm.response.headers.all().filter(function (h) { return h.key.toLowerCase() === 'set-cookie'; });",
+              "pm.test('access_token cookie set', function () {",
+              "  pm.expect(cookies.some(function (c) { return c.value.startsWith('access_token='); })).to.be.true;",
+              "});",
+              "pm.test('refresh_token cookie set', function () {",
+              "  pm.expect(cookies.some(function (c) { return c.value.startsWith('refresh_token='); })).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+      }
+    },
+    {
+      "name": "Create booking — invalid GSTN (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "const body = pm.response.json();",
+              "pm.test('error code VALIDATION_ERROR', function () { pm.expect(body.error.code).to.eql('VALIDATION_ERROR'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"serviceType\": \"asmt_10\",\n  \"contactName\": \"Ravi Kumar\",\n  \"contactEmail\": \"ravi@example.com\",\n  \"contactPhone\": \"+919876543210\",\n  \"filingFor\": \"self\",\n  \"gstn\": \"AAAAAAAAAAAAAAA\",\n  \"consentInformationAccurate\": true,\n  \"consentContactAuthorized\": true\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] }
+      }
+    },
+    {
+      "name": "Create booking — consent not accepted (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "const body = pm.response.json();",
+              "pm.test('error code VALIDATION_ERROR', function () { pm.expect(body.error.code).to.eql('VALIDATION_ERROR'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"serviceType\": \"asmt_10\",\n  \"contactName\": \"Ravi Kumar\",\n  \"contactEmail\": \"ravi@example.com\",\n  \"contactPhone\": \"+919876543210\",\n  \"filingFor\": \"self\",\n  \"gstn\": \"29AABCU9603R1ZX\",\n  \"consentInformationAccurate\": false,\n  \"consentContactAuthorized\": true\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] }
+      }
+    },
+    {
+      "name": "Create booking — success (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+              "const body = pm.response.json();",
+              "pm.test('envelope success=true', function () { pm.expect(body.success).to.eql(true); });",
+              "pm.test('message matches contract', function () { pm.expect(body.message).to.eql('Booking created. Please upload your documents to proceed.'); });",
+              "const booking = body.data.booking;",
+              "pm.test('status = document_upload', function () { pm.expect(booking.status).to.eql('document_upload'); });",
+              "pm.test('paymentStatus = pending', function () { pm.expect(booking.paymentStatus).to.eql('pending'); });",
+              "pm.test('client-supplied price is stripped', function () { pm.expect(booking).to.not.have.property('amountPaise'); });",
+              "pm.test('draftS3Key never returned', function () { pm.expect(booking).to.not.have.property('draftS3Key'); });",
+              "pm.test('gstn echoed', function () { pm.expect(booking.gstn).to.eql('29AABCU9603R1ZX'); });",
+              "pm.environment.set('bookingId', booking.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"serviceType\": \"asmt_10\",\n  \"contactName\": \"Ravi Kumar\",\n  \"contactEmail\": \"ravi@example.com\",\n  \"contactPhone\": \"+919876543210\",\n  \"organizationName\": \"Ravi Enterprises\",\n  \"filingFor\": \"self\",\n  \"gstn\": \"29AABCU9603R1ZX\",\n  \"consentInformationAccurate\": true,\n  \"consentContactAuthorized\": true,\n  \"amountPaise\": 1\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] }
+      }
+    },
+    {
+      "name": "List bookings (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('data is an array', function () { pm.expect(body.data).to.be.an('array'); });",
+              "pm.test('contains created booking, newest first', function () {",
+              "  pm.expect(body.data.length).to.be.above(0);",
+              "  pm.expect(body.data[0].id).to.eql(pm.environment.get('bookingId'));",
+              "});",
+              "pm.test('summary shape (no contactName)', function () { pm.expect(body.data[0]).to.not.have.property('contactName'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] }
+      }
+    },
+    {
+      "name": "Get booking detail (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const booking = pm.response.json().data.booking;",
+              "pm.test('id matches', function () { pm.expect(booking.id).to.eql(pm.environment.get('bookingId')); });",
+              "pm.test('has documents array', function () { pm.expect(booking.documents).to.be.an('array'); });",
+              "pm.test('has latestPayment key', function () { pm.expect(booking).to.have.property('latestPayment'); });",
+              "pm.test('detail shape includes gstn', function () { pm.expect(booking.gstn).to.eql('29AABCU9603R1ZX'); });",
+              "pm.test('draftS3Key never returned', function () { pm.expect(booking).to.not.have.property('draftS3Key'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}"] }
+      }
+    },
+    {
+      "name": "Get booking detail — invalid uuid (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "pm.test('error code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/bookings/not-a-uuid", "host": ["{{baseUrl}}"], "path": ["bookings", "not-a-uuid"] }
+      }
+    },
+    {
+      "name": "Get booking detail — non-existent (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', function () { pm.response.to.have.status(404); });",
+              "pm.test('error code NOT_FOUND', function () { pm.expect(pm.response.json().error.code).to.eql('NOT_FOUND'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/bookings/{{nonExistentUuid}}", "host": ["{{baseUrl}}"], "path": ["bookings", "{{nonExistentUuid}}"] }
+      }
+    },
+    {
+      "name": "Cancel booking — invalid transition (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Booking is in document_upload; cancel is only legal at draft_ready + pending.",
+              "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+              "pm.test('error code INVALID_TRANSITION', function () { pm.expect(pm.response.json().error.code).to.eql('INVALID_TRANSITION'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/cancel", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "cancel"] }
+      }
+    },
+    {
+      "name": "Cancel booking — non-existent (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', function () { pm.response.to.have.status(404); });",
+              "pm.test('error code NOT_FOUND', function () { pm.expect(pm.response.json().error.code).to.eql('NOT_FOUND'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/bookings/{{nonExistentUuid}}/cancel", "host": ["{{baseUrl}}"], "path": ["bookings", "{{nonExistentUuid}}", "cancel"] }
+      }
+    },
+    {
+      "name": "Upload URL — invalid file type (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "pm.test('error code INVALID_FILE_TYPE', function () { pm.expect(pm.response.json().error.code).to.eql('INVALID_FILE_TYPE'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"notice.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"text/plain\"\n}" },
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/upload-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "upload-url"] }
+      }
+    },
+    {
+      "name": "Upload URL — file too large (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "pm.test('error code FILE_TOO_LARGE', function () { pm.expect(pm.response.json().error.code).to.eql('FILE_TOO_LARGE'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"big.pdf\",\n  \"fileSize\": 6291456,\n  \"contentType\": \"application/pdf\"\n}" },
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/upload-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "upload-url"] }
+      }
+    },
+    {
+      "name": "Upload URL — validation error (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "pm.test('error code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"\",\n  \"fileSize\": -1,\n  \"contentType\": \"application/pdf\"\n}" },
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/upload-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "upload-url"] }
+      }
+    },
+    {
+      "name": "Upload URL — non-existent booking (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', function () { pm.response.to.have.status(404); });",
+              "pm.test('error code NOT_FOUND', function () { pm.expect(pm.response.json().error.code).to.eql('NOT_FOUND'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"notice.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" },
+        "url": { "raw": "{{baseUrl}}/bookings/{{nonExistentUuid}}/upload-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{nonExistentUuid}}", "upload-url"] }
+      }
+    },
+    {
+      "name": "Upload URL — success (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const res = pm.response.json().data;",
+              "pm.test('uploadUrl is a signed https url', function () { pm.expect(res.uploadUrl).to.be.a('string'); pm.expect(res.uploadUrl).to.match(/^https:\\/\\//); pm.expect(res.uploadUrl).to.include('X-Amz-Signature'); });",
+              "pm.test('s3Key ends with .pdf', function () { pm.expect(res.s3Key).to.match(/\\.pdf$/); });",
+              "pm.test('s3Key is scoped to this booking', function () { pm.expect(res.s3Key).to.include('/' + pm.environment.get('bookingId') + '/'); });",
+              "pm.test('s3Key stem is sanitized (no spaces or bang)', function () { pm.expect(res.s3Key).to.not.match(/[ !]/); });",
+              "pm.test('expiresAt present', function () { pm.expect(res.expiresAt).to.be.a('string'); });",
+              "pm.environment.set('docS3Key', res.s3Key);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"gst notice jan 2024!.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" },
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/upload-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "upload-url"] }
+      }
+    },
+    {
+      "name": "Confirm upload — success (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+              "const doc = pm.response.json().data.document;",
+              "pm.test('document belongs to booking', function () { pm.expect(doc.bookingId).to.eql(pm.environment.get('bookingId')); });",
+              "pm.test('uploadedBy = user', function () { pm.expect(doc.uploadedBy).to.eql('user'); });",
+              "pm.test('original fileName preserved', function () { pm.expect(doc.fileName).to.eql('gst notice jan 2024!.pdf'); });",
+              "pm.test('s3Key never returned', function () { pm.expect(doc).to.not.have.property('s3Key'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"{{docS3Key}}\",\n  \"fileName\": \"gst notice jan 2024!.pdf\"\n}" },
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/confirm-upload", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "confirm-upload"] }
+      }
+    },
+    {
+      "name": "Confirm upload — duplicate key (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+              "pm.test('error code DUPLICATE_KEY', function () { pm.expect(pm.response.json().error.code).to.eql('DUPLICATE_KEY'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"{{docS3Key}}\",\n  \"fileName\": \"gst notice jan 2024!.pdf\"\n}" },
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/confirm-upload", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "confirm-upload"] }
+      }
+    },
+    {
+      "name": "Confirm upload — key not scoped to booking (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "pm.test('error code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"00000000-0000-4000-8000-000000000000/00000000-0000-4000-8000-000000000000/20240101-x-abcd.pdf\",\n  \"fileName\": \"x.pdf\"\n}" },
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/confirm-upload", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "confirm-upload"] }
+      }
+    },
+    {
+      "name": "List documents (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const docs = pm.response.json().data.documents;",
+              "pm.test('documents is a non-empty array', function () { pm.expect(docs).to.be.an('array'); pm.expect(docs.length).to.be.above(0); });",
+              "pm.test('document metadata shape, no s3Key', function () { pm.expect(docs[0]).to.have.property('fileName'); pm.expect(docs[0]).to.not.have.property('s3Key'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/documents", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "documents"] }
+      }
+    },
+    {
+      "name": "Draft URL — not accessible at document_upload (403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 403', function () { pm.response.to.have.status(403); });",
+              "pm.test('error code DRAFT_NOT_ACCESSIBLE', function () { pm.expect(pm.response.json().error.code).to.eql('DRAFT_NOT_ACCESSIBLE'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/bookings/{{bookingId}}/draft-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{bookingId}}", "draft-url"] }
+      }
+    },
+    {
+      "name": "Draft URL — non-existent booking (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', function () { pm.response.to.have.status(404); });",
+              "pm.test('error code NOT_FOUND', function () { pm.expect(pm.response.json().error.code).to.eql('NOT_FOUND'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/bookings/{{nonExistentUuid}}/draft-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{nonExistentUuid}}", "draft-url"] }
+      }
+    }
+  ]
+}

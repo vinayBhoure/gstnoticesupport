@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book Service — Step 1: Select Service · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     BOOKING STEP 1 — Service Selection  /dashboard/book
+     Focused flow shell — no sidebar, no mobile bottom tab bar.
+     design.md §1–§7  |  components.md → Stepper, Notice Type Selector Card
+     ============================================================ */
+
+  body {
+    background: var(--neutral-50);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── skip link ──────────────────────────────────────────────── */
+  .skip-link {
+    position: absolute;
+    left: -999px;
+    top: 0;
+    background: var(--primary-navy);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 0 0 var(--r-btn) 0;
+    z-index: 200;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .skip-link:focus { left: 0; }
+
+  /* ============================================================
+     TOP BAR
+     ============================================================ */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--neutral-white);
+    border-bottom: 1px solid var(--neutral-200);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    flex-shrink: 0;
+  }
+
+  .top-bar__logo {
+    height: 34px;
+    width: auto;
+    display: block;
+  }
+
+  .btn-exit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--neutral-600);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 48px;
+    padding: 0 4px;
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .btn-exit:hover { color: var(--primary-navy); }
+  .btn-exit:focus-visible {
+    outline: none;
+    border-radius: var(--r-btn);
+    box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+  }
+
+  /* ============================================================
+     STEPPER  (components.md → Stepper / Progress Indicator)
+     300ms ease-out transitions — design.md §5.1
+     ============================================================ */
+  .stepper-rail {
+    background: var(--neutral-white);
+    border-bottom: 1px solid var(--neutral-200);
+    padding: 0 32px;
+    flex-shrink: 0;
+  }
+
+  .stepper {
+    display: flex;
+    align-items: center;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 18px 0;
+    list-style: none;
+  }
+
+  /* step item */
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .step__num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 300ms ease-out, border-color 300ms ease-out, color 300ms ease-out;
+  }
+
+  .step__label {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 300ms ease-out, font-weight 300ms ease-out;
+  }
+
+  /* active */
+  .step[data-state="active"] .step__num {
+    background: var(--accent-green);
+    color: #fff;
+    border: 2px solid var(--accent-green);
+  }
+  .step[data-state="active"] .step__label {
+    color: var(--primary-navy);
+    font-weight: 600;
+  }
+
+  /* upcoming */
+  .step[data-state="upcoming"] .step__num {
+    background: transparent;
+    color: var(--neutral-600);
+    border: 2px solid var(--neutral-200);
+  }
+  .step[data-state="upcoming"] .step__label {
+    color: var(--neutral-600);
+  }
+
+  /* complete */
+  .step[data-state="complete"] .step__num {
+    background: var(--accent-green);
+    color: #fff;
+    border: 2px solid var(--accent-green);
+  }
+  .step[data-state="complete"] .step__label {
+    color: var(--neutral-600);
+  }
+
+  /* connector line */
+  .step-connector {
+    flex: 1;
+    min-width: 32px;
+    height: 1px;
+    background: var(--neutral-200);
+    margin: 0 8px;
+    transition: background 300ms ease-out;
+  }
+  .step-connector[data-complete="true"] {
+    background: var(--accent-green);
+  }
+
+  /* ============================================================
+     MAIN CONTENT AREA
+     ============================================================ */
+  .main {
+    flex: 1;
+    padding: 48px 32px 112px; /* bottom clears sticky footer */
+  }
+
+  .content {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .content__heading {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary-navy);
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    margin-bottom: 8px;
+    text-wrap: pretty;
+  }
+
+  .content__sub {
+    font-size: 16px;
+    color: var(--neutral-600);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  /* ============================================================
+     CARDS WRAPPER — flex column; pre-deposit disclosure sits
+     between row 1 (ASMT-10, SCN) and row 2 (Commissioner, GSTAT)
+     ============================================================ */
+  .cards-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  /* row 1 always has a bottom margin — gap to predep or to row 2 */
+  .cards-row--top {
+    margin-bottom: 24px;
+  }
+
+  /* ============================================================
+     SERVICE CARD  (components.md → Notice Type Selector Card)
+     role="radio" inside role="radiogroup"
+     ============================================================ */
+  .service-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 24px;
+    background: var(--neutral-white);
+    border: 1.5px solid var(--neutral-200);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    font-family: inherit;
+  }
+
+  .service-card:hover:not([aria-checked="true"]) {
+    border-color: var(--neutral-600);
+    box-shadow: var(--shadow-md);
+  }
+
+  .service-card:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+  }
+
+  /* — selected state — 2px accent-green border + light tint bg */
+  .service-card[aria-checked="true"] {
+    border: 2px solid var(--accent-green);
+    background: rgba(11, 139, 78, .04);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* icon */
+  .card__icon {
+    color: var(--primary-deep-blue);
+    flex-shrink: 0;
+    transition: color .18s ease;
+  }
+  .service-card[aria-checked="true"] .card__icon {
+    color: var(--accent-green);
+  }
+
+  /* text */
+  .card__name {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--primary-navy);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .card__desc {
+    font-size: 14px;
+    color: var(--neutral-600);
+    line-height: 1.5;
+  }
+
+  .card__price {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary-navy);
+    margin-top: auto;
+    padding-top: 4px;
+    min-height: 22px; /* avoids height jump during skeleton → value */
+  }
+
+  /* price loading skeleton */
+  .skel {
+    display: inline-block;
+    width: 64px;
+    height: 18px;
+    border-radius: 4px;
+    background: linear-gradient(
+      90deg,
+      var(--neutral-200) 25%,
+      var(--neutral-50)  50%,
+      var(--neutral-200) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    vertical-align: middle;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* selected checkmark — top-right corner */
+  .card__check {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(.5);
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .service-card[aria-checked="true"] .card__check {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* ============================================================
+     PRE-DEPOSIT DISCLOSURE
+     Shows between row 1 and row 2 when ASMT-10 or SCN selected.
+     CSS animation only — no Framer Motion (design.md §5).
+     ============================================================ */
+  .predep-region {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-bottom: 0;
+    transition:
+      max-height .28s ease-out,
+      opacity    .22s ease-out,
+      margin-bottom .28s ease-out;
+  }
+
+  .predep-region.is-open {
+    max-height: 160px;
+    opacity: 1;
+    margin-bottom: 24px;
+  }
+
+  .predep-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--neutral-50);
+    border-left: 2px solid var(--warning-amber);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .predep-banner__icon {
+    color: var(--warning-amber);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .predep-banner__text {
+    font-size: 14px;
+    color: var(--neutral-900);
+    line-height: 1.55;
+  }
+
+  /* ============================================================
+     PRICING FOOTNOTE
+     ============================================================ */
+  .pricing-note {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    color: var(--neutral-600);
+    line-height: 1.5;
+    margin-top: 24px;
+  }
+  .pricing-note .ic-check {
+    color: var(--accent-green);
+    flex-shrink: 0;
+  }
+
+  /* ============================================================
+     FOOTER BAR
+     Full-width; sticky bottom on mobile via position:sticky.
+     Back: disabled step 1.  Continue: disabled until selection.
+     ============================================================ */
+  .footer-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 90;
+    background: var(--neutral-white);
+    border-top: 1px solid var(--neutral-200);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  /* Back — permanently disabled on step 1 */
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--neutral-200);
+    cursor: not-allowed;
+    min-height: 48px;
+    padding: 0 8px;
+    user-select: none;
+  }
+
+  /* Continue */
+  .btn-continue {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-green);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-btn);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    min-height: 48px;
+    padding: 13px 28px;
+    cursor: pointer;
+    transition: background .15s ease, transform .1s ease;
+  }
+  .btn-continue:hover:not(:disabled) { background: var(--accent-green-hover); }
+  .btn-continue:active:not(:disabled) {
+    background: var(--accent-green-hover);
+    transform: translateY(1px);
+  }
+  .btn-continue:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+  }
+  .btn-continue:disabled {
+    background: var(--neutral-200);
+    color: var(--neutral-600);
+    cursor: not-allowed;
+  }
+
+  /* ============================================================
+     RESPONSIVE DELTAS
+     ============================================================ */
+
+  /* < lg (1024px) — single column stack */
+  @media (max-width: 1023px) {
+    .cards-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .cards-row--top {
+      margin-bottom: 12px;
+    }
+    .predep-region.is-open {
+      margin-bottom: 12px;
+    }
+  }
+
+  /* < md (768px) */
+  @media (max-width: 767px) {
+    .top-bar,
+    .stepper-rail { padding: 0 20px; }
+    .main { padding: 28px 20px 100px; }
+    .footer-bar { padding: 12px 20px; }
+    .content__heading { font-size: 26px; letter-spacing: -.015em; }
+    .content__sub { font-size: 15px; margin-bottom: 24px; }
+  }
+
+  /* xs — hide step labels, keep bubbles */
+  @media (max-width: 479px) {
+    .step__label { display: none; }
+    .step-connector { min-width: 16px; }
+  }
+
+  /* reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .predep-region,
+    .card__check,
+    .service-card { transition: none !important; }
+    .skel { animation: none !important; background: var(--neutral-200); }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<!-- ==============================================================
+     TOP BAR — logo · Save & Exit [Tertiary]
+     No sidebar. No mobile bottom tab bar.  (Focused flow shell.)
+============================================================== -->
+<header class="top-bar" role="banner">
+  <a href="Dashboard Home.html" aria-label="GST Notice Support — back to dashboard">
+    <img src="assets/logo.png" alt="GST Notice Support" class="top-bar__logo" />
+  </a>
+  <a href="Dashboard Home.html" class="btn-exit" aria-label="Save progress and exit to dashboard">
+    Save &amp; Exit
+    <i data-lucide="x" width="15" height="15"></i>
+  </a>
+</header>
+
+<!-- ==============================================================
+     STEPPER  (components.md → Stepper / Progress Indicator)
+     design.md §5.1 — 300ms ease-out step transition
+============================================================== -->
+<nav class="stepper-rail" aria-label="Booking progress">
+  <ol class="stepper">
+    <li class="step" data-state="active" aria-current="step" id="step-1">
+      <div class="step__num" aria-hidden="true">1</div>
+      <span class="step__label">Service</span>
+    </li>
+    <li class="step-connector" role="presentation" aria-hidden="true" id="conn-1"></li>
+    <li class="step" data-state="upcoming" id="step-2">
+      <div class="step__num" aria-hidden="true">2</div>
+      <span class="step__label">Details</span>
+    </li>
+    <li class="step-connector" role="presentation" aria-hidden="true" id="conn-2"></li>
+    <li class="step" data-state="upcoming" id="step-3">
+      <div class="step__num" aria-hidden="true">3</div>
+      <span class="step__label">Documents</span>
+    </li>
+  </ol>
+</nav>
+
+<!-- ==============================================================
+     MAIN CONTENT  — centred, max-width 720px
+============================================================== -->
+<main class="main" id="main">
+  <div class="content">
+
+    <h2 class="content__heading">What type of GST notice have you received?</h2>
+    <p class="content__sub">Select the service that matches your notice type.</p>
+
+    <!-- ──────────────────────────────────────────────────────
+         SERVICE CARDS  radiogroup
+         a11y: role="radiogroup" + role="radio" per card +
+         roving tabindex + arrow-key navigation
+    ────────────────────────────────────────────────────── -->
+    <div
+      role="radiogroup"
+      aria-label="Select a GST notice service"
+      aria-required="true"
+      id="service-group"
+      class="cards-wrapper"
+    >
+
+      <!-- Row 1 — ASMT-10 and SCN (both trigger pre-deposit disclosure) -->
+      <div class="cards-row cards-row--top">
+
+        <!-- ASMT-10 Reply -->
+        <button
+          type="button"
+          role="radio"
+          aria-checked="false"
+          class="service-card"
+          data-service="asmt10"
+          data-predep="true"
+          tabindex="0"
+          id="card-asmt10"
+        >
+          <div class="card__check" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <i data-lucide="file-search" width="36" height="36" class="card__icon" stroke-width="1.5"></i>
+          <div>
+            <p class="card__name">ASMT-10 Reply</p>
+            <p class="card__desc">Reply to scrutiny notices under ASMT-10</p>
+          </div>
+          <div class="card__price">
+            <span class="price-val skel" data-price="₹4,999" aria-label="Price loading"></span>
+          </div>
+        </button>
+
+        <!-- Show Cause Notice (SCN) Reply -->
+        <button
+          type="button"
+          role="radio"
+          aria-checked="false"
+          class="service-card"
+          data-service="scn"
+          data-predep="true"
+          tabindex="-1"
+          id="card-scn"
+        >
+          <div class="card__check" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <i data-lucide="shield-alert" width="36" height="36" class="card__icon" stroke-width="1.5"></i>
+          <div>
+            <p class="card__name">Show Cause Notice (SCN) Reply</p>
+            <p class="card__desc">Response to Section 74 demand and penalty notices</p>
+          </div>
+          <div class="card__price">
+            <span class="price-val skel" data-price="₹6,999" aria-label="Price loading"></span>
+          </div>
+        </button>
+
+      </div>
+      <!-- /cards-row--top -->
+
+      <!-- Pre-deposit disclosure — animated in between row 1 and row 2.
+           aria-live="polite" announces to screen readers on reveal. -->
+      <div
+        class="predep-region"
+        id="predep-region"
+        role="region"
+        aria-label="Pre-deposit requirement"
+        aria-hidden="true"
+      >
+        <div aria-live="polite" aria-atomic="true" id="predep-live">
+          <div class="predep-banner">
+            <i data-lucide="info" width="16" height="16" class="predep-banner__icon" stroke-width="1.5"></i>
+            <p class="predep-banner__text">
+              A pre-deposit as per GST Act is required before this service is filed.
+              Our team will advise the exact amount.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2 — Commissioner Appeal and GSTAT Appeal (no pre-deposit) -->
+      <div class="cards-row">
+
+        <!-- Commissioner Appeal -->
+        <button
+          type="button"
+          role="radio"
+          aria-checked="false"
+          class="service-card"
+          data-service="commissioner"
+          data-predep="false"
+          tabindex="-1"
+          id="card-commissioner"
+        >
+          <div class="card__check" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <i data-lucide="scale" width="36" height="36" class="card__icon" stroke-width="1.5"></i>
+          <div>
+            <p class="card__name">Commissioner Appeal</p>
+            <p class="card__desc">Appeals against GST orders at Commissioner level</p>
+          </div>
+          <div class="card__price">
+            <span class="price-val skel" data-price="₹9,999" aria-label="Price loading"></span>
+          </div>
+        </button>
+
+        <!-- GSTAT Appeal -->
+        <button
+          type="button"
+          role="radio"
+          aria-checked="false"
+          class="service-card"
+          data-service="gstat"
+          data-predep="false"
+          tabindex="-1"
+          id="card-gstat"
+        >
+          <div class="card__check" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <i data-lucide="landmark" width="36" height="36" class="card__icon" stroke-width="1.5"></i>
+          <div>
+            <p class="card__name">GSTAT Appeal</p>
+            <p class="card__desc">Tribunal-level appeals against Commissioner decisions</p>
+          </div>
+          <div class="card__price">
+            <span class="price-val skel" data-price="₹14,999" aria-label="Price loading"></span>
+          </div>
+        </button>
+
+      </div>
+      <!-- /cards-row--bottom -->
+
+    </div>
+    <!-- /service-group -->
+
+    <!-- Pricing footnote -->
+    <p class="pricing-note">
+      <i data-lucide="check-circle" width="15" height="15" class="ic-check" stroke-width="1.5"></i>
+      Prices are inclusive of all charges. No hidden fees.
+    </p>
+
+  </div>
+</main>
+
+<!-- ==============================================================
+     FOOTER BAR — sticky bottom on mobile
+     Back [disabled step 1] · Continue [disabled until selection]
+============================================================== -->
+<footer class="footer-bar">
+  <button
+    type="button"
+    class="btn-back"
+    disabled
+    aria-disabled="true"
+    aria-label="Step 1 of 3, no previous step"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back
+  </button>
+
+  <button
+    type="button"
+    class="btn-continue"
+    id="btn-continue"
+    disabled
+    aria-disabled="true"
+    aria-label="Continue to step 2, Details"
+  >
+    Continue
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
+</footer>
+
+<!-- ==============================================================
+     SCRIPT
+     – price reveal (simulates server-derived fetch)
+     – card selection + pre-deposit disclosure toggle
+     – keyboard navigation (ARIA radiogroup pattern)
+     – Continue → stepper step transition (design.md §5.1)
+============================================================== -->
+<script>
+(function () {
+  'use strict';
+
+  // ── Init Lucide ──────────────────────────────────────────────
+  lucide.createIcons();
+
+  // ── Price reveal — simulated server fetch (900 ms) ──────────
+  // NOTE: Prices are server-derived. Client values are placeholders only.
+  setTimeout(function () {
+    document.querySelectorAll('.price-val').forEach(function (el) {
+      el.classList.remove('skel');
+      el.textContent = el.getAttribute('data-price');
+      el.removeAttribute('aria-label');
+    });
+  }, 900);
+
+  // ── Card selection ───────────────────────────────────────────
+  var cards       = Array.from(document.querySelectorAll('.service-card'));
+  var predepRegion = document.getElementById('predep-region');
+  var predepLive   = document.getElementById('predep-live');
+  var btnContinue  = document.getElementById('btn-continue');
+  var selectedService = null;
+
+  function selectCard(card) {
+    // Deselect all — roving tabindex
+    cards.forEach(function (c) {
+      c.setAttribute('aria-checked', 'false');
+      c.setAttribute('tabindex', '-1');
+    });
+
+    // Select this card
+    card.setAttribute('aria-checked', 'true');
+    card.setAttribute('tabindex', '0');
+    selectedService = card.getAttribute('data-service');
+
+    // Pre-deposit disclosure
+    var needsPredep = card.getAttribute('data-predep') === 'true';
+    if (needsPredep) {
+      predepRegion.classList.add('is-open');
+      predepRegion.setAttribute('aria-hidden', 'false');
+    } else {
+      predepRegion.classList.remove('is-open');
+      predepRegion.setAttribute('aria-hidden', 'true');
+    }
+
+    // Enable Continue
+    btnContinue.disabled = false;
+    btnContinue.setAttribute('aria-disabled', 'false');
+  }
+
+  // Click
+  cards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      selectCard(card);
+      card.focus();
+    });
+  });
+
+  // Keyboard — ARIA radiogroup pattern (arrow keys move + select)
+  cards.forEach(function (card, idx) {
+    card.addEventListener('keydown', function (e) {
+      var next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        next = cards[(idx + 1) % cards.length];
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        next = cards[(idx - 1 + cards.length) % cards.length];
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectCard(card);
+        return;
+      }
+      if (next) { selectCard(next); next.focus(); }
+    });
+  });
+
+  // ── Continue → stepper step transition (design.md §5.1, 300ms) ─
+  btnContinue.addEventListener('click', function () {
+    if (!selectedService || btnContinue.disabled) return;
+
+    var s1   = document.getElementById('step-1');
+    var s2   = document.getElementById('step-2');
+    var c1   = document.getElementById('conn-1');
+
+    // Step 1 → complete
+    s1.setAttribute('data-state', 'complete');
+    s1.removeAttribute('aria-current');
+    s1.querySelector('.step__num').innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    // Connector 1 → complete
+    c1.setAttribute('data-complete', 'true');
+
+    // Step 2 → active
+    s2.setAttribute('data-state', 'active');
+    s2.setAttribute('aria-current', 'step');
+
+    // Navigate to Step 2
+    sessionStorage.setItem('gns_booking_service', selectedService);
+    console.info('[Booking] Step 1 complete — service:', selectedService);
+    setTimeout(function(){ window.location.href = 'Booking Step 2 - Personal Info.html'; }, 350);
+  });
+
+}());
+</script>
+<script src="js/app-state.js"></script>
+</body>
+</html>

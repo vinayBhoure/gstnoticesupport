@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     APP SHELL (authenticated — sidebar)
+     components.md → App Shell (sidebar). First implementation;
+     intended to be the reusable shell for /dashboard and /admin.
+     ============================================================ */
+
+  :root{ --sidebar-w:264px; --header-h:64px; }
+
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);}
+
+  .app{display:flex;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:var(--sidebar-w);flex:0 0 var(--sidebar-w);
+    background:#fff;border-right:1px solid var(--neutral-200);
+    display:flex;flex-direction:column;
+    position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;
+  }
+  .sidebar .brand{
+    display:inline-flex;align-items:center;gap:10px;
+    height:var(--header-h);padding:0 20px;flex:0 0 auto;
+    border-bottom:1px solid var(--neutral-200);
+  }
+  .sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .sidebar .brand .bn span{color:var(--accent-green);}
+
+  .sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+  .nav-label{
+    font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--neutral-600);padding:8px 12px 6px;
+  }
+  .nav-link{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:var(--r-btn);
+    font-size:15px;font-weight:500;color:var(--neutral-900);
+    min-height:44px;line-height:1.2;
+    transition:background .15s,color .15s;
+  }
+  .nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);transition:color .15s;}
+  .nav-link:hover{background:var(--neutral-50);}
+  .nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .nav-link[aria-current="page"]{
+    background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;
+  }
+  .nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+
+  .sidebar .side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+  .side-help{
+    display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);
+    font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;
+  }
+  .side-help .ic{width:18px;height:18px;color:var(--neutral-600);}
+  .side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+  .side-help:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+
+  /* ---------- Main column ---------- */
+  .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+
+  /* Header strip */
+  .topbar{
+    height:var(--header-h);flex:0 0 auto;
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);
+    border-bottom:1px solid var(--neutral-200);
+    display:flex;align-items:center;gap:16px;
+    padding:0 32px;
+  }
+  .topbar .hamburger{
+    display:none;width:44px;height:44px;align-items:center;justify-content:center;
+    border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);
+  }
+  .topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+  .topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+  .topbar .mobile-brand .bn span{color:var(--accent-green);}
+
+  .topbar .spacer{flex:1;}
+  .topbar .tap-call{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;
+  }
+  .topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+  .topbar .tap-call:hover{border-color:var(--primary-navy);}
+  .topbar .tap-call:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .tap-call .num{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+
+  /* Account menu */
+  .acct{position:relative;}
+  .acct-btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    background:#fff;cursor:pointer;
+  }
+  .acct-btn:hover{border-color:var(--primary-navy);}
+  .acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-avatar{
+    width:32px;height:32px;border-radius:50%;flex:0 0 auto;
+    background:var(--primary-navy);color:#fff;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:600;letter-spacing:.02em;
+  }
+  .acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);line-height:1.2;}
+  .acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+  .acct-menu{
+    display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:200px;
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+    box-shadow:var(--shadow-md);padding:6px;z-index:70;
+  }
+  .acct-menu.open{display:block;}
+  .acct-menu a{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);
+    font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;
+  }
+  .acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+  .acct-menu a:hover{background:var(--neutral-50);}
+  .acct-menu a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+  /* ---------- Content ---------- */
+  .content{flex:1;padding:32px;}
+  .content-inner{max-width:1100px;margin:0 auto;}
+
+  /* Page header row */
+  .page-head{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
+    flex-wrap:wrap;
+  }
+  .page-head .greet h1{font-size:36px;letter-spacing:-.01em;line-height:1.15;}
+  .page-head .greet .date{font-size:14px;color:var(--neutral-600);margin-top:6px;}
+
+  /* Summary strip */
+  .summary-strip{
+    display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;
+    margin-top:20px;font-size:14px;color:var(--neutral-600);
+  }
+  .summary-strip .seg{display:inline-flex;align-items:center;gap:7px;}
+  .summary-strip .seg b{color:var(--primary-navy);font-weight:600;}
+  .summary-strip .dot{width:3px;height:3px;border-radius:50%;background:var(--neutral-200);}
+
+  /* Attention banner */
+  .attn-banner{
+    display:flex;align-items:center;gap:14px;
+    margin-top:24px;padding:16px 20px;
+    background:var(--neutral-50);
+    border:1px solid var(--neutral-200);border-left:3px solid var(--warning-amber);
+    border-radius:var(--r-card);box-shadow:var(--shadow-sm);
+  }
+  .attn-banner .ic-lead{width:22px;height:22px;flex:0 0 auto;color:var(--warning-amber);}
+  .attn-banner .txt{flex:1;font-size:15px;color:var(--neutral-900);line-height:1.45;}
+  .attn-banner .txt b{font-weight:600;}
+  .attn-banner .btn-tertiary{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;min-height:44px;}
+
+  /* Active services section */
+  .section-block{margin-top:40px;}
+  .section-head{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;
+  }
+  .section-head h2{font-size:24px;font-weight:600;line-height:1.3;}
+  .section-head .btn-tertiary{display:inline-flex;align-items:center;gap:5px;min-height:44px;}
+
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  }
+
+  /* ---------- Booking Summary Card (authenticated) ---------- */
+  .booking-card{
+    display:flex;flex-direction:column;gap:10px;
+    background:#fff;border:1px solid var(--neutral-200);
+    border-radius:var(--r-card);box-shadow:var(--shadow-sm);
+    padding:16px;min-height:88px;
+    text-align:left;cursor:pointer;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .booking-card:hover{border-color:#cdd5e2;box-shadow:var(--shadow-md);}
+  .booking-card:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .booking-card.draft-ready{border-left:3px solid var(--warning-amber);}
+  .booking-card .bc-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .booking-card .bc-type{font-size:16px;font-weight:600;color:var(--primary-navy);line-height:1.35;}
+  .booking-card .bc-next{font-size:14px;color:var(--neutral-600);line-height:1.45;}
+  .booking-card .bc-meta{
+    display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+    font-size:14px;color:var(--neutral-600);margin-top:auto;padding-top:4px;
+  }
+  .booking-card .bc-meta .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+  .booking-card .bc-meta .sep{color:var(--neutral-200);}
+
+  /* ---------- Service Status Badge ---------- */
+  .status-badge{
+    display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
+    font-size:14px;font-weight:500;line-height:1.3;
+    padding:4px 10px;min-height:24px;border-radius:var(--r-badge);
+    white-space:nowrap;
+  }
+  .status-badge .ic{width:16px;height:16px;flex:0 0 auto;}
+  .status-badge.s-upload{background:var(--neutral-50);color:var(--neutral-900);border:1px solid var(--neutral-200);}
+  .status-badge.s-review{background:var(--primary-deep-blue);color:#fff;}
+  .status-badge.s-draft{background:var(--warning-amber);color:#fff;}
+  .status-badge.s-filing{background:var(--primary-navy);color:#fff;}
+  .status-badge.s-complete{background:var(--accent-green);color:#fff;}
+  .status-badge.s-cancelled{background:var(--neutral-200);color:var(--neutral-600);}
+
+  /* ---------- Empty state ---------- */
+  .empty-state{
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding:64px 24px;max-width:440px;margin:48px auto 0;
+  }
+  .empty-state .ic-big{width:80px;height:80px;color:var(--neutral-200);margin-bottom:8px;}
+  .empty-state h2{font-size:24px;font-weight:600;margin-top:16px;}
+  .empty-state p{font-size:16px;color:var(--neutral-600);line-height:1.6;margin-top:10px;margin-bottom:28px;max-width:36ch;}
+
+  /* ---------- Skeleton loaders ---------- */
+  .skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);
+    background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+  @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+  @media (prefers-reduced-motion: reduce){ .skel{animation:none;} }
+  .skel-strip{height:16px;width:280px;margin-top:22px;}
+  .skel-card{
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);padding:16px;min-height:88px;display:flex;flex-direction:column;gap:12px;
+  }
+  .skel-line{height:14px;}
+  .skel-card .l1{width:70%;height:18px;}
+  .skel-card .l2{width:90%;}
+  .skel-card .l3{width:55%;margin-top:auto;}
+
+  /* ---------- Hidden helper ---------- */
+  [hidden]{display:none !important;}
+
+  /* ---------- Mobile drawer scrim ---------- */
+  .scrim{
+    display:none;position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;
+  }
+  .scrim.open{display:block;}
+
+  /* ============================================================
+     RESPONSIVE — sidebar → slide-in drawer (<lg)
+     ============================================================ */
+  @media (max-width:1023px){
+    .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+    .sidebar.open{transform:translateX(0);}
+    @media (prefers-reduced-motion: reduce){ .sidebar{transition:none;} }
+    .main{margin-left:0;}
+    .topbar{padding:0 16px;}
+    .topbar .hamburger{display:inline-flex;}
+    .topbar .mobile-brand{display:inline-flex;}
+    .topbar .tap-call .num{display:none;}
+    .content{padding:24px 16px 48px;}
+    .page-head .greet h1{font-size:28px;}
+    .cards-grid{grid-template-columns:1fr;}
+    .acct-name{display:none;}
+  }
+
+  /* ============================================================
+     PREVIEW STATE SWITCHER (review aid — not part of product UI)
+     ============================================================ */
+  .state-switch{
+    position:fixed;right:16px;bottom:16px;z-index:100;
+    display:flex;align-items:center;gap:6px;
+    background:#fff;border:1px dashed #c4ccd9;border-radius:10px;
+    padding:7px 9px;box-shadow:var(--shadow-md);
+    font-size:12px;
+  }
+  .state-switch .lbl{font-weight:600;color:var(--neutral-600);margin-right:2px;}
+  .state-switch button{
+    border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);
+    font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:inherit;
+  }
+  .state-switch button[aria-pressed="true"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+  .state-switch button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- ============================================================
+       SIDEBAR — components.md → App Shell (sidebar)
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <a class="brand" href="Dashboard Home.html" aria-label="GST Notice Support dashboard home">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Dashboard navigation">
+      <a class="nav-link" href="Dashboard Home.html" aria-current="page">
+        <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Dashboard
+      </a>
+      <a class="nav-link" href="Services List.html">
+        <i data-lucide="folder-open" class="ic" aria-hidden="true"></i> My Services
+      </a>
+      <a class="nav-link" href="Payment History.html">
+        <i data-lucide="credit-card" class="ic" aria-hidden="true"></i> Payments
+      </a>
+      <a class="nav-link" href="Settings.html">
+        <i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html">
+        <i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support
+      </a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <!-- ============================================================
+       MAIN COLUMN
+       ============================================================ -->
+  <div class="main">
+
+    <!-- Header strip -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Dashboard Home.html" aria-label="GST Notice Support dashboard home">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+
+      <span class="spacer"></span>
+
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+        <span class="num-sr" hidden>Call us</span>
+      </a>
+
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">RK</span>
+          <span class="acct-name">Rajesh Kumar</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+          <a href="My Profile.html" role="menuitem"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+          <a href="Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main id="main" class="content" data-screen-label="Dashboard Home">
+      <div class="content-inner">
+
+        <!-- 1. Page header row -->
+        <div class="page-head">
+          <div class="greet">
+            <h1 id="greeting">Good morning, Rajesh</h1>
+            <div class="date" id="todayDate">Tuesday, 9 June 2026</div>
+          </div>
+          <a class="btn btn-primary" href="Booking Step 1 - Service Selection.html" data-state-hide="empty">
+            <i data-lucide="plus" class="ic" aria-hidden="true"></i> Book New Service
+          </a>
+        </div>
+
+        <!-- ===== ACTIVE / DRAFT states (items 2–4) ===== -->
+        <div id="populatedView">
+
+          <!-- 2. Summary strip -->
+          <div class="summary-strip" aria-label="Account summary">
+            <span class="seg"><b>2</b> Active</span>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="seg"><b>1</b> Complete</span>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="seg"><b>0</b> Cancelled</span>
+          </div>
+
+          <!-- 3. Attention banner (Draft Ready only) -->
+          <div class="attn-banner" id="attnBanner" role="status" aria-live="polite">
+            <i data-lucide="alert-circle" class="ic-lead" aria-hidden="true"></i>
+            <p class="txt"><b>ASMT-10 Reply</b> — draft ready, payment required</p>
+            <a class="btn-tertiary" href="Service Detail.html">View Service <i data-lucide="arrow-right" style="width:15px;height:15px" aria-hidden="true"></i></a>
+          </div>
+
+          <!-- 4. Active services section -->
+          <section class="section-block" aria-labelledby="activeHeading">
+            <div class="section-head">
+              <h2 id="activeHeading">Active Services</h2>
+              <a class="btn-tertiary" href="Services List.html">View all services <i data-lucide="arrow-right" style="width:15px;height:15px" aria-hidden="true"></i></a>
+            </div>
+
+            <div class="cards-grid">
+
+              <!-- Card 1 — Draft Ready (amber left border, rendered first) -->
+              <a class="booking-card draft-ready" id="cardDraft" href="Service Detail.html" aria-label="ASMT-10 Reply — draft ready, payment required. View details.">
+                <div class="bc-row1">
+                  <span class="bc-type">ASMT-10 Reply</span>
+                  <span class="status-badge s-draft">
+                    <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i> Draft Ready
+                  </span>
+                </div>
+                <p class="bc-next">Draft ready — payment required</p>
+                <div class="bc-meta">
+                  <span>02 Jun 2026</span>
+                  <span class="sep" aria-hidden="true">·</span>
+                  <span class="mono">GNS-2026-0517</span>
+                </div>
+              </a>
+
+              <!-- Card 2 — In Review -->
+              <a class="booking-card" href="Service Detail.html" aria-label="SCN Reply, Section 74 — awaiting review. View details.">
+                <div class="bc-row1">
+                  <span class="bc-type">SCN Reply (Section 74)</span>
+                  <span class="status-badge s-review">
+                    <i data-lucide="search" class="ic" aria-hidden="true"></i> In Review
+                  </span>
+                </div>
+                <p class="bc-next">Awaiting review</p>
+                <div class="bc-meta">
+                  <span>28 May 2026</span>
+                  <span class="sep" aria-hidden="true">·</span>
+                  <span class="mono">GNS-2026-0489</span>
+                </div>
+              </a>
+
+            </div>
+          </section>
+        </div>
+
+        <!-- ===== EMPTY state (replaces 2–4) ===== -->
+        <div id="emptyView" hidden>
+          <div class="empty-state">
+            <i data-lucide="folder-open" class="ic-big" aria-hidden="true"></i>
+            <h2>No active services</h2>
+            <p>Book your first service to get expert help with your GST notice.</p>
+            <a class="btn btn-primary" href="Booking Step 1 - Service Selection.html">
+              <i data-lucide="plus" class="ic" aria-hidden="true"></i> Book New Service
+            </a>
+          </div>
+        </div>
+
+        <!-- ===== LOADING state (skeletons) ===== -->
+        <div id="loadingView" hidden aria-hidden="true">
+          <div class="skel skel-strip"></div>
+          <div class="section-block">
+            <div class="section-head">
+              <div class="skel skel-line" style="width:180px;height:22px"></div>
+            </div>
+            <div class="cards-grid">
+              <div class="skel-card"><div class="skel skel-line l1"></div><div class="skel skel-line l2"></div><div class="skel skel-line l3"></div></div>
+              <div class="skel-card"><div class="skel skel-line l1"></div><div class="skel skel-line l2"></div><div class="skel skel-line l3"></div></div>
+              <div class="skel-card"><div class="skel skel-line l1"></div><div class="skel skel-line l2"></div><div class="skel skel-line l3"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Preview state switcher (review aid — remove in production) -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">State</span>
+  <button data-state="draft" aria-pressed="true">Draft ready</button>
+  <button data-state="active" aria-pressed="false">No draft</button>
+  <button data-state="empty" aria-pressed="false">Empty</button>
+  <button data-state="loading" aria-pressed="false">Loading</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="22" y="26" width="20" height="48" rx="3" fill="#1B3A6B"/>
+    <rect x="48" y="26" width="30" height="14" rx="3" fill="#0B8B4E"/>
+    <rect x="48" y="46" width="30" height="10" rx="2" fill="#E5E9F0"/>
+    <rect x="48" y="60" width="30" height="10" rx="2" fill="#E5E9F0"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  /* ---------- Time-based greeting + date ---------- */
+  (function(){
+    const h = new Date().getHours();
+    const part = h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening');
+    const g = document.getElementById('greeting');
+    if(g) g.textContent = part + ', Rajesh';
+    const d = new Date();
+    const fmt = d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    const el = document.getElementById('todayDate');
+    if(el) el.textContent = fmt;
+  })();
+
+  /* ---------- Mobile drawer ---------- */
+  const sidebar  = document.getElementById('sidebar');
+  const scrim    = document.getElementById('scrim');
+  const hamburger= document.getElementById('hamburger');
+  function openDrawer(){
+    sidebar.classList.add('open');
+    scrim.hidden = false; requestAnimationFrame(()=>scrim.classList.add('open'));
+    hamburger.setAttribute('aria-expanded','true');
+  }
+  function closeDrawer(){
+    sidebar.classList.remove('open');
+    scrim.classList.remove('open'); scrim.hidden = true;
+    hamburger.setAttribute('aria-expanded','false');
+  }
+  hamburger.addEventListener('click', ()=> sidebar.classList.contains('open') ? closeDrawer() : openDrawer());
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeDrawer(); closeAcct(); } });
+
+  /* ---------- Account menu ---------- */
+  const acctBtn  = document.getElementById('acctBtn');
+  const acctMenu = document.getElementById('acctMenu');
+  function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+  acctBtn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const open = acctMenu.classList.toggle('open');
+    acctBtn.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e)=>{ if(!e.target.closest('.acct')) closeAcct(); });
+
+  /* ---------- Preview state switcher ---------- */
+  const populated = document.getElementById('populatedView');
+  const emptyView = document.getElementById('emptyView');
+  const loadingView = document.getElementById('loadingView');
+  const attnBanner  = document.getElementById('attnBanner');
+  const cardDraft   = document.getElementById('cardDraft');
+  const stateBtns   = document.querySelectorAll('.state-switch button');
+  const hideOnEmpty = document.querySelectorAll('[data-state-hide="empty"]');
+
+  function setState(state){
+    populated.hidden   = (state !== 'draft' && state !== 'active');
+    emptyView.hidden   = (state !== 'empty');
+    loadingView.hidden = (state !== 'loading');
+    // header "Book New Service" hidden only in empty (empty state has its own CTA)
+    hideOnEmpty.forEach(el => el.style.display = (state === 'empty') ? 'none' : '');
+    // Draft Ready specifics
+    if(state === 'draft'){
+      attnBanner.hidden = false;
+      cardDraft.classList.add('draft-ready');
+      cardDraft.parentElement.prepend(cardDraft); // draft renders first
+    } else if(state === 'active'){
+      attnBanner.hidden = true;
+      // demote the would-be-draft card to a plain In Review card
+      cardDraft.classList.remove('draft-ready');
+      cardDraft.querySelector('.bc-type').textContent = 'Commissioner Appeal';
+      cardDraft.querySelector('.status-badge').className = 'status-badge s-filing';
+      cardDraft.querySelector('.status-badge').innerHTML = '<i data-lucide="clock" class="ic" aria-hidden="true"></i> Filing';
+      cardDraft.querySelector('.bc-next').textContent = 'Filing in progress';
+      cardDraft.querySelector('.bc-meta').innerHTML = '<span>20 May 2026</span><span class="sep" aria-hidden="true">·</span><span class="mono">GNS-2026-0463</span>';
+      lucide.createIcons();
+    }
+    stateBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.state === state)));
+  }
+  stateBtns.forEach(b => b.addEventListener('click', ()=> setState(b.dataset.state)));
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+})();
+</script>
+</body>
+</html>

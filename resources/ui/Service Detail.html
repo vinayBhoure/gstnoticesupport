@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ASMT-10 Reply · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ============================================================
+   APP SHELL (sidebar) — shared shell
+   ============================================================ */
+:root{ --sidebar-w:264px; --header-h:64px; --tabbar-h:64px; }
+html,body{min-height:100%;}
+body{background:var(--neutral-50);}
+.app{display:flex;min-height:100vh;}
+
+.sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--neutral-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;}
+.sidebar .brand{display:inline-flex;align-items:center;gap:10px;height:var(--header-h);padding:0 20px;flex:0 0 auto;border-bottom:1px solid var(--neutral-200);}
+.sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+.sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+.sidebar .brand .bn span{color:var(--accent-green);}
+.sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+.nav-link{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:44px;transition:background .15s,color .15s;}
+.nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);}
+.nav-link:hover{background:var(--neutral-50);}
+.nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.nav-link[aria-current="page"]{background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;}
+.nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+.side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+.side-help{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;}
+.side-help .ic{width:18px;height:18px;}
+.side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+
+.main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+.topbar{height:var(--header-h);flex:0 0 auto;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);border-bottom:1px solid var(--neutral-200);display:flex;align-items:center;gap:16px;padding:0 32px;}
+.topbar .hamburger{display:none;width:44px;height:44px;align-items:center;justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);}
+.topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+.topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+.topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+.topbar .mobile-brand .bn span{color:var(--accent-green);}
+.topbar .spacer{flex:1;}
+.topbar .tap-call{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;}
+.topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+.topbar .tap-call:hover{border-color:var(--primary-navy);}
+.topbar .tap-call .num{font-family:'JetBrains Mono',monospace;font-size:13px;}
+.acct{position:relative;}
+.acct-btn{display:inline-flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;}
+.acct-btn:hover{border-color:var(--primary-navy);}
+.acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.acct-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+.acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);}
+.acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+.acct-menu{display:none;position:absolute;right:0;top:calc(100%+8px);min-width:200px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:6px;z-index:70;}
+.acct-menu.open{display:block;}
+.acct-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;}
+.acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+.acct-menu a:hover{background:var(--neutral-50);}
+.acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+.content{flex:1;padding:32px;}
+.content-inner{max-width:1100px;margin:0 auto;}
+
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--neutral-600);margin-bottom:20px;flex-wrap:wrap;}
+.breadcrumb a{color:var(--neutral-600);font-weight:500;}
+.breadcrumb a:hover{color:var(--primary-navy);}
+.breadcrumb a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);border-radius:4px;}
+.breadcrumb .sep{color:var(--neutral-200);}
+.breadcrumb .current{color:var(--primary-navy);font-weight:600;}
+
+/* Status row */
+.status-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px;}
+.status-row h1{font-size:32px;letter-spacing:-.01em;line-height:1.2;}
+
+/* Booking meta */
+.booking-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;color:var(--neutral-600);margin-bottom:32px;}
+.booking-meta .mono{font-family:'JetBrains Mono',monospace;font-size:13px;}
+.booking-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--neutral-200);}
+
+/* Two-column grid */
+.two-col{display:grid;grid-template-columns:60fr 40fr;gap:24px;align-items:start;}
+
+/* ============================================================
+   LEFT COLUMN — cards
+   ============================================================ */
+.detail-card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:24px;margin-bottom:20px;}
+.detail-card h2{font-size:18px;font-weight:600;margin-bottom:18px;}
+
+/* Case Information — dl/dt/dd */
+dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:10px 20px;}
+dt{font-size:14px;font-weight:500;color:var(--neutral-600);white-space:nowrap;}
+dd{font-size:14px;color:var(--neutral-900);word-break:break-word;}
+dd.mono{font-family:'JetBrains Mono',monospace;font-size:13px;}
+
+/* Uploaded Documents */
+ul.doc-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.doc-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-btn);}
+.doc-item .ic{width:18px;height:18px;color:var(--neutral-600);flex:0 0 auto;}
+.doc-item .name{font-size:14px;color:var(--neutral-900);font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.doc-item .size{font-size:13px;color:var(--neutral-600);white-space:nowrap;}
+.conf-note{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--neutral-600);margin-top:14px;}
+.conf-note .ic{width:15px;height:15px;color:var(--accent-green);flex:0 0 auto;}
+
+/* ============================================================
+   RIGHT COLUMN — status action panels
+   ============================================================ */
+.action-panel{background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:24px;position:sticky;top:calc(var(--header-h) + 20px);}
+[data-panel]{display:none;}
+[data-panel].active{display:block;}
+
+/* Generic panel icon row */
+.panel-icon-row{display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
+.panel-icon-row .big-ic{width:40px;height:40px;color:var(--neutral-600);}
+.panel-icon-row .big-ic.green{color:var(--accent-green);}
+.action-panel h2.ph{font-size:20px;font-weight:600;text-align:center;color:var(--primary-navy);margin-bottom:10px;}
+.action-panel .pbody{font-size:15px;color:var(--neutral-600);text-align:center;line-height:1.6;}
+
+/* Complete panel */
+.panel-complete{background:rgba(11,139,78,.05);border-color:rgba(11,139,78,.2);}
+.panel-complete h2.ph{color:var(--accent-green);}
+
+/* Expert Summary panel (Draft Ready) */
+.expert-summary{font-size:15px;color:var(--neutral-900);line-height:1.7;margin-bottom:18px;}
+.panel-divider{height:1px;background:var(--neutral-200);margin:18px 0;}
+
+/* Pay-to-unlock component */
+.pay-unlock{display:flex;flex-direction:column;gap:14px;}
+.pre-dep-row,.fee-row{display:flex;align-items:center;justify-content:space-between;font-size:14px;padding:10px 12px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-btn);}
+.pre-dep-row .lbl{color:var(--neutral-600);}
+.pre-dep-row .amt{font-weight:600;color:var(--primary-navy);font-family:'JetBrains Mono',monospace;font-size:13px;}
+.fee-row .lbl{color:var(--neutral-600);}
+.fee-row .amt{font-weight:600;color:var(--primary-navy);font-family:'JetBrains Mono',monospace;font-size:13px;}
+
+/* Lock / unlock icon animation */
+.lock-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.lock-icon-anim{width:36px;height:36px;color:var(--neutral-600);}
+@keyframes unlockPop{
+  0%  {transform:rotate(-12deg) scale(1.2);}
+  40% {transform:rotate(8deg) scale(1.25);}
+  70% {transform:rotate(-3deg) scale(1.1);}
+  100%{transform:rotate(0) scale(1);}
+}
+.lock-icon-anim.animating{animation:unlockPop 350ms ease-out both;}
+@media(prefers-reduced-motion:reduce){.lock-icon-anim.animating{animation:none;}}
+
+/* Draft reveal (unlocked state) */
+.draft-reveal{display:none;}
+.draft-reveal.revealed{display:block;animation:fadeUp 300ms ease-out both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@media(prefers-reduced-motion:reduce){.draft-reveal.revealed{animation:none;}}
+.draft-preview{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-btn);padding:14px;font-size:14px;color:var(--neutral-900);line-height:1.7;margin-bottom:14px;}
+.draft-preview .draft-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-green);margin-bottom:8px;}
+.advisory{font-size:14px;color:var(--neutral-600);margin-top:12px;line-height:1.5;}
+
+/* Pay button loading */
+.btn-pay .spinner{width:18px;height:18px;display:none;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+.btn-pay[data-loading="true"] .btn-lbl{display:none;}
+.btn-pay[data-loading="true"] .spinner{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@media(prefers-reduced-motion:reduce){.btn-pay .spinner{animation:none;}}
+
+/* Cancel link + confirmation */
+.cancel-link-wrap{margin-top:16px;text-align:center;}
+.cancel-link{display:inline-flex;align-items:center;gap:5px;min-height:44px;font-size:14px;font-weight:500;color:var(--neutral-600);background:none;border:none;cursor:pointer;font-family:inherit;}
+.cancel-link:hover{color:var(--primary-navy);}
+.cancel-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);border-radius:6px;}
+.cancel-confirm{display:none;margin-top:16px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:18px;}
+.cancel-confirm.show{display:block;}
+.cancel-confirm h3{font-size:17px;font-weight:600;margin-bottom:6px;}
+.cancel-confirm p{font-size:14px;color:var(--neutral-600);margin-bottom:16px;line-height:1.5;}
+.cancel-confirm .btn-row{display:flex;gap:10px;flex-direction:column;}
+.btn-danger{background:var(--warning-amber);color:#fff;border-color:var(--warning-amber);}
+.btn-danger:hover{background:#C96D05;border-color:#C96D05;}
+
+/* View Draft button row */
+.action-btn-row{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+.status-badge{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:6px 12px;min-height:28px;border-radius:var(--r-badge);white-space:nowrap;}
+.status-badge .ic{width:16px;height:16px;}
+.s-upload{background:var(--neutral-50);color:var(--neutral-900);border:1px solid var(--neutral-200);}
+.s-review{background:var(--primary-deep-blue);color:#fff;}
+.s-draft{background:var(--warning-amber);color:#fff;}
+.s-filing{background:var(--primary-navy);color:#fff;}
+.s-complete{background:var(--accent-green);color:#fff;}
+.s-cancelled{background:var(--neutral-200);color:var(--neutral-600);}
+
+/* ============================================================
+   SKELETON
+   ============================================================ */
+.skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+@keyframes shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+@media(prefers-reduced-motion:reduce){.skel{animation:none;}}
+.skel-block{height:14px;margin-bottom:10px;}
+
+/* ============================================================
+   MOBILE BOTTOM TAB BAR + DRAWER
+   ============================================================ */
+.tabbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;height:var(--tabbar-h);background:#fff;border-top:1px solid var(--neutral-200);box-shadow:var(--shadow-sm);grid-template-columns:repeat(4,1fr);}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--neutral-600);text-decoration:none;position:relative;min-height:48px;}
+.tab .ic{width:24px;height:24px;stroke-width:1.5;}
+.tab .lbl{font-size:12px;font-weight:500;}
+.tab:focus-visible{outline:none;box-shadow:inset 0 0 0 3px rgba(11,139,78,.35);border-radius:6px;}
+.tab[aria-current="page"]{color:var(--primary-navy);}
+.tab[aria-current="page"]::after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:2px;background:var(--accent-green);border-radius:0 0 2px 2px;}
+
+.scrim{position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;opacity:0;transition:opacity .2s;}
+.scrim.open{opacity:1;}
+.drawer{position:fixed;inset:0 auto 0 0;width:84%;max-width:320px;z-index:80;background:#fff;transform:translateX(-100%);transition:transform .2s ease;display:flex;flex-direction:column;box-shadow:var(--shadow-md);}
+.drawer.open{transform:translateX(0);}
+@media(prefers-reduced-motion:reduce){.drawer,.scrim,.sidebar{transition:none !important;}}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--neutral-200);}
+.drawer-head .brand{display:inline-flex;align-items:center;gap:8px;}
+.drawer-head .brand img{height:26px;width:26px;border-radius:6px;border:1px solid var(--neutral-200);}
+.drawer-head .brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+.drawer-head .brand .bn span{color:var(--accent-green);}
+.drawer-head .close{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--neutral-600);cursor:pointer;border-radius:var(--r-btn);}
+.drawer-acct{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--neutral-200);}
+.drawer-acct .avatar{width:42px;height:42px;border-radius:50%;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex:0 0 auto;}
+.drawer-acct .who .nm{font-size:15px;font-weight:600;color:var(--primary-navy);}
+.drawer-acct .who .em{font-size:13px;color:var(--neutral-600);}
+.drawer nav{flex:1;padding:8px;}
+.d-link{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:48px;}
+.d-link .ic{width:20px;height:20px;color:var(--neutral-600);flex:0 0 auto;}
+.d-link:hover{background:var(--neutral-50);}
+.d-link.wa .ic{color:var(--wa-green);}
+.d-divider{height:1px;background:var(--neutral-200);margin:8px 4px;}
+.drawer-foot{padding:14px 16px;border-top:1px solid var(--neutral-200);}
+.drawer-foot .legal{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--neutral-600);}
+.drawer-foot .legal a{color:var(--neutral-600);}
+
+[hidden]{display:none !important;}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:1023px){
+  .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .topbar{padding:0 16px;}
+  .topbar .hamburger{display:inline-flex;}
+  .topbar .mobile-brand{display:inline-flex;}
+  .topbar .tap-call .num{display:none;}
+  .content{padding:24px 16px calc(var(--tabbar-h)+28px);}
+  .two-col{grid-template-columns:1fr;}
+  .action-panel{position:static;}
+  .status-row h1{font-size:24px;}
+  .tabbar{display:grid;}
+  .acct-name{display:none;}
+}
+
+/* ============================================================
+   PREVIEW STATE SWITCHER
+   ============================================================ */
+.state-switch{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;align-items:center;gap:5px;flex-wrap:wrap;background:#fff;border:1px dashed #c4ccd9;border-radius:10px;padding:7px 9px;box-shadow:var(--shadow-md);font-size:12px;}
+.state-switch .lbl{font-weight:600;color:var(--neutral-600);margin-right:2px;}
+.state-switch button{border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:inherit;}
+.state-switch button[aria-pressed="true"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar" aria-label="Primary">
+  <a class="brand" href="Dashboard Home.html">
+    <img src="assets/logo.png" alt="" />
+    <span class="bn">GST<span>Notice</span>Support</span>
+  </a>
+  <nav aria-label="Dashboard navigation">
+    <a class="nav-link" href="Dashboard Home.html"><i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Dashboard</a>
+    <a class="nav-link" href="Services List.html" aria-current="page"><i data-lucide="folder-open" class="ic" aria-hidden="true"></i> My Services</a>
+    <a class="nav-link" href="Payment History.html"><i data-lucide="credit-card" class="ic" aria-hidden="true"></i> Payments</a>
+    <a class="nav-link" href="Settings.html"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+  </nav>
+  <div class="side-foot">
+    <a class="side-help" href="Contact.html"><i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support</a>
+  </div>
+</aside>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-expanded="false">
+      <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+    </button>
+    <a class="mobile-brand" href="Dashboard Home.html">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <span class="spacer"></span>
+    <a class="tap-call" href="tel:+918041000000">
+      <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+      <span class="num">+91 80 4100 0000</span>
+    </a>
+    <div class="acct">
+      <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+        <span class="acct-avatar" aria-hidden="true">RK</span>
+        <span class="acct-name">Rajesh Kumar</span>
+        <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+      </button>
+      <div class="acct-menu" id="acctMenu" role="menu">
+        <a href="My Profile.html" role="menuitem"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+        <a href="Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+        <div class="divider"></div>
+        <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="content" data-screen-label="Service Detail">
+    <div class="content-inner">
+
+      <!-- BREADCRUMB -->
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="Dashboard Home.html">Dashboard</a>
+        <span class="sep" aria-hidden="true">›</span>
+        <a href="Services List.html">My Services</a>
+        <span class="sep" aria-hidden="true">›</span>
+        <span class="current" id="breadcrumbService">ASMT-10 Reply</span>
+      </nav>
+
+      <!-- STATUS ROW -->
+      <div class="status-row">
+        <h1 id="serviceTitle">ASMT-10 Reply</h1>
+        <span class="status-badge s-draft" id="statusBadge" role="status" aria-live="polite">
+          <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+          <span id="statusLabel">Draft Ready</span>
+        </span>
+      </div>
+
+      <!-- BOOKING META -->
+      <div class="booking-meta">
+        <span><span class="sr-only">Reference:</span> <span class="mono">Ref: GNS-2026-0517</span></span>
+        <span class="dot" aria-hidden="true"></span>
+        <span>Booked 02 Jun 2026</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span>₹4,999</span>
+      </div>
+
+      <!-- ============================================================
+           LOADING STATE
+           ============================================================ -->
+      <div id="loadingView" hidden aria-hidden="true">
+        <div class="two-col">
+          <div>
+            <div class="detail-card" style="margin-bottom:20px;">
+              <div class="skel skel-block" style="width:140px;height:20px;margin-bottom:20px;"></div>
+              <div class="skel skel-block" style="width:100%"></div>
+              <div class="skel skel-block" style="width:90%"></div>
+              <div class="skel skel-block" style="width:80%"></div>
+              <div class="skel skel-block" style="width:85%"></div>
+            </div>
+            <div class="detail-card">
+              <div class="skel skel-block" style="width:160px;height:20px;margin-bottom:20px;"></div>
+              <div class="skel skel-block" style="width:100%;height:36px;margin-bottom:8px;"></div>
+              <div class="skel skel-block" style="width:100%;height:36px;margin-bottom:8px;"></div>
+            </div>
+          </div>
+          <div class="action-panel">
+            <div class="skel skel-block" style="width:70%;height:18px;margin:0 auto 16px;"></div>
+            <div class="skel skel-block" style="width:100%;height:56px;margin-bottom:10px;"></div>
+            <div class="skel skel-block" style="width:100%;height:48px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           POPULATED CONTENT
+           ============================================================ -->
+      <div id="populatedView">
+        <div class="two-col">
+
+          <!-- LEFT COLUMN -->
+          <div>
+            <!-- Case Information -->
+            <div class="detail-card">
+              <h2>Case Information</h2>
+              <dl class="kv">
+                <dt>Full Name</dt>   <dd>Rajesh Kumar</dd>
+                <dt>Email</dt>       <dd>rajesh.kumar@firm.in</dd>
+                <dt>Mobile</dt>      <dd>+91 98765 43210</dd>
+                <dt>GSTIN</dt>       <dd class="mono">29ABCDE1234F1Z5</dd>
+                <dt>Organisation</dt><dd>Kumar Enterprises Pvt. Ltd.</dd>
+                <dt>Filing For</dt>  <dd>FY 2024–25</dd>
+              </dl>
+            </div>
+
+            <!-- Uploaded Documents -->
+            <div class="detail-card">
+              <h2>Uploaded Documents</h2>
+              <ul class="doc-list" aria-label="Uploaded documents">
+                <li class="doc-item">
+                  <i data-lucide="file-text" class="ic" aria-hidden="true"></i>
+                  <span class="name">ASMT-10 Notice.pdf</span>
+                  <span class="size">245 KB</span>
+                </li>
+                <li class="doc-item">
+                  <i data-lucide="file-text" class="ic" aria-hidden="true"></i>
+                  <span class="name">GST Returns FY2024-25.pdf</span>
+                  <span class="size">1.2 MB</span>
+                </li>
+                <li class="doc-item">
+                  <i data-lucide="file-text" class="ic" aria-hidden="true"></i>
+                  <span class="name">Bank Statement Q3 2024.pdf</span>
+                  <span class="size">890 KB</span>
+                </li>
+              </ul>
+              <p class="conf-note">
+                <i data-lucide="shield-check" class="ic" aria-hidden="true"></i>
+                Documents are confidential and never shared.
+              </p>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN — STATUS ACTION PANEL -->
+          <div>
+            <div class="action-panel" aria-label="Status and actions">
+
+              <!-- ── PANEL: Document Upload ── -->
+              <div data-panel="upload">
+                <div class="panel-icon-row"><i data-lucide="file-text" class="big-ic" aria-hidden="true"></i></div>
+                <h2 class="ph">Documents Received</h2>
+                <p class="pbody">Our team will begin reviewing your case shortly. We'll notify you by email.</p>
+              </div>
+
+              <!-- ── PANEL: In Review ── -->
+              <div data-panel="review">
+                <div class="panel-icon-row"><i data-lucide="search" class="big-ic" aria-hidden="true"></i></div>
+                <h2 class="ph">Under Review</h2>
+                <p class="pbody">Our team is reviewing your case. We'll notify you when your draft reply is ready.</p>
+              </div>
+
+              <!-- ── PANEL: Draft Ready ── -->
+              <div data-panel="draft">
+                <h2 style="font-size:18px;font-weight:600;margin-bottom:14px;">Expert Summary</h2>
+                <p class="expert-summary">
+                  Our review of the ASMT-10 notice identifies discrepancies in ITC claims for Q3 FY 2024–25.
+                  The demand of ₹3.8L appears inflated due to mismatches in GSTR-2A reconciliation.
+                  A strong reply citing Section 16(2)(c) with supporting bank statements and vendor
+                  declarations should achieve full abatement or significant reduction.
+                </p>
+                <div class="panel-divider" aria-hidden="true"></div>
+                <!-- Pay-to-Unlock (locked) -->
+                <div class="pay-unlock" id="payUnlockLocked">
+                  <div class="pre-dep-row">
+                    <span class="lbl">Pre-deposit (as per GST Act)</span>
+                    <span class="amt">₹19,000</span>
+                  </div>
+                  <div class="fee-row">
+                    <span class="lbl">Reply preparation fee</span>
+                    <span class="amt">₹4,999</span>
+                  </div>
+                  <div class="lock-wrap">
+                    <i data-lucide="lock" class="lock-icon-anim" id="lockIcon" aria-hidden="true"></i>
+                    <button class="btn btn-primary btn-block btn-pay" id="payBtn" aria-label="Pay to unlock draft reply">
+                      <span class="btn-lbl">Pay to Unlock Draft</span>
+                      <span class="spinner" aria-hidden="true"></span>
+                    </button>
+                  </div>
+                </div>
+                <!-- Draft Reveal (appears after payment) -->
+                <div class="draft-reveal" id="draftReveal">
+                  <div class="draft-preview">
+                    <div class="draft-label">Draft Reply — ASMT-10 / GNS-2026-0517</div>
+                    To,<br>The Deputy Commissioner (GST)<br>Jurisdiction: Bengaluru South<br><br>
+                    Sub: Reply to Assessment Order under Section 74 of CGST Act, 2017 for FY 2024–25.<br><br>
+                    We hereby submit our response to the notice dated 01 Jun 2026 citing ITC discrepancies.
+                    As detailed in the enclosures, the figures align with our GSTR-3B filings and vendor
+                    GSTR-1 declarations…<br>
+                    <span style="color:var(--neutral-600);font-size:13px;">[Draft continues · 4 pages]</span>
+                  </div>
+                  <button class="btn btn-primary btn-block" id="confirmDraftBtn">Confirm Draft</button>
+                  <div class="action-btn-row">
+                    <a class="btn btn-secondary" href="Draft Viewer.html">View Draft</a>
+                  </div>
+                  <p class="advisory">Review your draft and confirm to notify our team.</p>
+                </div>
+                <!-- Cancel link + inline confirmation -->
+                <div class="cancel-link-wrap" id="cancelWrap">
+                  <button class="cancel-link" id="cancelLink" aria-expanded="false" aria-controls="cancelConfirm">
+                    Cancel this service
+                  </button>
+                </div>
+                <div class="cancel-confirm" id="cancelConfirm" role="region" aria-label="Cancel confirmation">
+                  <h3>Are you sure?</h3>
+                  <p>Cancellation cannot be undone.</p>
+                  <div class="cancel-confirm .btn-row">
+                    <button class="btn btn-danger btn-block" id="confirmCancelBtn" style="margin-bottom:10px;">Confirm Cancellation</button>
+                    <button class="btn btn-secondary btn-block" id="keepService">Keep Service</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── PANEL: Payment Received ── -->
+              <div data-panel="payment_received">
+                <div class="draft-preview">
+                  <div class="draft-label">Draft Reply — ASMT-10 / GNS-2026-0517</div>
+                  To,<br>The Deputy Commissioner (GST)<br>Jurisdiction: Bengaluru South<br><br>
+                  Sub: Reply to Assessment Order under Section 74 of CGST Act, 2017 for FY 2024–25.<br><br>
+                  We hereby submit our response to the notice citing ITC discrepancies.
+                  As detailed in the enclosures, the figures align with our GSTR-3B filings and vendor
+                  GSTR-1 declarations…<br>
+                  <span style="color:var(--neutral-600);font-size:13px;">[Draft continues · 4 pages]</span>
+                </div>
+                <button class="btn btn-primary btn-block" id="confirmDraftBtn2" style="margin-bottom:10px;">Confirm Draft</button>
+                <a class="btn btn-secondary btn-block" href="Draft Viewer.html">View Draft</a>
+                <p class="advisory">Review your draft carefully, then confirm to proceed to filing.</p>
+              </div>
+
+              <!-- ── PANEL: Filing (unlocked) ── -->
+              <div data-panel="filing">
+                <div class="draft-preview">
+                  <div class="draft-label">Draft Reply — ASMT-10 / GNS-2026-0517</div>
+                  To,<br>The Deputy Commissioner (GST)<br>Jurisdiction: Bengaluru South<br><br>
+                  Sub: Reply to Assessment Order under Section 74 of CGST Act, 2017 for FY 2024–25.<br><br>
+                  We hereby submit our response citing ITC discrepancies are reconciled. As detailed in
+                  the enclosures, all figures align with GSTR-3B filings and vendor declarations…<br>
+                  <span style="color:var(--neutral-600);font-size:13px;">[Draft continues · 4 pages]</span>
+                </div>
+                <button class="btn btn-primary btn-block" disabled aria-disabled="true" style="margin-bottom:10px;opacity:.6;cursor:not-allowed;">Confirmed – awaiting filing</button>
+                <a class="btn btn-secondary btn-block" href="Draft Viewer.html">View Draft</a>
+              </div>
+
+              <!-- ── PANEL: Complete ── -->
+              <div data-panel="complete" class="panel-complete" style="margin:-24px;padding:24px;border-radius:var(--r-card);">
+                <div class="panel-icon-row"><i data-lucide="check-circle" class="big-ic green" aria-hidden="true"></i></div>
+                <h2 class="ph">Service Complete</h2>
+                <p class="pbody">Your response has been filed on the GST portal.</p>
+                <div class="action-btn-row" style="margin-top:20px;align-items:center;">
+                  <a class="btn-tertiary" href="Draft Viewer.html" style="display:inline-flex;align-items:center;gap:5px;min-height:44px;align-self:center;margin:0 auto;">
+                    View Draft <i data-lucide="arrow-right" style="width:15px;height:15px" aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
+
+              <!-- ── PANEL: Cancelled ── -->
+              <div data-panel="cancelled">
+                <div class="panel-icon-row"><i data-lucide="x-circle" class="big-ic" aria-hidden="true"></i></div>
+                <h2 class="ph">Service Cancelled</h2>
+                <div style="text-align:center;margin-top:16px;">
+                  <a class="btn-tertiary" href="Booking Step 1 - Service Selection.html" style="display:inline-flex;align-items:center;gap:5px;min-height:44px;">
+                    Re-book this service <i data-lucide="arrow-right" style="width:15px;height:15px" aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
+
+            </div><!-- /action-panel -->
+          </div><!-- /right col -->
+        </div><!-- /two-col -->
+      </div><!-- /populated -->
+
+    </div>
+  </main>
+</div>
+</div>
+
+<!-- MOBILE BOTTOM TAB BAR -->
+<nav class="tabbar" aria-label="Primary">
+  <a class="tab" href="Dashboard Home.html"><i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i><span class="lbl">Dashboard</span></a>
+  <a class="tab" href="Services List.html" aria-current="page"><i data-lucide="folder-open" class="ic" aria-hidden="true"></i><span class="lbl">Services</span></a>
+  <a class="tab" href="Payment History.html"><i data-lucide="credit-card" class="ic" aria-hidden="true"></i><span class="lbl">Payments</span></a>
+  <a class="tab" href="Settings.html"><i data-lucide="settings" class="ic" aria-hidden="true"></i><span class="lbl">Settings</span></a>
+</nav>
+
+<!-- DRAWER (mobile, narrowed) -->
+<aside class="drawer" id="drawer" aria-label="Account and help" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="brand"><img src="assets/logo.png" alt="" /><span class="bn">GST<span>Notice</span>Support</span></span>
+    <button class="close" id="drawerClose" aria-label="Close menu"><i data-lucide="x" style="width:22px;height:22px" aria-hidden="true"></i></button>
+  </div>
+  <div class="drawer-acct">
+    <span class="avatar" aria-hidden="true">RK</span>
+    <span class="who"><span class="nm">Rajesh Kumar</span><span class="em">rajesh.kumar@firm.in</span></span>
+  </div>
+  <nav aria-label="Account menu">
+    <a class="d-link" href="My Profile.html"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+    <a class="d-link" href="Contact.html"><i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support</a>
+    <a class="d-link wa" href="https://wa.me/918041000000" target="_blank" rel="noopener"><i data-lucide="message-circle" class="ic" aria-hidden="true"></i> Chat on WhatsApp</a>
+    <div class="d-divider"></div>
+    <a class="d-link" href="Login.html"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+  </nav>
+  <div class="drawer-foot">
+    <div class="legal"><a href="Privacy Policy.html">Privacy Policy</a><a href="Terms of Service.html">Terms</a><a href="Refund Policy.html">Refund Policy</a></div>
+  </div>
+</aside>
+
+<!-- PREVIEW STATE SWITCHER -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">Status</span>
+  <button data-sstate="upload"           aria-pressed="false">Upload</button>
+  <button data-sstate="review"           aria-pressed="false">In Review</button>
+  <button data-sstate="draft"            aria-pressed="true" >Draft Ready</button>
+  <button data-sstate="payment_received" aria-pressed="false">Paid</button>
+  <button data-sstate="filing"           aria-pressed="false">Filing</button>
+  <button data-sstate="complete"         aria-pressed="false">Complete</button>
+  <button data-sstate="cancelled"        aria-pressed="false">Cancelled</button>
+  <button data-sstate="loading"          aria-pressed="false">Loading</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="22" y="26" width="20" height="48" rx="3" fill="#1B3A6B"/>
+    <rect x="48" y="26" width="20" height="38" rx="3" fill="#fff"/>
+    <rect x="72" y="26" width="6" height="38" rx="3" fill="#D97706"/>
+    <rect x="48" y="68" width="30" height="6" rx="3" fill="#0B8B4E"/>
+  </svg>
+</template>
+
+<script>
+lucide.createIcons();
+
+/* ============================================================
+   STATUS CONFIG
+   ============================================================ */
+const STATUS_CONFIG = {
+  upload:           { label:'Document Upload',  cls:'s-upload',    icon:'file-text',    panelKey:'upload'           },
+  review:           { label:'In Review',        cls:'s-review',    icon:'search',       panelKey:'review'           },
+  draft:            { label:'Draft Ready',      cls:'s-draft',     icon:'alert-circle', panelKey:'draft'            },
+  payment_received: { label:'Payment Received', cls:'s-review',    icon:'credit-card',  panelKey:'payment_received' },
+  filing:           { label:'Filing',           cls:'s-filing',    icon:'clock',        panelKey:'filing'           },
+  complete:         { label:'Complete',         cls:'s-complete',  icon:'check-circle', panelKey:'complete'         },
+  cancelled:        { label:'Cancelled',        cls:'s-cancelled', icon:'x-circle',     panelKey:'cancelled'        },
+};
+
+/* ============================================================
+   STATUS PANEL SWITCHER
+   ============================================================ */
+function setStatus(key){
+  const cfg = STATUS_CONFIG[key];
+  if(!cfg) return;
+
+  // Badge update
+  const badge = document.getElementById('statusBadge');
+  badge.className = 'status-badge ' + cfg.cls;
+  badge.innerHTML = `<i data-lucide="${cfg.icon}" class="ic" aria-hidden="true"></i><span>${cfg.label}</span>`;
+
+  // Show correct panel
+  document.querySelectorAll('[data-panel]').forEach(p => p.classList.remove('active'));
+  const panel = document.querySelector(`[data-panel="${cfg.panelKey}"]`);
+  if(panel) panel.classList.add('active');
+
+  // Populated vs loading
+  document.getElementById('populatedView').hidden = false;
+  document.getElementById('loadingView').hidden   = true;
+
+  // Reset cancel state
+  document.getElementById('cancelConfirm').classList.remove('show');
+  if(document.getElementById('cancelLink'))
+    document.getElementById('cancelLink').setAttribute('aria-expanded','false');
+
+  // Reset pay-unlock if back to draft
+  if(key === 'draft'){
+    document.getElementById('payUnlockLocked').hidden = false;
+    document.getElementById('draftReveal').classList.remove('revealed');
+    document.getElementById('lockIcon').innerHTML = ''; // re-render via lucide
+    lucide.createIcons();
+  }
+
+  lucide.createIcons();
+  document.querySelectorAll('[data-sstate]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sstate === key)));
+}
+
+function setLoading(){
+  document.getElementById('populatedView').hidden = true;
+  document.getElementById('loadingView').hidden   = false;
+  document.querySelectorAll('[data-sstate]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sstate === 'loading')));
+}
+
+document.querySelectorAll('[data-sstate]').forEach(b => b.addEventListener('click', () => {
+  if(b.dataset.sstate === 'loading') setLoading();
+  else setStatus(b.dataset.sstate);
+}));
+
+// Initial state: Draft Ready
+setStatus('draft');
+
+/* ============================================================
+   PAY-TO-UNLOCK → DRAFT REVEAL (design.md §5.3)
+   ============================================================ */
+const payBtn     = document.getElementById('payBtn');
+const lockIcon   = document.getElementById('lockIcon');
+const lockedWrap = document.getElementById('payUnlockLocked');
+const draftReveal= document.getElementById('draftReveal');
+
+payBtn.addEventListener('click', () => {
+  payBtn.dataset.loading = 'true';
+  payBtn.disabled = true;
+  const bookingId = new URLSearchParams(window.location.search).get('id') || 'GNS-2026-0517';
+  if(typeof GNS !== 'undefined') GNS.setActiveBookingId(bookingId);
+  setTimeout(() => { window.location.href = 'Payment Verification.html'; }, 900);
+});
+
+/* ============================================================
+   CANCEL INLINE CONFIRMATION
+   ============================================================ */
+document.getElementById('cancelLink').addEventListener('click', () => {
+  const conf = document.getElementById('cancelConfirm');
+  const isOpen = conf.classList.contains('show');
+  conf.classList.toggle('show', !isOpen);
+  document.getElementById('cancelLink').setAttribute('aria-expanded', String(!isOpen));
+});
+document.getElementById('keepService').addEventListener('click', () => {
+  document.getElementById('cancelConfirm').classList.remove('show');
+  document.getElementById('cancelLink').setAttribute('aria-expanded','false');
+});
+
+/* ============================================================
+   CONFIRM DRAFT button (in draft panel, after unlock)
+   ============================================================ */
+document.getElementById('confirmDraftBtn').addEventListener('click', () => {
+  // Legacy path (inline pay sim) — kept but normally reached via payment_received panel
+  setStatus('filing');
+  document.getElementById('confirmDraftBtn').disabled = true;
+  document.getElementById('confirmDraftBtn').textContent = 'Confirmed – awaiting filing';
+  document.querySelectorAll('[data-sstate]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sstate === 'filing')));
+});
+
+// confirmDraftBtn2 — in Payment Received panel
+const _cdb2 = document.getElementById('confirmDraftBtn2');
+if(_cdb2){
+  _cdb2.addEventListener('click', () => {
+    setStatus('filing');
+    _cdb2.disabled = true;
+    _cdb2.textContent = 'Confirmed – awaiting filing';
+    const _bid = new URLSearchParams(window.location.search).get('id') || 'GNS-2026-0517';
+    if(typeof GNS !== 'undefined') GNS.updateBooking(_bid, {status:'filing'});
+    document.querySelectorAll('[data-sstate]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sstate === 'filing')));
+  });
+}
+
+// Cancel confirm
+const _ccb = document.getElementById('confirmCancelBtn');
+if(_ccb){
+  _ccb.addEventListener('click', () => {
+    setStatus('cancelled');
+    document.getElementById('cancelConfirm').classList.remove('show');
+    document.getElementById('cancelWrap').hidden = true;
+    const _bid = new URLSearchParams(window.location.search).get('id') || 'GNS-2026-0517';
+    if(typeof GNS !== 'undefined') GNS.updateBooking(_bid, {status:'cancelled'});
+    document.querySelectorAll('[data-sstate]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sstate === 'cancelled')));
+  });
+}
+
+/* ============================================================
+   SHELL: sidebar drawer + account menu
+   ============================================================ */
+const sidebar=document.getElementById('sidebar'), scrim=document.getElementById('scrim');
+const hamburger=document.getElementById('hamburger'), drawer=document.getElementById('drawer');
+const drawerClose=document.getElementById('drawerClose');
+function closeAll(){
+  sidebar.classList.remove('open'); drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true');
+  scrim.classList.remove('open'); scrim.hidden=true; hamburger.setAttribute('aria-expanded','false');
+  closeAcct();
+}
+hamburger.addEventListener('click',()=>{
+  if(window.innerWidth<1024){ drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); }
+  else { sidebar.classList.add('open'); }
+  scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open'));
+  hamburger.setAttribute('aria-expanded','true');
+});
+if(drawerClose) drawerClose.addEventListener('click',closeAll);
+scrim.addEventListener('click',closeAll);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll();});
+
+const acctBtn=document.getElementById('acctBtn'), acctMenu=document.getElementById('acctMenu');
+function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+acctBtn.addEventListener('click',e=>{e.stopPropagation();const o=acctMenu.classList.toggle('open');acctBtn.setAttribute('aria-expanded',String(o));});
+document.addEventListener('click',e=>{if(!e.target.closest('.acct'))closeAcct();});
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+  // Check if payment verification redirected back with a status
+  var params = new URLSearchParams(window.location.search);
+  var redirectStatus = params.get('status');
+  if(redirectStatus && STATUS_CONFIG[redirectStatus]) setStatus(redirectStatus);
+})();
+</script>
+</body>
+</html>

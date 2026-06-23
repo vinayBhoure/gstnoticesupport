@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · User Detail · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* === APP SHELL — identical to Admin Bookings / Booking Detail === */
+  :root{ --sidebar-w:264px; --header-h:64px; }
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);}
+  .app{display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--neutral-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;}
+  .sidebar .brand{display:inline-flex;align-items:center;gap:10px;height:var(--header-h);padding:0 20px;flex:0 0 auto;border-bottom:1px solid var(--neutral-200);}
+  .sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .sidebar .brand .bn span{color:var(--accent-green);}
+  .sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+  .nav-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:8px 12px 6px;}
+  .nav-link{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:44px;line-height:1.2;transition:background .15s,color .15s;}
+  .nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);transition:color .15s;}
+  .nav-link:hover{background:var(--neutral-50);}
+  .nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .nav-link[aria-current="page"]{background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;}
+  .nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+  .sidebar .side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+  .side-help{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;}
+  .side-help .ic{width:18px;height:18px;color:var(--neutral-600);}
+  .side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+  .side-help:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+
+  .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+  .topbar{height:var(--header-h);flex:0 0 auto;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);border-bottom:1px solid var(--neutral-200);display:flex;align-items:center;gap:16px;padding:0 32px;}
+  .topbar .hamburger{display:none;width:44px;height:44px;align-items:center;justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);}
+  .topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+  .topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+  .topbar .mobile-brand .bn span{color:var(--accent-green);}
+  .topbar .spacer{flex:1;}
+  .topbar .tap-call{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;}
+  .topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+  .topbar .tap-call:hover{border-color:var(--primary-navy);}
+  .topbar .tap-call:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .num{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+  .acct{position:relative;}
+  .acct-btn{display:inline-flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;}
+  .acct-btn:hover{border-color:var(--primary-navy);}
+  .acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-avatar{width:32px;height:32px;border-radius:50%;flex:0 0 auto;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+  .acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);}
+  .acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+  .acct-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:6px;z-index:70;}
+  .acct-menu.open{display:block;}
+  .acct-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;}
+  .acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+  .acct-menu a:hover{background:var(--neutral-50);}
+  .acct-menu a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+  .content{flex:1;padding:32px;}
+  .content-inner{max-width:760px;margin:0 auto;}
+
+  /* === DETAIL HEADER === */
+  .back-link{display:inline-flex;align-items:center;gap:7px;min-height:44px;font-size:14px;font-weight:600;color:var(--accent-green);}
+  .back-link .ic{width:16px;height:16px;}
+  .back-link:hover{color:var(--accent-green-hover);}
+  .back-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);border-radius:4px;}
+
+  .detail-head{margin:6px 0 28px;}
+  .detail-head h1{font-size:32px;letter-spacing:-.01em;line-height:1.2;}
+
+  /* === CARDS === */
+  .card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:24px;}
+  .card + .card{margin-top:24px;}
+  .card h2{font-size:18px;font-weight:600;line-height:1.3;display:flex;align-items:center;gap:9px;}
+  .card h2 .ic{width:18px;height:18px;color:var(--neutral-600);flex:0 0 auto;}
+  .card .card-note{font-size:13px;color:var(--neutral-600);margin-top:4px;line-height:1.55;}
+
+  /* Read-only info */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;margin-top:18px;}
+  .info-grid > div{min-width:0;}
+  .info-grid .full{grid-column:1 / -1;}
+  .info-grid dt{font-size:13px;font-weight:500;color:var(--neutral-600);margin-bottom:3px;}
+  .info-grid dd{font-size:15px;font-weight:500;color:var(--neutral-900);overflow-wrap:break-word;line-height:1.5;}
+  .info-grid dd.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;user-select:all;}
+  .info-grid dd.muted{color:var(--neutral-600);font-weight:400;}
+
+  /* === BUTTONS === */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:var(--r-btn);font-size:15px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s,color .15s;font-family:inherit;}
+  .btn .ic{width:17px;height:17px;flex:0 0 auto;}
+  .btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+  .btn-primary{background:var(--accent-green);color:#fff;}
+  .btn-primary:hover{background:var(--accent-green-hover);}
+  .btn-primary:active{background:var(--accent-green-hover);transform:translateY(1px);}
+  .btn-primary:disabled{background:var(--neutral-200);color:var(--neutral-600);cursor:not-allowed;transform:none;}
+  .btn-secondary{background:transparent;border-color:var(--primary-navy);color:var(--primary-navy);}
+  .btn-secondary:hover{background:var(--primary-navy);color:#fff;}
+  .btn-secondary:disabled{border-color:var(--neutral-200);color:var(--neutral-600);background:transparent;cursor:not-allowed;}
+
+  /* === DELETE CARD === */
+  .delete-actions{margin-top:18px;}
+  .disabled-reason{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--neutral-600);line-height:1.55;margin-top:12px;max-width:520px;}
+  .disabled-reason .ic{width:15px;height:15px;flex:0 0 auto;color:var(--neutral-600);margin-top:2px;}
+
+  /* === DIALOG === */
+  .dialog-scrim{
+    display:none;position:fixed;inset:0;background:rgba(10,37,64,.4);
+    z-index:80;align-items:flex-start;justify-content:center;padding:80px 16px 24px;overflow-y:auto;
+  }
+  .dialog-scrim.open{display:flex;}
+  @media (max-width:640px){ .dialog-scrim{padding:40px 12px 24px;} }
+  .dialog{
+    background:#fff;border-radius:var(--r-card);box-shadow:var(--shadow-md);
+    max-width:480px;width:100%;padding:28px 28px 24px;outline:none;
+  }
+  .dialog h2{font-size:22px;font-weight:700;color:var(--primary-navy);line-height:1.25;letter-spacing:-.005em;}
+  .dialog .d-body{font-size:15px;color:var(--neutral-900);line-height:1.6;margin-top:10px;}
+  .dialog .d-meta{
+    margin-top:16px;padding:12px 14px;background:var(--neutral-50);border:1px solid var(--neutral-200);
+    border-radius:var(--r-btn);
+  }
+  .dialog .d-meta-label{display:block;font-size:12px;font-weight:500;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--neutral-600);margin-bottom:3px;}
+  .dialog .d-meta-val{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:var(--primary-navy);word-break:break-all;user-select:all;}
+
+  .dialog-field{margin-top:18px;}
+  .field-label{display:block;font-size:14px;font-weight:500;color:var(--neutral-900);margin-bottom:6px;}
+  .dialog-field .input{
+    width:100%;min-height:48px;padding:0 14px;font-size:15px;font-family:'JetBrains Mono',ui-monospace,monospace;
+    color:var(--neutral-900);background:#fff;border:1px solid var(--neutral-200);
+    border-radius:var(--r-btn);transition:border-color .15s,box-shadow .15s;
+  }
+  .dialog-field .input:focus{outline:none;border-color:var(--accent-green);box-shadow:0 0 0 3px rgba(11,139,78,.15);}
+  .dialog-field .input[aria-invalid="true"]{border-color:var(--warning-amber);}
+  .field-error{display:flex;align-items:flex-start;gap:7px;font-size:13px;color:var(--warning-amber);margin-top:8px;line-height:1.5;}
+  .field-error .ic{width:14px;height:14px;flex:0 0 auto;margin-top:2px;}
+
+  .dialog-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:24px;}
+
+  /* === TOAST (success) === */
+  .toast{
+    position:fixed;left:50%;bottom:32px;transform:translateX(-50%);
+    background:var(--primary-navy);color:#fff;padding:14px 20px;border-radius:var(--r-btn);
+    box-shadow:var(--shadow-md);font-size:14px;font-weight:500;
+    display:none;align-items:center;gap:9px;z-index:90;max-width:calc(100vw - 32px);
+  }
+  .toast.show{display:inline-flex;}
+  .toast .ic{width:17px;height:17px;color:#22c55e;flex:0 0 auto;}
+
+  /* === ERROR + LOADING === */
+  .error-card{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid var(--neutral-200);border-left:3px solid var(--warning-amber);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:20px 24px;}
+  .error-card .ic-lead{width:22px;height:22px;flex:0 0 auto;color:var(--warning-amber);}
+  .error-card .txt{flex:1;font-size:15px;line-height:1.5;color:var(--neutral-900);}
+  .error-card .txt b{font-weight:600;}
+
+  .skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  @media (prefers-reduced-motion:reduce){.skel{animation:none;}}
+  .skel-card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:24px;display:flex;flex-direction:column;gap:14px;}
+
+  [hidden]{display:none !important;}
+  .scrim{display:none;position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;}
+  .scrim.open{display:block;}
+  .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+  /* === RESPONSIVE (<lg) === */
+  @media (max-width:1023px){
+    .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+    .sidebar.open{transform:translateX(0);}
+    @media (prefers-reduced-motion:reduce){.sidebar{transition:none;}}
+    .main{margin-left:0;}
+    .topbar{padding:0 16px;}
+    .topbar .hamburger{display:inline-flex;}
+    .topbar .mobile-brand{display:inline-flex;}
+    .topbar .num{display:none;}
+    .content{padding:20px 16px 48px;}
+    .detail-head h1{font-size:24px;}
+    .info-grid{grid-template-columns:1fr;}
+    .acct-name{display:none;}
+  }
+
+  /* === STATE SWITCHER === */
+  .state-switch{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:min(540px,calc(100vw - 32px));background:#fff;border:1px dashed #c4ccd9;border-radius:10px;padding:7px 9px;box-shadow:var(--shadow-md);font-size:12px;}
+  .state-switch .lbl{font-weight:600;color:var(--neutral-600);margin-right:2px;}
+  .state-switch button{border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:inherit;}
+  .state-switch button[aria-pressed="true"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+  .state-switch button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- SIDEBAR — components.md → App Shell [admin links, Users active] -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <a class="brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Admin navigation">
+      <span class="nav-label">Admin</span>
+      <a class="nav-link" href="Admin Overview.html">
+        <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Overview
+      </a>
+      <a class="nav-link" href="Admin Bookings.html">
+        <i data-lucide="folder-open" class="ic" aria-hidden="true"></i> Bookings
+      </a>
+      <a class="nav-link" href="Admin Users.html" aria-current="page">
+        <i data-lucide="users" class="ic" aria-hidden="true"></i> Users
+      </a>
+      <a class="nav-link" href="Admin Settings.html">
+        <i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html">
+        <i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support
+      </a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+      <span class="spacer"></span>
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+      </a>
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">AD</span>
+          <span class="acct-name">Admin</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+          <a href="Admin Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="content" data-screen-label="Admin User Detail">
+      <div class="content-inner">
+
+        <!-- ===== LOADED ===== -->
+        <div id="mainView">
+
+          <a class="back-link" href="Admin Users.html">
+            <i data-lucide="arrow-left" class="ic" aria-hidden="true"></i> Back to users
+          </a>
+
+          <div class="detail-head">
+            <h1 id="userName">Suresh Patel</h1>
+          </div>
+
+          <!-- User Information (read-only) -->
+          <section class="card" aria-labelledby="info-h">
+            <h2 id="info-h">
+              <i data-lucide="user" class="ic" aria-hidden="true"></i>
+              User Information
+            </h2>
+            <p class="card-note">Read-only — admin cannot edit user profiles.</p>
+
+            <dl class="info-grid">
+              <div>
+                <dt>Name</dt>
+                <dd id="f-name">Suresh Patel</dd>
+              </div>
+              <div>
+                <dt>Mobile</dt>
+                <dd class="mono" id="f-mobile">+91 99876 54321</dd>
+              </div>
+              <div class="full">
+                <dt>Email</dt>
+                <dd id="f-email">suresh.patel@yahoo.com</dd>
+              </div>
+              <div class="full">
+                <dt>Interested Services</dt>
+                <dd id="f-services">ASMT-10 Reply</dd>
+              </div>
+            </dl>
+          </section>
+
+          <!-- Delete User -->
+          <section class="card" aria-labelledby="delete-h">
+            <h2 id="delete-h">
+              <i data-lucide="trash-2" class="ic" aria-hidden="true"></i>
+              Delete User
+            </h2>
+            <p class="card-note">
+              Removes the user's account. Their booking and payment records are retained for compliance.
+            </p>
+
+            <div class="delete-actions">
+              <button class="btn btn-primary" id="deleteBtn" type="button"
+                aria-describedby="deleteReason">
+                <i data-lucide="trash-2" class="ic" aria-hidden="true"></i>
+                Delete user
+              </button>
+              <p class="disabled-reason" id="deleteReason" hidden>
+                <i data-lucide="info" class="ic" aria-hidden="true"></i>
+                <span id="deleteReasonText">This user has 1 active booking. Users can only be deleted once all their bookings are complete or cancelled.</span>
+              </p>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ===== ERROR ===== -->
+        <div id="errorView" hidden>
+          <a class="back-link" href="Admin Users.html">
+            <i data-lucide="arrow-left" class="ic" aria-hidden="true"></i> Back to users
+          </a>
+          <div class="error-card" role="alert" style="margin-top:14px">
+            <i data-lucide="alert-circle" class="ic-lead" aria-hidden="true"></i>
+            <p class="txt"><b>Couldn't load this user.</b> Check your connection and try again.</p>
+            <button class="btn btn-secondary" id="retryBtn" type="button">
+              <i data-lucide="rotate-cw" class="ic" aria-hidden="true"></i> Retry
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== LOADING ===== -->
+        <div id="loadingView" hidden aria-hidden="true">
+          <div class="skel" style="width:120px;height:20px;margin:10px 0 22px;"></div>
+          <div class="skel" style="width:60%;height:32px;margin-bottom:28px;"></div>
+          <div class="skel-card">
+            <div class="skel" style="width:40%;height:20px;"></div>
+            <div class="skel" style="width:30%;height:14px;"></div>
+            <div class="skel" style="width:100%;height:48px;margin-top:8px"></div>
+            <div class="skel" style="width:80%;height:48px;"></div>
+          </div>
+          <div class="skel-card" style="margin-top:24px">
+            <div class="skel" style="width:35%;height:20px;"></div>
+            <div class="skel" style="width:55%;height:14px;"></div>
+            <div class="skel" style="width:140px;height:48px;margin-top:8px"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ===== DELETE CONFIRMATION DIALOG (components.md → Confirmation Dialog) ===== -->
+<div class="dialog-scrim" id="dialogScrim" role="presentation">
+  <div class="dialog" id="deleteDialog" role="dialog"
+       aria-modal="true" aria-labelledby="dlgTitle" aria-describedby="dlgBody"
+       tabindex="-1">
+    <h2 id="dlgTitle">Delete this user?</h2>
+    <p class="d-body" id="dlgBody">
+      This removes the user's account. Their booking and payment records are retained for compliance. This can't be undone.
+    </p>
+
+    <div class="d-meta">
+      <span class="d-meta-label">User email</span>
+      <span class="d-meta-val" id="dlgEmail">suresh.patel@yahoo.com</span>
+    </div>
+
+    <div class="dialog-field">
+      <label class="field-label" for="emailConfirm">Type the user's email to confirm</label>
+      <input type="email" id="emailConfirm" class="input"
+        autocomplete="off" autocapitalize="off" spellcheck="false"
+        aria-invalid="false" aria-describedby="emailErr" />
+      <p class="field-error" id="emailErr" hidden>
+        <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+        <span>Email doesn't match.</span>
+      </p>
+    </div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" id="dlgCancel" type="button">Cancel</button>
+      <button class="btn btn-primary" id="dlgConfirm" type="button" disabled>
+        <i data-lucide="trash-2" class="ic" aria-hidden="true"></i>
+        <span id="dlgConfirmLabel">Delete user</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Success toast -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <i data-lucide="check-circle" class="ic" aria-hidden="true"></i>
+  <span>User deleted.</span>
+</div>
+
+<!-- State switcher (review aid) -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">State</span>
+  <button data-state="loaded" aria-pressed="true">Loaded</button>
+  <button data-state="blocked" aria-pressed="false">Delete blocked</button>
+  <button data-state="dialog" aria-pressed="false">Dialog open</button>
+  <button data-state="loading" aria-pressed="false">Loading</button>
+  <button data-state="error" aria-pressed="false">Error</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <circle cx="50" cy="38" r="13" fill="#0B8B4E"/>
+    <path d="M24 80c0-14 12-24 26-24s26 10 26 24" fill="#0B8B4E"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  /* ============================================================
+     Sample user record
+     ============================================================ */
+  const USER = {
+    id:       'u-569',
+    name:     'Suresh Patel',
+    email:    'suresh.patel@yahoo.com',
+    mobile:   '+91 99876 54321',
+    services: ['ASMT-10 Reply'],
+    activeBookings: 0,   // toggled by state switcher; 0 = deletable
+  };
+
+  const $ = id => document.getElementById(id);
+
+  /* ============================================================
+     Hydrate
+     ============================================================ */
+  function hydrate(){
+    $('userName').textContent = USER.name;
+    $('f-name').textContent   = USER.name;
+    $('f-mobile').textContent = USER.mobile;
+    $('f-email').textContent  = USER.email;
+    const sv = USER.services.length ? USER.services.join(', ') : '—';
+    $('f-services').textContent = sv;
+    $('f-services').classList.toggle('muted', !USER.services.length);
+    $('dlgEmail').textContent = USER.email;
+    syncDeleteControl();
+  }
+
+  function syncDeleteControl(){
+    const blocked = USER.activeBookings > 0;
+    const btn     = $('deleteBtn');
+    const reason  = $('deleteReason');
+    btn.disabled  = blocked;
+    btn.setAttribute('aria-disabled', String(blocked));
+    reason.hidden = !blocked;
+    if(blocked){
+      const n = USER.activeBookings;
+      $('deleteReasonText').textContent =
+        'This user has ' + n + ' active booking' + (n===1?'':'s') +
+        '. Users can only be deleted once all their bookings are complete or cancelled.';
+    }
+  }
+
+  /* ============================================================
+     Dialog
+     ============================================================ */
+  const scrim   = $('dialogScrim');
+  const dlg     = $('deleteDialog');
+  const cancel  = $('dlgCancel');
+  const confirm = $('dlgConfirm');
+  const confLbl = $('dlgConfirmLabel');
+  const input   = $('emailConfirm');
+  const errEl   = $('emailErr');
+
+  let triggerEl = null;
+  let submitting = false;
+
+  function openDialog(){
+    if(USER.activeBookings > 0) return;
+    triggerEl = document.activeElement;
+    input.value = '';
+    input.setAttribute('aria-invalid','false');
+    errEl.hidden = true;
+    confirm.disabled = true;
+    confLbl.textContent = 'Delete user';
+    scrim.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => input.focus(), 30);
+  }
+
+  function closeDialog(){
+    if(submitting) return;
+    scrim.classList.remove('open');
+    document.body.style.overflow = '';
+    if(triggerEl && typeof triggerEl.focus === 'function') triggerEl.focus();
+  }
+
+  function matchesEmail(v){
+    return v.trim().toLowerCase() === USER.email.toLowerCase();
+  }
+
+  input.addEventListener('input', () => {
+    const v = input.value;
+    const ok = matchesEmail(v);
+    confirm.disabled = !ok;
+    /* clear stale error as user keeps typing */
+    if(errEl.hidden === false){
+      errEl.hidden = true;
+      input.setAttribute('aria-invalid','false');
+    }
+  });
+
+  input.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      if(!confirm.disabled) confirm.click();
+    }
+  });
+
+  cancel.addEventListener('click', closeDialog);
+  scrim.addEventListener('mousedown', e => { if(e.target === scrim) closeDialog(); });
+
+  /* Focus trap + Esc */
+  scrim.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){ e.stopPropagation(); closeDialog(); return; }
+    if(e.key !== 'Tab') return;
+    const focusables = dlg.querySelectorAll(
+      'input, button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+    );
+    if(!focusables.length) return;
+    const first = focusables[0];
+    const last  = focusables[focusables.length - 1];
+    if(e.shiftKey && document.activeElement === first){
+      e.preventDefault(); last.focus();
+    } else if(!e.shiftKey && document.activeElement === last){
+      e.preventDefault(); first.focus();
+    }
+  });
+
+  /* Confirm — simulated submit */
+  confirm.addEventListener('click', () => {
+    if(confirm.disabled || submitting) return;
+    if(!matchesEmail(input.value)){
+      input.setAttribute('aria-invalid','true');
+      errEl.hidden = false;
+      input.focus();
+      return;
+    }
+    submitting = true;
+    confirm.disabled = true;
+    cancel.disabled  = true;
+    confLbl.textContent = 'Deleting…';
+    setTimeout(() => {
+      submitting = false;
+      cancel.disabled = false;
+      scrim.classList.remove('open');
+      document.body.style.overflow = '';
+      showToast();
+      /* Real app: redirect after the toast briefly shows */
+      setTimeout(() => {
+        window.location.href = 'Admin Users.html';
+      }, 1400);
+    }, 700);
+  });
+
+  $('deleteBtn').addEventListener('click', openDialog);
+
+  /* Toast */
+  function showToast(){
+    const t = $('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ============================================================
+     Drawer + account menu
+     ============================================================ */
+  const sidebar   = $('sidebar');
+  const sideScrim = $('scrim');
+  const hamburger = $('hamburger');
+  function openDrawer(){ sidebar.classList.add('open'); sideScrim.hidden=false; requestAnimationFrame(()=>sideScrim.classList.add('open')); hamburger.setAttribute('aria-expanded','true'); }
+  function closeDrawer(){ sidebar.classList.remove('open'); sideScrim.classList.remove('open'); sideScrim.hidden=true; hamburger.setAttribute('aria-expanded','false'); }
+  hamburger.addEventListener('click', () => sidebar.classList.contains('open') ? closeDrawer() : openDrawer());
+  sideScrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && !scrim.classList.contains('open')){
+      closeDrawer(); closeAcct();
+    }
+  });
+
+  const acctBtn  = $('acctBtn');
+  const acctMenu = $('acctMenu');
+  function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+  acctBtn.addEventListener('click', e => { e.stopPropagation(); const o=acctMenu.classList.toggle('open'); acctBtn.setAttribute('aria-expanded',String(o)); });
+  document.addEventListener('click', e => { if(!e.target.closest('.acct')) closeAcct(); });
+
+  /* ============================================================
+     State switcher (review aid)
+     ============================================================ */
+  const mainView    = $('mainView');
+  const errorView   = $('errorView');
+  const loadingView = $('loadingView');
+
+  function setState(state){
+    /* Close dialog on any state change */
+    scrim.classList.remove('open');
+    document.body.style.overflow = '';
+
+    mainView.hidden    = state==='loading' || state==='error';
+    errorView.hidden   = state !== 'error';
+    loadingView.hidden = state !== 'loading';
+
+    if(state === 'loaded'){
+      USER.activeBookings = 0; syncDeleteControl();
+    } else if(state === 'blocked'){
+      USER.activeBookings = 2; syncDeleteControl();
+    } else if(state === 'dialog'){
+      USER.activeBookings = 0; syncDeleteControl();
+      requestAnimationFrame(openDialog);
+    }
+
+    document.querySelectorAll('.state-switch button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.state === state)));
+  }
+
+  document.querySelectorAll('.state-switch button').forEach(b =>
+    b.addEventListener('click', () => setState(b.dataset.state)));
+  $('retryBtn').addEventListener('click', () => setState('loaded'));
+
+  /* init */
+  hydrate();
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+  // Wire delete confirm to navigate back to Users list
+  var dlgOk = document.getElementById('dlgConfirm');
+  if(dlgOk){
+    dlgOk.addEventListener('click', function(){
+      setTimeout(function(){ window.location.href = 'Admin Users.html'; }, 1200);
+    });
+  }
+})();
+</script>
+</body>
+</html>

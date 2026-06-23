@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · Overview · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     APP SHELL (authenticated — sidebar) — components.md → App Shell
+     Same shell as Dashboard Home.html, admin link set.
+     ============================================================ */
+
+  :root{ --sidebar-w:264px; --header-h:64px; }
+
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);}
+
+  .app{display:flex;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:var(--sidebar-w);flex:0 0 var(--sidebar-w);
+    background:#fff;border-right:1px solid var(--neutral-200);
+    display:flex;flex-direction:column;
+    position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;
+  }
+  .sidebar .brand{
+    display:inline-flex;align-items:center;gap:10px;
+    height:var(--header-h);padding:0 20px;flex:0 0 auto;
+    border-bottom:1px solid var(--neutral-200);
+  }
+  .sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .sidebar .brand .bn span{color:var(--accent-green);}
+
+  .sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+  .nav-label{
+    font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--neutral-600);padding:8px 12px 6px;
+  }
+  .nav-link{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:var(--r-btn);
+    font-size:15px;font-weight:500;color:var(--neutral-900);
+    min-height:44px;line-height:1.2;
+    transition:background .15s,color .15s;
+  }
+  .nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);transition:color .15s;}
+  .nav-link:hover{background:var(--neutral-50);}
+  .nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .nav-link[aria-current="page"]{
+    background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;
+  }
+  .nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+
+  .sidebar .side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+  .side-help{
+    display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);
+    font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;
+  }
+  .side-help .ic{width:18px;height:18px;color:var(--neutral-600);}
+  .side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+  .side-help:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+
+  /* ---------- Main column ---------- */
+  .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+
+  .topbar{
+    height:var(--header-h);flex:0 0 auto;
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);
+    border-bottom:1px solid var(--neutral-200);
+    display:flex;align-items:center;gap:16px;
+    padding:0 32px;
+  }
+  .topbar .hamburger{
+    display:none;width:44px;height:44px;align-items:center;justify-content:center;
+    border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);
+  }
+  .topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+  .topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+  .topbar .mobile-brand .bn span{color:var(--accent-green);}
+
+  .topbar .spacer{flex:1;}
+  .topbar .tap-call{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;
+  }
+  .topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+  .topbar .tap-call:hover{border-color:var(--primary-navy);}
+  .topbar .tap-call:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .tap-call .num{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+
+  .acct{position:relative;}
+  .acct-btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    background:#fff;cursor:pointer;
+  }
+  .acct-btn:hover{border-color:var(--primary-navy);}
+  .acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-avatar{
+    width:32px;height:32px;border-radius:50%;flex:0 0 auto;
+    background:var(--primary-navy);color:#fff;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:600;letter-spacing:.02em;
+  }
+  .acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);line-height:1.2;}
+  .acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+  .acct-menu{
+    display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:200px;
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+    box-shadow:var(--shadow-md);padding:6px;z-index:70;
+  }
+  .acct-menu.open{display:block;}
+  .acct-menu a{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);
+    font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;
+  }
+  .acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+  .acct-menu a:hover{background:var(--neutral-50);}
+  .acct-menu a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+  /* ---------- Content ---------- */
+  .content{flex:1;padding:32px;}
+  .content-inner{max-width:1100px;margin:0 auto;}
+
+  .page-head{
+    display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  }
+  .page-head h1{font-size:36px;letter-spacing:-.01em;line-height:1.15;}
+
+  /* ---------- Segmented time-range control (radio group) ---------- */
+  .seg-control{
+    display:inline-flex;align-items:stretch;
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    padding:3px;gap:2px;
+  }
+  .seg-control label{position:relative;display:inline-flex;}
+  .seg-control input{
+    position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;
+  }
+  .seg-control .seg-lbl{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:0 16px;min-height:42px;border-radius:6px;
+    font-size:14px;font-weight:500;color:var(--neutral-600);
+    cursor:pointer;white-space:nowrap;
+    transition:background .15s,color .15s;
+  }
+  .seg-control label:hover .seg-lbl{color:var(--primary-navy);}
+  .seg-control input:checked + .seg-lbl{
+    background:var(--primary-navy);color:#fff;font-weight:600;
+  }
+  .seg-control input:focus-visible + .seg-lbl{box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+
+  /* ============================================================
+     NEW COMPONENT — Admin Stat Card
+     ============================================================ */
+  .kpi-row{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:28px;
+  }
+  .stat-card{
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);padding:24px;
+    display:flex;flex-direction:column;gap:6px;min-height:148px;
+  }
+  .stat-card .sc-label{
+    display:flex;align-items:center;gap:8px;
+    font-size:14px;font-weight:500;color:var(--neutral-600);
+  }
+  .stat-card .sc-label .ic{width:17px;height:17px;color:var(--neutral-600);}
+  .stat-card .sc-value{
+    font-size:48px;font-weight:700;line-height:1.1;color:var(--primary-navy);
+    letter-spacing:-.02em;margin-top:4px;
+  }
+  .stat-card .sc-sub{
+    font-size:14px;color:var(--neutral-600);line-height:1.5;margin-top:auto;padding-top:8px;
+  }
+  .stat-card .sc-sub b{color:var(--primary-navy);font-weight:600;}
+
+  /* status-count variant */
+  .stat-card.sc-statuses{gap:12px;}
+  .status-count-list{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:2px;
+  }
+  .status-count{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:26px;
+  }
+  .status-count .n{
+    font-size:15px;font-weight:600;color:var(--primary-navy);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ---------- Service Status Badge (components.md) ---------- */
+  .status-badge{
+    display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
+    font-size:14px;font-weight:500;line-height:1.3;
+    padding:4px 10px;min-height:24px;border-radius:var(--r-badge);
+    white-space:nowrap;
+  }
+  .status-badge .ic{width:16px;height:16px;flex:0 0 auto;}
+  .status-badge.s-upload{background:var(--neutral-50);color:var(--neutral-900);border:1px solid var(--neutral-200);}
+  .status-badge.s-review{background:var(--primary-deep-blue);color:#fff;}
+  .status-badge.s-draft{background:var(--warning-amber);color:#fff;}
+  .status-badge.s-filing{background:var(--primary-navy);color:#fff;}
+  .status-badge.s-complete{background:var(--accent-green);color:#fff;}
+  .status-badge.s-cancelled{background:var(--neutral-200);color:var(--neutral-600);}
+  /* compact badge inside status-count list */
+  .status-count .status-badge{font-size:13px;padding:3px 8px;}
+
+  /* ============================================================
+     NEW COMPONENT — Admin Data Table (compact / reduced cols)
+     ============================================================ */
+  .section-block{margin-top:48px;}
+  .section-head{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;
+  }
+  .section-head h2{font-size:24px;font-weight:600;line-height:1.3;}
+  .section-head .btn-tertiary{display:inline-flex;align-items:center;gap:5px;min-height:44px;}
+
+  .table-card{
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);overflow:hidden;
+  }
+  .table-scroll{overflow-x:auto;}
+  .admin-table{
+    width:100%;border-collapse:collapse;min-width:640px;
+  }
+  .admin-table th{
+    text-align:left;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--neutral-600);padding:14px 20px;
+    background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);
+    white-space:nowrap;
+  }
+  .admin-table td{
+    padding:16px 20px;border-bottom:1px solid var(--neutral-200);
+    font-size:15px;color:var(--neutral-900);vertical-align:middle;
+  }
+  .admin-table tbody tr:last-child td{border-bottom:none;}
+  .admin-table tbody tr{cursor:pointer;transition:background .15s;}
+  .admin-table tbody tr:hover{background:var(--neutral-50);}
+  .admin-table tbody tr:focus-visible{
+    outline:none;box-shadow:inset 0 0 0 3px rgba(11,139,78,.4);
+  }
+  .admin-table .t-name{font-weight:600;color:var(--primary-navy);}
+  .admin-table .t-updated{color:var(--neutral-600);font-size:14px;white-space:nowrap;}
+  .admin-table .t-arrow{width:48px;text-align:right;}
+  .admin-table .t-arrow .ic{width:18px;height:18px;color:var(--neutral-600);}
+  .admin-table tbody tr:hover .t-arrow .ic{color:var(--accent-green);}
+
+  /* table empty state */
+  .table-empty{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:48px 24px;text-align:center;
+  }
+  .table-empty .ic-big{width:44px;height:44px;color:var(--accent-green);}
+  .table-empty p{font-size:16px;color:var(--neutral-600);}
+
+  /* ---------- Error state (metrics fail → inline retry) ---------- */
+  .error-card{
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    background:#fff;border:1px solid var(--neutral-200);border-left:3px solid var(--warning-amber);
+    border-radius:var(--r-card);box-shadow:var(--shadow-sm);
+    padding:20px 24px;margin-top:28px;
+  }
+  .error-card .ic-lead{width:22px;height:22px;flex:0 0 auto;color:var(--warning-amber);}
+  .error-card .txt{flex:1;min-width:240px;font-size:15px;line-height:1.5;color:var(--neutral-900);}
+  .error-card .txt b{font-weight:600;}
+  .error-card .btn{min-height:44px;padding:9px 18px;}
+
+  /* ---------- Skeleton loaders ---------- */
+  .skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);
+    background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+  @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+  @media (prefers-reduced-motion: reduce){ .skel{animation:none;} }
+  .skel-stat{
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);padding:24px;min-height:148px;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .skel-stat .s1{height:14px;width:50%;}
+  .skel-stat .s2{height:40px;width:35%;}
+  .skel-stat .s3{height:13px;width:75%;margin-top:auto;}
+  .skel-row{height:18px;margin:19px 20px;}
+
+  [hidden]{display:none !important;}
+
+  /* ---------- Mobile drawer scrim ---------- */
+  .scrim{display:none;position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;}
+  .scrim.open{display:block;}
+
+  /* ============================================================
+     RESPONSIVE — minimal admin fallback (<lg)
+     ============================================================ */
+  @media (max-width:1023px){
+    .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+    .sidebar.open{transform:translateX(0);}
+    @media (prefers-reduced-motion: reduce){ .sidebar{transition:none;} }
+    .main{margin-left:0;}
+    .topbar{padding:0 16px;}
+    .topbar .hamburger{display:inline-flex;}
+    .topbar .mobile-brand{display:inline-flex;}
+    .topbar .tap-call .num{display:none;}
+    .content{padding:24px 16px 48px;}
+    .page-head h1{font-size:28px;}
+    .kpi-row{grid-template-columns:1fr;}
+    .acct-name{display:none;}
+    .seg-control{width:100%;}
+    .seg-control label{flex:1;}
+    .seg-control .seg-lbl{width:100%;}
+  }
+
+  /* ============================================================
+     PREVIEW STATE SWITCHER (review aid — not part of product UI)
+     ============================================================ */
+  .state-switch{
+    position:fixed;right:16px;bottom:16px;z-index:100;
+    display:flex;align-items:center;gap:6px;
+    background:#fff;border:1px dashed #c4ccd9;border-radius:10px;
+    padding:7px 9px;box-shadow:var(--shadow-md);
+    font-size:12px;
+  }
+  .state-switch .lbl{font-weight:600;color:var(--neutral-600);margin-right:2px;}
+  .state-switch button{
+    border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);
+    font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:inherit;
+  }
+  .state-switch button[aria-pressed="true"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+  .state-switch button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- ============================================================
+       SIDEBAR — components.md → App Shell (sidebar) [admin links]
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <a class="brand" href="Admin Overview.html" aria-label="GST Notice Support admin overview">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Admin navigation">
+      <span class="nav-label">Admin</span>
+      <a class="nav-link" href="Admin Overview.html" aria-current="page">
+        <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Overview
+      </a>
+      <a class="nav-link" href="Admin Bookings.html">
+        <i data-lucide="folder-open" class="ic" aria-hidden="true"></i> Bookings
+      </a>
+      <a class="nav-link" href="Admin Users.html">
+        <i data-lucide="users" class="ic" aria-hidden="true"></i> Users
+      </a>
+      <a class="nav-link" href="Admin Settings.html">
+        <i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html">
+        <i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support
+      </a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <!-- ============================================================
+       MAIN COLUMN
+       ============================================================ -->
+  <div class="main">
+
+    <!-- Header strip -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Admin Overview.html" aria-label="GST Notice Support admin overview">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+
+      <span class="spacer"></span>
+
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+      </a>
+
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">AD</span>
+          <span class="acct-name">Admin</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+          <a href="Admin Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main id="main" class="content" data-screen-label="Admin Overview">
+      <div class="content-inner">
+
+        <!-- 1. Page header: H2 left + segmented time-range right -->
+        <div class="page-head">
+          <h1>Overview</h1>
+          <fieldset class="seg-control" id="rangeControl" style="border:none" aria-describedby="rangeHint">
+            <legend class="skip-link">Time range for metrics</legend>
+            <label>
+              <input type="radio" name="range" value="all" checked />
+              <span class="seg-lbl">All time</span>
+            </label>
+            <label>
+              <input type="radio" name="range" value="fy" />
+              <span class="seg-lbl">This FY</span>
+            </label>
+            <label>
+              <input type="radio" name="range" value="month" />
+              <span class="seg-lbl">This month</span>
+            </label>
+          </fieldset>
+          <span id="rangeHint" hidden>Filters the metrics and the needs-attention list below.</span>
+        </div>
+
+        <!-- ===== POPULATED view ===== -->
+        <div id="populatedView">
+
+          <!-- 2. KPI row — NEW: Admin Stat Card ×3 -->
+          <div class="kpi-row" aria-live="polite">
+
+            <!-- (1) Total Bookings -->
+            <div class="stat-card">
+              <span class="sc-label">
+                <i data-lucide="folder-open" class="ic" aria-hidden="true"></i> Total Bookings
+              </span>
+              <span class="sc-value" id="kpiTotal">248</span>
+              <p class="sc-sub" id="kpiByService">
+                ASMT-10 <b>112</b> · SCN <b>74</b> · Commissioner <b>41</b> · GSTAT <b>21</b>
+              </p>
+            </div>
+
+            <!-- (2) Bookings by Status — status-count variant -->
+            <div class="stat-card sc-statuses">
+              <span class="sc-label">
+                <i data-lucide="list-checks" class="ic" aria-hidden="true"></i> Bookings by Status
+              </span>
+              <div class="status-count-list">
+                <div class="status-count">
+                  <span class="status-badge s-upload"><i data-lucide="file-text" class="ic" aria-hidden="true"></i> Document Upload</span>
+                  <span class="n" id="cntUpload">14</span>
+                </div>
+                <div class="status-count">
+                  <span class="status-badge s-review"><i data-lucide="search" class="ic" aria-hidden="true"></i> In Review</span>
+                  <span class="n" id="cntReview">22</span>
+                </div>
+                <div class="status-count">
+                  <span class="status-badge s-draft"><i data-lucide="alert-circle" class="ic" aria-hidden="true"></i> Draft Ready</span>
+                  <span class="n" id="cntDraft">9</span>
+                </div>
+                <div class="status-count">
+                  <span class="status-badge s-filing"><i data-lucide="clock" class="ic" aria-hidden="true"></i> Filing</span>
+                  <span class="n" id="cntFiling">11</span>
+                </div>
+                <div class="status-count">
+                  <span class="status-badge s-complete"><i data-lucide="check-circle" class="ic" aria-hidden="true"></i> Complete</span>
+                  <span class="n" id="cntComplete">178</span>
+                </div>
+                <div class="status-count">
+                  <span class="status-badge s-cancelled"><i data-lucide="x-circle" class="ic" aria-hidden="true"></i> Cancelled</span>
+                  <span class="n" id="cntCancelled">14</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- (3) Revenue Collected -->
+            <div class="stat-card">
+              <span class="sc-label">
+                <i data-lucide="indian-rupee" class="ic" aria-hidden="true"></i> Revenue Collected
+              </span>
+              <span class="sc-value" id="kpiRevenue">₹61,42,500</span>
+              <p class="sc-sub" id="kpiPaid">From <b>212</b> paid bookings</p>
+            </div>
+
+          </div>
+
+          <!-- 3. Needs attention -->
+          <section class="section-block" aria-labelledby="attnHeading">
+            <div class="section-head">
+              <h2 id="attnHeading">Needs attention</h2>
+              <a class="btn-tertiary" href="Admin Bookings.html">View all bookings <i data-lucide="arrow-right" style="width:15px;height:15px" aria-hidden="true"></i></a>
+            </div>
+
+            <div class="table-card">
+              <div class="table-scroll" id="tableScroll">
+                <table class="admin-table" aria-describedby="attnHeading">
+                  <thead>
+                    <tr>
+                      <th scope="col">User Name</th>
+                      <th scope="col">Service</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Updated</th>
+                      <th scope="col"><span class="skip-link">Open booking</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="attnBody">
+                    <!-- rows rendered by script -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- attention empty copy -->
+              <div class="table-empty" id="tableEmpty" hidden>
+                <i data-lucide="check-circle" class="ic-big" aria-hidden="true"></i>
+                <p>Nothing needs attention right now.</p>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ===== ERROR state (metrics fail → inline retry) ===== -->
+        <div id="errorView" hidden>
+          <div class="error-card" role="alert">
+            <i data-lucide="alert-circle" class="ic-lead" aria-hidden="true"></i>
+            <p class="txt"><b>Couldn't load metrics.</b> Check your connection and try again.</p>
+            <button class="btn btn-secondary" id="retryBtn" type="button">
+              <i data-lucide="rotate-cw" class="ic" aria-hidden="true"></i> Retry
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== LOADING state (skeletons) ===== -->
+        <div id="loadingView" hidden aria-hidden="true">
+          <div class="kpi-row">
+            <div class="skel-stat"><div class="skel s1"></div><div class="skel s2"></div><div class="skel s3"></div></div>
+            <div class="skel-stat"><div class="skel s1"></div><div class="skel s2"></div><div class="skel s3"></div></div>
+            <div class="skel-stat"><div class="skel s1"></div><div class="skel s2"></div><div class="skel s3"></div></div>
+          </div>
+          <div class="section-block">
+            <div class="section-head">
+              <div class="skel" style="width:200px;height:22px"></div>
+            </div>
+            <div class="table-card">
+              <div class="skel skel-row"></div>
+              <div class="skel skel-row"></div>
+              <div class="skel skel-row"></div>
+              <div class="skel skel-row"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Preview state switcher (review aid — remove in production) -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">State</span>
+  <button data-state="populated" aria-pressed="true">Populated</button>
+  <button data-state="empty" aria-pressed="false">Empty</button>
+  <button data-state="loading" aria-pressed="false">Loading</button>
+  <button data-state="error" aria-pressed="false">Error</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="22" y="26" width="16" height="48" rx="3" fill="#1B3A6B"/>
+    <rect x="44" y="26" width="16" height="14" rx="3" fill="#0B8B4E"/>
+    <rect x="64" y="26" width="16" height="14" rx="3" fill="#E5E9F0"/>
+    <rect x="44" y="46" width="36" height="8" rx="2" fill="#E5E9F0"/>
+    <rect x="44" y="58" width="36" height="8" rx="2" fill="#E5E9F0"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  /* ============================================================
+     Demo data per time range (FY = Apr 2026 onward; month = Jun 2026)
+     ============================================================ */
+  const METRICS = {
+    all:   { total:248, svc:{asmt:112, scn:74, comm:41, gstat:21},
+             status:{upload:14, review:22, draft:9, filing:11, complete:178, cancelled:14},
+             revenue:'₹61,42,500', paid:212 },
+    fy:    { total:31,  svc:{asmt:14, scn:9, comm:5, gstat:3},
+             status:{upload:5, review:9, draft:4, filing:3, complete:8, cancelled:2},
+             revenue:'₹7,88,000', paid:26 },
+    month: { total:9,   svc:{asmt:4, scn:3, comm:1, gstat:1},
+             status:{upload:2, review:4, draft:2, filing:1, complete:0, cancelled:0},
+             revenue:'₹2,12,000', paid:7 },
+  };
+
+  /* Bookings needing action:
+     Draft Ready + payment pending/failed, OR In Review awaiting draft.
+     ranges: which time ranges each row falls within. */
+  const ATTENTION = [
+    { name:'Suresh Patel',  service:'ASMT-10 Reply',          status:'draft',  updated:'10 Jun 2026', ranges:['all','fy','month'] },
+    { name:'Meena Iyer',    service:'SCN Reply (Section 74)', status:'review', updated:'09 Jun 2026', ranges:['all','fy','month'] },
+    { name:'Arvind Shah',   service:'Commissioner Appeal',    status:'draft',  updated:'08 Jun 2026', ranges:['all','fy','month'] },
+    { name:'Kavita Rao',    service:'SCN Reply (Section 73)', status:'review', updated:'28 May 2026', ranges:['all','fy'] },
+    { name:'Deepak Nair',   service:'GSTAT Appeal',           status:'draft',  updated:'12 Apr 2026', ranges:['all','fy'] },
+    { name:'Ramesh Gupta',  service:'ASMT-10 Reply',          status:'review', updated:'18 Mar 2026', ranges:['all'] },
+  ];
+
+  const BADGE = {
+    draft:  { cls:'s-draft',  icon:'alert-circle', label:'Draft Ready' },
+    review: { cls:'s-review', icon:'search',       label:'In Review' },
+  };
+
+  const EMPTY_METRICS = {
+    total:0, svc:{asmt:0, scn:0, comm:0, gstat:0},
+    status:{upload:0, review:0, draft:0, filing:0, complete:0, cancelled:0},
+    revenue:'₹0', paid:0,
+  };
+
+  /* ============================================================
+     Rendering
+     ============================================================ */
+  let currentRange = 'all';
+  let currentState = 'populated';
+
+  function renderMetrics(m){
+    document.getElementById('kpiTotal').textContent = m.total;
+    document.getElementById('kpiByService').innerHTML =
+      'ASMT-10 <b>' + m.svc.asmt + '</b> · SCN <b>' + m.svc.scn +
+      '</b> · Commissioner <b>' + m.svc.comm + '</b> · GSTAT <b>' + m.svc.gstat + '</b>';
+    document.getElementById('cntUpload').textContent    = m.status.upload;
+    document.getElementById('cntReview').textContent    = m.status.review;
+    document.getElementById('cntDraft').textContent     = m.status.draft;
+    document.getElementById('cntFiling').textContent    = m.status.filing;
+    document.getElementById('cntComplete').textContent  = m.status.complete;
+    document.getElementById('cntCancelled').textContent = m.status.cancelled;
+    document.getElementById('kpiRevenue').textContent   = m.revenue;
+    document.getElementById('kpiPaid').innerHTML        = 'From <b>' + m.paid + '</b> paid bookings';
+  }
+
+  function renderTable(rows){
+    const body = document.getElementById('attnBody');
+    const empty = document.getElementById('tableEmpty');
+    const scroll = document.getElementById('tableScroll');
+    body.innerHTML = '';
+    if(rows.length === 0){
+      scroll.hidden = true;
+      empty.hidden = false;
+      lucide.createIcons();
+      return;
+    }
+    scroll.hidden = false;
+    empty.hidden = true;
+    rows.forEach(r => {
+      const b = BADGE[r.status];
+      const tr = document.createElement('tr');
+      tr.tabIndex = 0;
+      tr.setAttribute('aria-label', r.name + ' — ' + r.service + ' — ' + b.label + ' — updated ' + r.updated + '. Open booking detail.');
+      tr.innerHTML =
+        '<td class="t-name">' + r.name + '</td>' +
+        '<td>' + r.service + '</td>' +
+        '<td><span class="status-badge ' + b.cls + '"><i data-lucide="' + b.icon + '" class="ic" aria-hidden="true"></i> ' + b.label + '</span></td>' +
+        '<td class="t-updated">' + r.updated + '</td>' +
+        '<td class="t-arrow"><i data-lucide="arrow-right" class="ic" aria-hidden="true"></i></td>';
+      const open = () => { window.location.href = 'Admin Booking Detail.html'; };
+      tr.addEventListener('click', open);
+      tr.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); } });
+      body.appendChild(tr);
+    });
+    lucide.createIcons();
+  }
+
+  function renderRange(range){
+    currentRange = range;
+    if(currentState === 'empty'){
+      renderMetrics(EMPTY_METRICS);
+      renderTable([]);
+      return;
+    }
+    renderMetrics(METRICS[range]);
+    renderTable(ATTENTION.filter(r => r.ranges.includes(range)));
+  }
+
+  document.querySelectorAll('#rangeControl input[name="range"]').forEach(input => {
+    input.addEventListener('change', () => renderRange(input.value));
+  });
+
+  /* ============================================================
+     Mobile drawer
+     ============================================================ */
+  const sidebar   = document.getElementById('sidebar');
+  const scrim     = document.getElementById('scrim');
+  const hamburger = document.getElementById('hamburger');
+  function openDrawer(){
+    sidebar.classList.add('open');
+    scrim.hidden = false; requestAnimationFrame(()=>scrim.classList.add('open'));
+    hamburger.setAttribute('aria-expanded','true');
+  }
+  function closeDrawer(){
+    sidebar.classList.remove('open');
+    scrim.classList.remove('open'); scrim.hidden = true;
+    hamburger.setAttribute('aria-expanded','false');
+  }
+  hamburger.addEventListener('click', ()=> sidebar.classList.contains('open') ? closeDrawer() : openDrawer());
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeDrawer(); closeAcct(); } });
+
+  /* ============================================================
+     Account menu
+     ============================================================ */
+  const acctBtn  = document.getElementById('acctBtn');
+  const acctMenu = document.getElementById('acctMenu');
+  function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+  acctBtn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const open = acctMenu.classList.toggle('open');
+    acctBtn.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (e)=>{ if(!e.target.closest('.acct')) closeAcct(); });
+
+  /* ============================================================
+     Preview state switcher
+     ============================================================ */
+  const populatedView = document.getElementById('populatedView');
+  const errorView     = document.getElementById('errorView');
+  const loadingView   = document.getElementById('loadingView');
+  const stateBtns     = document.querySelectorAll('.state-switch button');
+
+  function setState(state){
+    currentState = state;
+    populatedView.hidden = (state !== 'populated' && state !== 'empty');
+    errorView.hidden     = (state !== 'error');
+    loadingView.hidden   = (state !== 'loading');
+    if(state === 'populated' || state === 'empty') renderRange(currentRange);
+    stateBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.state === state)));
+  }
+  stateBtns.forEach(b => b.addEventListener('click', ()=> setState(b.dataset.state)));
+
+  /* Retry → back to populated */
+  document.getElementById('retryBtn').addEventListener('click', ()=> setState('populated'));
+
+  /* initial render */
+  renderRange('all');
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+})();
+</script>
+</body>
+</html>

@@ -10,7 +10,7 @@
 |---|---|---|
 | Phase 1 Dev Window | 7–12 June 2026 | 🔄 In Progress |
 | Phase 1 Launch | 15–16 June 2026 | ⬚ Pending |
-| Phase 2 Dev Window | 16 June – 4 July 2026 | ⬚ Pending |
+| Phase 2 Dev Window | 16 June – 4 July 2026 | 🔄 In Progress |
 | Phase 2 Launch | 5–6 July 2026 | ⬚ Pending |
 
 ---
@@ -31,10 +31,10 @@
 
 | EP | Name | Status | Completed |
 |---|---|---|---|
-| EP6 | Database Schema & Repository Layer | ⬚ Pending | — |
-| EP7 | Backend Core Infrastructure | ⬚ Pending | — |
-| EP8 | Auth Backend (OTP signup, login, JWT, forgot password) | ⬚ Pending | — |
-| EP9 | Booking & Document Upload Backend | ⬚ Pending | — |
+| EP6 | Database Schema & Repository Layer | ✅ Done | 2026-06-16 |
+| EP7 | Backend Core Infrastructure | ✅ Done | 2026-06-16 |
+| EP8 | Auth Backend (OTP signup, login, JWT, forgot password) | ✅ Done | 2026-06-16 |
+| EP9 | Booking & Document Upload Backend | ✅ Done | 2026-06-23 |
 | EP10 | Auth Frontend & Route Protection | ⬚ Pending | — |
 | EP11 | User Dashboard & Booking Flow Frontend | ⬚ Pending | — |
 | EP12 | Payment Integration (Razorpay + three-layer reliability) | ⬚ Pending | — |

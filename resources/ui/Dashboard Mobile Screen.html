@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     DASHBOARD HOME — MOBILE (delta of desktop 3.1)
+     SHELL: App Shell header (top) + Mobile Bottom Tab Bar (bottom)
+            Sidebar removed. Drawer narrowed to account/help/legal/logout.
+     ============================================================ */
+  :root{ --header-h:60px; --tabbar-h:64px; }
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);}
+
+  /* ---------- App Shell header ---------- */
+  .topbar{
+    height:var(--header-h);position:sticky;top:0;z-index:50;
+    background:rgba(255,255,255,.94);backdrop-filter:saturate(180%) blur(6px);
+    border-bottom:1px solid var(--neutral-200);
+    display:flex;align-items:center;gap:10px;padding:0 14px;
+  }
+  .topbar .hamburger{
+    width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);flex:0 0 auto;
+  }
+  .topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .brand{display:inline-flex;align-items:center;gap:8px;}
+  .topbar .brand img{height:26px;width:26px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .topbar .brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .topbar .brand .bn span{color:var(--accent-green);}
+  .topbar .spacer{flex:1;}
+  .topbar .tap-call{
+    width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;color:var(--accent-green);flex:0 0 auto;
+  }
+  .topbar .tap-call:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .tap-call .ic{width:19px;height:19px;}
+
+  /* ---------- Content ---------- */
+  .content{padding:22px 16px calc(var(--tabbar-h) + 28px);}
+
+  .greet h1{font-size:26px;letter-spacing:-.01em;line-height:1.15;}
+  .greet .date{font-size:14px;color:var(--neutral-600);margin-top:6px;}
+
+  /* Full-width primary CTA below greeting */
+  .cta-row{margin-top:18px;}
+  .cta-row .btn{width:100%;}
+
+  /* Summary strip — wraps to 2 lines if needed */
+  .summary-strip{
+    display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;
+    margin-top:20px;font-size:14px;color:var(--neutral-600);
+  }
+  .summary-strip .seg{display:inline-flex;align-items:center;gap:7px;}
+  .summary-strip .seg b{color:var(--primary-navy);font-weight:600;}
+  .summary-strip .dot{width:3px;height:3px;border-radius:50%;background:var(--neutral-200);}
+
+  /* Attention banner — full width, amber left border */
+  .attn-banner{
+    display:flex;align-items:flex-start;gap:12px;
+    margin-top:20px;padding:14px 16px;
+    background:var(--neutral-50);
+    border:1px solid var(--neutral-200);border-left:3px solid var(--warning-amber);
+    border-radius:var(--r-card);box-shadow:var(--shadow-sm);
+  }
+  .attn-banner .ic-lead{width:20px;height:20px;flex:0 0 auto;color:var(--warning-amber);margin-top:1px;}
+  .attn-banner .bd{flex:1;display:flex;flex-direction:column;gap:8px;align-items:flex-start;}
+  .attn-banner .txt{font-size:15px;color:var(--neutral-900);line-height:1.45;}
+  .attn-banner .txt b{font-weight:600;}
+  .attn-banner .btn-tertiary{display:inline-flex;align-items:center;gap:5px;min-height:44px;}
+
+  /* Active services section */
+  .section-block{margin-top:32px;}
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+  .section-head h2{font-size:22px;font-weight:600;line-height:1.3;}
+  .section-head .btn-tertiary{display:inline-flex;align-items:center;gap:5px;min-height:44px;white-space:nowrap;}
+
+  /* Single-column stack, gap 12px */
+  .cards-stack{display:flex;flex-direction:column;gap:12px;}
+
+  /* ---------- Booking Summary Card ---------- */
+  .booking-card{
+    display:flex;flex-direction:column;gap:9px;
+    background:#fff;border:1px solid var(--neutral-200);
+    border-radius:var(--r-card);box-shadow:var(--shadow-sm);
+    padding:16px;min-height:88px;text-align:left;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .booking-card:active{border-color:#cdd5e2;box-shadow:var(--shadow-md);}
+  .booking-card:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .booking-card.draft-ready{border-left:3px solid var(--warning-amber);}
+  .booking-card .bc-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .booking-card .bc-type{font-size:16px;font-weight:600;color:var(--primary-navy);line-height:1.35;}
+  .booking-card .bc-next{font-size:14px;color:var(--neutral-600);line-height:1.45;}
+  .booking-card .bc-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:14px;color:var(--neutral-600);}
+  .booking-card .bc-meta .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+  .booking-card .bc-meta .sep{color:var(--neutral-200);}
+
+  /* ---------- Service Status Badge ---------- */
+  .status-badge{
+    display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
+    font-size:14px;font-weight:500;line-height:1.3;
+    padding:4px 10px;min-height:24px;border-radius:var(--r-badge);white-space:nowrap;
+  }
+  .status-badge .ic{width:16px;height:16px;flex:0 0 auto;}
+  .status-badge.s-review{background:var(--primary-deep-blue);color:#fff;}
+  .status-badge.s-draft{background:var(--warning-amber);color:#fff;}
+
+  /* ---------- Empty state ---------- */
+  .empty-state{
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding:48px 12px;margin-top:24px;
+  }
+  .empty-state .ic-big{width:80px;height:80px;color:var(--neutral-200);}
+  .empty-state h2{font-size:22px;font-weight:600;margin-top:16px;}
+  .empty-state p{font-size:16px;color:var(--neutral-600);line-height:1.6;margin-top:10px;margin-bottom:24px;max-width:32ch;}
+  .empty-state .btn{width:100%;max-width:320px;}
+
+  [hidden]{display:none !important;}
+
+  /* ============================================================
+     MOBILE BOTTOM TAB BAR (authenticated)
+     ============================================================ */
+  .tabbar{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    height:var(--tabbar-h);background:#fff;border-top:1px solid var(--neutral-200);
+    box-shadow:var(--shadow-sm);
+    display:grid;grid-template-columns:repeat(4,1fr);
+  }
+  .tab{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    color:var(--neutral-600);text-decoration:none;position:relative;min-height:48px;
+  }
+  .tab .ic{width:24px;height:24px;stroke-width:1.5;}
+  .tab .lbl{font-size:12px;font-weight:500;line-height:1;}
+  .tab:focus-visible{outline:none;box-shadow:inset 0 0 0 3px rgba(11,139,78,.35);border-radius:6px;}
+  .tab[aria-current="page"]{color:var(--primary-navy);}
+  .tab[aria-current="page"] .lbl{font-weight:500;}
+  .tab[aria-current="page"]::after{
+    content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:28px;height:2px;background:var(--accent-green);border-radius:0 0 2px 2px;
+  }
+
+  /* ============================================================
+     DRAWER (narrowed — account / help / WhatsApp / legal / logout)
+     ============================================================ */
+  .scrim{position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:70;opacity:0;transition:opacity .2s;}
+  .scrim.open{opacity:1;}
+  .drawer{
+    position:fixed;inset:0 auto 0 0;width:84%;max-width:320px;z-index:80;
+    background:#fff;transform:translateX(-100%);transition:transform .2s ease;
+    display:flex;flex-direction:column;box-shadow:var(--shadow-md);
+  }
+  .drawer.open{transform:translateX(0);}
+  @media (prefers-reduced-motion: reduce){ .drawer,.scrim{transition:none;} }
+  .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--neutral-200);}
+  .drawer-head .brand{display:inline-flex;align-items:center;gap:8px;}
+  .drawer-head .brand img{height:26px;width:26px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .drawer-head .brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+  .drawer-head .brand .bn span{color:var(--accent-green);}
+  .drawer-head .close{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--neutral-600);cursor:pointer;border-radius:var(--r-btn);}
+  .drawer-head .close:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+
+  .drawer-acct{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--neutral-200);}
+  .drawer-acct .avatar{width:42px;height:42px;border-radius:50%;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex:0 0 auto;}
+  .drawer-acct .who .nm{font-size:15px;font-weight:600;color:var(--primary-navy);line-height:1.3;}
+  .drawer-acct .who .em{font-size:13px;color:var(--neutral-600);line-height:1.3;}
+
+  .drawer nav{flex:1;padding:8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+  .drawer .d-link{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:48px;}
+  .drawer .d-link .ic{width:20px;height:20px;color:var(--neutral-600);flex:0 0 auto;}
+  .drawer .d-link:hover,.drawer .d-link:active{background:var(--neutral-50);}
+  .drawer .d-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .drawer .d-link.wa .ic{color:var(--wa-green);}
+  .drawer .d-divider{height:1px;background:var(--neutral-200);margin:8px 4px;}
+  .drawer .d-link.logout{color:var(--primary-navy);font-weight:600;}
+
+  .drawer-foot{padding:14px 16px;border-top:1px solid var(--neutral-200);}
+  .drawer-foot .legal{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--neutral-600);}
+  .drawer-foot .legal a{color:var(--neutral-600);}
+  .drawer-foot .legal a:hover{color:var(--primary-navy);}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     APP SHELL HEADER (mobile) — logo + tap-to-call + hamburger
+     ============================================================ -->
+<header class="topbar">
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="drawer" aria-expanded="false">
+    <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+  </button>
+  <a class="brand" href="Dashboard Mobile Screen.html" aria-label="GST Notice Support home">
+    <img src="assets/logo.png" alt="" />
+    <span class="bn">GST<span>Notice</span>Support</span>
+  </a>
+  <span class="spacer"></span>
+  <a class="tap-call" href="tel:+918041000000" aria-label="Call us: +91 80 4100 0000">
+    <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+  </a>
+</header>
+
+<!-- ============================================================
+     CONTENT
+     ============================================================ -->
+<main id="main" class="content" data-screen-label="Dashboard Home (mobile)">
+
+  <div class="greet">
+    <h1 id="greeting">Good morning, Rajesh</h1>
+    <div class="date" id="todayDate">Tuesday, 9 June 2026</div>
+  </div>
+
+  <!-- Full-width primary CTA below greeting -->
+  <div class="cta-row" data-state-hide="empty">
+    <a class="btn btn-primary" href="Booking Step 1 - Service Selection.html">
+      <i data-lucide="plus" class="ic" aria-hidden="true"></i> Book New Service
+    </a>
+  </div>
+
+  <!-- ===== POPULATED (active / draft) ===== -->
+  <div id="populatedView">
+
+    <!-- Summary strip -->
+    <div class="summary-strip" aria-label="Account summary">
+      <span class="seg"><b>2</b> Active</span>
+      <span class="dot" aria-hidden="true"></span>
+      <span class="seg"><b>1</b> Complete</span>
+      <span class="dot" aria-hidden="true"></span>
+      <span class="seg"><b>0</b> Cancelled</span>
+    </div>
+
+    <!-- Attention banner -->
+    <div class="attn-banner" id="attnBanner" role="status" aria-live="polite">
+      <i data-lucide="alert-circle" class="ic-lead" aria-hidden="true"></i>
+      <div class="bd">
+        <p class="txt"><b>ASMT-10 Reply</b> — draft ready, payment required</p>
+        <a class="btn-tertiary" href="Service Detail.html">View Service <i data-lucide="arrow-right" style="width:15px;height:15px" aria-hidden="true"></i></a>
+      </div>
+    </div>
+
+    <!-- Active services -->
+    <section class="section-block" aria-labelledby="activeHeading">
+      <div class="section-head">
+        <h2 id="activeHeading">Active Services</h2>
+        <a class="btn-tertiary" href="Services List.html">View all <i data-lucide="arrow-right" style="width:15px;height:15px" aria-hidden="true"></i></a>
+      </div>
+
+      <div class="cards-stack">
+        <!-- Draft Ready (first) -->
+        <a class="booking-card draft-ready" href="Service Detail.html" aria-label="ASMT-10 Reply — draft ready, payment required. View details.">
+          <div class="bc-row1">
+            <span class="bc-type">ASMT-10 Reply</span>
+            <span class="status-badge s-draft"><i data-lucide="alert-circle" class="ic" aria-hidden="true"></i> Draft Ready</span>
+          </div>
+          <p class="bc-next">Draft ready — payment required</p>
+          <div class="bc-meta">
+            <span>02 Jun 2026</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <span class="mono">GNS-2026-0517</span>
+          </div>
+        </a>
+
+        <!-- In Review -->
+        <a class="booking-card" href="Service Detail.html" aria-label="SCN Reply, Section 74 — awaiting review. View details.">
+          <div class="bc-row1">
+            <span class="bc-type">SCN Reply (Section 74)</span>
+            <span class="status-badge s-review"><i data-lucide="search" class="ic" aria-hidden="true"></i> In Review</span>
+          </div>
+          <p class="bc-next">Awaiting review</p>
+          <div class="bc-meta">
+            <span>28 May 2026</span>
+            <span class="sep" aria-hidden="true">·</span>
+            <span class="mono">GNS-2026-0489</span>
+          </div>
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== EMPTY ===== -->
+  <div id="emptyView" hidden>
+    <div class="empty-state">
+      <i data-lucide="folder-open" class="ic-big" aria-hidden="true"></i>
+      <h2>No active services</h2>
+      <p>Book your first service to get expert help with your GST notice.</p>
+      <a class="btn btn-primary" href="Booking Step 1 - Service Selection.html"><i data-lucide="plus" class="ic" aria-hidden="true"></i> Book New Service</a>
+    </div>
+  </div>
+
+</main>
+
+<!-- ============================================================
+     MOBILE BOTTOM TAB BAR (authenticated)
+     ============================================================ -->
+<nav class="tabbar" aria-label="Primary">
+  <a class="tab" href="Dashboard Mobile Screen.html" aria-current="page">
+    <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i><span class="lbl">Dashboard</span>
+  </a>
+  <a class="tab" href="Services List.html">
+    <i data-lucide="folder-open" class="ic" aria-hidden="true"></i><span class="lbl">Services</span>
+  </a>
+  <a class="tab" href="Payment History.html">
+    <i data-lucide="credit-card" class="ic" aria-hidden="true"></i><span class="lbl">Payments</span>
+  </a>
+  <a class="tab" href="Settings.html">
+    <i data-lucide="settings" class="ic" aria-hidden="true"></i><span class="lbl">Settings</span>
+  </a>
+</nav>
+
+<!-- ============================================================
+     DRAWER (narrowed — account / help / WhatsApp / legal / logout)
+     ============================================================ -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Account and help" aria-hidden="true">
+  <div class="drawer-head">
+    <span class="brand"><img src="assets/logo.png" alt="" /><span class="bn">GST<span>Notice</span>Support</span></span>
+    <button class="close" id="drawerClose" aria-label="Close menu"><i data-lucide="x" style="width:22px;height:22px" aria-hidden="true"></i></button>
+  </div>
+  <div class="drawer-acct">
+    <span class="avatar" aria-hidden="true">RK</span>
+    <span class="who">
+      <span class="nm">Rajesh Kumar</span>
+      <span class="em">rajesh.kumar@firm.in</span>
+    </span>
+  </div>
+  <nav aria-label="Account menu">
+    <a class="d-link" href="My Profile.html"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+    <a class="d-link" href="Contact.html"><i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support</a>
+    <a class="d-link wa" href="https://wa.me/918041000000" target="_blank" rel="noopener"><i data-lucide="message-circle" class="ic" aria-hidden="true"></i> Chat on WhatsApp</a>
+    <div class="d-divider" aria-hidden="true"></div>
+    <a class="d-link logout" href="Login.html"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+  </nav>
+  <div class="drawer-foot">
+    <div class="legal">
+      <a href="Privacy Policy.html">Privacy Policy</a>
+      <a href="Terms of Service.html">Terms</a>
+      <a href="Refund Policy.html">Refund Policy</a>
+    </div>
+  </div>
+</aside>
+
+<!-- Preview state switcher (review aid — not product UI) -->
+<div style="position:fixed;right:10px;bottom:calc(var(--tabbar-h) + 10px);z-index:100;display:flex;gap:5px;background:#fff;border:1px dashed #c4ccd9;border-radius:9px;padding:6px 7px;box-shadow:var(--shadow-md);font-size:11px;" role="group" aria-label="Preview state (review only)">
+  <button data-state="draft" aria-pressed="true" style="border:1px solid var(--neutral-200);background:var(--primary-navy);color:#fff;font-size:11px;font-weight:600;padding:5px 8px;border-radius:6px;cursor:pointer;font-family:inherit;">Active</button>
+  <button data-state="empty" aria-pressed="false" style="border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);font-size:11px;font-weight:600;padding:5px 8px;border-radius:6px;cursor:pointer;font-family:inherit;">Empty</button>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  /* Greeting + date */
+  (function(){
+    const h = new Date().getHours();
+    const part = h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening');
+    const g = document.getElementById('greeting'); if(g) g.textContent = part + ', Rajesh';
+    const el = document.getElementById('todayDate');
+    if(el) el.textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  })();
+
+  /* Drawer */
+  const drawer=document.getElementById('drawer'), scrim=document.getElementById('scrim'),
+        ham=document.getElementById('hamburger'), dClose=document.getElementById('drawerClose');
+  function openDrawer(){ drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false');
+    scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open')); ham.setAttribute('aria-expanded','true'); }
+  function closeDrawer(){ drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true');
+    scrim.classList.remove('open'); scrim.hidden=true; ham.setAttribute('aria-expanded','false'); }
+  ham.addEventListener('click',openDrawer);
+  dClose.addEventListener('click',closeDrawer);
+  scrim.addEventListener('click',closeDrawer);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
+
+  /* State switcher */
+  const populated=document.getElementById('populatedView'), emptyView=document.getElementById('emptyView');
+  const hideOnEmpty=document.querySelectorAll('[data-state-hide="empty"]');
+  document.querySelectorAll('[data-state]').forEach(b=>b.addEventListener('click',()=>{
+    const s=b.dataset.state;
+    populated.hidden = (s==='empty'); emptyView.hidden = (s!=='empty');
+    hideOnEmpty.forEach(el=>el.style.display = (s==='empty')?'none':'');
+    document.querySelectorAll('[data-state]').forEach(x=>{
+      const on = x.dataset.state===s;
+      x.setAttribute('aria-pressed',String(on));
+      x.style.background = on ? 'var(--primary-navy)' : '#fff';
+      x.style.color = on ? '#fff' : 'var(--neutral-600)';
+    });
+  }));
+</script>
+</body>
+</html>

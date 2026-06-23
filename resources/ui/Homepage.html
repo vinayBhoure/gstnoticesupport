@@ -66,15 +66,19 @@
   .hero .reassure span{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--neutral-600);}
   .hero .reassure .ic{width:17px;height:17px;color:var(--accent-green);flex:0 0 auto;}
 
-  /* hero visual — flat document + shield + check (echoes the logo mark) */
-  .hero-art{position:relative;aspect-ratio:4/4;display:flex;align-items:center;justify-content:center;}
-  .hero-art .doc{width:74%;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:26px 24px;}
-  .hero-art .doc .doc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-  .hero-art .doc .tag{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--primary-deep-blue);border:1px solid var(--neutral-200);border-radius:var(--r-badge);padding:4px 9px;}
-  .hero-art .doc .ref{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--neutral-600);}
-  .hero-art .doc .line{height:9px;border-radius:3px;background:var(--neutral-200);margin-bottom:11px;}
-  .hero-art .doc .line.s{background:#EDF1F7;}
-  .hero-art .shield{position:absolute;right:6%;bottom:8%;width:104px;height:118px;filter:drop-shadow(0 6px 14px rgba(10,37,64,.18));}
+  /* hero visual — animated service video */
+  .hero-art{position:relative;display:flex;align-items:center;justify-content:center;}
+  .hero-video-card{
+    width:100%;
+    max-width:440px;
+    margin:0 auto;
+    background:#fff;
+    border:1px solid var(--neutral-200);
+    border-radius:var(--r-card);
+    box-shadow:0 2px 8px rgba(10,37,64,.06),0 8px 24px rgba(10,37,64,.09);
+    overflow:hidden;
+  }
+  .hero-video-card video{display:block;width:100%;height:auto;aspect-ratio:16/9;}
 
   /* ---------- NOTICE SELECTOR ---------- */
   .notice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
@@ -318,7 +322,7 @@
 <!-- NAVBAR (components.md → Navbar) -->
 <header class="nav" id="nav">
   <div class="container row">
-    <a class="brand" href="/" aria-label="GST Notice Support home">
+    <a class="brand" href="Homepage.html" aria-label="GST Notice Support home">
       <img src="assets/logo.png" alt="" />
       <span class="bn">GST<span>Notice</span>Support</span>
     </a>
@@ -338,8 +342,8 @@
     </nav>
     <div class="right">
       <a class="ph" href="tel:+919800000000" aria-label="Call +91 98000 00000"><i data-lucide="phone" class="ic"></i><span class="ph-num">+91 98000 00000</span></a>
-      <a class="btn btn-secondary nav-cta" href="Contact.html#callback">Request Callback</a>
-      <a class="btn btn-primary nav-cta" href="Pricing.html">Book Service</a>
+      <a class="btn btn-secondary nav-cta" href="Login.html">Log In</a>
+      <a class="btn btn-primary nav-cta" href="Signup.html">Sign Up</a>
       <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><i data-lucide="menu" style="width:24px;height:24px"></i></button>
     </div>
   </div>
@@ -370,8 +374,8 @@
   </nav>
   <div class="drawer-foot">
     <a class="ph" href="tel:+919800000000"><i data-lucide="phone" class="ic" style="width:17px;height:17px"></i>+91 98000 00000</a>
-    <a class="btn btn-secondary btn-block" href="Contact.html#callback">Request Callback</a>
-    <a class="btn btn-primary btn-block" href="Pricing.html">Book Service</a>
+    <a class="btn btn-secondary btn-block" href="Login.html">Log In</a>
+    <a class="btn btn-primary btn-block" href="Signup.html">Sign Up</a>
   </div>
 </aside>
 
@@ -385,7 +389,7 @@
         <h1>GST Notice? Get Expert Legal Support in 24 Hours.</h1>
         <p class="sub">Our team of ICAI-registered CAs and Bar Council-enrolled Advocates prepare your reply, appeal, or representation — fully managed, fixed fee.</p>
         <div class="cta">
-          <a class="btn btn-primary" href="Pricing.html"><i data-lucide="upload-cloud" class="ic"></i>Upload Your Notice</a>
+          <a class="btn btn-primary" id="hero-cta" href="Booking Step 1 - Service Selection.html"><i data-lucide="upload-cloud" class="ic"></i>Upload Your Notice</a>
           <a class="btn btn-secondary" href="Contact.html#callback">Request a Callback</a>
         </div>
         <div class="reassure">
@@ -396,23 +400,11 @@
         </div>
       </div>
       <div class="hero-art" aria-hidden="true">
-        <div class="doc">
-          <div class="doc-head">
-            <span class="tag">GST NOTICE</span>
-            <span class="ref">DRC-01</span>
-          </div>
-          <div class="line" style="width:90%"></div>
-          <div class="line s" style="width:100%"></div>
-          <div class="line s" style="width:96%"></div>
-          <div class="line s" style="width:80%"></div>
-          <div class="line" style="width:55%;margin-top:18px"></div>
-          <div class="line s" style="width:100%"></div>
-          <div class="line s" style="width:72%"></div>
+        <div class="hero-video-card">
+          <video autoplay loop muted playsinline preload="auto">
+            <source src="uploads/Convert_video_to_square_format_202606041920.mp4" type="video/mp4" />
+          </video>
         </div>
-        <svg class="shield" viewBox="0 0 100 116" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M50 4 L92 20 V58 C92 86 72 104 50 112 C28 104 8 86 8 58 V20 Z" fill="#0A2540"/>
-          <path d="M34 58 L46 70 L68 44" stroke="#0B8B4E" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
       </div>
     </div>
   </section>
@@ -793,7 +785,7 @@
       <div class="disc-inner">
         <div class="disc-rule"></div>
         <div class="disc-label">Disclaimer</div>
-        <p class="disc-body">The information provided on this website is for general guidance only and does not constitute legal advice. Outcomes in GST litigation depend on case-specific facts, the applicable law, and decisions made by the relevant tax authority — they cannot be predicted or guaranteed. Timelines mentioned are indicative and may vary based on case complexity and departmental processing times. The scope of services provided is defined by the selected service plan. For complete details, please refer to our <a href="#">Disclaimer</a>, <a href="#">Terms &amp; Conditions</a>, and <a href="#">Privacy Policy</a>.</p>
+        <p class="disc-body">The information provided on this website is for general guidance only and does not constitute legal advice. Outcomes in GST litigation depend on case-specific facts, the applicable law, and decisions made by the relevant tax authority — they cannot be predicted or guaranteed. Timelines mentioned are indicative and may vary based on case complexity and departmental processing times. The scope of services provided is defined by the selected service plan. For complete details, please refer to our <a href="Terms of Service.html#not-legal">Disclaimer</a>, <a href="Terms of Service.html">Terms &amp; Conditions</a>, and <a href="Privacy Policy.html">Privacy Policy</a>.</p>
       </div>
     </div>
   </section>
@@ -804,7 +796,7 @@
       <h2>Don't Let a GST Notice Become a Bigger Problem</h2>
       <p>Get expert legal support within 24 hours.</p>
       <div class="cta">
-        <a class="btn btn-primary" href="Pricing.html"><i data-lucide="upload-cloud" class="ic"></i>Upload Your Notice Now</a>
+        <a class="btn btn-primary" id="final-cta" href="Booking Step 1 - Service Selection.html"><i data-lucide="upload-cloud" class="ic"></i>Upload Your Notice Now</a>
         <a class="btn btn-secondary on-dark" href="tel:+919800000000">Request a Callback</a>
       </div>
       <a class="ph" href="tel:+919800000000"><i data-lucide="phone" style="width:17px;height:17px"></i>+91 98000 00000</a>
@@ -837,8 +829,8 @@
       <div>
         <h5>Resources</h5>
         <ul>
-          <li><a href="#">GST Notice Guides</a></li>
-          <li><a href="#">Blog</a></li>
+          <li><a href="GST Notice Guides.html">GST Notice Guides</a></li>
+          <li><a href="Blog.html">Blog</a></li>
           <li><a href="FAQ.html">FAQ</a></li>
         </ul>
       </div>
@@ -855,9 +847,9 @@
     </div>
     <div class="strip">
       <div class="pols">
-        <a href="#">Privacy Policy</a><span>|</span>
-        <a href="#">Terms</a><span>|</span>
-        <a href="#">Refund Policy</a>
+        <a href="Privacy Policy.html">Privacy Policy</a><span>|</span>
+        <a href="Terms of Service.html">Terms</a><span>|</span>
+        <a href="Refund Policy.html">Refund Policy</a>
       </div>
       <span class="ssl" style="margin-left:auto"><i data-lucide="shield-check" style="width:15px;height:15px"></i>SSL Secured</span>
       <span>© 2026 GST Notice Support Pvt. Ltd. All rights reserved.</span>
@@ -1036,6 +1028,19 @@
   document.querySelectorAll('.tpanel').forEach(panel => {
     initCarousel(panel.querySelector('.tscroll'), panel.querySelector('.tdots'), '.tcard');
   });
+</script>
+<script src="js/app-state.js"></script>
+<script>
+// Auth-aware CTAs: if not logged in, route hero CTAs to Login first
+(function(){
+  if(typeof GNS==='undefined') return;
+  if(!GNS.isLoggedIn()){
+    ['hero-cta','final-cta'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(el) el.href='Login.html';
+    });
+  }
+})();
 </script>
 </body>
 </html>
