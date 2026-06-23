@@ -16,6 +16,10 @@ const s3Client = new S3Client({
     accessKeyId: env.AWS_ACCESS_KEY_ID,
     secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
   },
+  // The SDK otherwise bakes a CRC32 checksum into the signed URL, which breaks a
+  // browser PUT that streams the real file body. Keep checksums off for presigning.
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
 });
 
 function formatDateStamp(date: Date): string {
@@ -40,13 +44,13 @@ type UploadUrlParams = {
 
 // Pre-signed PUT. ContentType and ContentLength are signed, so the browser must
 // send exactly the validated size and a PDF content-type — neither can be bypassed.
+// Encryption is applied by the bucket's default SSE-S3, so no SSE header is signed.
 export async function getUploadUrl({ key, contentLength }: UploadUrlParams): Promise<string> {
   const command = new PutObjectCommand({
     Bucket: env.AWS_S3_BUCKET_NAME,
     Key: key,
     ContentType: CONTENT_TYPE_PDF,
     ContentLength: contentLength,
-    ServerSideEncryption: 'AES256',
   });
   return getSignedUrl(s3Client, command, { expiresIn: UPLOAD_URL_EXPIRY_SECONDS });
 }
