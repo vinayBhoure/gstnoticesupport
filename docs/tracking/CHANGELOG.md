@@ -5,6 +5,57 @@
 
 ---
 
+## [2026-06-23] — feat(backend): Phase 4 — Document Handling (pre-signed S3)
+
+**4 new endpoints under `/api/v1/bookings/:id`** — all `authenticate`-gated, ownership enforced (404-collapse). Files never pass through Express; the browser PUTs/GETs S3 directly via pre-signed URLs.
+
+- `POST /bookings/:id/upload-url` — Validates server-side (PDF only, ≤5 MB, booking in `document_upload`, <8 files) then returns a 5-min pre-signed PUT URL. `ContentType`+`ContentLength` are signed so the declared size/type can't be exceeded. Errors: `INVALID_FILE_TYPE`, `FILE_TOO_LARGE`, `INVALID_STATUS`, `FILE_LIMIT_REACHED`. Rate: 7/hr/user.
+- `POST /bookings/:id/confirm-upload` — Records the `booking_documents` row after the browser upload. Rejects an `s3Key` not scoped to `{userId}/{bookingId}/` and duplicate keys (`DUPLICATE_KEY`).
+- `GET /bookings/:id/documents` — Lists document metadata; `s3Key` never exposed.
+- `GET /bookings/:id/draft-url` — 15-min pre-signed GET for the draft PDF, gated to `status ∈ {filing, complete}` (`DRAFT_NOT_ACCESSIBLE` otherwise). Rate: 15/hr/user.
+
+**New modules**
+- `lib/s3.ts` — S3 client (`ap-south-1`), pre-signed PUT/GET helpers, `buildDocumentKey`. Request checksums disabled for presigning; encryption via bucket-default SSE-S3.
+- `utils/sanitizeFilename.ts`, `schemas/document.schema.ts`, `repositories/document.repository.ts`, `services/document.service.ts`, `controllers/document.controller.ts`.
+- New env: `AWS_REGION`, `AWS_S3_BUCKET_NAME`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
+
+**Verified** — Newman suite extended to 22 requests / 68 assertions (all green); live S3 PUT→GET byte round-trip confirmed; unsigned public reads return 403. Admin draft *upload* (Phase 6) and the S3 hard-delete job (Phase 8) remain out of scope.
+
+---
+
+## [2026-06-17] — test(api): Postman + Newman booking API test suite
+
+**Automated API tests under `test/postman/`** — Postman collection **"GST Notice Support"** runnable headlessly via Newman.
+
+- Scope: Phase 3 Booking Lifecycle (4 endpoints) + admin login. **11 requests / 38 assertions, all green.**
+- Covers: auth gate (401), login cookie set (`access_token` + `refresh_token`), create success (201, `document_upload`/`pending`, client price stripped, no `draftS3Key`), list (newest-first, summary shape), detail (`documents[]` + `latestPayment`, no `draftS3Key`), invalid GSTN / false consent / invalid uuid → 400, non-existent → 404, cancel at `document_upload` → 409 `INVALID_TRANSITION`.
+- **Auth:** logs in as the seeded admin; credentials read from `server/.env` at runtime by `run-newman.sh` and injected as Newman env-vars — never committed. Newman cookie jar carries the session.
+- Files: collection JSON, environment (placeholders only), `run-newman.sh`, `package.json` (pins Newman), `README.md`. Run with `cd test/postman && npm install && npm test`.
+- Out of scope until later phases: OTP success-path (bcrypt-hashed, no plaintext read) and cancel **success** path (needs `draft_ready` via admin draft upload, Phase 6).
+
+---
+
+## [2026-06-17] — feat(backend): Phase 3 — Booking Lifecycle
+
+**4 new endpoints under `/api/v1/bookings`** — all `authenticate`-gated, no rate limiters.
+
+- `POST /bookings` — Creates a booking at `status=document_upload`, `paymentStatus=pending`. Price derived server-side; any client-supplied price is stripped by Zod. Sends confirmation emails to user and admin (best-effort). Returns `BookingDetailDTO` (no `draftS3Key`).
+- `GET /bookings` — Lists the authenticated user's bookings newest-first as `BookingSummaryDTO[]`.
+- `GET /bookings/:id` — Returns `BookingDetailWithRelations` (detail + `documents[]` + `latestPayment`). Returns 404 for both non-existent and foreign-user bookings (no existence leak, D69).
+- `POST /bookings/:id/cancel` — Allowed only when `status=draft_ready` AND `paymentStatus=pending`. Sends cancellation emails (best-effort). Returns updated `BookingDetailDTO`.
+
+**New modules**
+- `schemas/booking.schema.ts` — `createBookingSchema` (GSTN regex, consent refines, no price field) + `bookingIdParamSchema`.
+- `lib/pricing.ts` — `SERVICE_PRICING` in paise; reused by Phase 5 payment flow.
+- `services/booking-state-machine.ts` — Pure `ALLOWED_TRANSITIONS` map, `assertTransition`, `assertUserCancellable` (D70).
+- `repositories/booking.repository.ts` — Ownership-baked queries; includes `documents`/`paymentRecords` on detail fetch.
+- `dto/booking.dto.ts` — Explicit summary/detail/document/payment/detail-with-relations mappers; `draftS3Key` and `s3Key` never included.
+- `services/booking.service.ts` — Business logic; emails are best-effort (never block transitions).
+
+**Email templates** — `bookingCreatedUser/Admin`, `bookingCancelledUser/Admin` added to `emails/templates.ts`; `notification.service.ts` extended with `sendBookingCreated` + `sendBookingCancelled`.
+
+---
+
 ## [2026-06-16] — feat(backend): Phase 2 — Authentication & Identity
 
 **Response envelope aligned to `api_contract.md`**

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Create your account · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     AUTH CARD SHELL — shared between Signup / Login / Reset
+     (Flagged in screen prompt: no Input/Checkbox primitive in
+      components.md; styles below should be promoted later.)
+     ============================================================ */
+
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);display:flex;flex-direction:column;}
+
+  .auth-page{
+    flex:1;display:flex;flex-direction:column;
+    padding:32px 24px 48px;
+    min-height:100vh;
+  }
+
+  /* Top brand strip — minimal (no marketing navbar on auth) */
+  .auth-top{
+    width:100%;max-width:1080px;margin:0 auto 40px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .auth-top .brand{display:inline-flex;align-items:center;gap:11px;}
+  .auth-top .brand img{height:36px;width:36px;border-radius:7px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .auth-top .brand .bn{font-weight:700;font-size:16px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .auth-top .brand .bn span{color:var(--accent-green);}
+  .auth-top .back{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:14px;font-weight:500;color:var(--neutral-600);
+    padding:8px 4px;border-radius:var(--r-btn);
+  }
+  .auth-top .back:hover{color:var(--primary-navy);}
+  .auth-top .back:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);}
+
+  /* Center stack */
+  .auth-wrap{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    width:100%;max-width:480px;margin:0 auto;gap:20px;
+  }
+
+  /* Auth card */
+  .auth-card{
+    width:100%;background:#fff;
+    border:1px solid var(--neutral-200);
+    border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);
+    padding:40px;
+  }
+  .auth-card .wordmark{
+    display:inline-flex;align-items:center;gap:10px;
+    margin-bottom:24px;
+  }
+  .auth-card .wordmark img{height:32px;width:32px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .auth-card .wordmark .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .auth-card .wordmark .bn span{color:var(--accent-green);}
+
+  .auth-card h2{font-size:28px;line-height:1.2;letter-spacing:-.01em;}
+  .auth-card .subhead{
+    font-size:16px;color:var(--neutral-600);line-height:1.55;
+    margin-top:10px;margin-bottom:32px;
+    max-width:42ch;
+  }
+
+  /* ----- Form fields ----- */
+  .auth-form{display:flex;flex-direction:column;gap:20px;}
+  .field{display:flex;flex-direction:column;gap:7px;}
+  .field label{
+    font-size:14px;font-weight:500;color:var(--primary-navy);
+    line-height:1.4;
+  }
+  .field .input-wrap{position:relative;}
+  .field .input{padding-right:14px;}
+  .field .input.has-toggle{padding-right:48px;}
+  .field .input[aria-invalid="true"]{
+    border-color:var(--warning-amber);
+    box-shadow:0 0 0 3px rgba(217,118,6,.12);
+  }
+  .field .helper{
+    font-size:13px;color:var(--neutral-600);line-height:1.4;
+    margin-top:2px;
+  }
+  .field .error{
+    display:none;
+    font-size:13px;font-weight:500;color:var(--warning-amber);
+    line-height:1.4;margin-top:2px;
+    align-items:flex-start;gap:6px;
+  }
+  .field .error .ic{width:14px;height:14px;flex:0 0 auto;margin-top:2px;}
+  .field[data-invalid="true"] .error{display:flex;}
+  .field[data-invalid="true"] .helper{display:none;}
+
+  /* Password toggle */
+  .pw-toggle{
+    position:absolute;top:50%;right:6px;transform:translateY(-50%);
+    width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;
+    background:transparent;border:none;cursor:pointer;color:var(--neutral-600);
+    border-radius:var(--r-btn);
+  }
+  .pw-toggle:hover{color:var(--primary-navy);}
+  .pw-toggle:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);}
+  .pw-toggle svg{width:18px;height:18px;}
+  .pw-toggle .ic-hide{display:none;}
+  .pw-toggle[aria-pressed="true"] .ic-show{display:none;}
+  .pw-toggle[aria-pressed="true"] .ic-hide{display:block;}
+
+  /* ----- Checkboxes ----- */
+  .check-group{display:flex;flex-direction:column;gap:14px;margin-top:4px;}
+  .check{
+    display:flex;align-items:flex-start;gap:11px;
+    cursor:pointer;line-height:1.5;
+  }
+  .check input[type="checkbox"]{
+    appearance:none;-webkit-appearance:none;
+    width:20px;height:20px;flex:0 0 auto;margin-top:1px;
+    border:1.5px solid var(--neutral-200);
+    border-radius:5px;background:#fff;cursor:pointer;
+    transition:border-color .15s,background-color .15s;
+    position:relative;
+  }
+  .check input[type="checkbox"]:hover{border-color:var(--primary-navy);}
+  .check input[type="checkbox"]:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);}
+  .check input[type="checkbox"]:checked{
+    background:var(--accent-green);border-color:var(--accent-green);
+  }
+  .check input[type="checkbox"]:checked::after{
+    content:"";position:absolute;left:5px;top:1px;
+    width:6px;height:11px;
+    border-right:2px solid #fff;border-bottom:2px solid #fff;
+    transform:rotate(45deg);
+  }
+  .check .ctext{font-size:14px;color:var(--neutral-900);}
+  .check .ctext a{color:var(--accent-green);font-weight:500;text-decoration:underline;text-underline-offset:2px;}
+  .check .ctext a:hover{color:var(--accent-green-hover);}
+  .check .ctext .req{color:var(--warning-amber);font-weight:600;margin-left:2px;}
+  .check-reason{
+    display:none;
+    font-size:13px;font-weight:500;color:var(--warning-amber);
+    line-height:1.4;margin-top:-4px;padding-left:31px;
+    align-items:flex-start;gap:6px;
+  }
+  .check-reason .ic{width:14px;height:14px;flex:0 0 auto;margin-top:2px;}
+  .check-reason.show{display:flex;}
+
+  /* ----- Server error banner ----- */
+  .server-error{
+    display:none;
+    align-items:flex-start;gap:12px;
+    padding:14px 16px;
+    background:#FFF8EF;border:1px solid #F0D9B5;
+    border-radius:var(--r-btn);
+    margin-bottom:24px;
+  }
+  .server-error.show{display:flex;}
+  .server-error .ic{width:18px;height:18px;flex:0 0 auto;color:var(--warning-amber);margin-top:2px;}
+  .server-error .body{font-size:14px;color:var(--neutral-900);line-height:1.5;}
+  .server-error .body a{color:var(--accent-green);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+
+  /* ----- Submit + footer link ----- */
+  .auth-submit{margin-top:8px;}
+  .auth-submit .btn .spinner{
+    width:18px;height:18px;display:none;
+    border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+  }
+  .auth-submit .btn[data-loading="true"] .label{display:none;}
+  .auth-submit .btn[data-loading="true"] .spinner{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion: reduce){
+    .auth-submit .btn[data-loading="true"] .spinner{animation:none;border-top-color:rgba(255,255,255,.6);}
+  }
+
+  .auth-foot{
+    margin-top:24px;text-align:center;
+    font-size:14px;color:var(--neutral-600);
+  }
+  .auth-foot a{
+    color:var(--accent-green);font-weight:600;
+    text-decoration:underline;text-underline-offset:2px;
+    padding:4px 2px;
+  }
+  .auth-foot a:hover{color:var(--accent-green-hover);}
+  .auth-foot a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);border-radius:4px;}
+
+  /* ============================================================
+     TRUST STRIP — slim legal identity (design.md §6, minimal form)
+     ============================================================ */
+  .trust-strip{
+    width:100%;display:flex;flex-direction:column;align-items:center;
+    gap:8px;margin-top:8px;padding:0 8px;
+    text-align:center;
+  }
+  .trust-strip .row{
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+    gap:8px 18px;font-size:13px;color:var(--neutral-600);line-height:1.5;
+  }
+  .trust-strip .row .item{display:inline-flex;align-items:center;gap:6px;}
+  .trust-strip .row .item .ic{width:14px;height:14px;color:var(--accent-green);flex:0 0 auto;}
+  .trust-strip .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:var(--neutral-600);}
+  .trust-strip .pols{
+    display:flex;flex-wrap:wrap;justify-content:center;
+    gap:6px 14px;font-size:13px;color:var(--neutral-600);
+  }
+  .trust-strip .pols a{color:var(--neutral-600);}
+  .trust-strip .pols a:hover{color:var(--primary-navy);}
+  .trust-strip .copy{font-size:12px;color:var(--neutral-600);margin-top:2px;}
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width:640px){
+    .auth-page{padding:20px 16px 32px;}
+    .auth-top{margin-bottom:24px;}
+    .auth-top .back .lbl{display:none;}
+    .auth-card{padding:28px 22px;border-radius:12px;}
+    .auth-card h2{font-size:24px;}
+    .auth-card .subhead{font-size:15px;margin-bottom:24px;}
+    .auth-form{gap:18px;}
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="auth-page">
+
+  <!-- TOP BAR — minimal (no marketing navbar on auth) -->
+  <header class="auth-top" data-screen-label="Signup">
+    <a class="brand" href="Homepage.html" aria-label="GST Notice Support home">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <a class="back" href="Homepage.html">
+      <i data-lucide="arrow-left" style="width:15px;height:15px" aria-hidden="true"></i>
+      <span class="lbl">Back to home</span>
+    </a>
+  </header>
+
+  <main id="main" class="auth-wrap">
+
+    <!-- ============================================================
+         AUTH CARD — Signup
+         ============================================================ -->
+    <section class="auth-card" aria-labelledby="signupHeading">
+
+      <!-- Wordmark inside card header -->
+      <div class="wordmark" aria-hidden="true">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </div>
+
+      <h2 id="signupHeading">Create your account</h2>
+      <p class="subhead">Track your GST notice response from filing to resolution.</p>
+
+      <!-- Server error banner (hidden by default; demo trigger below) -->
+      <div class="server-error" id="serverError" role="alert" aria-live="polite">
+        <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+        <div class="body">
+          An account with this email already exists.
+          <a href="Login.html">Log in</a> instead, or use a different email.
+        </div>
+      </div>
+
+      <form class="auth-form" id="signupForm" novalidate>
+
+        <!-- Full Name -->
+        <div class="field" id="field-name">
+          <label for="fullName">Full Name</label>
+          <div class="input-wrap">
+            <input
+              class="input"
+              type="text"
+              id="fullName"
+              name="fullName"
+              autocomplete="name"
+              required
+              aria-describedby="err-name"
+              aria-invalid="false"
+            />
+          </div>
+          <span class="error" id="err-name" role="alert">
+            <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+            <span class="msg">Please enter your full name.</span>
+          </span>
+        </div>
+
+        <!-- Email -->
+        <div class="field" id="field-email">
+          <label for="email">Email Address</label>
+          <div class="input-wrap">
+            <input
+              class="input"
+              type="email"
+              id="email"
+              name="email"
+              autocomplete="email"
+              inputmode="email"
+              required
+              aria-describedby="err-email"
+              aria-invalid="false"
+            />
+          </div>
+          <span class="error" id="err-email" role="alert">
+            <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+            <span class="msg">Please enter a valid email address.</span>
+          </span>
+        </div>
+
+        <!-- Password -->
+        <div class="field" id="field-password">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input
+              class="input has-toggle"
+              type="password"
+              id="password"
+              name="password"
+              autocomplete="new-password"
+              required
+              minlength="8"
+              aria-describedby="err-password password-helper"
+              aria-invalid="false"
+            />
+            <button
+              type="button"
+              class="pw-toggle"
+              id="pwToggle"
+              aria-label="Show password"
+              aria-pressed="false"
+              aria-controls="password"
+            >
+              <i data-lucide="eye" class="ic-show" aria-hidden="true"></i>
+              <i data-lucide="eye-off" class="ic-hide" aria-hidden="true"></i>
+            </button>
+          </div>
+          <span class="helper" id="password-helper">Minimum 8 characters.</span>
+          <span class="error" id="err-password" role="alert">
+            <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+            <span class="msg">Password must be at least 8 characters.</span>
+          </span>
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="check-group">
+          <label class="check" for="terms">
+            <input type="checkbox" id="terms" name="terms" required aria-describedby="terms-reason" />
+            <span class="ctext">
+              I agree to the <a href="Terms of Service.html">Terms of Service</a> and <a href="Privacy Policy.html">Privacy Policy</a>.<span class="req" aria-hidden="true">*</span>
+            </span>
+          </label>
+          <span class="check-reason" id="terms-reason" role="status">
+            <i data-lucide="alert-triangle" class="ic" aria-hidden="true"></i>
+            <span>Accept the Terms and Privacy Policy to create your account.</span>
+          </span>
+
+          <label class="check" for="promotions">
+            <input type="checkbox" id="promotions" name="promotions" />
+            <span class="ctext">Send me occasional updates on GST deadlines and services.</span>
+          </label>
+        </div>
+
+        <!-- Submit -->
+        <div class="auth-submit">
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn" disabled>
+            <span class="label">Create Account</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
+
+      <p class="auth-foot">
+        Already have an account? <a href="Login.html">Log in</a>
+      </p>
+    </section>
+
+    <!-- ============================================================
+         TRUST STRIP — slim legal identity (design.md §6)
+         ============================================================ -->
+    <aside class="trust-strip" aria-label="Legal identity">
+      <div class="row">
+        <span class="item">
+          <i data-lucide="shield-check" class="ic" aria-hidden="true"></i>
+          SSL Secured · 256-bit encryption
+        </span>
+        <span class="item">GST Notice Support Pvt. Ltd.</span>
+      </div>
+      <div class="row">
+        <span class="mono">CIN: U74999KA2024PTC000000</span>
+        <span class="mono">GSTIN: 29ABCDE1234F1Z5</span>
+      </div>
+      <div class="pols">
+        <a href="Privacy Policy.html">Privacy Policy</a>
+        <span aria-hidden="true">·</span>
+        <a href="Terms of Service.html">Terms</a>
+        <span aria-hidden="true">·</span>
+        <a href="Refund Policy.html">Refund Policy</a>
+      </div>
+      <div class="copy">© 2026 GST Notice Support Pvt. Ltd.</div>
+    </aside>
+
+  </main>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <path d="M50 24 L72 32 V52 C72 66 62 75 50 79 C38 75 28 66 28 52 V32 Z" fill="none" stroke="#0B8B4E" stroke-width="3"/>
+    <circle cx="50" cy="50" r="6" fill="#0B8B4E"/>
+    <path d="M50 56 L50 64" stroke="#0B8B4E" stroke-width="3" stroke-linecap="round"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  // ---------- Validation helpers ----------
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const form        = document.getElementById('signupForm');
+  const submitBtn   = document.getElementById('submitBtn');
+  const serverError = document.getElementById('serverError');
+
+  const fields = {
+    name: {
+      el: document.getElementById('fullName'),
+      field: document.getElementById('field-name'),
+      msg: document.querySelector('#err-name .msg'),
+      validate(v){
+        if(!v.trim()) return 'Please enter your full name.';
+        return null;
+      }
+    },
+    email: {
+      el: document.getElementById('email'),
+      field: document.getElementById('field-email'),
+      msg: document.querySelector('#err-email .msg'),
+      validate(v){
+        if(!v.trim()) return 'Please enter your email address.';
+        if(!EMAIL_RE.test(v.trim())) return 'Enter a valid email address (e.g. you@firm.com).';
+        return null;
+      }
+    },
+    password: {
+      el: document.getElementById('password'),
+      field: document.getElementById('field-password'),
+      msg: document.querySelector('#err-password .msg'),
+      validate(v){
+        if(v.length < 8) return 'Password must be at least 8 characters.';
+        return null;
+      }
+    }
+  };
+
+  const termsBox    = document.getElementById('terms');
+  const termsReason = document.getElementById('terms-reason');
+
+  function setFieldInvalid(key, message){
+    const f = fields[key];
+    if(message){
+      f.field.dataset.invalid = 'true';
+      f.el.setAttribute('aria-invalid','true');
+      f.msg.textContent = message;
+    } else {
+      f.field.dataset.invalid = 'false';
+      f.el.setAttribute('aria-invalid','false');
+    }
+  }
+
+  function validateField(key){
+    const f = fields[key];
+    const err = f.validate(f.el.value);
+    setFieldInvalid(key, err);
+    return !err;
+  }
+
+  function updateSubmitState(){
+    // Primary disabled while terms unchecked (with reason adjacent)
+    const ok = termsBox.checked;
+    submitBtn.disabled = !ok;
+    termsReason.classList.toggle('show', !ok && termsTouched);
+  }
+
+  // Validate on blur (after first interaction)
+  let termsTouched = false;
+  Object.keys(fields).forEach(key => {
+    fields[key].el.addEventListener('blur', () => validateField(key));
+    fields[key].el.addEventListener('input', () => {
+      // Clear error state as user types if it was previously invalid
+      if(fields[key].field.dataset.invalid === 'true') validateField(key);
+    });
+  });
+
+  termsBox.addEventListener('change', () => {
+    termsTouched = true;
+    updateSubmitState();
+  });
+  // Initial state
+  updateSubmitState();
+
+  // ---------- Password show/hide ----------
+  const pwInput  = document.getElementById('password');
+  const pwToggle = document.getElementById('pwToggle');
+  pwToggle.addEventListener('click', () => {
+    const showing = pwInput.type === 'text';
+    pwInput.type = showing ? 'password' : 'text';
+    pwToggle.setAttribute('aria-pressed', String(!showing));
+    pwToggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  });
+
+  // ---------- Submit ----------
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    serverError.classList.remove('show');
+
+    // Touch & validate every field
+    termsTouched = true;
+    const results = Object.keys(fields).map(validateField);
+    updateSubmitState();
+    if(!results.every(Boolean) || !termsBox.checked){
+      // Focus first invalid
+      const firstBad = Object.keys(fields).find(k => fields[k].field.dataset.invalid === 'true');
+      if(firstBad) fields[firstBad].el.focus();
+      else if(!termsBox.checked) termsBox.focus();
+      return;
+    }
+
+    // Loading state
+    submitBtn.dataset.loading = 'true';
+    submitBtn.disabled = true;
+
+    // Demo: simulate server response.
+    // If email is "exists@demo.in" → show server-error state.
+    setTimeout(() => {
+      const email = fields.email.el.value.trim().toLowerCase();
+      if(email === 'exists@demo.in'){
+        submitBtn.dataset.loading = 'false';
+        submitBtn.disabled = false;
+        serverError.classList.add('show');
+        serverError.scrollIntoView ? null : null; // (intentionally not used; see CLAUDE rules)
+        fields.email.el.focus();
+        return;
+      }
+      // Success — would navigate to dashboard
+      submitBtn.dataset.loading = 'false';
+      submitBtn.disabled = false;
+      sessionStorage.setItem('gns_pending_email', fields.email.el.value.trim());
+      window.location.href = 'OTP Verification.html';
+    }, 900);
+  });
+</script>
+<script src="js/app-state.js"></script>
+</body>
+</html>

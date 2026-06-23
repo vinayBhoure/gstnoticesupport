@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Verifying payment · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* ============================================================
+     PAYMENT VERIFICATION — /payment/verify · Zone 4, chromeless
+     Shell: components.md → Auth Card Shell (reused exactly).
+     4 states + 1 transient micro-state, backend-driven only.
+     ============================================================ */
+  html, body { min-height: 100%; }
+  body { background: var(--neutral-50); display: flex; flex-direction: column; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* Auth Card Shell — full-viewport neutral-50, card centered both axes */
+  .auth-page {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 32px 16px 48px;
+    min-height: 100vh;
+  }
+
+  .auth-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; max-width: 440px; gap: 20px;
+  }
+
+  .auth-card {
+    width: 100%; background: var(--neutral-white);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-md);
+    padding: 48px;
+  }
+  @media (max-width: 640px) {
+    .auth-card { padding: 32px 24px; }
+  }
+
+  .auth-card .wordmark {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 32px;
+  }
+  .auth-card .wordmark img { height: 32px; width: 32px; border-radius: 6px; border: 1px solid var(--neutral-200); }
+  .auth-card .wordmark .bn { font-weight: 700; font-size: 15px; color: var(--primary-navy); letter-spacing: -.01em; }
+  .auth-card .wordmark .bn span { color: var(--accent-green); }
+
+  /* ── State zone ──
+     Fixed min-height so the card NEVER shifts or re-layouts between states.
+     Sized to the tallest state (State 3: icon + heading + body + booking
+     ref + WhatsApp button + tertiary link). */
+  .state-zone { min-height: 528px; display: flex; }
+
+  .pv-state {
+    display: none;
+    flex: 1;
+    flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    gap: 24px;                       /* spec: 24px gaps in the single column */
+  }
+  .pv-state.active { display: flex; }
+
+  .pv-icon { width: 32px; height: 32px; flex: 0 0 auto; }
+  .pv-icon svg { width: 32px; height: 32px; stroke-width: 1.5; }
+  .ic-navy  { color: var(--primary-navy); }
+  .ic-green { color: var(--accent-green); }
+  .ic-muted { color: var(--neutral-600); }
+
+  .pv-state h2 { font-size: 28px; line-height: 1.25; letter-spacing: -.01em; }
+  .pv-state .body {
+    font-size: 16px; line-height: 1.6; color: var(--neutral-600);
+    max-width: 38ch; text-wrap: pretty;
+  }
+
+  /* Spinner — plain CSS rotation on the Lucide loader-2 glyph */
+  .pv-spin { animation: pv-rotate 0.9s linear infinite; }
+  @keyframes pv-rotate { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .pv-spin { animation: none; }
+  }
+
+  /* Booking reference (State 3) */
+  .pv-ref {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 12px 24px;
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--r-btn);
+  }
+  .pv-ref .lbl {
+    font-size: 13px; font-weight: 500; color: var(--neutral-600);
+    letter-spacing: .02em;
+  }
+  .pv-ref .val {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px; font-weight: 500; color: var(--neutral-900);
+  }
+
+  /* Actions column */
+  .pv-actions {
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    width: 100%;
+  }
+  .pv-actions .btn { width: 100%; max-width: 300px; }
+
+  .pv-tertiary {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 14px; font-weight: 600; color: var(--accent-green);
+    padding: 8px 4px; border-radius: 4px;
+    min-height: 48px;                /* tap target */
+  }
+  .pv-tertiary:hover { color: var(--accent-green-hover); }
+  .pv-tertiary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.3); }
+  .pv-tertiary .ic { width: 15px; height: 15px; }
+
+  /* Trust strip (Auth Card Shell — below card, NOT the public Footer) */
+  .trust-strip {
+    width: 100%; display: flex; flex-direction: column; align-items: center;
+    gap: 8px; margin-top: 8px; padding: 0 8px;
+    text-align: center;
+  }
+  .trust-strip .row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 8px 18px; font-size: 13px; color: var(--neutral-600); line-height: 1.5;
+  }
+  .trust-strip .row .item { display: inline-flex; align-items: center; gap: 6px; }
+  .trust-strip .row .item .ic { width: 14px; height: 14px; color: var(--accent-green); flex: 0 0 auto; }
+  .trust-strip .pols {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 6px 14px; font-size: 13px; color: var(--neutral-600);
+  }
+  .trust-strip .pols a { color: var(--neutral-600); }
+  .trust-strip .pols a:hover { color: var(--primary-navy); }
+
+  /* ============================================================
+     DESIGN-REVIEW STATE SWITCHER — not part of the product UI.
+     States are backend-driven; this exists only so reviewers can
+     see all 4 states. Remove on handoff.
+     ============================================================ */
+  .review-bar {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 4px;
+    background: var(--primary-navy); border-radius: var(--r-btn);
+    padding: 6px; box-shadow: var(--shadow-md);
+    z-index: 50;
+  }
+  .review-bar .tag {
+    font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(255,255,255,.55); padding: 0 10px 0 8px;
+  }
+  .review-bar button {
+    font-size: 13px; font-weight: 600; color: rgba(255,255,255,.75);
+    background: none; border: none; cursor: pointer;
+    padding: 8px 12px; border-radius: 6px;
+    transition: background .15s, color .15s;
+  }
+  .review-bar button:hover { color: #fff; background: rgba(255,255,255,.1); }
+  .review-bar button:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,.6); }
+  .review-bar button[aria-pressed="true"] { background: var(--accent-green); color: #fff; }
+  @media print { .review-bar { display: none; } }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<!-- Live region: announce state changes to screen readers -->
+<div id="a11y-announce" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<div class="auth-page" data-screen-label="Payment Verification">
+  <main id="main" class="auth-wrap">
+
+    <!-- ============================================================
+         AUTH CARD — single card, all states render inside
+         ============================================================ -->
+    <section class="auth-card" aria-labelledby="pvHeading">
+
+      <!-- Wordmark header -->
+      <div class="wordmark" aria-hidden="true">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </div>
+
+      <div class="state-zone">
+
+        <!-- ─── STATE 1: LOADING (default) ─── -->
+        <div class="pv-state active" id="state-loading" data-state="loading">
+          <span class="pv-icon ic-navy pv-spin" aria-hidden="true">
+            <i data-lucide="loader-2"></i>
+          </span>
+          <h2 id="pvHeading">Verifying your payment.</h2>
+          <p class="body">Please do not close this window. This usually takes a few seconds.</p>
+        </div>
+
+        <!-- ─── STATE 2: TRANSIENT SUCCESS (~1–2s, then redirect) ─── -->
+        <div class="pv-state" id="state-success" data-state="success">
+          <span class="pv-icon ic-green" aria-hidden="true">
+            <i data-lucide="check-circle"></i>
+          </span>
+          <h2>Payment confirmed.</h2>
+          <p class="body">Taking you to your service…</p>
+        </div>
+
+        <!-- ─── STATE 3: INCONCLUSIVE ─── -->
+        <div class="pv-state" id="state-inconclusive" data-state="inconclusive">
+          <span class="pv-icon ic-muted" aria-hidden="true">
+            <i data-lucide="help-circle"></i>
+          </span>
+          <h2>We're having trouble confirming your payment right now.</h2>
+          <p class="body">If your payment was deducted, it will be reflected in your service status within a few minutes. Please check your service page shortly.</p>
+
+          <div class="pv-ref">
+            <span class="lbl">Booking ID</span>
+            <span class="val" id="pv-booking-ref">GNS-2026-0147</span>
+          </div>
+
+          <div class="pv-actions">
+            <a class="pv-tertiary" href="Payment History.html">
+              Go to Payments
+              <i data-lucide="arrow-right" class="ic" aria-hidden="true"></i>
+            </a>
+            <a class="pv-tertiary" href="Service Detail.html">
+              Go to Service Page
+              <i data-lucide="arrow-right" class="ic" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- ─── STATE 4: INVALID / EXPIRED LINK ─── -->
+        <div class="pv-state" id="state-invalid" data-state="invalid">
+          <span class="pv-icon ic-muted" aria-hidden="true">
+            <i data-lucide="link-2-off"></i>
+          </span>
+          <h2>This payment link is invalid or has expired.</h2>
+          <p class="body">Please check your service status in your service page or payments history.</p>
+          <div class="pv-actions">
+            <a class="pv-tertiary" href="Payment History.html">
+              Go to Payments
+              <i data-lucide="arrow-right" class="ic" aria-hidden="true"></i>
+            </a>
+            <a class="pv-tertiary" href="Service Detail.html">
+              Go to Service Page
+              <i data-lucide="arrow-right" class="ic" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TRUST STRIP (Auth Card Shell) -->
+    <aside class="trust-strip" aria-label="Legal identity">
+      <div class="row">
+        <span class="item">
+          <i data-lucide="shield-check" class="ic" aria-hidden="true"></i>
+          SSL Secured · 256-bit encryption
+        </span>
+        <span class="item">GST Notice Support Pvt. Ltd.</span>
+      </div>
+      <div class="pols">
+        <a href="Privacy Policy.html">Privacy Policy</a>
+        <span aria-hidden="true">·</span>
+        <a href="Terms of Service.html">Terms</a>
+      </div>
+    </aside>
+
+  </main>
+</div>
+
+<!-- DESIGN-REVIEW ONLY: state switcher (states are backend-driven in product) -->
+<nav class="review-bar" aria-label="Design review — preview states">
+  <span class="tag">States</span>
+  <button type="button" data-target="loading" aria-pressed="true">1 · Loading</button>
+  <button type="button" data-target="success" aria-pressed="false">2 · Success</button>
+  <button type="button" data-target="inconclusive" aria-pressed="false">3 · Inconclusive</button>
+  <button type="button" data-target="invalid" aria-pressed="false">4 · Invalid link</button>
+</nav>
+
+<script>
+  lucide.createIcons();
+
+  var ANNOUNCE = {
+    loading: 'Verifying your payment. Please do not close this window.',
+    success: 'Payment confirmed. Taking you to your service.',
+    inconclusive: 'We are having trouble confirming your payment right now.',
+    invalid: 'This payment link is invalid or has expired.'
+  };
+
+  var announceEl = document.getElementById('a11y-announce');
+  var states = document.querySelectorAll('.pv-state');
+  var bar = document.querySelector('.review-bar');
+  var timeoutId = null;
+
+  function setState(name) {
+    states.forEach(function (s) {
+      s.classList.toggle('active', s.dataset.state === name);
+    });
+    bar.querySelectorAll('button').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.target === name));
+    });
+    announceEl.textContent = ANNOUNCE[name] || '';
+    if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+    // Behavior note (spec): loading never persists — hard 10s timeout
+    // falls through to State 3 (Inconclusive).
+    if (name === 'loading') {
+      timeoutId = setTimeout(function () { setState('inconclusive'); }, 10000);
+    }
+  }
+
+  bar.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-target]');
+    if (btn) setState(btn.dataset.target);
+  });
+
+  // Default on load: State 1 (Loading)
+  setState('loading');
+
+  // Auto-flow for prototype: loading → success (2s) → redirect to Service Detail (1.5s)
+  if(timeoutId){ clearTimeout(timeoutId); timeoutId=null; }
+  var pvAutoId = setTimeout(function(){
+    setState('success');
+    if(typeof GNS!=='undefined'){
+      var bookingId = GNS.getActiveBookingId()||'GNS-2026-0517';
+      GNS.updateBooking(bookingId,{status:'payment_received'});
+      var refEl = document.getElementById('pv-booking-ref');
+      if(refEl) refEl.textContent = bookingId;
+    }
+    pvAutoId = setTimeout(function(){
+      window.location.href = 'Service Detail.html?status=payment_received';
+    }, 1500);
+  }, 2000);
+
+  // Clicking review bar cancels auto-flow
+  bar.addEventListener('click', function(){ clearTimeout(pvAutoId); }, {once:true});
+</script>
+
+<script src="js/app-state.js"></script>
+</body>
+</html>

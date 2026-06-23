@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book Service — Step 3: Upload Documents (Mobile) · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ================================================================
+   BOOKING STEP 3 — Document Upload · MOBILE DELTA
+   Base: Booking Step 3 desktop (3.7).
+   Delta: camera-first upload panel replaces drag-and-drop zone.
+   design.md §4.2 mobile rules · §5.2 upload confirmation animation
+   ================================================================ */
+
+body {
+  background: var(--neutral-50);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── skip link ────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--primary-navy);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 0 0 var(--r-btn) 0;
+  z-index: 200;
+  font-weight: 600;
+  font-size: 14px;
+}
+.skip-link:focus { left: 0; }
+
+/* ================================================================
+   TOP BAR
+   ================================================================ */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--neutral-white);
+  border-bottom: 1px solid var(--neutral-200);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+.top-bar__logo { height: 32px; width: auto; display: block; }
+
+.btn-exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--neutral-600);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 48px;
+  padding: 0 4px;
+  text-decoration: none;
+  transition: color .15s;
+}
+.btn-exit:hover { color: var(--primary-navy); }
+.btn-exit:focus-visible {
+  outline: none;
+  border-radius: var(--r-btn);
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+
+/* ================================================================
+   STEPPER — Steps 1 & 2 complete, Step 3 active
+   ================================================================ */
+.stepper-rail {
+  background: var(--neutral-white);
+  border-bottom: 1px solid var(--neutral-200);
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+.stepper {
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  list-style: none;
+}
+.step { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.step__num {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 300ms ease-out, border-color 300ms ease-out, color 300ms ease-out;
+}
+.step__label {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 300ms ease-out;
+}
+.step[data-state="active"] .step__num   { background: var(--accent-green); color: #fff; border: 2px solid var(--accent-green); }
+.step[data-state="active"] .step__label { color: var(--primary-navy); font-weight: 600; }
+.step[data-state="upcoming"] .step__num   { background: transparent; color: var(--neutral-600); border: 2px solid var(--neutral-200); }
+.step[data-state="upcoming"] .step__label { color: var(--neutral-600); }
+.step[data-state="complete"] .step__num   { background: var(--accent-green); color: #fff; border: 2px solid var(--accent-green); }
+.step[data-state="complete"] .step__label { color: var(--neutral-600); }
+
+.step-connector {
+  flex: 1;
+  height: 1px;
+  background: var(--neutral-200);
+  margin: 0 8px;
+  transition: background 300ms ease-out;
+}
+.step-connector[data-complete="true"] { background: var(--accent-green); }
+
+/* Hide step labels on small screens, keep bubbles */
+@media (max-width: 479px) {
+  .step__label { display: none; }
+  .step-connector { margin: 0 4px; }
+}
+
+/* ================================================================
+   MAIN — padding clears sticky footer
+   ================================================================ */
+.main {
+  flex: 1;
+  padding: 28px 20px 108px;
+}
+.content {
+  max-width: 540px;
+  margin: 0 auto;
+}
+.content__heading {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-navy);
+  line-height: 1.2;
+  letter-spacing: -.018em;
+  margin-bottom: 8px;
+}
+.content__sub {
+  font-size: 15px;
+  color: var(--neutral-600);
+  line-height: 1.6;
+  margin-bottom: 28px;
+  text-wrap: pretty;
+}
+
+/* ================================================================
+   UPLOAD ACTIONS — MOBILE DELTA
+   Two stacked full-width buttons. No drag-and-drop zone.
+   ================================================================ */
+.upload-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Camera button [Primary] ─────────────────────────────────── */
+.btn-upload-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  background: var(--accent-green);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-btn);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 14px 20px;
+  transition: background .15s ease, transform .1s ease;
+  text-align: center;
+}
+.btn-upload-primary:hover { background: var(--accent-green-hover); }
+.btn-upload-primary:active { background: var(--accent-green-hover); transform: translateY(1px); }
+.btn-upload-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+.btn-upload-primary:disabled {
+  background: var(--neutral-200);
+  color: var(--neutral-600);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Choose File button [Secondary / Outline] ────────────────── */
+.btn-upload-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  background: var(--neutral-white);
+  color: var(--primary-navy);
+  border: 1.5px solid var(--neutral-200);
+  border-radius: var(--r-btn);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 14px 20px;
+  transition: border-color .15s ease, background .15s ease;
+  text-align: center;
+}
+.btn-upload-secondary:hover {
+  border-color: var(--primary-deep-blue);
+  background: var(--neutral-50);
+}
+.btn-upload-secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+.btn-upload-secondary:disabled {
+  color: var(--neutral-600);
+  border-color: var(--neutral-200);
+  cursor: not-allowed;
+  background: var(--neutral-50);
+}
+
+/* ── Camera denied notice ────────────────────────────────────── */
+/* Replaces camera button; CSS max-height reveal */
+.camera-denied-region {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height .24s ease-out, opacity .2s ease-out;
+}
+.camera-denied-region.is-open {
+  max-height: 100px;
+  opacity: 1;
+}
+
+.camera-denied-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--neutral-50);
+  border-left: 2px solid var(--warning-amber);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.camera-denied-banner__icon {
+  color: var(--warning-amber);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.camera-denied-banner__text {
+  font-size: 14px;
+  color: var(--neutral-900);
+  line-height: 1.5;
+}
+
+/* ── Constraints line ─────────────────────────────────────────── */
+.upload-constraints {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--neutral-600);
+  margin-top: 14px;
+  line-height: 1.5;
+}
+.upload-constraints .dot { color: var(--neutral-200); font-size: 10px; }
+
+/* ── Over-limit warning ───────────────────────────────────────── */
+.over-limit-msg {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--warning-amber);
+  margin-top: 10px;
+}
+.over-limit-msg.is-visible { display: flex; }
+
+/* ── Privacy note ─────────────────────────────────────────────── */
+.upload-privacy {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--neutral-600);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+.upload-privacy svg { color: var(--accent-green); flex-shrink: 0; }
+
+/* ================================================================
+   FILE LIST — identical to desktop
+   ================================================================ */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.file-list:empty { margin-top: 0; }
+
+.file-item {
+  background: var(--neutral-white);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--r-card);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+}
+.file-item__top { display: flex; align-items: center; gap: 12px; }
+
+/* icon wrapper — file → check animation (design.md §5.2) */
+.file-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--neutral-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: background .25s ease;
+}
+.file-icon-wrap.is-success { background: rgba(11,139,78,.1); }
+.file-icon-wrap.is-error   { background: rgba(217,119,6,.1); }
+
+.fi-file { color: var(--primary-deep-blue); transition: opacity .2s ease, transform .2s ease; }
+.fi-check {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent-green);
+  opacity: 0; transform: scale(.5);
+  transition: opacity .25s ease .1s, transform .25s ease .1s;
+}
+.fi-error-ic {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--warning-amber);
+  opacity: 0; transform: scale(.5);
+  transition: opacity .25s ease .1s, transform .25s ease .1s;
+}
+.file-icon-wrap.is-success .fi-file    { opacity: 0; transform: scale(.5); }
+.file-icon-wrap.is-success .fi-check   { opacity: 1; transform: scale(1); }
+.file-icon-wrap.is-error   .fi-file    { opacity: 0; transform: scale(.5); }
+.file-icon-wrap.is-error   .fi-error-ic { opacity: 1; transform: scale(1); }
+
+.file-info { flex: 1; min-width: 0; }
+.file-name {
+  font-size: 14px; font-weight: 500; color: var(--primary-navy);
+  line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.file-meta { font-size: 12px; color: var(--neutral-600); margin-top: 1px; line-height: 1.4; }
+.file-meta.is-error { color: var(--warning-amber); font-weight: 500; }
+
+.file-delete {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;        /* larger tap target on mobile */
+  border: none; background: none; border-radius: 8px;
+  cursor: pointer; color: var(--neutral-600); flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+.file-delete:active { background: var(--neutral-50); color: var(--primary-navy); }
+.file-delete:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(11,139,78,.4); }
+
+.file-progress-wrap {
+  height: 4px; background: var(--neutral-50); border-radius: 99px; overflow: hidden;
+}
+.file-progress-bar {
+  height: 100%; width: 0%;
+  background: var(--accent-green); border-radius: 99px;
+  transition: width .1s linear;
+}
+.file-progress-wrap.is-hidden { display: none; }
+
+/* ================================================================
+   BOOKING SUMMARY CARD — identical to desktop
+   ================================================================ */
+.summary-region {
+  max-height: 0; overflow: hidden; opacity: 0; margin-top: 0;
+  transition: max-height .32s ease-out, opacity .25s ease-out, margin-top .32s ease-out;
+}
+.summary-region.is-open { max-height: 320px; opacity: 1; margin-top: 24px; }
+
+.summary-card {
+  background: var(--neutral-50);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  padding: 18px 16px;
+}
+.summary-card__heading {
+  font-size: 14px; font-weight: 600; color: var(--primary-navy);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 7px;
+}
+.summary-card__heading svg { color: var(--accent-green); }
+
+.summary-rows {
+  display: flex; flex-direction: column; gap: 0;
+  border-top: 1px solid var(--neutral-200);
+}
+.summary-row {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--neutral-200);
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-row__label {
+  font-size: 13px; color: var(--neutral-600); font-weight: 500;
+  min-width: 90px; flex-shrink: 0;
+}
+.summary-row__value { font-size: 14px; font-weight: 500; color: var(--neutral-900); line-height: 1.4; }
+.summary-row__value--mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px; letter-spacing: .04em; font-weight: 500;
+}
+
+/* ================================================================
+   SUCCESS STATE
+   ================================================================ */
+.success-state {
+  display: none; flex-direction: column; align-items: center;
+  text-align: center; gap: 20px; padding: 40px 20px;
+}
+.success-state.is-visible { display: flex; }
+
+.success-icon-ring {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(11,139,78,.1);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent-green);
+}
+.success-heading {
+  font-size: 26px; font-weight: 700; color: var(--primary-navy);
+  letter-spacing: -.018em; line-height: 1.2;
+}
+.success-ref {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 14px; font-weight: 600; color: var(--primary-navy);
+  letter-spacing: .06em; background: var(--neutral-50);
+  border: 1px solid var(--neutral-200); border-radius: var(--r-btn);
+  padding: 8px 16px; display: inline-block;
+}
+.success-body {
+  font-size: 15px; color: var(--neutral-600); line-height: 1.6;
+  max-width: 360px; text-wrap: pretty;
+}
+.btn-dashboard {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-green); color: #fff; border: none;
+  border-radius: var(--r-btn); font-family: inherit;
+  font-size: 15px; font-weight: 600; min-height: 52px;
+  padding: 14px 28px; cursor: pointer; text-decoration: none;
+  transition: background .15s ease; width: 100%;
+  justify-content: center;
+}
+.btn-dashboard:active { background: var(--accent-green-hover); }
+
+/* ================================================================
+   FOOTER BAR — mobile layout (Back link above, Submit full-width)
+   ================================================================ */
+.footer-bar {
+  position: sticky; bottom: 0; z-index: 90;
+  background: var(--neutral-white);
+  border-top: 1px solid var(--neutral-200);
+  padding: 12px 20px;
+  display: flex; flex-direction: column;
+  align-items: stretch; gap: 8px;
+  flex-shrink: 0;
+  transition: opacity .2s ease;
+}
+.footer-bar.is-hidden { opacity: 0; pointer-events: none; }
+
+.btn-back {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: none; border: none; font-family: inherit;
+  font-size: 15px; font-weight: 500; color: var(--neutral-600);
+  cursor: pointer; min-height: 40px; padding: 0 8px;
+  text-decoration: none; transition: color .15s;
+  order: -1; /* visually above Submit */
+}
+.btn-back:active { color: var(--primary-navy); }
+.btn-back:focus-visible {
+  outline: none; border-radius: var(--r-btn);
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+
+.btn-submit {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--accent-green); color: #fff; border: none;
+  border-radius: var(--r-btn); font-family: inherit;
+  font-size: 15px; font-weight: 600; min-height: 52px;
+  padding: 14px 20px; cursor: pointer; width: 100%;
+  transition: background .15s ease;
+}
+.btn-submit:active:not(:disabled) { background: var(--accent-green-hover); }
+.btn-submit:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(11,139,78,.4); }
+.btn-submit:disabled { background: var(--neutral-200); color: var(--neutral-600); cursor: not-allowed; }
+
+.spinner {
+  display: none; width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .65s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-submit.is-loading .spinner   { display: block; }
+.btn-submit.is-loading .btn-label { display: none; }
+.btn-submit.is-loading .btn-arr   { display: none; }
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .camera-denied-region, .file-icon-wrap, .fi-check, .fi-error-ic,
+  .fi-file, .summary-region, .file-progress-bar { transition: none !important; }
+  .spinner { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<!-- ==============================================================
+     TOP BAR
+============================================================== -->
+<header class="top-bar" role="banner">
+  <a href="Dashboard Home.html" aria-label="GST Notice Support — back to dashboard">
+    <img src="assets/logo.png" alt="GST Notice Support" class="top-bar__logo" />
+  </a>
+  <a href="Dashboard Home.html" class="btn-exit" aria-label="Save progress and exit to dashboard">
+    Save &amp; Exit
+    <i data-lucide="x" width="15" height="15"></i>
+  </a>
+</header>
+
+<!-- ==============================================================
+     STEPPER — Steps 1 & 2 complete · Step 3 active
+============================================================== -->
+<nav class="stepper-rail" aria-label="Booking progress">
+  <ol class="stepper">
+    <li class="step" data-state="complete" id="step-1">
+      <div class="step__num" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="step__label">Service</span>
+    </li>
+    <li class="step-connector" role="presentation" aria-hidden="true" data-complete="true"></li>
+    <li class="step" data-state="complete" id="step-2">
+      <div class="step__num" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="step__label">Details</span>
+    </li>
+    <li class="step-connector" role="presentation" aria-hidden="true" data-complete="true" id="conn-2"></li>
+    <li class="step" data-state="active" aria-current="step" id="step-3">
+      <div class="step__num" aria-hidden="true">3</div>
+      <span class="step__label">Documents</span>
+    </li>
+  </ol>
+</nav>
+
+<!-- ==============================================================
+     MAIN CONTENT
+============================================================== -->
+<main class="main" id="main">
+  <div class="content" id="upload-view">
+
+    <h2 class="content__heading">Upload Your Notice Documents</h2>
+    <p class="content__sub">Upload all relevant notices and orders. Our team will review them before preparing your response.</p>
+
+    <!-- ── Document Upload Component — mobile camera-first ───── -->
+    <div role="region" aria-label="Document upload">
+
+      <!-- Hidden file inputs (outside buttons for clean semantics) -->
+      <input
+        type="file"
+        id="camera-input"
+        accept="image/*"
+        capture="environment"
+        style="display:none"
+        aria-hidden="true"
+        tabindex="-1"
+      />
+      <input
+        type="file"
+        id="file-input"
+        accept=".pdf,application/pdf"
+        multiple
+        style="display:none"
+        aria-hidden="true"
+        tabindex="-1"
+      />
+
+      <!-- Upload action buttons -->
+      <div class="upload-actions" id="upload-actions" aria-label="Upload options">
+
+        <!-- Camera button wrapper — swapped for denied notice if permission blocked -->
+        <div id="camera-btn-wrap">
+          <button
+            type="button"
+            class="btn-upload-primary"
+            id="btn-camera"
+            aria-label="Take a photo of your notice using device camera"
+          >
+            <i data-lucide="camera" width="20" height="20" stroke-width="1.8"></i>
+            Take a Photo of Your Notice
+          </button>
+        </div>
+
+        <!-- Camera denied notice (CSS reveal; replaces camera button) -->
+        <div
+          class="camera-denied-region"
+          id="camera-denied-region"
+          aria-hidden="true"
+          role="alert"
+          aria-live="polite"
+        >
+          <div class="camera-denied-banner">
+            <i data-lucide="alert-circle" width="16" height="16" class="camera-denied-banner__icon" stroke-width="1.5"></i>
+            <p class="camera-denied-banner__text">
+              Camera access denied. Use &ldquo;Choose File&rdquo; to upload.
+            </p>
+          </div>
+        </div>
+
+        <!-- Choose File button -->
+        <button
+          type="button"
+          class="btn-upload-secondary"
+          id="btn-choose"
+          aria-label="Choose a PDF file from your device"
+        >
+          <i data-lucide="upload" width="20" height="20" stroke-width="1.8"></i>
+          Choose File from Device
+        </button>
+
+      </div>
+      <!-- /upload-actions -->
+
+      <!-- Constraints — same copy as desktop -->
+      <div class="upload-constraints" id="upload-constraints">
+        <span>PDF only</span>
+        <span class="dot">●</span>
+        <span>Max 8 files</span>
+        <span class="dot">●</span>
+        <span>5 MB per file</span>
+        <span class="dot">●</span>
+        <span>40 MB total</span>
+      </div>
+
+      <!-- Over-limit message -->
+      <div class="over-limit-msg" id="over-limit-msg" role="alert" aria-live="polite">
+        <i data-lucide="alert-circle" width="14" height="14" stroke-width="1.5"></i>
+        Maximum 8 files reached.
+      </div>
+
+      <!-- Privacy note -->
+      <p class="upload-privacy">
+        <i data-lucide="lock" width="14" height="14" stroke-width="1.5"></i>
+        Your documents are confidential and never shared.
+      </p>
+
+      <!-- File list -->
+      <ul
+        class="file-list"
+        id="file-list"
+        aria-label="Uploaded files"
+        aria-live="polite"
+        aria-relevant="additions removals"
+      ></ul>
+
+    </div>
+    <!-- /Document Upload Component -->
+
+    <!-- Booking Summary — identical to desktop, appears on first success -->
+    <div
+      class="summary-region"
+      id="summary-region"
+      aria-hidden="true"
+      role="region"
+      aria-label="Booking summary"
+    >
+      <div class="summary-card">
+        <div class="summary-card__heading">
+          <i data-lucide="clipboard-check" width="16" height="16" stroke-width="1.5"></i>
+          Booking Summary
+        </div>
+        <div class="summary-rows">
+          <div class="summary-row">
+            <span class="summary-row__label">Service</span>
+            <span class="summary-row__value" id="sum-service">ASMT-10 Reply</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row__label">Name</span>
+            <span class="summary-row__value" id="sum-name">Rajesh Kumar</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row__label">GSTIN</span>
+            <span class="summary-row__value summary-row__value--mono" id="sum-gstin">29ABCDE1234F1Z5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /upload-view -->
+
+  <!-- Success state — replaces content area on submit -->
+  <div class="success-state" id="success-state" aria-live="assertive" role="status">
+    <div class="success-icon-ring">
+      <i data-lucide="check" width="32" height="32" stroke-width="2.4"></i>
+    </div>
+    <h2 class="success-heading">Booking Submitted</h2>
+    <span class="success-ref" id="success-ref">REF-2847</span>
+    <p class="success-body">We've received your documents. Our team will review them and update you by email.</p>
+    <a href="Dashboard Home.html" class="btn-dashboard">
+      Go to Dashboard
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+
+</main>
+
+<!-- ==============================================================
+     FOOTER BAR — Back above, Submit full-width below
+============================================================== -->
+<footer class="footer-bar" id="footer-bar">
+  <a
+    href="Booking Step 2 - Personal Info.html"
+    class="btn-back"
+    aria-label="Back to Step 2, Case Details"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back
+  </a>
+
+  <button
+    type="button"
+    class="btn-submit"
+    id="btn-submit"
+    disabled
+    aria-disabled="true"
+    aria-label="Submit booking, 0 files uploaded"
+  >
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="btn-label">Submit Booking</span>
+    <svg class="btn-arr" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
+</footer>
+
+<!-- ==============================================================
+     SCRIPT
+     Mobile delta — camera-first upload, no drag-and-drop.
+     – Camera permission check on load (Permissions API)
+     – Camera button → camera-input (capture="environment")
+     – Choose File → file-input (PDF; multiple)
+     – Camera images skip PDF-type check (valid by origin)
+     – All other logic identical to desktop (progress, summary, submit)
+============================================================== -->
+<script>
+(function () {
+  'use strict';
+
+  lucide.createIcons();
+
+  /* ── Constants ───────────────────────────────────────────────── */
+  var MAX_FILES    = 8;
+  var MAX_PER_FILE = 5  * 1024 * 1024;
+  var MAX_TOTAL    = 40 * 1024 * 1024;
+
+  /* ── State ───────────────────────────────────────────────────── */
+  var files        = [];
+  var nextId       = 1;
+  var summaryShown = false;
+
+  /* ── DOM refs ────────────────────────────────────────────────── */
+  var cameraInput      = document.getElementById('camera-input');
+  var fileInput        = document.getElementById('file-input');
+  var btnCamera        = document.getElementById('btn-camera');
+  var btnChoose        = document.getElementById('btn-choose');
+  var cameraBtnWrap    = document.getElementById('camera-btn-wrap');
+  var cameraDeniedRegion = document.getElementById('camera-denied-region');
+  var fileList         = document.getElementById('file-list');
+  var overLimitMsg     = document.getElementById('over-limit-msg');
+  var summaryRegion    = document.getElementById('summary-region');
+  var uploadView       = document.getElementById('upload-view');
+  var successState     = document.getElementById('success-state');
+  var btnSubmit        = document.getElementById('btn-submit');
+  var footerBar        = document.getElementById('footer-bar');
+
+  /* ── Camera permission ───────────────────────────────────────── */
+  function showCameraDenied() {
+    cameraBtnWrap.style.display    = 'none';
+    cameraDeniedRegion.classList.add('is-open');
+    cameraDeniedRegion.setAttribute('aria-hidden', 'false');
+  }
+  function hideCameraDenied() {
+    cameraBtnWrap.style.display    = '';
+    cameraDeniedRegion.classList.remove('is-open');
+    cameraDeniedRegion.setAttribute('aria-hidden', 'true');
+  }
+
+  if (navigator.permissions) {
+    navigator.permissions.query({ name: 'camera' })
+      .then(function (result) {
+        if (result.state === 'denied') showCameraDenied();
+        result.addEventListener('change', function () {
+          if (result.state === 'denied') showCameraDenied();
+          else hideCameraDenied();
+        });
+      })
+      .catch(function () { /* Permissions API unavailable — show button as normal */ });
+  }
+
+  /* ── Button → input wiring ───────────────────────────────────── */
+  btnCamera.addEventListener('click', function () {
+    if (files.length >= MAX_FILES) return;
+    cameraInput.value = '';
+    cameraInput.click();
+  });
+  btnChoose.addEventListener('click', function () {
+    if (files.length >= MAX_FILES) return;
+    fileInput.value = '';
+    fileInput.click();
+  });
+
+  /* ── File input change ───────────────────────────────────────── */
+  cameraInput.addEventListener('change', function () {
+    processFiles(this.files, true /* fromCamera */);
+  });
+  fileInput.addEventListener('change', function () {
+    processFiles(this.files, false /* fromCamera */);
+  });
+
+  /* ── Helpers ─────────────────────────────────────────────────── */
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+  function totalSize() {
+    return files.reduce(function (s, f) { return s + f.size; }, 0);
+  }
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Process files ───────────────────────────────────────────── */
+  function processFiles(incoming, fromCamera) {
+    var remaining    = MAX_FILES - files.length;
+    var currentTotal = totalSize();
+    var added        = 0;
+
+    Array.from(incoming).forEach(function (raw) {
+      if (added >= remaining) return;
+
+      /* Type check — camera captures (images) are trusted; file picker enforces PDF */
+      if (!fromCamera) {
+        if (raw.type !== 'application/pdf' && !raw.name.toLowerCase().endsWith('.pdf')) {
+          addErrorFile(raw, 'Only PDF files are accepted');
+          return;
+        }
+      }
+
+      if (raw.size > MAX_PER_FILE) {
+        addErrorFile(raw, 'File exceeds 5 MB limit');
+        return;
+      }
+
+      if (currentTotal + raw.size > MAX_TOTAL) {
+        addErrorFile(raw, 'Total upload limit of 40 MB reached');
+        return;
+      }
+
+      var f = { id: nextId++, name: raw.name, size: raw.size, state: 'uploading', errorMsg: null };
+      files.push(f);
+      currentTotal += raw.size;
+      renderFile(f);
+      simulateUpload(f);
+      added++;
+    });
+
+    updateUI();
+  }
+
+  /* ── Render file row ─────────────────────────────────────────── */
+  function renderFile(f) {
+    var li = document.createElement('li');
+    li.id  = 'file-item-' + f.id;
+    li.className = 'file-item';
+    li.setAttribute('aria-label', f.name + ', uploading');
+
+    li.innerHTML = [
+      '<div class="file-item__top">',
+        '<div class="file-icon-wrap" id="fiw-' + f.id + '">',
+          '<span class="fi-file"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>',
+          '<span class="fi-check"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>',
+          '<span class="fi-error-ic"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>',
+        '</div>',
+        '<div class="file-info">',
+          '<div class="file-name">' + escHtml(f.name) + '</div>',
+          '<div class="file-meta" id="fm-' + f.id + '">' + fmtSize(f.size) + '</div>',
+        '</div>',
+        '<button type="button" class="file-delete" aria-label="Remove ' + escHtml(f.name) + '" data-id="' + f.id + '">',
+          '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>',
+        '</button>',
+      '</div>',
+      '<div class="file-progress-wrap" id="fpw-' + f.id + '">',
+        '<div class="file-progress-bar" id="fpb-' + f.id + '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>',
+      '</div>'
+    ].join('');
+
+    fileList.appendChild(li);
+    li.querySelector('.file-delete').addEventListener('click', function () { removeFile(f.id); });
+  }
+
+  /* ── Error file row ──────────────────────────────────────────── */
+  function addErrorFile(raw, msg) {
+    var f = { id: nextId++, name: raw.name, size: raw.size, state: 'error', errorMsg: msg };
+    files.push(f);
+    renderFile(f);
+    var fiw = document.getElementById('fiw-' + f.id);
+    var fpw = document.getElementById('fpw-' + f.id);
+    var fm  = document.getElementById('fm-'  + f.id);
+    var li  = document.getElementById('file-item-' + f.id);
+    if (fiw) fiw.classList.add('is-error');
+    if (fpw) fpw.classList.add('is-hidden');
+    if (fm)  { fm.textContent = msg; fm.classList.add('is-error'); }
+    if (li)  li.setAttribute('aria-label', f.name + ', error: ' + msg);
+    updateUI();
+  }
+
+  /* ── Remove file ─────────────────────────────────────────────── */
+  function removeFile(id) {
+    files = files.filter(function (f) { return f.id !== id; });
+    var el = document.getElementById('file-item-' + id);
+    if (el) el.remove();
+    updateUI();
+  }
+
+  /* ── Simulate upload progress + icon animation (design.md §5.2) */
+  function simulateUpload(f) {
+    var bar  = document.getElementById('fpb-'  + f.id);
+    var wrap = document.getElementById('fpw-'  + f.id);
+    var fiw  = document.getElementById('fiw-'  + f.id);
+    var fm   = document.getElementById('fm-'   + f.id);
+    var li   = document.getElementById('file-item-' + f.id);
+    if (!bar) return;
+
+    var pct  = 0;
+    var tick = setInterval(function () {
+      var step = pct < 70 ? 12 : pct < 90 ? 4 : 1;
+      pct = Math.min(pct + step + Math.random() * 8, 95);
+      bar.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', Math.round(pct));
+    }, 80);
+
+    var delay = 1200 + Math.random() * 400;
+    setTimeout(function () {
+      clearInterval(tick);
+      bar.style.width = '100%';
+      bar.setAttribute('aria-valuenow', 100);
+      setTimeout(function () {
+        wrap.classList.add('is-hidden');
+        fiw.classList.add('is-success'); /* file icon → checkmark */
+        fm.textContent = fmtSize(f.size) + ' · Uploaded';
+        f.state = 'done';
+        if (li) li.setAttribute('aria-label', f.name + ', uploaded successfully');
+        updateUI();
+      }, 120);
+    }, delay);
+  }
+
+  /* ── Update buttons + summary + over-limit ───────────────────── */
+  function updateUI() {
+    var successCount = files.filter(function (f) { return f.state === 'done'; }).length;
+    var allCount     = files.length;
+
+    /* Submit */
+    btnSubmit.disabled = successCount < 1;
+    btnSubmit.setAttribute('aria-disabled', successCount >= 1 ? 'false' : 'true');
+    btnSubmit.setAttribute('aria-label', 'Submit booking, ' + successCount + ' file' + (successCount !== 1 ? 's' : '') + ' uploaded');
+
+    /* Summary */
+    if (successCount >= 1 && !summaryShown) {
+      summaryShown = true;
+      summaryRegion.classList.add('is-open');
+      summaryRegion.setAttribute('aria-hidden', 'false');
+    } else if (successCount === 0) {
+      summaryShown = false;
+      summaryRegion.classList.remove('is-open');
+      summaryRegion.setAttribute('aria-hidden', 'true');
+    }
+
+    /* Max-files guard */
+    var maxed = allCount >= MAX_FILES;
+    btnCamera.disabled  = maxed;
+    btnChoose.disabled  = maxed;
+    cameraInput.disabled = maxed;
+    fileInput.disabled   = maxed;
+    if (maxed) overLimitMsg.classList.add('is-visible');
+    else        overLimitMsg.classList.remove('is-visible');
+  }
+
+  /* ── Submit ──────────────────────────────────────────────────── */
+  btnSubmit.addEventListener('click', function () {
+    if (btnSubmit.disabled) return;
+
+    btnSubmit.classList.add('is-loading');
+    btnSubmit.disabled = true;
+    btnSubmit.setAttribute('aria-label', 'Submitting, please wait');
+
+    setTimeout(function () {
+      /* Stepper: Step 3 → complete */
+      var s3 = document.getElementById('step-3');
+      s3.setAttribute('data-state', 'complete');
+      s3.removeAttribute('aria-current');
+      s3.querySelector('.step__num').innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+      /* Reference number */
+      var ref = 'REF-' + (Math.floor(Math.random() * 8999) + 1000);
+      document.getElementById('success-ref').textContent = ref;
+
+      /* Swap content */
+      uploadView.style.display = 'none';
+      successState.classList.add('is-visible');
+      footerBar.classList.add('is-hidden');
+
+      console.info('[Booking Mobile] Submitted — ref:', ref);
+    }, 1800);
+  });
+
+}());
+</script>
+</body>
+</html>

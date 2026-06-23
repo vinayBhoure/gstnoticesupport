@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book Service — Step 3: Upload Documents · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ================================================================
+   BOOKING STEP 3 — Document Upload  /dashboard/book/documents
+   Focused flow shell — no sidebar, no tab bar.
+   design.md §1–§7 | components.md → Stepper, Document Upload
+   ================================================================ */
+
+body {
+  background: var(--neutral-50);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── skip link ────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--primary-navy);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 0 0 var(--r-btn) 0;
+  z-index: 200;
+  font-weight: 600;
+  font-size: 14px;
+}
+.skip-link:focus { left: 0; }
+
+/* ================================================================
+   TOP BAR — same as Steps 1 & 2
+   ================================================================ */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--neutral-white);
+  border-bottom: 1px solid var(--neutral-200);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  flex-shrink: 0;
+}
+.top-bar__logo { height: 34px; width: auto; display: block; }
+
+.btn-exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--neutral-600);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 48px;
+  padding: 0 4px;
+  text-decoration: none;
+  transition: color .15s;
+}
+.btn-exit:hover { color: var(--primary-navy); }
+.btn-exit:focus-visible {
+  outline: none;
+  border-radius: var(--r-btn);
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+
+/* ================================================================
+   STEPPER — Steps 1 & 2 complete, Step 3 active
+   design.md §5.1 — 300ms ease-out
+   ================================================================ */
+.stepper-rail {
+  background: var(--neutral-white);
+  border-bottom: 1px solid var(--neutral-200);
+  padding: 0 32px;
+  flex-shrink: 0;
+}
+.stepper {
+  display: flex;
+  align-items: center;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 18px 0;
+  list-style: none;
+}
+.step { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.step__num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 300ms ease-out, border-color 300ms ease-out, color 300ms ease-out;
+}
+.step__label {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 300ms ease-out;
+}
+.step[data-state="active"] .step__num   { background: var(--accent-green); color: #fff; border: 2px solid var(--accent-green); }
+.step[data-state="active"] .step__label { color: var(--primary-navy); font-weight: 600; }
+.step[data-state="upcoming"] .step__num   { background: transparent; color: var(--neutral-600); border: 2px solid var(--neutral-200); }
+.step[data-state="upcoming"] .step__label { color: var(--neutral-600); }
+.step[data-state="complete"] .step__num   { background: var(--accent-green); color: #fff; border: 2px solid var(--accent-green); }
+.step[data-state="complete"] .step__label { color: var(--neutral-600); }
+
+.step-connector {
+  flex: 1;
+  min-width: 32px;
+  height: 1px;
+  background: var(--neutral-200);
+  margin: 0 8px;
+  transition: background 300ms ease-out;
+}
+.step-connector[data-complete="true"] { background: var(--accent-green); }
+
+/* ================================================================
+   MAIN CONTENT AREA — max-width 640px
+   ================================================================ */
+.main {
+  flex: 1;
+  padding: 48px 32px 120px;
+}
+.content {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.content__heading {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-navy);
+  line-height: 1.2;
+  letter-spacing: -.02em;
+  margin-bottom: 8px;
+}
+.content__sub {
+  font-size: 16px;
+  color: var(--neutral-600);
+  line-height: 1.6;
+  margin-bottom: 32px;
+  text-wrap: pretty;
+}
+
+/* ================================================================
+   DOCUMENT UPLOAD COMPONENT
+   (components.md → Document Upload)
+   ================================================================ */
+
+/* ── Drag-and-drop zone ───────────────────────────────────────── */
+.drop-zone {
+  position: relative;
+  border: 1.5px dashed var(--neutral-200);
+  border-radius: var(--r-card);
+  background: var(--neutral-white);
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color .18s ease,
+    background   .18s ease,
+    box-shadow   .18s ease;
+  /* hidden file input covers zone */
+  overflow: hidden;
+}
+.drop-zone:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+/* drag-over state */
+.drop-zone.is-dragover {
+  border-color: var(--accent-green);
+  border-style: solid;
+  background: rgba(11,139,78,.04);
+  box-shadow: 0 0 0 3px rgba(11,139,78,.12);
+}
+/* disabled when 8 files reached */
+.drop-zone.is-maxed {
+  cursor: not-allowed;
+  opacity: .55;
+  pointer-events: none;
+}
+
+.drop-zone__icon {
+  color: var(--primary-deep-blue);
+  transition: color .18s ease;
+}
+.drop-zone.is-dragover .drop-zone__icon { color: var(--accent-green); }
+
+.drop-zone__label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-navy);
+  line-height: 1.3;
+}
+.drop-zone__sub {
+  font-size: 14px;
+  color: var(--neutral-600);
+  line-height: 1.4;
+}
+.drop-zone__sub span {
+  color: var(--accent-green);
+  font-weight: 500;
+}
+
+/* hidden file input */
+.drop-zone__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Constraints line ─────────────────────────────────────────── */
+.upload-constraints {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--neutral-600);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+.upload-constraints .dot {
+  color: var(--neutral-200);
+  font-size: 10px;
+}
+
+/* ── Over-limit warning ───────────────────────────────────────── */
+.over-limit-msg {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--warning-amber);
+  margin-top: 8px;
+}
+.over-limit-msg.is-visible { display: flex; }
+
+/* ── Privacy note ─────────────────────────────────────────────── */
+.upload-privacy {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--neutral-600);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+.upload-privacy svg { color: var(--accent-green); flex-shrink: 0; }
+
+/* ── File list ────────────────────────────────────────────────── */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.file-list:empty { margin-top: 0; }
+
+/* ── Single file row ─────────────────────────────────────────── */
+.file-item {
+  background: var(--neutral-white);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--r-card);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.file-item__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* icon wrapper — animates file → check (design.md §5.2) */
+.file-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--neutral-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: background .25s ease;
+}
+.file-icon-wrap.is-success { background: rgba(11,139,78,.1); }
+.file-icon-wrap.is-error   { background: rgba(217,119,6,.1); }
+
+/* file icon (default) */
+.fi-file {
+  color: var(--primary-deep-blue);
+  transition: opacity .2s ease, transform .2s ease;
+}
+/* check icon — starts hidden */
+.fi-check {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-green);
+  opacity: 0;
+  transform: scale(.5);
+  transition: opacity .25s ease .1s, transform .25s ease .1s;
+}
+/* error icon */
+.fi-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--warning-amber);
+  opacity: 0;
+  transform: scale(.5);
+  transition: opacity .25s ease .1s, transform .25s ease .1s;
+}
+
+/* success animation: file fades out, check pops in */
+.file-icon-wrap.is-success .fi-file  { opacity: 0; transform: scale(.5); }
+.file-icon-wrap.is-success .fi-check { opacity: 1; transform: scale(1); }
+.file-icon-wrap.is-error   .fi-file  { opacity: 0; transform: scale(.5); }
+.file-icon-wrap.is-error   .fi-error { opacity: 1; transform: scale(1); }
+
+.file-info { flex: 1; min-width: 0; }
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary-navy);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-meta {
+  font-size: 12px;
+  color: var(--neutral-600);
+  margin-top: 1px;
+  line-height: 1.4;
+}
+.file-meta.is-error { color: var(--warning-amber); font-weight: 500; }
+
+/* delete button */
+.file-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--neutral-600);
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+.file-delete:hover { background: var(--neutral-50); color: var(--primary-navy); }
+.file-delete:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(11,139,78,.4);
+}
+
+/* ── Progress bar ─────────────────────────────────────────────── */
+.file-progress-wrap {
+  height: 4px;
+  background: var(--neutral-50);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.file-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent-green);
+  border-radius: 99px;
+  transition: width .1s linear;
+}
+.file-progress-wrap.is-hidden { display: none; }
+
+/* ================================================================
+   BOOKING SUMMARY CARD
+   Appears after ≥1 successful upload. CSS max-height reveal.
+   ================================================================ */
+.summary-region {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  margin-top: 0;
+  transition:
+    max-height .32s ease-out,
+    opacity    .25s ease-out,
+    margin-top .32s ease-out;
+}
+.summary-region.is-open {
+  max-height: 320px;
+  opacity: 1;
+  margin-top: 24px;
+}
+
+.summary-card {
+  background: var(--neutral-50);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+}
+.summary-card__heading {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-navy);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.summary-card__heading svg { color: var(--accent-green); }
+
+.summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--neutral-200);
+}
+.summary-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--neutral-200);
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-row__label {
+  font-size: 13px;
+  color: var(--neutral-600);
+  font-weight: 500;
+  min-width: 110px;
+  flex-shrink: 0;
+}
+.summary-row__value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral-900);
+  line-height: 1.4;
+}
+.summary-row__value--mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  letter-spacing: .04em;
+  font-weight: 500;
+}
+
+/* ================================================================
+   SUCCESS STATE — replaces full content area
+   ================================================================ */
+.success-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  padding: 48px 24px;
+}
+.success-state.is-visible { display: flex; }
+
+.success-icon-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(11,139,78,.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-green);
+}
+
+.success-heading {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-navy);
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+
+.success-ref {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-navy);
+  letter-spacing: .06em;
+  background: var(--neutral-50);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--r-btn);
+  padding: 8px 18px;
+  display: inline-block;
+}
+
+.success-body {
+  font-size: 16px;
+  color: var(--neutral-600);
+  line-height: 1.6;
+  max-width: 440px;
+  text-wrap: pretty;
+}
+
+.btn-dashboard {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-green);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-btn);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  min-height: 48px;
+  padding: 13px 28px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s ease;
+}
+.btn-dashboard:hover { background: var(--accent-green-hover); }
+.btn-dashboard:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+
+/* ================================================================
+   FOOTER BAR
+   ================================================================ */
+.footer-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 90;
+  background: var(--neutral-white);
+  border-top: 1px solid var(--neutral-200);
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  transition: opacity .2s ease;
+}
+.footer-bar.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--neutral-600);
+  cursor: pointer;
+  min-height: 48px;
+  padding: 0 8px;
+  text-decoration: none;
+  transition: color .15s;
+}
+.btn-back:hover { color: var(--primary-navy); }
+.btn-back:focus-visible {
+  outline: none;
+  border-radius: var(--r-btn);
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--accent-green);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-btn);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  min-height: 48px;
+  padding: 13px 28px;
+  cursor: pointer;
+  transition: background .15s ease, transform .1s ease;
+}
+.btn-submit:hover:not(:disabled) { background: var(--accent-green-hover); }
+.btn-submit:active:not(:disabled) { background: var(--accent-green-hover); transform: translateY(1px); }
+.btn-submit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11,139,78,.4);
+}
+.btn-submit:disabled {
+  background: var(--neutral-200);
+  color: var(--neutral-600);
+  cursor: not-allowed;
+}
+
+.spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-submit.is-loading .spinner   { display: block; }
+.btn-submit.is-loading .btn-label { display: none; }
+.btn-submit.is-loading .btn-arr   { display: none; }
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 767px) {
+  .top-bar, .stepper-rail { padding: 0 20px; }
+  .main { padding: 28px 20px 108px; }
+  .footer-bar { padding: 12px 20px; flex-direction: column; align-items: stretch; gap: 8px; }
+  .btn-back { order: -1; justify-content: center; min-height: 40px; }
+  .btn-submit { width: 100%; }
+  .content__heading { font-size: 26px; }
+  .content__sub { font-size: 15px; margin-bottom: 24px; }
+  .summary-row__label { min-width: 90px; }
+}
+@media (max-width: 479px) {
+  .step__label { display: none; }
+  .step-connector { min-width: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drop-zone, .file-icon-wrap, .fi-check, .fi-error, .fi-file,
+  .summary-region, .file-progress-bar { transition: none !important; }
+  .spinner { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<!-- ==============================================================
+     TOP BAR
+============================================================== -->
+<header class="top-bar" role="banner">
+  <a href="Dashboard Home.html" aria-label="GST Notice Support — back to dashboard">
+    <img src="assets/logo.png" alt="GST Notice Support" class="top-bar__logo" />
+  </a>
+  <a href="Dashboard Home.html" class="btn-exit" aria-label="Save progress and exit to dashboard">
+    Save &amp; Exit
+    <i data-lucide="x" width="15" height="15"></i>
+  </a>
+</header>
+
+<!-- ==============================================================
+     STEPPER — Steps 1 & 2 complete · Step 3 active
+============================================================== -->
+<nav class="stepper-rail" aria-label="Booking progress">
+  <ol class="stepper">
+    <li class="step" data-state="complete" id="step-1">
+      <div class="step__num" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="step__label">Service</span>
+    </li>
+    <li class="step-connector" role="presentation" aria-hidden="true" data-complete="true"></li>
+    <li class="step" data-state="complete" id="step-2">
+      <div class="step__num" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="step__label">Details</span>
+    </li>
+    <li class="step-connector" role="presentation" aria-hidden="true" data-complete="true" id="conn-2"></li>
+    <li class="step" data-state="active" aria-current="step" id="step-3">
+      <div class="step__num" aria-hidden="true">3</div>
+      <span class="step__label">Documents</span>
+    </li>
+  </ol>
+</nav>
+
+<!-- ==============================================================
+     MAIN CONTENT
+============================================================== -->
+<main class="main" id="main">
+  <div class="content" id="upload-view">
+
+    <h2 class="content__heading">Upload Your Notice Documents</h2>
+    <p class="content__sub">Upload all relevant notices and orders. Our team will review them before preparing your response.</p>
+
+    <!-- ── Document Upload Component ─────────────────────────── -->
+    <div role="region" aria-label="Document upload">
+
+      <!-- Drop zone -->
+      <div
+        class="drop-zone"
+        id="drop-zone"
+        role="button"
+        tabindex="0"
+        aria-label="Upload documents — drag and drop or activate to browse"
+        aria-describedby="upload-constraints"
+      >
+        <input
+          type="file"
+          id="file-input"
+          class="drop-zone__input"
+          accept=".pdf,application/pdf"
+          multiple
+          aria-hidden="true"
+          tabindex="-1"
+        />
+        <div class="drop-zone__icon">
+          <i data-lucide="upload-cloud" width="40" height="40" stroke-width="1.4"></i>
+        </div>
+        <p class="drop-zone__label">Drag and drop your PDFs here</p>
+        <p class="drop-zone__sub">or <span>click to browse files</span></p>
+      </div>
+
+      <!-- Constraints line -->
+      <div class="upload-constraints" id="upload-constraints" aria-live="polite">
+        <span>PDF only</span>
+        <span class="dot">●</span>
+        <span>Max 8 files</span>
+        <span class="dot">●</span>
+        <span>5 MB per file</span>
+        <span class="dot">●</span>
+        <span>40 MB total</span>
+      </div>
+
+      <!-- Over-limit message -->
+      <div class="over-limit-msg" id="over-limit-msg" role="alert" aria-live="polite">
+        <i data-lucide="alert-circle" width="14" height="14" stroke-width="1.5"></i>
+        Maximum 8 files reached.
+      </div>
+
+      <!-- Privacy note -->
+      <p class="upload-privacy">
+        <i data-lucide="lock" width="14" height="14" stroke-width="1.5"></i>
+        Your documents are confidential and never shared.
+      </p>
+
+      <!-- File list (aria-live so additions are announced) -->
+      <ul
+        class="file-list"
+        id="file-list"
+        aria-label="Uploaded files"
+        aria-live="polite"
+        aria-relevant="additions removals"
+      ></ul>
+
+    </div>
+    <!-- /Document Upload Component -->
+
+    <!-- ── Booking Summary (appears after ≥1 upload success) ── -->
+    <div
+      class="summary-region"
+      id="summary-region"
+      aria-hidden="true"
+      role="region"
+      aria-label="Booking summary"
+    >
+      <div class="summary-card">
+        <div class="summary-card__heading">
+          <i data-lucide="clipboard-check" width="16" height="16" stroke-width="1.5"></i>
+          Booking Summary
+        </div>
+        <div class="summary-rows">
+          <div class="summary-row">
+            <span class="summary-row__label">Service</span>
+            <span class="summary-row__value" id="sum-service">ASMT-10 Reply</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row__label">Name</span>
+            <span class="summary-row__value" id="sum-name">Rajesh Kumar</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-row__label">GSTIN</span>
+            <span class="summary-row__value summary-row__value--mono" id="sum-gstin">29ABCDE1234F1Z5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /upload-view -->
+
+  <!-- ── Success state (replaces content area) ─────────────── -->
+  <div class="success-state" id="success-state" aria-live="assertive" role="status">
+    <div class="success-icon-ring">
+      <i data-lucide="check" width="36" height="36" stroke-width="2.2"></i>
+    </div>
+    <h2 class="success-heading">Booking Submitted</h2>
+    <span class="success-ref" id="success-ref">REF-2847</span>
+    <p class="success-body">We've received your documents. Our team will review them and update you by email.</p>
+    <a href="Dashboard Home.html" class="btn-dashboard">
+      Go to Dashboard
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+
+</main>
+
+<!-- ==============================================================
+     FOOTER BAR
+============================================================== -->
+<footer class="footer-bar" id="footer-bar">
+  <a
+    href="Booking Step 2 - Personal Info.html"
+    class="btn-back"
+    aria-label="Back to Step 2, Case Details"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back
+  </a>
+
+  <button
+    type="button"
+    class="btn-submit"
+    id="btn-submit"
+    disabled
+    aria-disabled="true"
+    aria-label="Submit booking, 0 files uploaded"
+  >
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="btn-label">Submit Booking</span>
+    <svg class="btn-arr" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
+</footer>
+
+<!-- ==============================================================
+     SCRIPT
+     – Drag-and-drop handling
+     – File validation (PDF, 5MB, 8-file, 40MB total)
+     – Simulated per-file upload progress
+     – File icon → checkmark animation (design.md §5.2)
+     – Booking summary reveal after first success
+     – Submit: loading state → success state + stepper complete
+============================================================== -->
+<script>
+(function () {
+  'use strict';
+
+  lucide.createIcons();
+
+  /* ── Constants ───────────────────────────────────────────────── */
+  var MAX_FILES    = 8;
+  var MAX_PER_FILE = 5 * 1024 * 1024;  /* 5 MB */
+  var MAX_TOTAL    = 40 * 1024 * 1024; /* 40 MB */
+
+  /* ── State ───────────────────────────────────────────────────── */
+  var files      = [];   /* [{id, name, size, state:'uploading'|'done'|'error', errorMsg}] */
+  var nextId     = 1;
+  var summaryShown = false;
+
+  /* ── DOM refs ────────────────────────────────────────────────── */
+  var dropZone      = document.getElementById('drop-zone');
+  var fileInput     = document.getElementById('file-input');
+  var fileList      = document.getElementById('file-list');
+  var overLimitMsg  = document.getElementById('over-limit-msg');
+  var summaryRegion = document.getElementById('summary-region');
+  var uploadView    = document.getElementById('upload-view');
+  var successState  = document.getElementById('success-state');
+  var btnSubmit     = document.getElementById('btn-submit');
+  var footerBar     = document.getElementById('footer-bar');
+
+  /* ── Format bytes ────────────────────────────────────────────── */
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  /* ── Total size of done/uploading files ─────────────────────── */
+  function totalSize() {
+    return files.reduce(function (s, f) { return s + f.size; }, 0);
+  }
+
+  /* ── Render file list ────────────────────────────────────────── */
+  function renderFile(f) {
+    var li = document.createElement('li');
+    li.id = 'file-item-' + f.id;
+    li.className = 'file-item';
+    li.setAttribute('aria-label', f.name + (f.state === 'done' ? ', uploaded' : f.state === 'error' ? ', error: ' + f.errorMsg : ', uploading'));
+
+    li.innerHTML = [
+      '<div class="file-item__top">',
+        '<div class="file-icon-wrap" id="fiw-' + f.id + '">',
+          '<span class="fi-file"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>',
+          '<span class="fi-check"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>',
+          '<span class="fi-error"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>',
+        '</div>',
+        '<div class="file-info">',
+          '<div class="file-name">' + escHtml(f.name) + '</div>',
+          '<div class="file-meta" id="fm-' + f.id + '">' + fmtSize(f.size) + '</div>',
+        '</div>',
+        '<button type="button" class="file-delete" aria-label="Remove ' + escHtml(f.name) + '" data-id="' + f.id + '">',
+          '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>',
+        '</button>',
+      '</div>',
+      '<div class="file-progress-wrap" id="fpw-' + f.id + '">',
+        '<div class="file-progress-bar" id="fpb-' + f.id + '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>',
+      '</div>'
+    ].join('');
+
+    fileList.appendChild(li);
+
+    /* attach delete */
+    li.querySelector('.file-delete').addEventListener('click', function () {
+      removeFile(f.id);
+    });
+  }
+
+  /* ── Escape HTML ─────────────────────────────────────────────── */
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Remove file ─────────────────────────────────────────────── */
+  function removeFile(id) {
+    files = files.filter(function (f) { return f.id !== id; });
+    var el = document.getElementById('file-item-' + id);
+    if (el) el.remove();
+    updateUI();
+  }
+
+  /* ── Update Submit button + summary card + max-reached state ── */
+  function updateUI() {
+    var successCount = files.filter(function (f) { return f.state === 'done'; }).length;
+    var allCount     = files.length;
+
+    /* Submit button */
+    var canSubmit = successCount >= 1;
+    btnSubmit.disabled = !canSubmit;
+    btnSubmit.setAttribute('aria-disabled', canSubmit ? 'false' : 'true');
+    btnSubmit.setAttribute('aria-label', 'Submit booking, ' + successCount + ' file' + (successCount !== 1 ? 's' : '') + ' uploaded');
+
+    /* Summary card */
+    if (successCount >= 1 && !summaryShown) {
+      summaryShown = true;
+      summaryRegion.classList.add('is-open');
+      summaryRegion.setAttribute('aria-hidden', 'false');
+    } else if (successCount === 0) {
+      summaryShown = false;
+      summaryRegion.classList.remove('is-open');
+      summaryRegion.setAttribute('aria-hidden', 'true');
+    }
+
+    /* Max-files guard */
+    if (allCount >= MAX_FILES) {
+      dropZone.classList.add('is-maxed');
+      overLimitMsg.classList.add('is-visible');
+      fileInput.disabled = true;
+    } else {
+      dropZone.classList.remove('is-maxed');
+      overLimitMsg.classList.remove('is-visible');
+      fileInput.disabled = false;
+    }
+  }
+
+  /* ── Simulate upload progress per file (design.md §5.2) ─────── */
+  function simulateUpload(f) {
+    var bar   = document.getElementById('fpb-' + f.id);
+    var wrap  = document.getElementById('fpw-' + f.id);
+    var fiw   = document.getElementById('fiw-' + f.id);
+    var fm    = document.getElementById('fm-' + f.id);
+    var li    = document.getElementById('file-item-' + f.id);
+    if (!bar) return;
+
+    var pct  = 0;
+    var tick = setInterval(function () {
+      /* Accelerate toward 90%, then slow */
+      var step = pct < 70 ? 12 : pct < 90 ? 4 : 1;
+      pct = Math.min(pct + step + Math.random() * 8, 95);
+      bar.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', Math.round(pct));
+    }, 80);
+
+    /* Complete at ~1.2–1.6s */
+    var delay = 1200 + Math.random() * 400;
+    setTimeout(function () {
+      clearInterval(tick);
+      bar.style.width = '100%';
+      bar.setAttribute('aria-valuenow', 100);
+
+      setTimeout(function () {
+        /* Hide progress bar */
+        wrap.classList.add('is-hidden');
+
+        /* File icon → checkmark animation (design.md §5.2) */
+        fiw.classList.add('is-success');
+
+        /* Meta text */
+        fm.textContent = fmtSize(f.size) + ' · Uploaded';
+
+        /* Update ARIA */
+        f.state = 'done';
+        if (li) li.setAttribute('aria-label', f.name + ', uploaded successfully');
+
+        updateUI();
+      }, 120);
+    }, delay);
+  }
+
+  /* ── Process dropped / selected files ───────────────────────── */
+  function processFiles(incoming) {
+    var remaining = MAX_FILES - files.length;
+    var currentTotal = totalSize();
+    var added = 0;
+
+    Array.from(incoming).forEach(function (raw) {
+      if (added >= remaining) return;
+
+      /* Validate type */
+      if (raw.type !== 'application/pdf' && !raw.name.toLowerCase().endsWith('.pdf')) {
+        addErrorFile(raw, 'Only PDF files are accepted');
+        return;
+      }
+
+      /* Validate per-file size */
+      if (raw.size > MAX_PER_FILE) {
+        addErrorFile(raw, 'File exceeds 5 MB limit');
+        return;
+      }
+
+      /* Validate total */
+      if (currentTotal + raw.size > MAX_TOTAL) {
+        addErrorFile(raw, 'Total upload limit of 40 MB reached');
+        return;
+      }
+
+      var f = { id: nextId++, name: raw.name, size: raw.size, state: 'uploading', errorMsg: null };
+      files.push(f);
+      currentTotal += raw.size;
+      renderFile(f);
+      simulateUpload(f);
+      added++;
+    });
+
+    /* Reset input so same file can be re-selected */
+    fileInput.value = '';
+    updateUI();
+  }
+
+  /* ── Add error-state file row ────────────────────────────────── */
+  function addErrorFile(raw, msg) {
+    var f = { id: nextId++, name: raw.name, size: raw.size, state: 'error', errorMsg: msg };
+    files.push(f);
+    renderFile(f);
+
+    /* Apply error state immediately */
+    var fiw = document.getElementById('fiw-' + f.id);
+    var fpw = document.getElementById('fpw-' + f.id);
+    var fm  = document.getElementById('fm-' + f.id);
+    var li  = document.getElementById('file-item-' + f.id);
+    if (fiw) fiw.classList.add('is-error');
+    if (fpw) fpw.classList.add('is-hidden');
+    if (fm)  { fm.textContent = msg; fm.classList.add('is-error'); }
+    if (li)  li.setAttribute('aria-label', f.name + ', error: ' + msg);
+    updateUI();
+  }
+
+  /* ── Drag events ─────────────────────────────────────────────── */
+  dropZone.addEventListener('dragenter', function (e) {
+    e.preventDefault();
+    dropZone.classList.add('is-dragover');
+  });
+  dropZone.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    dropZone.classList.add('is-dragover');
+  });
+  dropZone.addEventListener('dragleave', function (e) {
+    if (!dropZone.contains(e.relatedTarget)) {
+      dropZone.classList.remove('is-dragover');
+    }
+  });
+  dropZone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    dropZone.classList.remove('is-dragover');
+    if (dropZone.classList.contains('is-maxed')) return;
+    processFiles(e.dataTransfer.files);
+  });
+
+  /* ── Click / keyboard activate ──────────────────────────────── */
+  dropZone.addEventListener('click', function (e) {
+    if (dropZone.classList.contains('is-maxed')) return;
+    /* Only trigger if click was on zone itself, not on the hidden file input */
+    if (e.target !== fileInput) fileInput.click();
+  });
+  dropZone.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (!dropZone.classList.contains('is-maxed')) fileInput.click();
+    }
+  });
+
+  /* ── File input change ───────────────────────────────────────── */
+  fileInput.addEventListener('change', function () {
+    processFiles(this.files);
+  });
+
+  /* ── Submit ──────────────────────────────────────────────────── */
+  btnSubmit.addEventListener('click', function () {
+    if (btnSubmit.disabled) return;
+
+    /* Loading state */
+    btnSubmit.classList.add('is-loading');
+    btnSubmit.disabled = true;
+    btnSubmit.setAttribute('aria-label', 'Submitting, please wait');
+
+    /* Stepper: Step 3 → complete */
+    setTimeout(function () {
+      var s3  = document.getElementById('step-3');
+      var c2  = document.getElementById('conn-2');
+      s3.setAttribute('data-state', 'complete');
+      s3.removeAttribute('aria-current');
+      s3.querySelector('.step__num').innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+      /* Generate reference number */
+      var ref = 'REF-' + (Math.floor(Math.random() * 8999) + 1000);
+      document.getElementById('success-ref').textContent = ref;
+
+      /* Swap content */
+      uploadView.style.display    = 'none';
+      successState.classList.add('is-visible');
+      footerBar.classList.add('is-hidden');
+
+      console.info('[Booking] Submitted — ref:', ref);
+    }, 1800);
+  });
+
+}());
+</script>
+<script src="js/app-state.js"></script>
+<script>
+// Wire Step 3 Submit → create booking in state
+(function(){
+  var btnS = document.getElementById('btn-submit');
+  if(!btnS) return;
+  var _clicked = false;
+  btnS.addEventListener('click', function(){
+    if(btnS.disabled || _clicked) return;
+    _clicked = true;
+    // Wait for the existing handler to show success state, then create booking
+    setTimeout(function(){
+      var successEl = document.getElementById('success-state');
+      if(!successEl) return;
+      if(typeof GNS==='undefined') return;
+      var serviceKey = sessionStorage.getItem('gns_booking_service')||'asmt10';
+      var serviceNames = {asmt10:'ASMT-10 Reply',scn:'SCN Reply',commissioner:'Commissioner Appeal',gstat:'GSTAT Appeal'};
+      var svcName = serviceNames[serviceKey]||'ASMT-10 Reply';
+      var refNum = 'GNS-2026-' + (Math.floor(Math.random()*400)+9600);
+      var b = GNS.addBooking({
+        id: refNum,
+        service: svcName,
+        status: 'upload',
+        date: new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
+        amount: '\u20b94,999'
+      });
+      GNS.setActiveBookingId(b.id);
+      var refEl = document.getElementById('success-ref');
+      if(refEl) refEl.textContent = b.id;
+    }, 2200);
+  });
+})();
+</script>
+</body>
+</html>

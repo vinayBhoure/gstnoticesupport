@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · Booking Detail · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* === APP SHELL — identical structure to Admin Overview / Bookings === */
+  :root{ --sidebar-w:264px; --header-h:64px; }
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);}
+  .app{display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--neutral-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;}
+  .sidebar .brand{display:inline-flex;align-items:center;gap:10px;height:var(--header-h);padding:0 20px;flex:0 0 auto;border-bottom:1px solid var(--neutral-200);}
+  .sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .sidebar .brand .bn span{color:var(--accent-green);}
+  .sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+  .nav-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:8px 12px 6px;}
+  .nav-link{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:44px;line-height:1.2;transition:background .15s,color .15s;}
+  .nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);transition:color .15s;}
+  .nav-link:hover{background:var(--neutral-50);}
+  .nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .nav-link[aria-current="page"]{background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;}
+  .nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+  .sidebar .side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+  .side-help{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;}
+  .side-help .ic{width:18px;height:18px;color:var(--neutral-600);}
+  .side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+  .side-help:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+
+  .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+  .topbar{height:var(--header-h);flex:0 0 auto;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);border-bottom:1px solid var(--neutral-200);display:flex;align-items:center;gap:16px;padding:0 32px;}
+  .topbar .hamburger{display:none;width:44px;height:44px;align-items:center;justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);}
+  .topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+  .topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+  .topbar .mobile-brand .bn span{color:var(--accent-green);}
+  .topbar .spacer{flex:1;}
+  .topbar .tap-call{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;}
+  .topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+  .topbar .tap-call:hover{border-color:var(--primary-navy);}
+  .topbar .tap-call:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .num{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+  .acct{position:relative;}
+  .acct-btn{display:inline-flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;}
+  .acct-btn:hover{border-color:var(--primary-navy);}
+  .acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-avatar{width:32px;height:32px;border-radius:50%;flex:0 0 auto;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+  .acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);}
+  .acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+  .acct-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:6px;z-index:70;}
+  .acct-menu.open{display:block;}
+  .acct-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;}
+  .acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+  .acct-menu a:hover{background:var(--neutral-50);}
+  .acct-menu a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+  .content{flex:1;padding:32px;}
+  .content-inner{max-width:1100px;margin:0 auto;}
+
+  /* === DETAIL HEADER === */
+  .back-link{display:inline-flex;align-items:center;gap:7px;min-height:44px;font-size:14px;font-weight:600;color:var(--accent-green);}
+  .back-link .ic{width:16px;height:16px;}
+  .back-link:hover{color:var(--accent-green-hover);}
+  .back-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);border-radius:4px;}
+
+  .detail-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 28px;}
+  .detail-head h1{font-size:32px;letter-spacing:-.01em;line-height:1.2;}
+  .detail-head .ref{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;color:var(--neutral-600);user-select:all;padding-top:6px;}
+
+  /* === BADGES (components.md → Service Status Badge + payment chip) === */
+  .status-badge{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding:4px 11px;border-radius:var(--r-badge);white-space:nowrap;line-height:1.4;}
+  .status-badge .ic{width:15px;height:15px;flex:0 0 auto;}
+  .s-upload{background:var(--neutral-50);color:var(--neutral-900);border:1px solid var(--neutral-200);}
+  .s-review{background:var(--primary-deep-blue);color:#fff;}
+  .s-draft{background:var(--warning-amber);color:var(--neutral-900);}
+  .s-filing{background:var(--primary-navy);color:#fff;}
+  .s-complete{background:var(--accent-green);color:#fff;}
+  .s-cancelled{background:var(--neutral-200);color:var(--neutral-600);}
+  .pay-badge{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:500;padding:3px 10px;border-radius:var(--r-badge);white-space:nowrap;line-height:1.4;}
+  .pay-badge .ic{width:13px;height:13px;flex:0 0 auto;}
+  .pay-paid{background:var(--accent-green);color:#fff;}
+  .pay-pending{background:var(--neutral-50);color:var(--neutral-900);border:1px solid var(--neutral-200);}
+  .pay-failed{background:#FFF8EF;color:var(--warning-amber);border:1px solid #F0D9B5;}
+
+  /* === LAYOUT GRID === */
+  .detail-grid{display:grid;grid-template-columns:3fr 2fr;gap:24px;align-items:start;}
+  .col-left{display:flex;flex-direction:column;gap:24px;min-width:0;}
+  .col-right{display:flex;flex-direction:column;gap:24px;min-width:0;position:sticky;top:calc(var(--header-h) + 24px);}
+
+  /* === CARDS === */
+  .card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:24px;}
+  .card h2{font-size:18px;font-weight:600;line-height:1.3;display:flex;align-items:center;gap:9px;}
+  .card h2 .ic{width:18px;height:18px;color:var(--neutral-600);flex:0 0 auto;}
+  .card .card-note{font-size:13px;color:var(--neutral-600);margin-top:4px;}
+
+  /* User info dl */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;margin-top:18px;}
+  .info-grid > div{min-width:0;}
+  .info-grid dt{font-size:13px;font-weight:500;color:var(--neutral-600);margin-bottom:3px;}
+  .info-grid dd{font-size:15px;font-weight:500;color:var(--neutral-900);overflow-wrap:break-word;}
+  .info-grid dd.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;user-select:all;}
+
+  /* === Document List Row (NEW component) === */
+  .doc-list{display:flex;flex-direction:column;margin-top:14px;}
+  .doc-row{display:flex;align-items:center;gap:14px;padding:13px 2px;border-bottom:1px solid var(--neutral-200);}
+  .doc-row:last-child{border-bottom:none;}
+  .doc-row .ic-file{width:20px;height:20px;flex:0 0 auto;color:var(--primary-deep-blue);}
+  .doc-row .doc-meta{flex:1;min-width:0;}
+  .doc-row .doc-name{display:block;font-size:15px;font-weight:500;color:var(--neutral-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .doc-row .doc-sub{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--neutral-600);margin-top:2px;}
+  .doc-tag{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:var(--r-badge);background:var(--neutral-50);border:1px solid var(--neutral-200);color:var(--neutral-600);}
+  .doc-dl{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:8px 14px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;color:var(--primary-navy);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:border-color .15s,background .15s;}
+  .doc-dl .ic{width:15px;height:15px;}
+  .doc-dl:hover{border-color:var(--primary-navy);background:var(--neutral-50);}
+  .doc-dl:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .doc-dl:disabled{opacity:.55;cursor:wait;}
+  .doc-empty{display:flex;align-items:center;gap:10px;padding:22px 2px 8px;font-size:15px;color:var(--neutral-600);}
+  .doc-empty .ic{width:18px;height:18px;color:var(--neutral-200);}
+  .doc-error{font-size:13px;color:var(--warning-amber);margin-top:2px;}
+
+  /* === Form primitives === */
+  .field-label{display:block;font-size:14px;font-weight:500;color:var(--neutral-900);margin-bottom:6px;}
+  .helper{font-size:13px;color:var(--neutral-600);line-height:1.5;}
+  textarea.input{width:100%;min-height:120px;resize:vertical;padding:12px 14px;font-size:15px;font-family:inherit;line-height:1.55;color:var(--neutral-900);background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-btn);transition:border-color .15s;}
+  textarea.input:focus{outline:none;border-color:var(--primary-deep-blue);box-shadow:0 0 0 3px rgba(27,58,107,.15);}
+  input.input{width:100%;min-height:48px;padding:0 14px;font-size:15px;font-family:inherit;color:var(--neutral-900);background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-btn);transition:border-color .15s;}
+  input.input:focus{outline:none;border-color:var(--primary-deep-blue);box-shadow:0 0 0 3px rgba(27,58,107,.15);}
+  input.input.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;}
+  input.input[aria-invalid="true"]{border-color:var(--warning-amber);}
+  .char-count{font-size:13px;color:var(--neutral-600);font-variant-numeric:tabular-nums;}
+  .note-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;flex-wrap:wrap;}
+  .note-status{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;}
+  .note-status .ic{width:14px;height:14px;}
+  .note-status.ok{color:var(--accent-green);}
+  .note-status.err{color:var(--warning-amber);}
+
+  /* === BUTTONS === */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:var(--r-btn);font-size:15px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s,color .15s;font-family:inherit;}
+  .btn .ic{width:17px;height:17px;flex:0 0 auto;}
+  .btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+  .btn-primary{background:var(--accent-green);color:#fff;}
+  .btn-primary:hover{background:var(--accent-green-hover);}
+  .btn-primary:active{background:var(--accent-green-hover);transform:translateY(1px);}
+  .btn-primary:disabled{background:var(--neutral-200);color:var(--neutral-600);cursor:not-allowed;transform:none;}
+  .btn-secondary{background:transparent;border-color:var(--primary-navy);color:var(--primary-navy);}
+  .btn-secondary:hover{background:var(--primary-navy);color:#fff;}
+  .btn-secondary:disabled{border-color:var(--neutral-200);color:var(--neutral-600);background:transparent;cursor:not-allowed;}
+  .btn-block{width:100%;}
+
+  /* === DRAFT UPLOAD (cross-zone shared Document Upload) === */
+  .dropzone{
+    margin-top:16px;border:1.5px dashed var(--neutral-200);border-radius:var(--r-card);
+    padding:28px 20px;text-align:center;cursor:pointer;background:var(--neutral-50);
+    transition:border-color .15s,background .15s;
+  }
+  .dropzone:hover,.dropzone.dragover{border-color:var(--accent-green);background:rgba(11,139,78,.04);}
+  .dropzone:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .dropzone .ic-up{width:28px;height:28px;color:var(--primary-deep-blue);margin:0 auto 10px;display:block;}
+  .dropzone .dz-title{font-size:15px;font-weight:600;color:var(--primary-navy);}
+  .dropzone .dz-sub{font-size:13px;color:var(--neutral-600);margin-top:4px;}
+  .dz-error{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--warning-amber);margin-top:10px;text-align:left;}
+  .dz-error .ic{width:15px;height:15px;flex:0 0 auto;margin-top:1px;}
+
+  .trust-line{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--neutral-600);line-height:1.5;margin-top:14px;}
+  .trust-line .ic{width:15px;height:15px;flex:0 0 auto;color:var(--accent-green);margin-top:1px;}
+
+  /* uploading progress */
+  .upload-progress{margin-top:16px;}
+  .upload-progress .up-row{display:flex;align-items:center;gap:12px;}
+  .upload-progress .ic{width:20px;height:20px;color:var(--primary-deep-blue);flex:0 0 auto;}
+  .upload-progress .up-name{flex:1;font-size:14px;font-weight:500;color:var(--neutral-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .upload-progress .up-pct{font-size:13px;color:var(--neutral-600);font-variant-numeric:tabular-nums;}
+  .progress-track{height:6px;border-radius:3px;background:var(--neutral-200);margin-top:10px;overflow:hidden;}
+  .progress-fill{height:100%;border-radius:3px;background:var(--accent-green);width:0%;transition:width .2s linear;}
+  @media (prefers-reduced-motion:reduce){.progress-fill{transition:none;}}
+
+  /* draft present row */
+  .draft-file{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:var(--neutral-50);}
+  .draft-file .ic-ok{width:22px;height:22px;flex:0 0 auto;color:var(--accent-green);}
+  .draft-file .df-meta{flex:1;min-width:0;}
+  .draft-file .df-name{display:block;font-size:15px;font-weight:600;color:var(--primary-navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .draft-file .df-sub{font-size:13px;color:var(--neutral-600);margin-top:2px;}
+  .replace-row{margin-top:14px;}
+  .replace-note{font-size:13px;color:var(--neutral-600);margin-top:8px;line-height:1.5;}
+  .locked-reason{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--neutral-600);margin-top:14px;line-height:1.5;}
+  .locked-reason .ic{width:15px;height:15px;flex:0 0 auto;color:var(--neutral-600);margin-top:1px;}
+  .replace-success{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--accent-green);font-weight:500;margin-top:10px;}
+  .replace-success .ic{width:15px;height:15px;flex:0 0 auto;margin-top:1px;}
+
+  /* === STATUS ACTIONS === */
+  .action-hint{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--neutral-600);line-height:1.55;margin-top:14px;}
+  .action-hint .ic{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:var(--neutral-600);}
+  .action-stack{display:flex;flex-direction:column;gap:12px;margin-top:16px;}
+
+  .pay-panel{margin-top:16px;padding:16px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:var(--neutral-50);}
+  .pay-panel h3{font-size:15px;font-weight:600;color:var(--primary-navy);margin-bottom:4px;}
+  .pay-panel .helper{margin-bottom:12px;}
+  .pay-field{margin-bottom:12px;}
+  .pay-error{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--warning-amber);margin-top:10px;line-height:1.5;}
+  .pay-error .ic{width:15px;height:15px;flex:0 0 auto;margin-top:1px;}
+
+  /* === ERROR / SKELETON === */
+  .error-card{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid var(--neutral-200);border-left:3px solid var(--warning-amber);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:20px 24px;}
+  .error-card .ic-lead{width:22px;height:22px;flex:0 0 auto;color:var(--warning-amber);}
+  .error-card .txt{flex:1;font-size:15px;line-height:1.5;color:var(--neutral-900);}
+  .error-card .txt b{font-weight:600;}
+
+  .skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  @media (prefers-reduced-motion:reduce){.skel{animation:none;}}
+  .skel-card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:24px;display:flex;flex-direction:column;gap:14px;}
+
+  [hidden]{display:none !important;}
+  .scrim{display:none;position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;}
+  .scrim.open{display:block;}
+  .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+  /* === RESPONSIVE (<lg) === */
+  @media (max-width:1023px){
+    .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+    .sidebar.open{transform:translateX(0);}
+    @media (prefers-reduced-motion:reduce){.sidebar{transition:none;}}
+    .main{margin-left:0;}
+    .topbar{padding:0 16px;}
+    .topbar .hamburger{display:inline-flex;}
+    .topbar .mobile-brand{display:inline-flex;}
+    .topbar .num{display:none;}
+    .content{padding:20px 16px 48px;}
+    .detail-head h1{font-size:24px;}
+    .detail-grid{grid-template-columns:1fr;}
+    .col-right{position:static;}
+    .info-grid{grid-template-columns:1fr;}
+    .acct-name{display:none;}
+  }
+
+  /* === STATE SWITCHER (review aid) === */
+  .state-switch{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:min(540px,calc(100vw - 32px));background:#fff;border:1px dashed #c4ccd9;border-radius:10px;padding:7px 9px;box-shadow:var(--shadow-md);font-size:12px;}
+  .state-switch .lbl{font-weight:600;color:var(--neutral-600);margin-right:2px;}
+  .state-switch button{border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:inherit;}
+  .state-switch button[aria-pressed="true"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+  .state-switch button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- SIDEBAR — components.md → App Shell [admin links] -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <a class="brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Admin navigation">
+      <span class="nav-label">Admin</span>
+      <a class="nav-link" href="Admin Overview.html">
+        <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Overview
+      </a>
+      <a class="nav-link" href="Admin Bookings.html" aria-current="page">
+        <i data-lucide="folder-open" class="ic" aria-hidden="true"></i> Bookings
+      </a>
+      <a class="nav-link" href="Admin Users.html">
+        <i data-lucide="users" class="ic" aria-hidden="true"></i> Users
+      </a>
+      <a class="nav-link" href="Admin Settings.html">
+        <i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html">
+        <i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support
+      </a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+      <span class="spacer"></span>
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+      </a>
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">AD</span>
+          <span class="acct-name">Admin</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+          <a href="Admin Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="content" data-screen-label="Admin Booking Detail">
+      <div class="content-inner">
+
+        <a class="back-link" href="Admin Bookings.html">
+          <i data-lucide="arrow-left" class="ic" aria-hidden="true"></i> Back to bookings
+        </a>
+
+        <!-- ===== LOADED VIEW ===== -->
+        <div id="loadedView">
+
+          <div class="detail-head">
+            <h1>ASMT-10 Reply</h1>
+            <span class="ref">GNS-2026-0569</span>
+            <span id="statusBadge"></span>
+            <span id="payBadge"></span>
+          </div>
+
+          <div class="detail-grid">
+
+            <!-- ================= LEFT COLUMN ================= -->
+            <div class="col-left">
+
+              <!-- User Information -->
+              <section class="card" aria-labelledby="uiHeading">
+                <h2 id="uiHeading"><i data-lucide="user" class="ic" aria-hidden="true"></i> User Information</h2>
+                <p class="card-note">Read-only — submitted at booking.</p>
+                <dl class="info-grid">
+                  <div><dt>Name</dt><dd>Suresh Patel</dd></div>
+                  <div><dt>Email</dt><dd>suresh.patel@sptextiles.in</dd></div>
+                  <div><dt>Contact</dt><dd>+91 98865 43210</dd></div>
+                  <div><dt>GST Number</dt><dd class="mono">29ABCDE1234F1Z5</dd></div>
+                  <div><dt>Organization</dt><dd>SP Textiles Pvt Ltd</dd></div>
+                  <div><dt>Filing For</dt><dd>Own business</dd></div>
+                  <div><dt>Booking Date</dt><dd>10 Jun 2026</dd></div>
+                </dl>
+              </section>
+
+              <!-- Uploaded Documents -->
+              <section class="card" aria-labelledby="docHeading">
+                <h2 id="docHeading"><i data-lucide="files" class="ic" aria-hidden="true"></i> Uploaded Documents</h2>
+                <div class="doc-list" id="docList"></div>
+                <div class="doc-empty" id="docEmpty" hidden>
+                  <i data-lucide="folder-open" class="ic" aria-hidden="true"></i>
+                  No documents uploaded.
+                </div>
+              </section>
+
+              <!-- Admin Note -->
+              <section class="card" aria-labelledby="noteHeading">
+                <h2 id="noteHeading"><i data-lucide="sticky-note" class="ic" aria-hidden="true"></i> Admin Note</h2>
+                <p class="card-note" id="noteHelper">Visible to the user on their service detail page.</p>
+                <div style="margin-top:14px">
+                  <label class="field-label" for="noteArea">Note</label>
+                  <textarea class="input" id="noteArea" maxlength="2000" aria-describedby="noteHelper noteCount">We have reviewed your ASMT-10 notice and the GSTR-3B mismatch flagged for FY 2024-25. The draft reply addresses the ITC discrepancy of ₹4,82,000 with reconciliation annexures.</textarea>
+                  <div class="note-foot">
+                    <span class="char-count" id="noteCount" aria-live="polite"></span>
+                    <span style="display:inline-flex;align-items:center;gap:14px">
+                      <span class="note-status" id="noteStatus" aria-live="polite"></span>
+                      <button class="btn btn-primary" id="saveNoteBtn" type="button">Save note</button>
+                    </span>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+
+            <!-- ================= RIGHT COLUMN (sticky) ================= -->
+            <div class="col-right">
+
+              <!-- Draft -->
+              <section class="card" aria-labelledby="draftHeading">
+                <h2 id="draftHeading"><i data-lucide="file-check" class="ic" aria-hidden="true"></i> Draft</h2>
+
+                <!-- empty: dropzone -->
+                <div id="draftEmpty">
+                  <div class="dropzone" id="dropzone" role="button" tabindex="0"
+                       aria-label="Upload prepared draft. PDF only, single file. Click to choose a file or drag and drop.">
+                    <i data-lucide="upload" class="ic-up" aria-hidden="true"></i>
+                    <span class="dz-title">Upload prepared draft (PDF)</span>
+                    <span class="dz-sub" style="display:block">Drag &amp; drop or click to choose · single file</span>
+                  </div>
+                  <input type="file" id="fileInput" accept="application/pdf,.pdf" class="visually-hidden" aria-hidden="true" tabindex="-1" />
+                  <div class="dz-error" id="dzError" hidden>
+                    <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+                    <span>Only PDF files are accepted. Please choose a single .pdf file.</span>
+                  </div>
+                </div>
+
+                <!-- uploading -->
+                <div class="upload-progress" id="draftUploading" hidden aria-live="polite">
+                  <div class="up-row">
+                    <i data-lucide="file-text" class="ic" aria-hidden="true"></i>
+                    <span class="up-name" id="upName">draft.pdf</span>
+                    <span class="up-pct" id="upPct">0%</span>
+                  </div>
+                  <div class="progress-track"><div class="progress-fill" id="upFill"></div></div>
+                </div>
+
+                <!-- uploaded -->
+                <div id="draftPresent" hidden>
+                  <div class="draft-file">
+                    <i data-lucide="check-circle" class="ic-ok" aria-hidden="true"></i>
+                    <span class="df-meta">
+                      <span class="df-name" id="draftName">ASMT-10_Reply_Draft_SPTextiles.pdf</span>
+                      <span class="df-sub" id="draftDate">Uploaded 10 Jun 2026</span>
+                    </span>
+                  </div>
+                  <div class="replace-row" id="replaceRow">
+                    <button class="btn btn-secondary btn-block" id="replaceBtn" type="button">
+                      <i data-lucide="refresh-cw" class="ic" aria-hidden="true"></i> Replace draft
+                    </button>
+                    <p class="replace-note">Replacing sends the user an "updated draft" email. Status stays unchanged.</p>
+                    <p class="replace-success" id="replaceSuccess" hidden>
+                      <i data-lucide="check-circle" class="ic" aria-hidden="true"></i>
+                      Updated draft uploaded — the user has been notified by email.
+                    </p>
+                  </div>
+                  <div class="locked-reason" id="replaceLocked" hidden>
+                    <i data-lucide="lock" class="ic" aria-hidden="true"></i>
+                    Draft is final once payment begins.
+                  </div>
+                </div>
+
+                <p class="trust-line">
+                  <i data-lucide="shield-check" class="ic" aria-hidden="true"></i>
+                  Drafts are confidential and encrypted — shared only with this client.
+                </p>
+              </section>
+
+              <!-- Status Actions -->
+              <section class="card" aria-labelledby="saHeading">
+                <h2 id="saHeading"><i data-lucide="git-branch" class="ic" aria-hidden="true"></i> Status Actions</h2>
+
+                <!-- status = Document Upload -->
+                <div class="action-stack" id="actReview" hidden>
+                  <button class="btn btn-primary btn-block" id="setReviewBtn" type="button">
+                    <i data-lucide="search" class="ic" aria-hidden="true"></i> Set to In Review
+                  </button>
+                  <p class="helper">Confirms documents are sufficient to begin drafting. The user is notified.</p>
+                </div>
+
+                <!-- status = In Review: no button, hint only -->
+                <div class="action-hint" id="hintReview" hidden>
+                  <i data-lucide="info" class="ic" aria-hidden="true"></i>
+                  <span>Next: upload the prepared draft. Status will move to Draft Ready automatically.</span>
+                </div>
+
+                <!-- status = Draft Ready + payment pending/failed: Mark as Paid -->
+                <div class="pay-panel" id="payPanel" hidden>
+                  <h3>Mark as Paid</h3>
+                  <p class="helper">Fallback for payments confirmed outside the portal. Verifies against Razorpay before any status change.</p>
+                  <div class="pay-field">
+                    <label class="field-label" for="payIdInput">Razorpay Payment ID</label>
+                    <input class="input mono" id="payIdInput" type="text" inputmode="text"
+                           autocomplete="off" spellcheck="false"
+                           placeholder="pay_XXXXXXXXXXXXXX"
+                           aria-describedby="payIdHelp" />
+                    <p class="helper" id="payIdHelp" style="margin-top:6px">Format: <span style="font-family:'JetBrains Mono',monospace">pay_</span> followed by 14 characters.</p>
+                  </div>
+                  <button class="btn btn-primary btn-block" id="verifyBtn" type="button">Verify &amp; mark paid</button>
+                  <div class="pay-error" id="payError" hidden role="alert">
+                    <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+                    <span>This payment ID could not be confirmed with Razorpay.</span>
+                  </div>
+                </div>
+
+                <!-- status = Draft Ready + paid (edge): waiting hint -->
+                <div class="action-hint" id="hintDraftPaid" hidden>
+                  <i data-lucide="info" class="ic" aria-hidden="true"></i>
+                  <span>Payment received. Filing begins once the user confirms the draft.</span>
+                </div>
+
+                <!-- status = Filing -->
+                <div class="action-stack" id="actComplete" hidden>
+                  <button class="btn btn-primary btn-block" id="markCompleteBtn" type="button">
+                    <i data-lucide="check-circle" class="ic" aria-hidden="true"></i> Mark Complete
+                  </button>
+                  <p class="helper">Confirms the reply has been filed on the GST portal. Closes the case for the user.</p>
+                </div>
+
+                <!-- status = Complete -->
+                <div class="action-hint" id="hintComplete" hidden>
+                  <i data-lucide="check-circle" class="ic" aria-hidden="true" style="color:var(--accent-green)"></i>
+                  <span>Case complete. No further actions.</span>
+                </div>
+              </section>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== ERROR ===== -->
+        <div id="errorView" hidden>
+          <div class="error-card" role="alert" style="margin-top:20px">
+            <i data-lucide="alert-circle" class="ic-lead" aria-hidden="true"></i>
+            <p class="txt"><b>Couldn't load this booking.</b> Check your connection and try again.</p>
+            <button class="btn btn-secondary" id="retryBtn" type="button">
+              <i data-lucide="rotate-cw" class="ic" aria-hidden="true"></i> Retry
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== LOADING ===== -->
+        <div id="loadingView" hidden aria-hidden="true" style="margin-top:20px">
+          <div class="skel" style="height:34px;width:46%;margin-bottom:24px"></div>
+          <div class="detail-grid">
+            <div class="col-left">
+              <div class="skel-card"><div class="skel" style="height:16px;width:40%"></div><div class="skel" style="height:13px;width:90%"></div><div class="skel" style="height:13px;width:85%"></div><div class="skel" style="height:13px;width:70%"></div></div>
+              <div class="skel-card"><div class="skel" style="height:16px;width:50%"></div><div class="skel" style="height:13px;width:95%"></div><div class="skel" style="height:13px;width:88%"></div></div>
+            </div>
+            <div class="col-right">
+              <div class="skel-card"><div class="skel" style="height:16px;width:30%"></div><div class="skel" style="height:90px;width:100%"></div></div>
+              <div class="skel-card"><div class="skel" style="height:16px;width:45%"></div><div class="skel" style="height:44px;width:100%"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- State switcher (review aid) -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">Status</span>
+  <button data-st="upload" aria-pressed="false">Doc Upload</button>
+  <button data-st="review" aria-pressed="true">In Review</button>
+  <button data-st="draft" aria-pressed="false">Draft Ready</button>
+  <button data-st="filing" aria-pressed="false">Filing</button>
+  <button data-st="complete" aria-pressed="false">Complete</button>
+  <span class="lbl" style="margin-left:6px">View</span>
+  <button data-st="loading" aria-pressed="false">Loading</button>
+  <button data-st="error" aria-pressed="false">Error</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="22" y="24" width="34" height="52" rx="4" fill="#E5E9F0"/>
+    <rect x="27" y="32" width="24" height="5" rx="2" fill="#1B3A6B"/>
+    <rect x="27" y="42" width="24" height="5" rx="2" fill="#1B3A6B" opacity=".6"/>
+    <rect x="62" y="24" width="16" height="24" rx="4" fill="#0B8B4E"/>
+    <rect x="62" y="54" width="16" height="22" rx="4" fill="#1B3A6B"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  /* ============================================================
+     Booking state machine (demo)
+     status: upload → review → draft → filing → complete
+     ============================================================ */
+  const STATUS_CFG = {
+    upload:   {cls:'s-upload',   icon:'file-text',    label:'Document Upload'},
+    review:   {cls:'s-review',   icon:'search',       label:'In Review'},
+    draft:    {cls:'s-draft',    icon:'alert-circle', label:'Draft Ready'},
+    filing:   {cls:'s-filing',   icon:'clock',        label:'Filing'},
+    complete: {cls:'s-complete', icon:'check-circle', label:'Complete'},
+  };
+  const PAY_CFG = {
+    Paid:    {cls:'pay-paid',    icon:'check-circle', label:'Paid'},
+    Pending: {cls:'pay-pending', icon:'clock',        label:'Pending'},
+    Failed:  {cls:'pay-failed',  icon:'alert-circle', label:'Failed'},
+  };
+
+  const booking = {
+    status: 'review',          // arriving from "Needs attention": In Review awaiting draft
+    payment: 'Pending',
+    draft: null,               // {name, date} once uploaded
+    docs: [
+      {name:'ASMT-10_Notice_29ABCDE1234F1Z5.pdf', date:'10 Jun 2026', tag:'User'},
+      {name:'GSTR-3B_FY2024-25_Apr-Mar.pdf',      date:'10 Jun 2026', tag:'User'},
+      {name:'ITC_Reconciliation_Annexure.pdf',    date:'10 Jun 2026', tag:'User'},
+    ],
+  };
+
+  const $ = id => document.getElementById(id);
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  /* ============================================================
+     Render: header badges
+     ============================================================ */
+  function renderBadges(){
+    const sc = STATUS_CFG[booking.status];
+    $('statusBadge').innerHTML =
+      '<span class="status-badge ' + sc.cls + '"><i data-lucide="' + sc.icon + '" class="ic" aria-hidden="true"></i> ' + sc.label + '</span>';
+    const pc = PAY_CFG[booking.payment];
+    $('payBadge').innerHTML =
+      '<span class="pay-badge ' + pc.cls + '"><i data-lucide="' + pc.icon + '" class="ic" aria-hidden="true"></i> Payment: ' + pc.label + '</span>';
+  }
+
+  /* ============================================================
+     Render: documents
+     ============================================================ */
+  function renderDocs(){
+    const list = $('docList');
+    if(booking.docs.length === 0){
+      list.innerHTML = '';
+      $('docEmpty').hidden = false;
+      return;
+    }
+    $('docEmpty').hidden = true;
+    list.innerHTML = '';
+    booking.docs.forEach((d, i) => {
+      const row = document.createElement('div');
+      row.className = 'doc-row';
+      row.innerHTML =
+        '<i data-lucide="file-text" class="ic-file" aria-hidden="true"></i>' +
+        '<span class="doc-meta">' +
+          '<span class="doc-name">' + esc(d.name) + '</span>' +
+          '<span class="doc-sub">' + d.date + ' <span class="doc-tag">' + d.tag + '</span></span>' +
+          '<span class="doc-error" hidden id="docErr' + i + '">Download failed. Try again.</span>' +
+        '</span>' +
+        '<button class="doc-dl" type="button" aria-label="Download ' + esc(d.name) + '">' +
+          '<i data-lucide="download" class="ic" aria-hidden="true"></i> Download' +
+        '</button>';
+      const btn = row.querySelector('.doc-dl');
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader" class="ic" aria-hidden="true"></i> Preparing…';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="download" class="ic" aria-hidden="true"></i> Download';
+          lucide.createIcons();
+        }, 1100);
+      });
+      list.appendChild(row);
+    });
+  }
+
+  /* ============================================================
+     Render: draft card + status actions (single source of truth)
+     ============================================================ */
+  function renderActions(){
+    const st = booking.status;
+    const draftLocked = (st === 'filing' || st === 'complete');
+
+    /* Draft card */
+    $('draftEmpty').hidden     = !!booking.draft;
+    $('draftUploading').hidden = true;
+    $('draftPresent').hidden   = !booking.draft;
+    if(booking.draft){
+      $('draftName').textContent = booking.draft.name;
+      $('draftDate').textContent = 'Uploaded ' + booking.draft.date;
+      $('replaceRow').hidden     = draftLocked;
+      $('replaceLocked').hidden  = !draftLocked;
+    }
+
+    /* Status actions */
+    $('actReview').hidden     = st !== 'upload';
+    $('hintReview').hidden    = st !== 'review';
+    $('payPanel').hidden      = !(st === 'draft' && (booking.payment === 'Pending' || booking.payment === 'Failed'));
+    $('hintDraftPaid').hidden = !(st === 'draft' && booking.payment === 'Paid');
+    $('actComplete').hidden   = st !== 'filing';
+    $('hintComplete').hidden  = st !== 'complete';
+
+    renderBadges();
+    lucide.createIcons();
+  }
+
+  /* ============================================================
+     Admin note
+     ============================================================ */
+  const noteArea  = $('noteArea');
+  const noteCount = $('noteCount');
+  const noteBtn   = $('saveNoteBtn');
+  const noteStat  = $('noteStatus');
+  function updateCount(){
+    noteCount.textContent = noteArea.value.length + ' / 2000';
+  }
+  noteArea.addEventListener('input', () => { updateCount(); noteStat.textContent=''; noteStat.className='note-status'; });
+  updateCount();
+
+  noteBtn.addEventListener('click', () => {
+    noteBtn.disabled = true;
+    noteBtn.textContent = 'Saving…';
+    noteStat.textContent = '';
+    setTimeout(() => {
+      noteBtn.disabled = false;
+      noteBtn.textContent = 'Save note';
+      noteStat.className = 'note-status ok';
+      noteStat.innerHTML = '<i data-lucide="check" class="ic" aria-hidden="true"></i> Saved';
+      lucide.createIcons();
+    }, 900);
+  });
+
+  /* ============================================================
+     Draft upload (PDF only, single file)
+     ============================================================ */
+  const dropzone  = $('dropzone');
+  const fileInput = $('fileInput');
+  let   replacing = false;
+
+  function pickFile(){ fileInput.click(); }
+  dropzone.addEventListener('click', pickFile);
+  dropzone.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pickFile(); } });
+  ['dragover','dragenter'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+  dropzone.addEventListener('drop', e => {
+    const files = e.dataTransfer.files;
+    if(files && files.length) handleFiles(files);
+  });
+  fileInput.addEventListener('change', () => {
+    if(fileInput.files && fileInput.files.length) handleFiles(fileInput.files);
+    fileInput.value = '';
+  });
+
+  function handleFiles(files){
+    $('dzError').hidden = true;
+    if(files.length > 1 || !/\.pdf$/i.test(files[0].name)){
+      $('dzError').hidden = false;
+      return;
+    }
+    startUpload(files[0].name);
+  }
+
+  function startUpload(name){
+    $('draftEmpty').hidden     = true;
+    $('draftPresent').hidden   = true;
+    $('draftUploading').hidden = false;
+    $('upName').textContent    = name;
+    let pct = 0;
+    const timer = setInterval(() => {
+      pct = Math.min(100, pct + 9 + Math.random() * 14);
+      $('upPct').textContent  = Math.floor(pct) + '%';
+      $('upFill').style.width = pct + '%';
+      if(pct >= 100){
+        clearInterval(timer);
+        setTimeout(() => finishUpload(name), 250);
+      }
+    }, 120);
+  }
+
+  function finishUpload(name){
+    booking.draft = { name: name, date: '12 Jun 2026' };
+    if(replacing){
+      replacing = false;
+      renderActions();
+      $('replaceSuccess').hidden = false;
+      lucide.createIcons();
+    } else {
+      /* on success, status auto → Draft Ready */
+      booking.status = 'draft';
+      syncSwitcher('draft');
+      renderActions();
+    }
+    $('upFill').style.width = '0%';
+  }
+
+  /* Replace draft — re-upload; status unchanged */
+  $('replaceBtn').addEventListener('click', () => {
+    replacing = true;
+    $('replaceSuccess').hidden = true;
+    pickFile();
+  });
+
+  /* ============================================================
+     Status actions
+     ============================================================ */
+  $('setReviewBtn').addEventListener('click', () => {
+    booking.status = 'review';
+    syncSwitcher('review');
+    renderActions();
+  });
+
+  $('markCompleteBtn').addEventListener('click', () => {
+    booking.status = 'complete';
+    syncSwitcher('complete');
+    renderActions();
+  });
+
+  /* Mark as Paid — verify against Razorpay (simulated) */
+  const verifyBtn  = $('verifyBtn');
+  const payIdInput = $('payIdInput');
+  verifyBtn.addEventListener('click', () => {
+    const id = payIdInput.value.trim();
+    $('payError').hidden = true;
+    payIdInput.removeAttribute('aria-invalid');
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = 'Verifying…';
+    setTimeout(() => {
+      verifyBtn.disabled = false;
+      verifyBtn.innerHTML = 'Verify &amp; mark paid';
+      const valid = /^pay_[A-Za-z0-9]{14}$/.test(id);
+      if(valid){
+        booking.payment = 'Paid';
+        booking.status  = 'filing';
+        payIdInput.value = '';
+        syncSwitcher('filing');
+        renderActions();
+      } else {
+        $('payError').hidden = false;
+        payIdInput.setAttribute('aria-invalid','true');
+      }
+    }, 1100);
+  });
+
+  /* ============================================================
+     Drawer + account menu (shared shell behavior)
+     ============================================================ */
+  const sidebar = $('sidebar'), scrim = $('scrim'), hamburger = $('hamburger');
+  function openDrawer(){ sidebar.classList.add('open'); scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open')); hamburger.setAttribute('aria-expanded','true'); }
+  function closeDrawer(){ sidebar.classList.remove('open'); scrim.classList.remove('open'); scrim.hidden=true; hamburger.setAttribute('aria-expanded','false'); }
+  hamburger.addEventListener('click', () => sidebar.classList.contains('open') ? closeDrawer() : openDrawer());
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeDrawer(); closeAcct(); } });
+
+  const acctBtn = $('acctBtn'), acctMenu = $('acctMenu');
+  function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+  acctBtn.addEventListener('click', e => { e.stopPropagation(); const o=acctMenu.classList.toggle('open'); acctBtn.setAttribute('aria-expanded',String(o)); });
+  document.addEventListener('click', e => { if(!e.target.closest('.acct')) closeAcct(); });
+
+  /* ============================================================
+     State switcher (review aid)
+     ============================================================ */
+  const loadedView  = $('loadedView');
+  const errorView   = $('errorView');
+  const loadingView = $('loadingView');
+
+  function syncSwitcher(st){
+    document.querySelectorAll('.state-switch button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.st === st)));
+  }
+
+  function setPreviewState(st){
+    if(st === 'loading' || st === 'error'){
+      loadedView.hidden  = true;
+      errorView.hidden   = st !== 'error';
+      loadingView.hidden = st !== 'loading';
+      syncSwitcher(st);
+      return;
+    }
+    loadedView.hidden = false;
+    errorView.hidden = true;
+    loadingView.hidden = true;
+
+    booking.status = st;
+    /* sensible demo payment/draft per status */
+    if(st === 'upload'){ booking.payment='Pending'; booking.draft=null; }
+    if(st === 'review'){ booking.payment='Pending'; booking.draft=null; }
+    if(st === 'draft'){  booking.payment='Pending'; booking.draft=booking.draft||{name:'ASMT-10_Reply_Draft_SPTextiles.pdf',date:'12 Jun 2026'}; }
+    if(st === 'filing'){ booking.payment='Paid';    booking.draft=booking.draft||{name:'ASMT-10_Reply_Draft_SPTextiles.pdf',date:'12 Jun 2026'}; }
+    if(st === 'complete'){ booking.payment='Paid';  booking.draft=booking.draft||{name:'ASMT-10_Reply_Draft_SPTextiles.pdf',date:'12 Jun 2026'}; }
+    $('replaceSuccess').hidden = true;
+    syncSwitcher(st);
+    renderActions();
+  }
+
+  document.querySelectorAll('.state-switch button').forEach(b =>
+    b.addEventListener('click', () => setPreviewState(b.dataset.st)));
+  $('retryBtn').addEventListener('click', () => setPreviewState('review'));
+
+  /* init */
+  renderDocs();
+  renderActions();
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Draft Reply — ASMT-10 Reply · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ============================================================
+   APP SHELL (sidebar)
+   ============================================================ */
+:root{ --sidebar-w:264px; --header-h:64px; }
+html,body{ min-height:100%; }
+body{ background:var(--neutral-50); }
+.app{ display:flex; min-height:100vh; }
+
+.sidebar{ width:var(--sidebar-w); flex:0 0 var(--sidebar-w); background:#fff; border-right:1px solid var(--neutral-200); display:flex; flex-direction:column; position:fixed; inset:0 auto 0 0; height:100vh; z-index:60; }
+.sidebar .brand{ display:inline-flex; align-items:center; gap:10px; height:var(--header-h); padding:0 20px; flex:0 0 auto; border-bottom:1px solid var(--neutral-200); }
+.sidebar .brand img{ height:30px; width:30px; border-radius:6px; border:1px solid var(--neutral-200); object-fit:cover; }
+.sidebar .brand .bn{ font-weight:700; font-size:15px; color:var(--primary-navy); letter-spacing:-.01em; }
+.sidebar .brand .bn span{ color:var(--accent-green); }
+.sidebar nav{ flex:1; padding:16px 12px; display:flex; flex-direction:column; gap:4px; }
+.nav-link{ display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:var(--r-btn); font-size:15px; font-weight:500; color:var(--neutral-900); min-height:44px; transition:background .15s,color .15s; }
+.nav-link .ic{ width:20px; height:20px; flex:0 0 auto; color:var(--neutral-600); }
+.nav-link:hover{ background:var(--neutral-50); }
+.nav-link:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); }
+.nav-link[aria-current="page"]{ background:rgba(11,139,78,.08); color:var(--primary-navy); font-weight:600; }
+.nav-link[aria-current="page"] .ic{ color:var(--accent-green); }
+.side-foot{ padding:12px; border-top:1px solid var(--neutral-200); }
+.side-help{ display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:var(--r-btn); font-size:14px; font-weight:500; color:var(--neutral-600); min-height:44px; }
+.side-help .ic{ width:18px; height:18px; }
+.side-help:hover{ background:var(--neutral-50); color:var(--primary-navy); }
+
+.main{ flex:1; margin-left:var(--sidebar-w); display:flex; flex-direction:column; min-width:0; }
+.topbar{ height:var(--header-h); flex:0 0 auto; position:sticky; top:0; z-index:50; background:rgba(255,255,255,.92); backdrop-filter:saturate(180%) blur(6px); border-bottom:1px solid var(--neutral-200); display:flex; align-items:center; gap:16px; padding:0 32px; }
+.topbar .hamburger{ display:none; width:44px; height:44px; align-items:center; justify-content:center; border:1px solid var(--neutral-200); border-radius:var(--r-btn); background:#fff; cursor:pointer; color:var(--primary-navy); }
+.topbar .hamburger:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); }
+.topbar .mobile-brand{ display:none; align-items:center; gap:9px; }
+.topbar .mobile-brand img{ height:28px; width:28px; border-radius:6px; border:1px solid var(--neutral-200); }
+.topbar .mobile-brand .bn{ font-weight:700; font-size:14px; color:var(--primary-navy); }
+.topbar .mobile-brand .bn span{ color:var(--accent-green); }
+.topbar .spacer{ flex:1; }
+.topbar .tap-call{ display:inline-flex; align-items:center; gap:8px; padding:9px 14px; min-height:44px; border:1px solid var(--neutral-200); border-radius:var(--r-btn); font-size:14px; font-weight:600; color:var(--primary-navy); background:#fff; }
+.topbar .tap-call .ic{ width:16px; height:16px; color:var(--accent-green); }
+.topbar .tap-call:hover{ border-color:var(--primary-navy); }
+.topbar .tap-call .num{ font-family:'JetBrains Mono',monospace; font-size:13px; }
+.acct{ position:relative; }
+.acct-btn{ display:inline-flex; align-items:center; gap:10px; padding:6px 10px 6px 6px; min-height:44px; border:1px solid var(--neutral-200); border-radius:var(--r-btn); background:#fff; cursor:pointer; }
+.acct-btn:hover{ border-color:var(--primary-navy); }
+.acct-btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); }
+.acct-avatar{ width:32px; height:32px; border-radius:50%; background:var(--primary-navy); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; }
+.acct-name{ font-size:14px; font-weight:600; color:var(--primary-navy); }
+.acct-btn .chev{ width:16px; height:16px; color:var(--neutral-600); }
+.acct-menu{ display:none; position:absolute; right:0; top:calc(100% + 8px); min-width:200px; background:#fff; border:1px solid var(--neutral-200); border-radius:var(--r-card); box-shadow:var(--shadow-md); padding:6px; z-index:70; }
+.acct-menu.open{ display:block; }
+.acct-menu a{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--r-btn); font-size:14px; font-weight:500; color:var(--neutral-900); min-height:44px; }
+.acct-menu a .ic{ width:17px; height:17px; color:var(--neutral-600); }
+.acct-menu a:hover{ background:var(--neutral-50); }
+.acct-menu .divider{ height:1px; background:var(--neutral-200); margin:6px 4px; }
+
+[hidden]{ display:none !important; }
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+.content{ flex:1; padding:32px; }
+.content-inner{ max-width:1100px; margin:0 auto; }
+
+/* Breadcrumb */
+.breadcrumb{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--neutral-600); margin-bottom:20px; flex-wrap:wrap; }
+.breadcrumb a{ color:var(--neutral-600); font-weight:500; }
+.breadcrumb a:hover{ color:var(--primary-navy); }
+.breadcrumb a:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); border-radius:4px; }
+.breadcrumb .sep{ color:var(--neutral-200); }
+.breadcrumb .current{ color:var(--primary-navy); font-weight:600; }
+
+/* Back link */
+.back-link{ display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:500; color:var(--neutral-600); min-height:44px; margin-bottom:4px; }
+.back-link:hover{ color:var(--primary-navy); }
+.back-link:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); border-radius:6px; }
+.back-link .ic{ width:16px; height:16px; }
+
+/* Page header */
+.page-head{ display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:16px; }
+.page-head h1{ font-size:32px; letter-spacing:-.01em; }
+
+/* Expiry notice */
+.expiry-notice{
+  display:flex; align-items:flex-start; gap:12px;
+  padding:14px 16px; margin-bottom:20px;
+  background:var(--neutral-50); border:1px solid var(--neutral-200);
+  border-left:2px solid var(--warning-amber); border-radius:8px;
+}
+.expiry-notice .ic{ width:18px; height:18px; color:var(--warning-amber); flex:0 0 auto; margin-top:1px; }
+.expiry-notice p{ font-size:14px; color:var(--neutral-900); line-height:1.5; }
+
+/* ============================================================
+   PDF VIEWER AREA
+   ============================================================ */
+.viewer-shell{
+  position:relative; width:100%; min-height:80vh;
+  border:1px solid var(--neutral-200); border-radius:var(--r-card);
+  background:#fff; overflow:hidden;
+}
+
+/* Loading spinner */
+.viewer-loading{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:80vh; gap:16px;
+}
+.spin-ring{
+  width:40px; height:40px;
+  border:3px solid var(--neutral-200); border-top-color:var(--accent-green);
+  border-radius:50%; animation:spin .8s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce){ .spin-ring{ animation:none; border-top-color:var(--accent-green); } }
+.viewer-loading p{ font-size:14px; color:var(--neutral-600); }
+
+/* PDF iframe (loaded state) */
+.viewer-iframe{
+  display:block; width:100%; min-height:80vh; border:none;
+}
+
+/* Expired / Error state */
+.viewer-fallback{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; min-height:80vh; padding:48px 24px; gap:0;
+}
+.viewer-fallback .fb-icon{ width:64px; height:64px; color:var(--neutral-600); margin-bottom:20px; }
+.viewer-fallback h3{ font-size:20px; font-weight:600; margin-bottom:10px; }
+.viewer-fallback p{ font-size:15px; color:var(--neutral-600); line-height:1.6; margin-bottom:24px; max-width:34ch; }
+
+/* Read-only note */
+.readonly-note{ text-align:center; font-size:14px; color:var(--neutral-600); margin-top:16px; line-height:1.5; }
+
+/* ============================================================
+   RESPONSIVE  (<lg)
+   ============================================================ */
+@media(max-width:1023px){
+  .sidebar{ transform:translateX(-100%); transition:transform .2s ease; box-shadow:var(--shadow-md); }
+  .sidebar.open{ transform:translateX(0); }
+  @media(prefers-reduced-motion:reduce){ .sidebar{ transition:none; } }
+  .main{ margin-left:0; }
+  .topbar{ padding:0 16px; }
+  .topbar .hamburger{ display:inline-flex; }
+  .topbar .mobile-brand{ display:inline-flex; }
+  .topbar .tap-call .num{ display:none; }
+  .content{ padding:20px 16px 40px; }
+  .page-head h1{ font-size:24px; }
+  .acct-name{ display:none; }
+}
+
+/* ============================================================
+   PREVIEW STATE SWITCHER
+   ============================================================ */
+.state-switch{ position:fixed; right:16px; bottom:16px; z-index:100; display:flex; align-items:center; gap:5px; background:#fff; border:1px dashed #c4ccd9; border-radius:10px; padding:7px 9px; box-shadow:var(--shadow-md); font-size:12px; }
+.state-switch .lbl{ font-weight:600; color:var(--neutral-600); margin-right:2px; }
+.state-switch button{ border:1px solid var(--neutral-200); background:#fff; color:var(--neutral-600); font-size:12px; font-weight:600; padding:5px 9px; border-radius:6px; cursor:pointer; font-family:inherit; }
+.state-switch button[aria-pressed="true"]{ background:var(--primary-navy); color:#fff; border-color:var(--primary-navy); }
+.state-switch button:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(11,139,78,.35); }
+
+/* Scrim (mobile sidebar) */
+.scrim{ position:fixed; inset:0; background:rgba(10,37,64,.4); z-index:55; opacity:0; transition:opacity .2s; }
+.scrim.open{ opacity:1; }
+@media(prefers-reduced-motion:reduce){ .scrim{ transition:none; } }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <a class="brand" href="Dashboard Home.html">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Dashboard navigation">
+      <a class="nav-link" href="Dashboard Home.html"><i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Dashboard</a>
+      <a class="nav-link" href="Services List.html" aria-current="page"><i data-lucide="folder-open" class="ic" aria-hidden="true"></i> My Services</a>
+      <a class="nav-link" href="Payment History.html"><i data-lucide="credit-card" class="ic" aria-hidden="true"></i> Payments</a>
+      <a class="nav-link" href="Settings.html"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html"><i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support</a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Dashboard Home.html">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+      <span class="spacer"></span>
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+      </a>
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">RK</span>
+          <span class="acct-name">Rajesh Kumar</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu">
+          <a href="My Profile.html" role="menuitem"><i data-lucide="user" class="ic" aria-hidden="true"></i> My Profile</a>
+          <a href="Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="content" data-screen-label="Draft Viewer">
+      <div class="content-inner">
+
+        <!-- Back link — keyboard-reachable before iframe -->
+        <a class="back-link" href="Service Detail.html">
+          <i data-lucide="arrow-left" class="ic" aria-hidden="true"></i> Back to Service
+        </a>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="Dashboard Home.html">Dashboard</a>
+          <span class="sep" aria-hidden="true">›</span>
+          <a href="Services List.html">My Services</a>
+          <span class="sep" aria-hidden="true">›</span>
+          <a href="Service Detail.html">ASMT-10 Reply</a>
+          <span class="sep" aria-hidden="true">›</span>
+          <span class="current">View Draft</span>
+        </nav>
+
+        <!-- Page header -->
+        <div class="page-head">
+          <h1>Draft Reply — ASMT-10 Reply</h1>
+          <a class="btn btn-secondary" href="Draft Viewer.html" id="downloadBtn" aria-label="Download draft reply for ASMT-10 Reply">
+            <i data-lucide="download" class="ic" aria-hidden="true"></i> Download Draft
+          </a>
+        </div>
+
+        <!-- Expiry notice — hidden in expired/error states -->
+        <div class="expiry-notice" id="expiryNotice" role="status" aria-live="polite">
+          <i data-lucide="alert-circle" class="ic" aria-hidden="true"></i>
+          <p>This link expires in <strong id="expiryTimer">15:00</strong>. Refresh the page to generate a new one if needed.</p>
+        </div>
+
+        <!-- PDF viewer shell -->
+        <div class="viewer-shell" id="viewerShell">
+
+          <!-- State: Loading -->
+          <div id="stateLoading" class="viewer-loading" aria-label="Loading draft document">
+            <div class="spin-ring" role="status" aria-label="Loading"></div>
+            <p>Loading draft…</p>
+          </div>
+
+          <!-- State: Loaded — inline PDF viewer (placeholder using mock PDF content) -->
+          <div id="stateLoaded" hidden>
+            <!-- Simulated PDF page -->
+            <div style="padding:48px 56px;font-family:'Inter',sans-serif;line-height:1.8;color:#0F172A;min-height:80vh;background:#fff;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid #E5E9F0;">
+                <div>
+                  <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#0B8B4E;margin-bottom:6px;">GST Notice Support — Confidential Draft</div>
+                  <div style="font-size:13px;color:#5A6878;font-family:'JetBrains Mono',monospace;">Ref: GNS-2026-0517 &nbsp;·&nbsp; ASMT-10 Reply</div>
+                </div>
+                <div style="font-size:12px;color:#5A6878;text-align:right;">Prepared: 8 Jun 2026<br>Draft v1</div>
+              </div>
+              <p style="font-size:15px;margin-bottom:20px;">To,<br>
+              The Deputy Commissioner (GST)<br>
+              GST Bhavan, Bengaluru South Commissionerate<br>
+              Jurisdiction: Division IV, Bengaluru</p>
+              <p style="font-size:15px;margin-bottom:20px;"><strong>Sub:</strong> Reply to Assessment Notice under Section 61 read with Section 73 of the CGST Act, 2017 for FY 2024–25 — GSTIN: 29ABCDE1234F1Z5</p>
+              <p style="font-size:15px;margin-bottom:14px;">Respected Sir/Madam,</p>
+              <p style="font-size:15px;margin-bottom:14px;">We write in response to the ASMT-10 notice dated 01 June 2026 (Notice No. GST/ASMT-10/BLS/2026/0412) pointing to discrepancies in Input Tax Credit (ITC) claims for the period April 2024 – March 2025.</p>
+              <p style="font-size:15px;margin-bottom:14px;">After a thorough review, we submit the following factual and legal response:</p>
+              <p style="font-size:15px;font-weight:600;margin-bottom:10px;">1. Discrepancy in ITC claims — GSTR-2A vs. GSTR-3B</p>
+              <p style="font-size:15px;margin-bottom:14px;">The observed difference of ₹3,82,450 arises primarily from timing differences in vendor filings. Our GSTR-2A figures for Q3 FY 2024–25 were reconciled as on 31 March 2025. Supporting reconciliation statements are enclosed as <strong>Annexure A</strong>.</p>
+              <p style="font-size:15px;font-weight:600;margin-bottom:10px;">2. Legal position under Section 16(2)(c) — CGST Act</p>
+              <p style="font-size:15px;margin-bottom:14px;">As per Section 16(2)(c), ITC eligibility is contingent on the tax having been paid by the supplier. We have obtained vendor declarations confirming tax payment for all disputed invoices. These declarations are enclosed as <strong>Annexure B</strong>.</p>
+              <p style="font-size:15px;margin-bottom:14px;color:#5A6878;font-style:italic;">[Page 1 of 4 — Draft continues]</p>
+            </div>
+          </div>
+
+          <!-- State: Expired -->
+          <div id="stateExpired" hidden class="viewer-fallback">
+            <i data-lucide="lock" class="fb-icon" aria-hidden="true"></i>
+            <h3>Link Expired</h3>
+            <p>Your preview link has expired. Generate a new one to continue.</p>
+            <button class="btn btn-primary" id="generateNewLink">Generate New Link</button>
+          </div>
+
+          <!-- State: Load Error -->
+          <div id="stateError" hidden class="viewer-fallback">
+            <i data-lucide="alert-triangle" class="fb-icon" aria-hidden="true"></i>
+            <h3>Could not load draft</h3>
+            <p>Could not load the draft. Please try again.</p>
+            <button class="btn btn-primary" id="retryBtn">Retry</button>
+          </div>
+
+        </div><!-- /viewer-shell -->
+
+        <!-- Read-only note (hidden during expired/error states) -->
+        <p class="readonly-note" id="readonlyNote">
+          This is a read-only preview. To confirm this draft, <a href="Service Detail.html" style="color:var(--primary-navy);font-weight:500;">return to the service page</a>.
+        </p>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- PREVIEW STATE SWITCHER -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">State</span>
+  <button data-vstate="loading"  aria-pressed="false">Loading</button>
+  <button data-vstate="loaded"   aria-pressed="true">Loaded</button>
+  <button data-vstate="expired"  aria-pressed="false">Expired</button>
+  <button data-vstate="error"    aria-pressed="false">Error</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <rect x="22" y="26" width="20" height="48" rx="3" fill="#1B3A6B"/>
+    <rect x="48" y="26" width="30" height="48" rx="3" fill="#fff"/>
+    <rect x="53" y="33" width="20" height="2" rx="1" fill="#E5E9F0"/>
+    <rect x="53" y="38" width="20" height="2" rx="1" fill="#E5E9F0"/>
+    <rect x="53" y="43" width="14" height="2" rx="1" fill="#E5E9F0"/>
+    <rect x="53" y="52" width="20" height="2" rx="1" fill="#E5E9F0"/>
+    <rect x="53" y="57" width="20" height="2" rx="1" fill="#E5E9F0"/>
+    <rect x="48" y="66" width="30" height="8" rx="2" fill="#1B3A6B"/>
+  </svg>
+</template>
+
+<script>
+lucide.createIcons();
+
+/* ============================================================
+   VIEWER STATE SWITCHER
+   ============================================================ */
+const stateEls = {
+  loading: document.getElementById('stateLoading'),
+  loaded:  document.getElementById('stateLoaded'),
+  expired: document.getElementById('stateExpired'),
+  error:   document.getElementById('stateError'),
+};
+const expiryNotice = document.getElementById('expiryNotice');
+const readonlyNote = document.getElementById('readonlyNote');
+const downloadBtn  = document.getElementById('downloadBtn');
+
+function setViewerState(state){
+  Object.values(stateEls).forEach(el => el.hidden = true);
+  if(stateEls[state]) stateEls[state].hidden = false;
+
+  // Expiry notice: visible only when loading or loaded
+  expiryNotice.hidden = (state === 'expired' || state === 'error');
+  // Read-only note: hidden during expired/error
+  readonlyNote.hidden = (state === 'expired' || state === 'error');
+  // Download button: disabled during loading, hidden expired/error
+  downloadBtn.hidden  = (state === 'expired' || state === 'error');
+  if(state === 'loading'){ downloadBtn.setAttribute('aria-disabled','true'); downloadBtn.style.opacity='.45'; downloadBtn.style.pointerEvents='none'; }
+  else { downloadBtn.removeAttribute('aria-disabled'); downloadBtn.style.opacity=''; downloadBtn.style.pointerEvents=''; }
+
+  document.querySelectorAll('[data-vstate]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.vstate === state)));
+}
+
+document.querySelectorAll('[data-vstate]').forEach(b =>
+  b.addEventListener('click', () => setViewerState(b.dataset.vstate))
+);
+
+// Initial state: simulate loading → loaded
+setViewerState('loading');
+setTimeout(() => setViewerState('loaded'), 1200);
+
+/* ============================================================
+   EXPIRY COUNTDOWN (15:00 → 0:00)
+   ============================================================ */
+let secondsLeft = 15 * 60;
+const timerEl = document.getElementById('expiryTimer');
+const timerInterval = setInterval(() => {
+  secondsLeft--;
+  if(secondsLeft <= 0){ clearInterval(timerInterval); setViewerState('expired'); return; }
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  timerEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+}, 1000);
+
+/* ============================================================
+   GENERATE NEW LINK / RETRY — simulate reload
+   ============================================================ */
+document.getElementById('generateNewLink').addEventListener('click', () => {
+  secondsLeft = 15 * 60;
+  timerEl.textContent = '15:00';
+  setViewerState('loading');
+  setTimeout(() => setViewerState('loaded'), 1200);
+});
+document.getElementById('retryBtn').addEventListener('click', () => {
+  setViewerState('loading');
+  setTimeout(() => setViewerState('loaded'), 1200);
+});
+
+/* ============================================================
+   SHELL — sidebar + account menu
+   ============================================================ */
+const sidebar   = document.getElementById('sidebar');
+const scrim     = document.getElementById('scrim');
+const hamburger = document.getElementById('hamburger');
+function closeAll(){ sidebar.classList.remove('open'); scrim.classList.remove('open'); scrim.hidden=true; hamburger.setAttribute('aria-expanded','false'); closeAcct(); }
+hamburger.addEventListener('click', () => { sidebar.classList.add('open'); scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open')); hamburger.setAttribute('aria-expanded','true'); });
+scrim.addEventListener('click', closeAll);
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeAll(); });
+
+const acctBtn  = document.getElementById('acctBtn');
+const acctMenu = document.getElementById('acctMenu');
+function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+acctBtn.addEventListener('click', e => { e.stopPropagation(); const o = acctMenu.classList.toggle('open'); acctBtn.setAttribute('aria-expanded', String(o)); });
+document.addEventListener('click', e => { if(!e.target.closest('.acct')) closeAcct(); });
+</script>
+</body>
+</html>

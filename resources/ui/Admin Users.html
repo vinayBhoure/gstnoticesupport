@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin · Users · GST Notice Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/tokens.css" />
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  /* === APP SHELL — identical to Admin Bookings / Overview === */
+  :root{ --sidebar-w:264px; --header-h:64px; }
+  html,body{min-height:100%;}
+  body{background:var(--neutral-50);}
+  .app{display:flex;min-height:100vh;}
+
+  .sidebar{width:var(--sidebar-w);flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--neutral-200);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;height:100vh;z-index:60;}
+  .sidebar .brand{display:inline-flex;align-items:center;gap:10px;height:var(--header-h);padding:0 20px;flex:0 0 auto;border-bottom:1px solid var(--neutral-200);}
+  .sidebar .brand img{height:30px;width:30px;border-radius:6px;border:1px solid var(--neutral-200);object-fit:cover;}
+  .sidebar .brand .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+  .sidebar .brand .bn span{color:var(--accent-green);}
+  .sidebar nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
+  .nav-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:8px 12px 6px;}
+  .nav-link{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:15px;font-weight:500;color:var(--neutral-900);min-height:44px;line-height:1.2;transition:background .15s,color .15s;}
+  .nav-link .ic{width:20px;height:20px;flex:0 0 auto;color:var(--neutral-600);transition:color .15s;}
+  .nav-link:hover{background:var(--neutral-50);}
+  .nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .nav-link[aria-current="page"]{background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;}
+  .nav-link[aria-current="page"] .ic{color:var(--accent-green);}
+  .sidebar .side-foot{padding:12px;border-top:1px solid var(--neutral-200);}
+  .side-help{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;}
+  .side-help .ic{width:18px;height:18px;color:var(--neutral-600);}
+  .side-help:hover{background:var(--neutral-50);color:var(--primary-navy);}
+  .side-help:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+
+  .main{flex:1;margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-width:0;}
+  .topbar{height:var(--header-h);flex:0 0 auto;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:saturate(180%) blur(6px);border-bottom:1px solid var(--neutral-200);display:flex;align-items:center;gap:16px;padding:0 32px;}
+  .topbar .hamburger{display:none;width:44px;height:44px;align-items:center;justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;color:var(--primary-navy);}
+  .topbar .hamburger:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .mobile-brand{display:none;align-items:center;gap:9px;}
+  .topbar .mobile-brand img{height:28px;width:28px;border-radius:6px;border:1px solid var(--neutral-200);}
+  .topbar .mobile-brand .bn{font-weight:700;font-size:14px;color:var(--primary-navy);}
+  .topbar .mobile-brand .bn span{color:var(--accent-green);}
+  .topbar .spacer{flex:1;}
+  .topbar .tap-call{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:14px;font-weight:600;color:var(--primary-navy);background:#fff;}
+  .topbar .tap-call .ic{width:16px;height:16px;color:var(--accent-green);}
+  .topbar .tap-call:hover{border-color:var(--primary-navy);}
+  .topbar .tap-call:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .topbar .num{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
+  .acct{position:relative;}
+  .acct-btn{display:inline-flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;min-height:44px;border:1px solid var(--neutral-200);border-radius:var(--r-btn);background:#fff;cursor:pointer;}
+  .acct-btn:hover{border-color:var(--primary-navy);}
+  .acct-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-avatar{width:32px;height:32px;border-radius:50%;flex:0 0 auto;background:var(--primary-navy);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+  .acct-name{font-size:14px;font-weight:600;color:var(--primary-navy);}
+  .acct-btn .chev{width:16px;height:16px;color:var(--neutral-600);}
+  .acct-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:6px;z-index:70;}
+  .acct-menu.open{display:block;}
+  .acct-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-btn);font-size:14px;font-weight:500;color:var(--neutral-900);min-height:44px;}
+  .acct-menu a .ic{width:17px;height:17px;color:var(--neutral-600);}
+  .acct-menu a:hover{background:var(--neutral-50);}
+  .acct-menu a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .acct-menu .divider{height:1px;background:var(--neutral-200);margin:6px 4px;}
+
+  .content{flex:1;padding:32px;}
+  .content-inner{max-width:1100px;margin:0 auto;}
+
+  /* Page header */
+  .page-head{margin-bottom:24px;}
+  .page-head h1{font-size:36px;letter-spacing:-.01em;line-height:1.15;}
+  .page-head .sub{font-size:15px;color:var(--neutral-600);margin-top:6px;}
+
+  /* === CONTROLS BAR (search only) === */
+  .controls-bar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+    box-shadow:var(--shadow-sm);padding:14px 16px;margin-bottom:16px;
+  }
+  .search-wrap{flex:1;min-width:220px;position:relative;}
+  .search-wrap .ic-search{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--neutral-600);pointer-events:none;}
+  .search-wrap .input{padding-left:36px;}
+  .btn-tertiary{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 2px;min-height:44px;
+    background:none;border:none;color:var(--accent-green);font-weight:600;font-size:14px;
+    cursor:pointer;font-family:inherit;white-space:nowrap;
+  }
+  .btn-tertiary:hover{color:var(--accent-green-hover);}
+  .btn-tertiary:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);border-radius:4px;}
+
+  /* === TABLE CARD === */
+  .table-card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-sm);overflow:hidden;}
+  .table-scroll{overflow-x:auto;}
+  .admin-table{width:100%;border-collapse:collapse;min-width:880px;}
+
+  .admin-table th{background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);padding:0;white-space:nowrap;}
+  .th-plain{display:block;padding:13px 20px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--neutral-600);text-align:left;}
+
+  .admin-table td{padding:14px 20px;border-bottom:1px solid var(--neutral-200);font-size:15px;color:var(--neutral-900);vertical-align:middle;}
+  .admin-table tbody tr:last-child td{border-bottom:none;}
+  .admin-table tbody tr{cursor:pointer;transition:background .12s;}
+  .admin-table tbody tr:hover{background:var(--neutral-50);}
+  .admin-table tbody tr:focus-visible{outline:none;box-shadow:inset 0 0 0 3px rgba(11,139,78,.4);}
+
+  .t-name{font-weight:600;color:var(--primary-navy);line-height:1.3;}
+  .t-email,.t-mobile{color:var(--neutral-900);font-size:14px;white-space:nowrap;}
+  .t-mobile{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;color:var(--neutral-600);}
+  .t-services{color:var(--neutral-900);font-size:14px;line-height:1.5;max-width:340px;}
+  .t-services.empty{color:var(--neutral-600);}
+  .t-arrow{width:48px;padding-right:20px;text-align:right;}
+  .t-arrow .ic{width:17px;height:17px;color:var(--neutral-200);}
+  .admin-table tbody tr:hover .t-arrow .ic,
+  .admin-table tbody tr:focus-visible .t-arrow .ic{color:var(--accent-green);}
+
+  /* Empty state */
+  .table-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:56px 24px;text-align:center;}
+  .table-empty .ic-big{width:40px;height:40px;color:var(--neutral-200);}
+  .table-empty p{font-size:16px;color:var(--neutral-600);}
+
+  /* === PAGINATION === */
+  .pagination{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    padding:13px 20px;border-top:1px solid var(--neutral-200);
+  }
+  .page-info{font-size:14px;color:var(--neutral-600);}
+  .page-controls{display:flex;align-items:center;gap:3px;}
+  .page-btn{
+    min-width:36px;height:36px;padding:0 10px;display:inline-flex;align-items:center;
+    justify-content:center;border:1px solid var(--neutral-200);border-radius:var(--r-btn);
+    background:#fff;color:var(--neutral-900);font-size:14px;font-weight:500;
+    cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s;
+  }
+  .page-btn:hover{background:var(--neutral-50);border-color:var(--primary-navy);}
+  .page-btn[aria-current="page"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);font-weight:600;}
+  .page-btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
+  .page-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+  .page-ellipsis{padding:0 4px;font-size:14px;color:var(--neutral-600);display:inline-flex;align-items:center;height:36px;}
+
+  /* === ERROR === */
+  .error-card{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid var(--neutral-200);border-left:3px solid var(--warning-amber);border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:20px 24px;}
+  .error-card .ic-lead{width:22px;height:22px;flex:0 0 auto;color:var(--warning-amber);}
+  .error-card .txt{flex:1;font-size:15px;line-height:1.5;color:var(--neutral-900);}
+  .error-card .txt b{font-weight:600;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:var(--r-btn);font-size:15px;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s,color .15s;font-family:inherit;}
+  .btn .ic{width:18px;height:18px;flex:0 0 auto;}
+  .btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+  .btn-secondary{background:transparent;border-color:var(--primary-navy);color:var(--primary-navy);}
+  .btn-secondary:hover{background:var(--primary-navy);color:#fff;}
+
+  /* === SKELETONS === */
+  .skel{background:linear-gradient(90deg,var(--neutral-200) 25%,#eef1f6 37%,var(--neutral-200) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:6px;}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  @media (prefers-reduced-motion:reduce){.skel{animation:none;}}
+  .skel-bar{height:64px;border-radius:var(--r-card);margin-bottom:16px;}
+  .skel-th{height:42px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);}
+  .skel-row{display:block;height:60px;border-bottom:1px solid var(--neutral-200);}
+  .skel-row:last-child{border-bottom:none;}
+
+  [hidden]{display:none !important;}
+  .scrim{display:none;position:fixed;inset:0;background:rgba(10,37,64,.4);z-index:55;}
+  .scrim.open{display:block;}
+
+  /* === RESPONSIVE (<lg) === */
+  @media (max-width:1023px){
+    .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
+    .sidebar.open{transform:translateX(0);}
+    @media (prefers-reduced-motion:reduce){.sidebar{transition:none;}}
+    .main{margin-left:0;}
+    .topbar{padding:0 16px;}
+    .topbar .hamburger{display:inline-flex;}
+    .topbar .mobile-brand{display:inline-flex;}
+    .topbar .num{display:none;}
+    .content{padding:20px 16px 48px;}
+    .page-head h1{font-size:28px;}
+    .acct-name{display:none;}
+    .search-wrap{flex:1 1 100%;}
+  }
+
+  /* === STATE SWITCHER === */
+  .state-switch{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;align-items:center;gap:6px;background:#fff;border:1px dashed #c4ccd9;border-radius:10px;padding:7px 9px;box-shadow:var(--shadow-md);font-size:12px;}
+  .state-switch .lbl{font-weight:600;color:var(--neutral-600);margin-right:2px;}
+  .state-switch button{border:1px solid var(--neutral-200);background:#fff;color:var(--neutral-600);font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:inherit;}
+  .state-switch button[aria-pressed="true"]{background:var(--primary-navy);color:#fff;border-color:var(--primary-navy);}
+  .state-switch button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="app">
+
+  <!-- SIDEBAR — components.md → App Shell [admin links, Users active] -->
+  <aside class="sidebar" id="sidebar" aria-label="Primary">
+    <a class="brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+      <img src="assets/logo.png" alt="" />
+      <span class="bn">GST<span>Notice</span>Support</span>
+    </a>
+    <nav aria-label="Admin navigation">
+      <span class="nav-label">Admin</span>
+      <a class="nav-link" href="Admin Overview.html">
+        <i data-lucide="layout-dashboard" class="ic" aria-hidden="true"></i> Overview
+      </a>
+      <a class="nav-link" href="Admin Bookings.html">
+        <i data-lucide="folder-open" class="ic" aria-hidden="true"></i> Bookings
+      </a>
+      <a class="nav-link" href="Admin Users.html" aria-current="page">
+        <i data-lucide="users" class="ic" aria-hidden="true"></i> Users
+      </a>
+      <a class="nav-link" href="Admin Settings.html">
+        <i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings
+      </a>
+    </nav>
+    <div class="side-foot">
+      <a class="side-help" href="Contact.html">
+        <i data-lucide="life-buoy" class="ic" aria-hidden="true"></i> Help &amp; Support
+      </a>
+    </div>
+  </aside>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
+        <i data-lucide="menu" style="width:22px;height:22px" aria-hidden="true"></i>
+      </button>
+      <a class="mobile-brand" href="Admin Overview.html" aria-label="GST Notice Support — admin">
+        <img src="assets/logo.png" alt="" />
+        <span class="bn">GST<span>Notice</span>Support</span>
+      </a>
+      <span class="spacer"></span>
+      <a class="tap-call" href="tel:+918041000000">
+        <i data-lucide="phone" class="ic" aria-hidden="true"></i>
+        <span class="num">+91 80 4100 0000</span>
+      </a>
+      <div class="acct">
+        <button class="acct-btn" id="acctBtn" aria-haspopup="true" aria-expanded="false" aria-controls="acctMenu">
+          <span class="acct-avatar" aria-hidden="true">AD</span>
+          <span class="acct-name">Admin</span>
+          <i data-lucide="chevron-down" class="chev" aria-hidden="true"></i>
+        </button>
+        <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+          <a href="Admin Settings.html" role="menuitem"><i data-lucide="settings" class="ic" aria-hidden="true"></i> Settings</a>
+          <div class="divider" aria-hidden="true"></div>
+          <a href="Login.html" role="menuitem"><i data-lucide="log-out" class="ic" aria-hidden="true"></i> Log out</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="content" data-screen-label="Admin Users">
+      <div class="content-inner">
+
+        <div class="page-head">
+          <h1>Users</h1>
+          <p class="sub" id="totalCount">32 users</p>
+        </div>
+
+        <!-- ===== POPULATED / EMPTY ===== -->
+        <div id="mainView">
+
+          <div class="controls-bar" role="search" aria-label="Search users">
+            <div class="search-wrap">
+              <i data-lucide="search" class="ic-search" aria-hidden="true"></i>
+              <input type="search" class="input" id="searchInput"
+                placeholder="Search by name or email"
+                aria-label="Search by name or email"
+                autocomplete="off" />
+            </div>
+            <button class="btn-tertiary" id="clearBtn" type="button" hidden>
+              <i data-lucide="x" style="width:14px;height:14px" aria-hidden="true"></i>
+              Clear
+            </button>
+          </div>
+
+          <div class="table-card">
+            <div class="table-scroll" id="tableScroll">
+              <table class="admin-table" id="usersTable">
+                <thead>
+                  <tr>
+                    <th scope="col"><span class="th-plain">Name</span></th>
+                    <th scope="col"><span class="th-plain">Email</span></th>
+                    <th scope="col"><span class="th-plain">Mobile</span></th>
+                    <th scope="col"><span class="th-plain">Interested Services</span></th>
+                    <th scope="col" aria-hidden="true"><span class="th-plain"></span></th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="table-empty" id="tableEmpty" hidden>
+              <i data-lucide="users" class="ic-big" aria-hidden="true"></i>
+              <p id="emptyMsg">No users yet.</p>
+              <button class="btn-tertiary" id="clearBtnEmpty" type="button" style="margin-top:2px" hidden>
+                <i data-lucide="x" style="width:14px;height:14px" aria-hidden="true"></i>
+                Clear
+              </button>
+            </div>
+
+            <div class="pagination" id="pagination" hidden></div>
+          </div>
+
+        </div>
+
+        <!-- ===== ERROR ===== -->
+        <div id="errorView" hidden>
+          <div class="error-card" role="alert">
+            <i data-lucide="alert-circle" class="ic-lead" aria-hidden="true"></i>
+            <p class="txt"><b>Couldn't load users.</b> Check your connection and try again.</p>
+            <button class="btn btn-secondary" id="retryBtn" type="button">
+              <i data-lucide="rotate-cw" class="ic" aria-hidden="true"></i> Retry
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== LOADING ===== -->
+        <div id="loadingView" hidden aria-hidden="true">
+          <div class="skel skel-bar"></div>
+          <div class="table-card">
+            <div class="skel-th"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row"></div>
+            <div class="skel skel-row" style="border-bottom:none"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- State switcher (review aid) -->
+<div class="state-switch" role="group" aria-label="Preview state (review only)">
+  <span class="lbl">State</span>
+  <button data-state="populated" aria-pressed="true">Populated</button>
+  <button data-state="empty-data" aria-pressed="false">Empty</button>
+  <button data-state="no-results" aria-pressed="false">No results</button>
+  <button data-state="loading" aria-pressed="false">Loading</button>
+  <button data-state="error" aria-pressed="false">Error</button>
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0A2540"/>
+    <circle cx="38" cy="42" r="9" fill="#0B8B4E"/>
+    <path d="M22 70c0-9 7-15 16-15s16 6 16 15" fill="#0B8B4E"/>
+    <circle cx="68" cy="38" r="7" fill="#E5E9F0"/>
+    <path d="M55 64c0-7 6-12 13-12s13 5 13 12" fill="#E5E9F0"/>
+  </svg>
+</template>
+
+<script>
+  lucide.createIcons();
+
+  /* ============================================================
+     Data — 32 users (newest first; soft-deleted excluded)
+     [id, name, email, mobile, services[]]
+     ============================================================ */
+  const RAW = [
+    ['u-571','Meena Iyer',        'meena.iyer@gmail.com',          '+91 98450 12345', ['SCN Reply (Section 74)']],
+    ['u-569','Suresh Patel',      'suresh.patel@yahoo.com',        '+91 99876 54321', ['ASMT-10 Reply']],
+    ['u-565','Arvind Shah',       'arvind.shah@sharma.co.in',      '+91 98765 43210', ['Commissioner Appeal','SCN Reply (Section 74)']],
+    ['u-558','Priya Sharma',      'priya.sharma@gmail.com',        '+91 97456 78901', ['ASMT-10 Reply']],
+    ['u-552','Rajiv Menon',       'rajiv.menon@menonca.in',        '+91 96321 45678', ['GSTAT Appeal','Commissioner Appeal']],
+    ['u-547','Kavita Rao',        'kavita.rao@outlook.com',        '+91 99123 87654', ['SCN Reply (Section 73)']],
+    ['u-541','Deepak Nair',       'deepak.nair@nairlegal.in',      '+91 98231 67890', ['GSTAT Appeal']],
+    ['u-535','Anitha Krishnan',   'anitha.k@gmail.com',            '+91 97089 23456', ['ASMT-10 Reply']],
+    ['u-528','Ramesh Gupta',      'ramesh.gupta@guptaco.com',      '+91 98567 89012', ['SCN Reply (Section 74)']],
+    ['u-521','Sunita Verma',      'sunita.verma@gmail.com',        '+91 99234 56781', ['Commissioner Appeal']],
+    ['u-517','Rajesh Kumar',      'rajesh.kumar@hotmail.com',      '+91 97890 12345', ['ASMT-10 Reply','SCN Reply (Section 73)']],
+    ['u-510','Vinod Sharma',      'vinod.sharma@sharmaca.in',      '+91 98112 34567', ['SCN Reply (Section 74)']],
+    ['u-502','Geeta Pillai',      'geeta.pillai@gmail.com',        '+91 99456 78123', ['GSTAT Appeal']],
+    ['u-498','Arun Reddy',        'arun.reddy@reddyenterprises.in','+91 98123 45670', ['ASMT-10 Reply']],
+    ['u-489','Nandita Singh',     'nandita.singh@gmail.com',       '+91 97345 89012', []],
+    ['u-481','Sanjay Mehta',      'sanjay.mehta@mehtaca.com',      '+91 98678 12345', ['Commissioner Appeal']],
+    ['u-473','Lakshmi Nair',      'lakshmi.nair@gmail.com',        '+91 99567 23456', ['ASMT-10 Reply']],
+    ['u-465','Mohan Das',         'mohan.das@dasandsons.in',       '+91 98234 56781', ['SCN Reply (Section 74)']],
+    ['u-458','Rekha Joshi',       'rekha.joshi@outlook.com',       '+91 97456 12389', ['GSTAT Appeal']],
+    ['u-451','Vikram Bose',       'vikram.bose@boseca.in',         '+91 98345 67012', ['ASMT-10 Reply']],
+    ['u-443','Pooja Nambiar',     'pooja.nambiar@gmail.com',       '+91 99012 34568', ['SCN Reply (Section 74)']],
+    ['u-436','Harish Chandra',    'harish.chandra@chandraco.in',   '+91 98456 23901', ['Commissioner Appeal']],
+    ['u-429','Smita Kulkarni',    'smita.kulkarni@gmail.com',      '+91 97123 45689', ['ASMT-10 Reply']],
+    ['u-421','Dinesh Rao',        'dinesh.rao@raolegal.in',        '+91 98789 01234', ['SCN Reply (Section 73)']],
+    ['u-413','Fatima Sheikh',     'fatima.sheikh@gmail.com',       '+91 99345 67801', ['GSTAT Appeal']],
+    ['u-405','Naresh Kumar',      'naresh.kumar@nareshca.in',      '+91 98012 34569', ['ASMT-10 Reply']],
+    ['u-397','Bhavana Iyer',      'bhavana.iyer@iyerca.com',       '+91 97567 89013', ['SCN Reply (Section 74)']],
+    ['u-389','Prakash Shetty',    'prakash.shetty@shettyco.in',    '+91 98234 67890', ['Commissioner Appeal']],
+    ['u-381','Usha Menon',        'usha.menon@gmail.com',          '+91 99123 56780', ['ASMT-10 Reply']],
+    ['u-373','Girish Nayak',      'girish.nayak@nayakca.in',       '+91 98456 78902', []],
+    ['u-365','Madhuri Patil',     'madhuri.patil@gmail.com',       '+91 97890 23456', ['GSTAT Appeal']],
+    ['u-357','Kiran Bhat',        'kiran.bhat@bhatandco.com',      '+91 98012 56789', ['ASMT-10 Reply','SCN Reply (Section 74)']],
+  ];
+
+  const ALL = RAW.map(([id,name,email,mobile,services]) =>
+    ({id,name,email,mobile,services}));
+
+  /* ============================================================
+     State
+     ============================================================ */
+  let curPage   = 1;
+  let emptyMode = false;   // review aid: simulate no users
+  const PER_PAGE = 25;
+
+  const $ = id => document.getElementById(id);
+
+  function getQuery(){ return $('searchInput').value.trim().toLowerCase(); }
+
+  function filtered(src, q){
+    if(!q) return src;
+    return src.filter(u =>
+      u.name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q));
+  }
+
+  /* ============================================================
+     Render
+     ============================================================ */
+  function render(){
+    const source = emptyMode ? [] : ALL;
+    const q      = getQuery();
+    const rows   = filtered(source, q);
+
+    $('totalCount').textContent =
+      source.length + ' ' + (source.length === 1 ? 'user' : 'users');
+
+    $('clearBtn').hidden = !q;
+
+    const scroll = $('tableScroll');
+    const empty  = $('tableEmpty');
+    const pag    = $('pagination');
+    const body   = $('tableBody');
+
+    if(rows.length === 0){
+      scroll.hidden = true; pag.hidden = true; empty.hidden = false;
+      const isSearch = !!q;
+      $('emptyMsg').textContent = isSearch ? 'No users match your search.' : 'No users yet.';
+      $('clearBtnEmpty').hidden = !isSearch;
+      empty.querySelector('.ic-big').setAttribute('data-lucide', isSearch ? 'search' : 'users');
+      lucide.createIcons();
+      return;
+    }
+
+    empty.hidden = true;
+    scroll.hidden = false; pag.hidden = false;
+
+    const start    = (curPage - 1) * PER_PAGE;
+    const pageRows = rows.slice(start, start + PER_PAGE);
+
+    body.innerHTML = '';
+    pageRows.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.tabIndex = 0;
+      const servicesText = u.services.length ? u.services.join(', ') : '—';
+      tr.setAttribute('aria-label',
+        u.name + ' — ' + u.email + '. Open user.');
+      tr.innerHTML =
+        '<td><span class="t-name">' + esc(u.name) + '</span></td>' +
+        '<td class="t-email">' + esc(u.email) + '</td>' +
+        '<td class="t-mobile">' + esc(u.mobile) + '</td>' +
+        '<td class="t-services' + (u.services.length ? '' : ' empty') + '">' +
+          esc(servicesText) + '</td>' +
+        '<td class="t-arrow"><i data-lucide="chevron-right" class="ic" aria-hidden="true"></i></td>';
+      const go = () => { window.location.href = 'Admin User Detail.html?id=' + u.id; };
+      tr.addEventListener('click', go);
+      tr.addEventListener('keydown', e => {
+        if(e.key==='Enter' || e.key===' '){ e.preventDefault(); go(); }
+      });
+      body.appendChild(tr);
+    });
+
+    renderPagination(rows.length);
+    lucide.createIcons();
+  }
+
+  function renderPagination(total){
+    const pag   = $('pagination');
+    const pages = Math.ceil(total / PER_PAGE);
+    const s     = (curPage - 1) * PER_PAGE + 1;
+    const e     = Math.min(curPage * PER_PAGE, total);
+    const info  = '<span class="page-info">Showing ' + s + '–' + e + ' of ' + total + '</span>';
+
+    if(pages <= 1){ pag.innerHTML = info; return; }
+
+    let btns = '';
+    for(let p = 1; p <= pages; p++){
+      const show = pages <= 7 || p===1 || p===pages || Math.abs(p-curPage)<=1;
+      const ellipsis = !show && Math.abs(p-curPage)===2;
+      if(show){
+        btns += '<button class="page-btn" data-page="' + p + '"' +
+          (p===curPage ? ' aria-current="page"' : '') +
+          ' aria-label="Page ' + p + '">' + p + '</button>';
+      } else if(ellipsis){
+        btns += '<span class="page-ellipsis" aria-hidden="true">…</span>';
+      }
+    }
+
+    pag.innerHTML = info +
+      '<div class="page-controls">' +
+        '<button class="page-btn" id="prevBtn" aria-label="Previous page"' + (curPage===1?' disabled':'') + '>' +
+          '<i data-lucide="chevron-left" style="width:15px;height:15px"></i>' +
+        '</button>' +
+        btns +
+        '<button class="page-btn" id="nextBtn" aria-label="Next page"' + (curPage===pages?' disabled':'') + '>' +
+          '<i data-lucide="chevron-right" style="width:15px;height:15px"></i>' +
+        '</button>' +
+      '</div>';
+
+    pag.querySelectorAll('[data-page]').forEach(b =>
+      b.addEventListener('click', () => { curPage = +b.dataset.page; render(); }));
+    const p = $('prevBtn'), n = $('nextBtn');
+    if(p) p.addEventListener('click', () => { curPage--; render(); });
+    if(n) n.addEventListener('click', () => { curPage++; render(); });
+    lucide.createIcons();
+  }
+
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* Search */
+  $('searchInput').addEventListener('input', () => { curPage = 1; render(); });
+  function clearSearch(){ $('searchInput').value = ''; curPage = 1; render(); $('searchInput').focus(); }
+  $('clearBtn').addEventListener('click', clearSearch);
+  $('clearBtnEmpty').addEventListener('click', clearSearch);
+
+  /* Drawer */
+  const sidebar   = $('sidebar');
+  const scrim     = $('scrim');
+  const hamburger = $('hamburger');
+  function openDrawer(){ sidebar.classList.add('open'); scrim.hidden=false; requestAnimationFrame(()=>scrim.classList.add('open')); hamburger.setAttribute('aria-expanded','true'); }
+  function closeDrawer(){ sidebar.classList.remove('open'); scrim.classList.remove('open'); scrim.hidden=true; hamburger.setAttribute('aria-expanded','false'); }
+  hamburger.addEventListener('click', () => sidebar.classList.contains('open') ? closeDrawer() : openDrawer());
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeDrawer(); closeAcct(); } });
+
+  /* Account menu */
+  const acctBtn  = $('acctBtn');
+  const acctMenu = $('acctMenu');
+  function closeAcct(){ acctMenu.classList.remove('open'); acctBtn.setAttribute('aria-expanded','false'); }
+  acctBtn.addEventListener('click', e => { e.stopPropagation(); const o=acctMenu.classList.toggle('open'); acctBtn.setAttribute('aria-expanded',String(o)); });
+  document.addEventListener('click', e => { if(!e.target.closest('.acct')) closeAcct(); });
+
+  /* State switcher */
+  const mainView    = $('mainView');
+  const errorView   = $('errorView');
+  const loadingView = $('loadingView');
+
+  function setState(state){
+    mainView.hidden    = state==='loading' || state==='error';
+    errorView.hidden   = state !== 'error';
+    loadingView.hidden = state !== 'loading';
+
+    if(state==='populated'){
+      emptyMode = false;
+      $('searchInput').value = '';
+      curPage = 1; render();
+    } else if(state==='empty-data'){
+      emptyMode = true;
+      $('searchInput').value = '';
+      curPage = 1; render();
+    } else if(state==='no-results'){
+      emptyMode = false;
+      $('searchInput').value = 'zzzzzz';
+      curPage = 1; render();
+    }
+    document.querySelectorAll('.state-switch button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.state === state)));
+  }
+
+  document.querySelectorAll('.state-switch button').forEach(b =>
+    b.addEventListener('click', () => setState(b.dataset.state)));
+  $('retryBtn').addEventListener('click', () => setState('populated'));
+
+  /* init */
+  render();
+</script>
+<script src="js/app-state.js"></script>
+<script>
+(function(){
+  if(typeof GNS==='undefined') return;
+  GNS.wireLogoutLinks('Login.html');
+})();
+</script>
+</body>
+</html>
