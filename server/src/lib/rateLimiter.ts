@@ -55,3 +55,16 @@ export const resetPasswordRateLimiter = createRateLimiter({
   max: 5,
   message: 'Too many reset attempts. Please try again in 10 minutes.',
 });
+
+// Document rate limiters (api_contract.md §4)
+export const documentUploadRateLimiter = createRateLimiter({
+  windowMs: HOUR,
+  max: 7,
+  message: 'Too many uploads. Please try again in an hour.',
+});
+
+export const draftUrlRateLimiter = createRateLimiter({
+  windowMs: HOUR,
+  max: 15,
+  message: 'Too many draft requests. Please try again in an hour.',
+});
