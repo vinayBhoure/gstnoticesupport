@@ -171,13 +171,19 @@
 ### EP10 — Auth Frontend & Route Protection (frontend, backend_plan Phase 2)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Login page (`/login`) — RHF + zodResolver + TanStack Query mutation | |
-| ⬚ | Signup page (`/signup`) — email + password | |
-| ⬚ | OTP verification page (`/verify-otp`) | |
-| ⬚ | Forgot password + reset password pages | |
-| ⬚ | Complete profile page (`/complete-profile`) — name + phone (D67) | One-time, post-OTP-verify |
-| ⬚ | Auth check helper for Server Components — reads JWT cookie, redirects to `/login` if absent | |
-| ⬚ | Admin role guard — redirects to `/dashboard` if `role !== admin` | |
+| ✅ | Login page (`/login`) — RHF + zodResolver + TanStack Query mutation | `EMAIL_NOT_VERIFIED` handled with targeted toast; routes to /dashboard |
+| ✅ | Signup page (`/signup`) — email + password | z.input<> for Zod v4 input/output fix; termsAccepted + allowPromotions |
+| ✅ | OTP verification page (`/verify-otp`) | 6-box OTPInput, paste-aware, resend button; Next.js 16 async searchParams |
+| ✅ | Forgot password + reset password pages | Two-state ForgotPasswordForm; reset via ?userId= link from email |
+| ✅ | Complete profile page (`/complete-profile`) — name + phone (D67) | No interestedServices per D67/real backend schema |
+| ✅ | Auth check helper for Server Components — reads JWT cookie, redirects to `/login` if absent | `lib/auth/session.ts`: getSession, requireUser, requireAdmin |
+| ✅ | Admin role guard — redirects to `/dashboard` if `role !== admin` | requireAdmin() in session.ts |
+| ✅ | `/auth/invalidate` — "This wasn't me" SSR page | Calls GET /auth/invalidate?ref= server-side; shows success/expired/invalid states |
+| ✅ | Typed API client + auth API functions | `lib/api/client.ts` + `lib/api/auth.ts` — all 11 endpoints |
+| ✅ | TanStack Query provider + root layout wrap | `app/providers.tsx` + additive layout change |
+| ✅ | Auth UI primitives: OTPInput, Checkbox, extended Input (telPrefix + password toggle) | Phase 2 tokens appended to tokens.css |
+| ✅ | AuthCardShell — 440px card + trust strip; no Navbar/Footer | `components/layout/AuthCardShell.tsx` |
+| ✅ | Token refresh proxy (`src/proxy.ts`) | Next.js 16 naming convention; auto-refresh on dashboard/admin routes |
 
 ### EP11 — User Dashboard & Booking Flow Frontend (frontend, backend_plan Phases 3 + 4)
 | Status | Task | Notes |
