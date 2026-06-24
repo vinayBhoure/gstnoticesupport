@@ -5,6 +5,41 @@
 
 ---
 
+## [2026-06-24] — feat(frontend): Phase 2.1 — Auth Frontend (EP10 complete)
+
+**7 new auth pages + full API client layer.** Users can now sign up, verify their email via OTP, complete their profile, log in, and reset their password through the platform UI.
+
+**Pages added** (all under `/(auth)/`, no Navbar/Footer, AuthCardShell with trust strip):
+- `/signup` — email + password + terms consent + promotions opt-in; RHF + zodResolver
+- `/verify-otp` — 6-box OTP with paste-distribute, backspace/arrow nav, resend button
+- `/complete-profile` — name + phone only (D67 — no `interestedServices` per real backend schema)
+- `/login` — email + password; `EMAIL_NOT_VERIFIED` surfaces a targeted toast
+- `/forgot-password` — two-state: email entry → "check your inbox"; OTP + new-password form when `?userId=` is present in URL
+- `/auth/invalidate` — SSR "This wasn't me" page; calls backend, shows success/expired/invalid
+
+**Infrastructure added:**
+- `lib/api/client.ts` — typed fetch wrapper (`credentials: include`, envelope parsing, `ApiRequestError`)
+- `lib/api/auth.ts` — 11 typed auth endpoint functions wired to real backend schemas
+- `lib/auth/session.ts` — `getSession()`, `requireUser()`, `requireAdmin()` for Server Components; async `cookies()` (Next.js 16)
+- `app/providers.tsx` — TanStack Query `QueryClientProvider` client leaf
+- `src/proxy.ts` — silent refresh proxy for dashboard/admin routes (Next.js 16 convention, replaces `middleware.ts`)
+
+**UI primitives added:**
+- `OTPInput` — 6-box, paste-aware, keyboard-nav, `one-time-code` autocomplete
+- `Checkbox` — accessible, forwardRef, label + error slot
+- `Input` extended — password show/hide toggle (Eye/EyeOff), +91 tel prefix, inputMode support
+- Phase 2 CSS section appended to `tokens.css`: `.auth-card`, `.auth-trust-strip`, `.otp-box`, `.checkbox-*`, `.input-wrap/prefix/suffix`
+
+**Next.js 16 breaking changes applied:**
+- `cookies()` is now async — all usages use `await cookies()`
+- `params` / `searchParams` are Promises — pages `await searchParams`
+- `middleware.ts` → `proxy.ts` with `export function proxy`
+- `next.config.ts` uses `turbopack.root` (not `webpack`) for cross-package alias resolution
+
+**Build**: 26 pages, 0 TypeScript errors. Branch: `feature/phase-2/frontend-auth` merged into `development`.
+
+---
+
 ## [2026-06-23] — feat(backend): Phase 4 — Document Handling (pre-signed S3)
 
 **4 new endpoints under `/api/v1/bookings/:id`** — all `authenticate`-gated, ownership enforced (404-collapse). Files never pass through Express; the browser PUTs/GETs S3 directly via pre-signed URLs.
