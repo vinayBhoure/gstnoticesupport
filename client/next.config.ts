@@ -1,11 +1,7 @@
-import type { NextConfig } from 'next';
-import path from 'path';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    // Allow Turbopack to resolve files in ../server/src (for @server/* alias)
-    root: path.join(__dirname, '..'),
-  },
+  /* config options here */
 };
 
 export default nextConfig;
