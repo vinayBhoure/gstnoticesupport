@@ -48,3 +48,15 @@
 **Fix:** Rename the local variable (used `const res = ...`) in the test script.
 
 **Note:** Re-running the full Newman suite against a long-lived server eventually trips the `upload-url` 7/hr rate limit (in-memory counter persists across runs). Restart the server to reset the counter between full re-runs.
+
+---
+
+## 5. Schema sync script blocked — `@prisma/client` string in comment (EP11, 2026-06-29)
+
+**Symptom:** `npm run sync:schemas` silently skipped `booking.schema.ts` despite adding it to the allow-list. A secondary `grep` scan revealed the sync script checks every file for the literal string `@prisma/client` and refuses to copy any file containing it.
+
+**Cause:** The refactored `booking.schema.ts` still had a comment reading *"not z.nativeEnum from @prisma/client"*, which contains the blocked substring verbatim.
+
+**Fix:** Reword all comments to avoid the substring. The comment was changed to *"not z.nativeEnum over a server-only import"*. The schema itself had already dropped the import — only the comment was the issue.
+
+**Rule:** Any comment in a server schema intended for client sync must not mention the string `@prisma/client`. The sync guard (`BLOCK_PATTERN`) in `client/scripts/sync-shared-schemas.mjs` is intentional and must not be weakened.

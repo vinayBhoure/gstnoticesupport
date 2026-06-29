@@ -5,6 +5,75 @@
 
 ---
 
+## [2026-06-29] — feat(client): EP11 — Booking, Document Upload & Draft Viewer UI
+
+**Logged-in app wired to the Phase 2 booking/document backend (8 endpoints + draft-url). Consumes every existing un-consumed endpoint; payment-dependent UI (pay-to-unlock) deferred until the Razorpay backend exists.**
+
+**Shared-schema unblock**
+- `server/src/schemas/booking.schema.ts` — Refactored `z.nativeEnum(ServiceType/FilingFor)` → `z.enum([...])` literals; dropped the `@prisma/client` import so the schema is now client-safe. Behaviour-identical (literal unions are structurally equal to the Prisma enum types). Added `SERVICE_TYPES`/`FILING_FOR_VALUES` consts.
+- `client/scripts/sync-shared-schemas.mjs` — Added `booking.schema.ts` to the sync allow-list; it now syncs to `client/src/lib/shared-schemas/`.
+
+**Typed API surfaces**
+- `client/src/lib/api/booking.ts` — `bookingApi.create/list/getById/cancel` (unwraps the nested `booking` key).
+- `client/src/lib/api/document.ts` — `documentApi.getUploadUrl/confirmUpload/list/getDraftUrl` + `uploadToS3()` helper (direct browser→S3 PUT, bypasses `apiClient`).
+- `client/src/lib/api/types.ts` — Booking domain DTOs + enum unions mirroring `server/src/dto/booking.dto.ts`.
+
+**Components**
+- `StatusBadge` — 6 booking statuses → label + icon + token colour (never colour-only).
+- `Stepper`, `SegmentedToggle`, `PreDepositNotice` (+ `requiresPreDeposit`), `DocumentUpload` (validate → pre-signed PUT → confirm; drag-drop, per-file progress/error), `BookingCard`.
+- `client/src/lib/constants/services.ts`, `booking-status.ts` — service metadata, next-action copy, date/ref helpers.
+
+**Screens (`(dashboard)/` — SSR, auth-gated)**
+- `/dashboard` — Server Component fetches `GET /bookings` (cookie-forwarded); booking cards + empty state + "Start a service".
+- `/dashboard/bookings/new` — 3-step wizard (service + pre-deposit disclosure → case details RHF+Zod → create booking + upload).
+- `/dashboard/bookings/[id]` — case info, documents, admin note, status-dependent action panel (upload / review / draft-ready + cancel / view-draft / cancelled). No pay-to-unlock (deferred).
+- `/dashboard/bookings/[id]/draft` — read-only draft viewer (filing/complete only), fetches fresh 15-min pre-signed URL, expiry countdown + regenerate.
+- `loading.tsx` / `error.tsx` for `(dashboard)/dashboard` and `bookings/[id]`.
+
+**Backend fix**
+- `server/src/services/notification.service.ts` — Login-alert "This wasn't me" link now points at `CLIENT_URL/auth/invalidate` (frontend page) instead of the raw API endpoint, so the user sees a friendly screen.
+
+**Pre-deposit disclosure** present at booking Step 1 and the draft-ready panel for Commissioner/GSTAT Appeal (frontend.md §8.3).
+
+**Build verified** — server + client `tsc --noEmit` clean; `npm run build` exits 0; new routes are `ƒ (Dynamic)`, marketing routes remain `○ (Static)`; new files lint clean. Browser→S3 CORS not yet verified against the live bucket (external config may be required).
+
+---
+
+## [2026-06-29] — feat(client): EP10 — Auth Frontend & Route Protection
+
+**Complete auth UI wired to the Phase 2 backend (EP6–EP8). All six auth screens built; route guards active.**
+
+**Infrastructure**
+- `client/src/lib/api/client.ts` — Typed fetch gateway: envelope unwrap, `ApiRequestError` (carries `code`/`message`/`status`), automatic 401 → `POST /auth/refresh` → retry once. All requests use `credentials: 'include'` for HTTP-only cookie cross-origin auth.
+- `client/src/lib/api/auth.ts` — Typed auth API surface; payloads match `z.infer<>` of server schemas.
+- `client/src/lib/api/types.ts` — Wire-contract types: `ApiEnvelope`, `ApiErrorBody`, `UserObject`, `SignupResponseData`.
+- `client/scripts/sync-shared-schemas.mjs` — Copies `auth.schema.ts` + `document.schema.ts` from `server/src/schemas/` into `client/src/lib/shared-schemas/` on every `predev`/`prebuild` run. Resolves the Turbopack monorepo-boundary constraint (can't reference files outside the Next.js project root). Server remains the sole source of truth; generated copies are auto-generated and not hand-edited. Guards against `@prisma/client` imports (booking schema not yet syncable).
+- `client/src/app/providers.tsx` — TanStack Query `QueryClient` provider; `staleTime: 60s`, `retry: 1`, `refetchOnWindowFocus: false`. Mounted in root layout (marketing tree unaffected — no queries fired on public pages).
+- `client/src/lib/auth/session.ts` — SSR session helpers: `getCurrentUser()` (cookie-forwarding `GET /auth/me`, returns `UserObject | null`), `requireUser()` (redirects to `/login`), `requireAdmin()` (redirects to `/dashboard`), `redirectIfAuthenticated()`. No client-side token handling — auth is always verified server-side.
+
+**UI Primitives (extended / new)**
+- `Input` — Added password show/hide toggle (Eye/EyeOff icons), `+91` tel-prefix slot, `aria-invalid` + `aria-describedby`, `forwardRef` (required for React Hook Form `register()`).
+- `Checkbox` — New. `forwardRef`, `label: React.ReactNode`, error display with `aria-invalid`.
+- `OTPInput` — New. 6-box OTP entry: paste distribution across boxes, arrow/backspace navigation, `inputMode="numeric"`, `autoComplete="one-time-code"` on first box, group `role="group"`, `.has-error` state.
+- `AuthCardShell` — New layout component. Full-viewport neutral background, 440px card, wordmark, `title`/`subtitle`/`children`/`footer` slot, trust strip (ShieldCheck + Privacy/Terms links). No Navbar/Footer.
+
+**Auth Screens (`(auth)/` route group — SSR, no Navbar/Footer)**
+- `/login` — RHF + `zodResolver(loginSchema)`. Amber error banner for wrong credentials (never discloses which field); neutral info banner for `EMAIL_NOT_VERIFIED`.
+- `/signup` — Three-generic `useForm<Input, Ctx, Output>` to handle `.default(false)` on `allowPromotions`. On success routes to `/verify-otp?userId=`.
+- `/verify-otp` — `OTPInput` + resend button. Uses `useWatch` (not `watch()`) for React Compiler compatibility. Reads `?userId` from `searchParams`; redirects to `/signup` if absent.
+- `/complete-profile` — Name + `+91` phone field. SSR gate: `requireUser()` + redirect to `/dashboard` if `user.phone` already set (enforces D67 one-time gate).
+- `/forgot-password` — Two-state: email entry → sent confirmation. Neutral server response (never reveals whether email exists).
+- `/reset-password` — `OTPInput` + new password. Reads `?uid` from `searchParams`; redirects to `/forgot-password` if absent. On success routes to `/dashboard`.
+- `/auth/invalidate` — Fully SSR. Calls `authApi.invalidate(ref)` server-side; renders ShieldCheck (success) or ShieldAlert (error/invalid). No JSON leak to client. Used by the "This wasn't me" security email link.
+
+**Dashboard Skeleton (`(dashboard)/` route group)**
+- `(dashboard)/layout.tsx` — Calls `requireUser()` as auth gate. Full AppShell deferred to EP11.
+- `/dashboard` — Minimal SSR placeholder showing `user.name`; `LogoutButton` client leaf.
+
+**Build verified** — `tsc --noEmit` clean; `npm run build` (client) exits 0; prebuild sync hook runs automatically; marketing routes remain `○ (Static)`; auth/dashboard routes are `ƒ (Dynamic)`; dev server: all routes 200, guard routes 307, zero RSC client manifest errors.
+
+---
+
 ## [2026-06-23] — feat(backend): Phase 4 — Document Handling (pre-signed S3)
 
 **4 new endpoints under `/api/v1/bookings/:id`** — all `authenticate`-gated, ownership enforced (404-collapse). Files never pass through Express; the browser PUTs/GETs S3 directly via pre-signed URLs.
