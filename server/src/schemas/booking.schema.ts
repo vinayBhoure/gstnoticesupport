@@ -1,12 +1,18 @@
 import { z } from 'zod';
-import { ServiceType, FilingFor } from '@prisma/client';
+
+// Service and filing-for values mirror the Prisma enums (ServiceType, FilingFor).
+// Declared as plain z.enum literals (not z.nativeEnum over a server-only import) so
+// this schema stays client-safe and can be synced into the frontend (RULES.md §3.1/§3.2).
+// Keep these arrays in lockstep with prisma/schema.prisma.
+export const SERVICE_TYPES = ['asmt_10', 'scn', 'commissioner_appeal', 'gstat_appeal'] as const;
+export const FILING_FOR_VALUES = ['self', 'others'] as const;
 
 // Canonical Indian GSTIN format regex (format-only, no external API per LLD).
 // Decision recorded in docs/tracking/decisions.md.
 const GSTN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 
 export const createBookingSchema = z.object({
-  serviceType: z.nativeEnum(ServiceType, {
+  serviceType: z.enum(SERVICE_TYPES, {
     error: 'Invalid service type',
   }),
   contactName: z
@@ -31,7 +37,7 @@ export const createBookingSchema = z.object({
     .max(255, 'Organization name must be at most 255 characters')
     .optional()
     .nullable(),
-  filingFor: z.nativeEnum(FilingFor, {
+  filingFor: z.enum(FILING_FOR_VALUES, {
     error: 'filingFor must be "self" or "others"',
   }),
   gstn: z

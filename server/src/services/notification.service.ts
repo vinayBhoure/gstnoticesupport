@@ -27,7 +27,9 @@ export const notificationService = {
     user: { name: string; email: string },
     ctx: { ip: string; userAgent: string; jti: string },
   ): Promise<void> {
-    const invalidateUrl = `${env.API_URL}/api/v1/auth/invalidate?ref=${encodeURIComponent(ctx.jti)}`;
+    // Route through the frontend page (which proxies to the API) so the user sees
+    // a friendly confirmation screen, never the raw JSON response.
+    const invalidateUrl = `${env.CLIENT_URL}/auth/invalidate?ref=${encodeURIComponent(ctx.jti)}`;
     const userMail = templates.loginAlert({
       name: user.name,
       ip: ctx.ip,
