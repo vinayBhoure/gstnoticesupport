@@ -171,13 +171,27 @@
 ### EP10 — Auth Frontend & Route Protection (frontend, backend_plan Phase 2)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Login page (`/login`) — RHF + zodResolver + TanStack Query mutation | |
-| ⬚ | Signup page (`/signup`) — email + password | |
-| ⬚ | OTP verification page (`/verify-otp`) | |
-| ⬚ | Forgot password + reset password pages | |
-| ⬚ | Complete profile page (`/complete-profile`) — name + phone (D67) | One-time, post-OTP-verify |
-| ⬚ | Auth check helper for Server Components — reads JWT cookie, redirects to `/login` if absent | |
-| ⬚ | Admin role guard — redirects to `/dashboard` if `role !== admin` | |
+| ✅ | Typed API client (`lib/api/client.ts`) — envelope unwrap, `ApiRequestError`, 401→refresh→retry | Shared typed gateway; `credentials:include` for cross-origin cookies |
+| ✅ | Auth API calls (`lib/api/auth.ts`) — typed payloads via shared Zod schemas | |
+| ✅ | Shared Zod schema sync script (`client/scripts/sync-shared-schemas.mjs`) — copies `auth.schema.ts` + `document.schema.ts` from server on `predev`/`prebuild` | Solves Turbopack monorepo boundary; server is sole source of truth |
+| ✅ | TanStack Query `Providers` (`app/providers.tsx`) — mounted in root layout | `staleTime:60s`, `retry:1`, `refetchOnWindowFocus:false` |
+| ✅ | SSR session helpers (`lib/auth/session.ts`) — `getCurrentUser`, `requireUser`, `requireAdmin`, `redirectIfAuthenticated` | Cookie-forwarding `GET /auth/me`; no client-side token |
+| ✅ | Extended `Input` component — password show/hide toggle, `+91` tel prefix, `aria-invalid`, `forwardRef` | |
+| ✅ | New `Checkbox` component — `forwardRef`, `label: React.ReactNode`, error + a11y | |
+| ✅ | New `OTPInput` component — 6-box, paste distribution, arrow/backspace nav, `inputMode="numeric"` | |
+| ✅ | `AuthCardShell` layout component — 440px card, wordmark, trust strip, Privacy/Terms links | |
+| ✅ | `(auth)/layout.tsx` passthrough — no Navbar/Footer | |
+| ✅ | Login page (`/login`) — RHF + zodResolver + TanStack Query mutation | `EMAIL_NOT_VERIFIED` info banner; generic error (no cred disclosure) |
+| ✅ | Signup page (`/signup`) — email + password | Three-generic `useForm` for `.default()` schemas |
+| ✅ | OTP verification page (`/verify-otp`) — OTPInput + resend; `useWatch` pattern | |
+| ✅ | Complete profile page (`/complete-profile`) — name + phone (D67); one-time gate | Redirects to `/dashboard` if `user.phone` already set |
+| ✅ | Forgot password page (`/forgot-password`) — email → sent confirmation; neutral response | |
+| ✅ | Reset password page (`/reset-password`) — OTPInput + new password | Reads `?uid` from searchParams |
+| ✅ | Auth invalidate page (`/auth/invalidate`) — fully SSR; success/expired/invalid states | "This wasn't me" link; no JSON leak to client |
+| ✅ | Dashboard skeleton (`/dashboard`) — SSR, `requireUser()` gate; `LogoutButton` client leaf | Placeholder pending EP11 App Shell |
+| ✅ | `(dashboard)/layout.tsx` — `requireUser()` auth gate | Full AppShell deferred to EP11 |
+| 🔄 | Live E2E validation — full auth flow against running server (signup → OTP → complete-profile → dashboard → logout → login → forgot/reset) | Pending: requires `server/.env` + Resend live |
+| ⬚ | Backend fix: `notification.service.ts` invalidation link → `CLIENT_URL/auth/invalidate?ref=...` (currently points to API URL) | One-line server change; requires user approval |
 
 ### EP11 — User Dashboard & Booking Flow Frontend (frontend, backend_plan Phases 3 + 4)
 | Status | Task | Notes |
