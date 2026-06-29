@@ -18,9 +18,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SRC_DIR = resolve(__dirname, '../../server/src/schemas');
 const OUT_DIR = resolve(__dirname, '../src/lib/shared-schemas');
 
-// Allow-list: only pure-Zod schemas. booking.schema.ts imports @prisma/client
-// and is excluded until it is refactored to plain z.enum literals (EP11).
-const SYNC = ['auth.schema.ts', 'document.schema.ts'];
+// Allow-list: only pure-Zod schemas (no server-only imports like @prisma/client).
+const SYNC = ['auth.schema.ts', 'document.schema.ts', 'booking.schema.ts'];
 
 const HEADER = (name) =>
   `// AUTO-GENERATED — DO NOT EDIT.\n` +

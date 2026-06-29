@@ -1,0 +1,44 @@
+import { apiClient } from './client';
+import type { BookingDocumentDTO, UploadUrlResponse, DraftUrlResponse } from './types';
+import type { UploadUrlInput, ConfirmUploadInput } from '@/lib/shared-schemas/document.schema';
+
+// Booking-scoped document endpoints. apiClient unwraps the envelope's `data`;
+// where the server nests an inner key we unwrap it here.
+export const documentApi = {
+  getUploadUrl: (bookingId: string, payload: UploadUrlInput): Promise<UploadUrlResponse> =>
+    apiClient.post<UploadUrlResponse>(`/bookings/${bookingId}/upload-url`, payload),
+
+  confirmUpload: (
+    bookingId: string,
+    payload: ConfirmUploadInput,
+  ): Promise<BookingDocumentDTO> =>
+    apiClient
+      .post<{ document: BookingDocumentDTO }>(`/bookings/${bookingId}/confirm-upload`, payload)
+      .then((r) => r.document),
+
+  list: (bookingId: string, cookie?: string): Promise<BookingDocumentDTO[]> =>
+    apiClient
+      .get<{ documents: BookingDocumentDTO[] }>(`/bookings/${bookingId}/documents`, { cookie })
+      .then((r) => r.documents),
+
+  getDraftUrl: (bookingId: string): Promise<DraftUrlResponse> =>
+    apiClient.get<DraftUrlResponse>(`/bookings/${bookingId}/draft-url`),
+};
+
+// Direct browser → S3 upload via the pre-signed PUT URL. This deliberately does
+// NOT go through apiClient: S3 is not our API (no /api/v1 prefix, no cookies, no
+// response envelope). The Content-Type must match what the URL was signed for.
+export async function uploadToS3(
+  uploadUrl: string,
+  file: File,
+  contentType: string,
+): Promise<void> {
+  const res = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': contentType },
+    body: file,
+  });
+  if (!res.ok) {
+    throw new Error(`S3 upload failed (${res.status})`);
+  }
+}

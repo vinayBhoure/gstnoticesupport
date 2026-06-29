@@ -191,17 +191,18 @@
 | ✅ | Dashboard skeleton (`/dashboard`) — SSR, `requireUser()` gate; `LogoutButton` client leaf | Placeholder pending EP11 App Shell |
 | ✅ | `(dashboard)/layout.tsx` — `requireUser()` auth gate | Full AppShell deferred to EP11 |
 | 🔄 | Live E2E validation — full auth flow against running server (signup → OTP → complete-profile → dashboard → logout → login → forgot/reset) | Pending: requires `server/.env` + Resend live |
-| ⬚ | Backend fix: `notification.service.ts` invalidation link → `CLIENT_URL/auth/invalidate?ref=...` (currently points to API URL) | One-line server change; requires user approval |
+| ✅ | Backend fix: `notification.service.ts` invalidation link → `CLIENT_URL/auth/invalidate?ref=...` (currently points to API URL) | Done EP11 — D75 |
 
 ### EP11 — User Dashboard & Booking Flow Frontend (frontend, backend_plan Phases 3 + 4)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Dashboard home — booking list with status badges | SSR Server Component |
-| ⬚ | Booking Step 1 — service selection + pre-deposit disclosure for GSTAT/Commissioner | KB2 §7 — must appear here |
-| ⬚ | Booking Step 2 — personal info + GSTN + consents | RHF + zodResolver |
-| ⬚ | Booking Step 3 — document upload (multi-file, PDF, ≤5 MB each) | Pre-signed PUT flow |
-| ⬚ | Booking detail page — status timeline, documents, admin note, draft viewer | |
-| ⬚ | Draft viewer — fetches pre-signed GET URL per load; gated to `filing/complete` | Never store pre-signed URL in state |
+| ✅ | Dashboard home — booking list with status badges | SSR Server Component; `bookingApi.list` cookie-forwarded |
+| ✅ | Booking Step 1 — service selection + pre-deposit disclosure for GSTAT/Commissioner | KB2 §7 — `PreDepositNotice` |
+| ✅ | Booking Step 2 — personal info + GSTN + consents | RHF + zodResolver (synced `booking.schema.ts`) |
+| ✅ | Booking Step 3 — document upload (multi-file, PDF, ≤5 MB each) | `DocumentUpload`: pre-signed PUT → confirm |
+| ✅ | Booking detail page — status info, documents, admin note, status-dependent action panel | Pay-to-unlock deferred (no payment backend); cancel wired |
+| ✅ | Draft viewer — fetches pre-signed GET URL per load; gated to `filing/complete` | Never stores URL; 15-min countdown + regenerate |
+| ✅ | `lib/api/booking.ts` + `lib/api/document.ts` typed surfaces; `loading.tsx`/`error.tsx`; `booking.schema` sync unblock; auth/invalidate email link fix | EP11 supporting work |
 | ⬚ | Payment History page — offset pagination + Razorpay receipt links (D64) | |
 | ⬚ | My Profile page — view + update name/phone (`PATCH /user/profile`) | |
 
