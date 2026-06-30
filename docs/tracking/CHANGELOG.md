@@ -5,6 +5,36 @@
 
 ---
 
+## [2026-06-30] — feat(server): EP12 — Payments (Razorpay, 3-layer reliability backend)
+
+**The draft-gated payment mechanic. A user with a `draft_ready` booking can now pay via Razorpay; payment transitions the booking `draft_ready → filing` (unlocking the draft) exactly once across all reliability layers. Layer 3 (admin mark-paid) deferred to EP13 but its shared transition core is built here. Payment frontend (modal + `/payment/verify` page) deferred.**
+
+**New endpoints (`/api/v1`)**
+- `POST /payments/:bookingId/initiate` — `assertPayable` gate (`draft_ready` + not paid), price derived server-side from `serviceType`, creates a Razorpay Order + `payment_records` row at `status=created`; returns `orderId`/`keyId`/`prefill`/`callbackUrl`. Rate: 5/hr.
+- `GET /payments/verify` — Layer 2 fallback. Verifies redirect signature → ownership → Razorpay Fetch Payment API; returns outcome enum (`success`/`failed`/`inconclusive`/`tampered`), never redirects. Rate: 7/hr.
+- `POST /webhooks/razorpay` — Layer 1. Mounted in `index.ts` with `express.raw()` **before** `express.json()`; HMAC-SHA256 verify over raw body (timing-safe) → 400 on failure (no payload log); dispatches `payment.captured`/`payment.failed`; **always returns 200**. Rate-limit exempt.
+
+**New files**
+- `server/src/lib/razorpay.ts` — SDK client + `createOrder`, `fetchPayment`, `verifyWebhookSignature`, `verifyPaymentRedirectSignature`.
+- `server/src/schemas/payment.schema.ts`, `dto/payment.dto.ts`, `repositories/payment.repository.ts`, `services/payment.service.ts`, `controllers/payment.controller.ts`, `controllers/webhook.controller.ts`, `routes/payment.routes.ts`.
+
+**Idempotency (locked invariant)**
+- `payment.repository.captureAndTransition` runs an atomic `$transaction`: a conditional `updateMany` (`status != captured`) claims the order row and only then flips the booking to `filing`/`paid`. The first layer wins (count=1); duplicates get count=0 → no-op. Unique `razorpay_payment_id` violations under a true race are caught and treated as already-processed. The shared `processCaptured` core fires the confirmation email exactly once.
+
+**Notifications** — `sendPaymentConfirmed` (user + admin) on capture; `sendPaymentFailed` (admin only) on failed attempt. Three new brand-styled templates. Best-effort — email failure never blocks a transition.
+
+**Reused** — `lib/pricing.ts` (server-side price), `booking-state-machine.ts` (added `assertPayable`; `draft_ready → filing` already legal), `bookingRepository.findByIdAndUserId` (ownership/404-collapse), `createRateLimiter`, `notificationService`/`emailService`.
+
+**Config** — added `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` to `env.ts` (`.env.example` already listed them). `razorpay@^2.9.6` dependency.
+
+**Verified** — `tsc --noEmit` clean; no `any`/`console.log` in new code. Newman suite `test/postman/Payments.postman_collection.json` (21 requests / 45 assertions, all green) drives the full flow against the live test keys: auth gates (401), `INVALID_STATUS`/`PAYMENT_ALREADY_CAPTURED`/`NOT_FOUND` gates, server-derived amount (₹2,999), real Razorpay Orders API on `initiate`, webhook signature rejection (missing/bad/tampered → 400) and acceptance (200), `payment.captured` → booking `filing`/`paid`, **duplicate delivery → single transition (idempotency)**, `payment.failed` leaves the booking retryable, and verify `tampered`/`inconclusive`/validation outcomes. Run via `test/postman/run-payments-newman.sh` (mints two `draft_ready` fixtures via `server/scripts/setup-draft-ready-booking.mjs`; admin creds + Razorpay secrets injected at runtime, never committed). Not auto-covered by Newman: verify *success* + a real captured webhook (need an actual Razorpay test payment) — the synthetic signed webhook proves the capture→filing→idempotency core.
+
+**Live end-to-end validation (real payment, 2026-07-01)** — completed a real Razorpay test Checkout (Netbanking→Success, since international cards are disabled on the test account) for a `draft_ready` booking. Razorpay delivered the **real signed `payment.captured` webhook** to the API over an ngrok tunnel (`user-agent: Razorpay-Webhook/v1`, valid `x-razorpay-signature`) → handler verified and returned **200** → booking transitioned to `filing`/`paid`. Re-deliveries of related events all returned 200 with a single transition (idempotency on real traffic). Layer 2 verify, called with the real `payment_id`/`order_id`/`signature`, returned `outcome:success` idempotently (no double-processing). Both reliability layers now confirmed with a genuine captured payment.
+
+**Test tooling added** — `test/postman/Payments.postman_collection.json` + `payments-local.postman_environment.json` + `run-payments-newman.sh`; `server/scripts/setup-draft-ready-booking.mjs` (draft-ready fixture); `test/manual/checkout.html` + `initiate.sh` + `verify.sh` (manual real-payment helpers, Path B). See decisions D76–D77 and ERROR.md §6–7.
+
+---
+
 ## [2026-06-29] — feat(client): EP11 — Booking, Document Upload & Draft Viewer UI
 
 **Logged-in app wired to the Phase 2 booking/document backend (8 endpoints + draft-url). Consumes every existing un-consumed endpoint; payment-dependent UI (pay-to-unlock) deferred until the Razorpay backend exists.**

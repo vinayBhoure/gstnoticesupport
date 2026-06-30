@@ -209,15 +209,15 @@
 ### EP12 — Payment Integration (backend_plan Phase 5)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | `POST /payments/:bookingId/initiate` — create Razorpay Order, insert `payment_records` row at `status=created` | Gated: `status=draft_ready` + `payment_status=pending`; rate: 5/hr |
-| ⬚ | `POST /webhooks/razorpay` — `express.raw()`, HMAC-SHA256 verify, idempotency, transition → `filing` | Layer 1; exempt from rate limiting; always returns 200 |
-| ⬚ | `GET /payments/verify` — signature verify + Razorpay Fetch Payment API; returns outcome enum | Layer 2; rate: 7/hr; no redirect |
-| ⬚ | Idempotency: `razorpay_payment_id` unique constraint — no double-transition | Validated via `payment_records` lookup before any state change |
-| ⬚ | Payment confirmed emails — user + admin | Fire inside webhook + verify handlers |
-| ⬚ | Failed payment email — admin only | |
+| ✅ | `POST /payments/:bookingId/initiate` — create Razorpay Order, insert `payment_records` row at `status=created` | Gated via `assertPayable` (`draft_ready` + not paid); price server-derived; rate: 5/hr |
+| ✅ | `POST /webhooks/razorpay` — `express.raw()`, HMAC-SHA256 verify, idempotency, transition → `filing` | Layer 1; mounted before `express.json()`; exempt from rate limiting; always returns 200 |
+| ✅ | `GET /payments/verify` — signature verify + Razorpay Fetch Payment API; returns outcome enum | Layer 2; rate: 7/hr; no redirect; success/failed/inconclusive/tampered |
+| ✅ | Idempotency: `razorpay_payment_id` unique constraint — no double-transition | Atomic conditional `captureAndTransition` (updateMany `status != captured`) + unique-constraint race catch |
+| ✅ | Payment confirmed emails — user + admin | `notificationService.sendPaymentConfirmed`, fired once in shared `processCaptured` core |
+| ✅ | Failed payment email — admin only | `notificationService.sendPaymentFailed` |
 | ⬚ | Pay-to-unlock screen frontend — Razorpay modal integration | Pre-deposit disclosure for GSTAT/Commissioner (KB2 §7) |
 | ⬚ | `/payment/verify` page frontend — reads outcome enum; shows status + WhatsApp link on Inconclusive | SSR; reads Razorpay query params |
-| ⬚ | External: Razorpay test-mode keys (unblocks dev); live-mode KYC approval needed before prod | Start KYC early — longest external blocker |
+| 🔄 | External: Razorpay test-mode keys (unblocks dev); live-mode KYC approval needed before prod | Test keys supplied + wired; KYC still required before prod |
 
 ### EP13 — Admin Dashboard (backend_plan Phase 6)
 | Status | Task | Notes |

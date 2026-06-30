@@ -46,6 +46,12 @@ function button(href: string, label: string): string {
   return `<a href="${href}" style="display:inline-block;padding:12px 22px;background:${GREEN};color:#FFFFFF;text-decoration:none;border-radius:6px;font-weight:bold;">${escapeHtml(label)}</a>`;
 }
 
+// Paise → ₹ formatted with Indian grouping, e.g. 299900 → "₹2,999".
+function formatRupees(amountPaise: number): string {
+  const rupees = Math.round(amountPaise / 100);
+  return `₹${rupees.toLocaleString('en-IN')}`;
+}
+
 export function signupOtp(data: { name: string; otp: string }): EmailContent {
   return {
     subject: 'Verify your email — GST Notice Support',
@@ -206,6 +212,75 @@ export function bookingCancelledAdmin(data: {
         <li>Service: ${escapeHtml(data.serviceType)}</li>
         <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
       </ul>
+    `),
+  };
+}
+
+// ============================================================
+// Phase 5 — Payment notifications
+// ============================================================
+
+export function paymentConfirmedUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  amountPaise: number;
+  draftUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Payment confirmed — your draft is now available',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>We have received your payment of <strong>${escapeHtml(formatRupees(data.amountPaise))}</strong>. Your draft is now unlocked and ready to view.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.draftUrl, 'View your draft')}</p>
+      <p style="color:${MUTED};">Our team will proceed with the filing stage and keep you updated.</p>
+    `),
+  };
+}
+
+export function paymentConfirmedAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+  amountPaise: number;
+}): EmailContent {
+  return {
+    subject: `Payment received — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A payment has been confirmed and the booking has moved to the filing stage:</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Amount: ${escapeHtml(formatRupees(data.amountPaise))}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+      </ul>
+    `),
+  };
+}
+
+export function paymentFailedAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+}): EmailContent {
+  return {
+    subject: `Payment attempt failed — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A payment attempt failed. The booking remains at draft stage and the user can retry.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+        <li>Phone: ${escapeHtml(data.contactPhone)}</li>
+      </ul>
+      <p style="color:${MUTED};">Consider following up via WhatsApp or email if the user needs assistance.</p>
     `),
   };
 }

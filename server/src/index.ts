@@ -8,6 +8,7 @@ import { requestLogger } from './middleware/requestLogger';
 import { notFound } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
 import { apiRouter, healthRouter } from './routes';
+import { webhookController } from './controllers/webhook.controller';
 
 const app = express();
 
@@ -25,8 +26,11 @@ app.use(requestLogger);
 
 // Razorpay webhook must be registered BEFORE express.json() with express.raw()
 // so that HMAC-SHA256 signature verification is computed over the raw buffer.
-// Wired in Phase 5.
-// app.post('/api/v1/webhooks/razorpay', express.raw({ type: 'application/json' }), webhookController.handle);
+app.post(
+  '/api/v1/webhooks/razorpay',
+  express.raw({ type: 'application/json' }),
+  webhookController.handle,
+);
 
 // JSON body parsing for all other routes
 app.use(express.json());

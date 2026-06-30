@@ -35,12 +35,28 @@
 | EP7 | Backend Core Infrastructure | ✅ Done | 2026-06-16 |
 | EP8 | Auth Backend (OTP signup, login, JWT, forgot password) | ✅ Done | 2026-06-16 |
 | EP9 | Booking & Document Upload Backend | ✅ Done | 2026-06-23 |
-| EP10 | Auth Frontend & Route Protection | ⬚ Pending | — |
-| EP11 | User Dashboard & Booking Flow Frontend | ⬚ Pending | — |
-| EP12 | Payment Integration (Razorpay + three-layer reliability) | ⬚ Pending | — |
+| EP10 | Auth Frontend & Route Protection | ✅ Done | 2026-06-29 |
+| EP11 | User Dashboard & Booking Flow Frontend | ✅ Done | 2026-06-29 |
+| EP12 | Payment Integration (Razorpay + three-layer reliability) | ✅ Done (backend) | 2026-07-01 |
 | EP13 | Admin Dashboard | ⬚ Pending | — |
 | EP14 | Email Notifications (Resend + notification matrix) | ⬚ Pending | — |
 | EP15 | Phase 2 Hardening & Launch | ⬚ Pending | — |
+
+---
+
+## EP12 — Definition of Done (Verified 2026-07-01, backend)
+
+- [x] `POST /payments/:bookingId/initiate` — `assertPayable` gate, server-derived amount, Razorpay Order + `payment_records` row at `status=created`
+- [x] `POST /webhooks/razorpay` — `express.raw()` before `express.json()`, HMAC-SHA256 verify (timing-safe), always 200
+- [x] `GET /payments/verify` — signature → ownership → Razorpay Fetch Payment API; `success`/`failed`/`inconclusive`/`tampered`; no redirect
+- [x] Idempotency — atomic `captureAndTransition` (`updateMany status != captured`) + unique `razorpay_payment_id`; single transition across layers (D76)
+- [x] Payment-confirmed emails (user + admin) once per capture; failed-attempt email (admin only)
+- [x] `tsc --noEmit` clean; no `any` / `console.log` in new code
+- [x] Newman suite `test/postman/Payments...` — 21 requests / 45 assertions green (real test Orders API, synthetic webhook idempotency, verify outcomes)
+- [x] **Real payment validated end-to-end** — Razorpay Checkout (Netbanking→Success) → real signed `payment.captured` webhook over ngrok → booking `filing`/`paid`; Layer 2 verify with the real payment returned `success` idempotently (D77)
+- [ ] Pay-to-unlock frontend (Razorpay modal) + `/payment/verify` page — deferred (separate frontend epic)
+- [ ] Layer 3 admin `mark-paid` — deferred to EP13 (shares the Phase 5 transition core)
+- [ ] Live-mode Razorpay KYC — external blocker before production
 
 ---
 
