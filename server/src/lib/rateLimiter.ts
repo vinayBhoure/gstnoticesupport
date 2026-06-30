@@ -68,3 +68,16 @@ export const draftUrlRateLimiter = createRateLimiter({
   max: 15,
   message: 'Too many draft requests. Please try again in an hour.',
 });
+
+// Payment rate limiters (api_contract.md §5). The webhook route is exempt.
+export const paymentInitiateRateLimiter = createRateLimiter({
+  windowMs: HOUR,
+  max: 5,
+  message: 'Too many payment attempts. Please try again in an hour.',
+});
+
+export const paymentVerifyRateLimiter = createRateLimiter({
+  windowMs: HOUR,
+  max: 7,
+  message: 'Too many verification attempts. Please try again in an hour.',
+});

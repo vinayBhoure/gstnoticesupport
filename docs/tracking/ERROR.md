@@ -60,3 +60,27 @@
 **Fix:** Reword all comments to avoid the substring. The comment was changed to *"not z.nativeEnum over a server-only import"*. The schema itself had already dropped the import — only the comment was the issue.
 
 **Rule:** Any comment in a server schema intended for client sync must not mention the string `@prisma/client`. The sync guard (`BLOCK_PATTERN`) in `client/scripts/sync-shared-schemas.mjs` is intentional and must not be weakened.
+
+---
+
+## 6. Newman payment fixture — `ERR_MODULE_NOT_FOUND: Cannot find package 'dotenv'` (EP12, 2026-07-01)
+
+**Symptom:** The payments Newman runner failed at the fixture step: `npx tsx` (run with cwd `server/`) could not resolve `dotenv` / `@prisma/client` from a script located at `test/postman/setup-draft-ready-booking.mjs`.
+
+**Cause:** Node ESM resolves bare imports starting from the **importing file's** directory and walking up — not from the process cwd. A script under `test/postman/` walks `test/postman → test → repo root`, none of which contain `dotenv`/`@prisma/client` (those live in `server/node_modules`). `NODE_PATH` does not help ESM bare-specifier resolution.
+
+**Fix:** Relocate the fixture to `server/scripts/setup-draft-ready-booking.mjs` so resolution finds `server/node_modules`. The runner calls it via `(cd ../../server && npx tsx scripts/setup-draft-ready-booking.mjs)`.
+
+**Rule:** Any standalone `.mjs`/`.ts` script that imports server dependencies must live under `server/` (or be run with those deps resolvable from its own location), regardless of cwd.
+
+---
+
+## 7. Razorpay test checkout — "International cards are not supported" (EP12, 2026-07-01)
+
+**Symptom:** Completing the Razorpay **test** Checkout with the common test card `4111 1111 1111 1111` returned "Payment could not be completed. International cards are not supported."
+
+**Cause:** International payments are not enabled on the test account, and that card BIN is treated as international.
+
+**Fix (testing):** Use **Netbanking → Success** on the mock bank page (`api.razorpay.com/v1/gateway/mocksharp/payment`) — the deterministic domestic test-capture path — or a domestic test card. This produces a real `captured` payment, fires the real signed webhook, and transitions the booking to `filing`.
+
+**Note:** This is a test-account capability, not a code issue. Before production, enable the payment methods/cards you intend to accept in the Razorpay dashboard (and complete live-mode KYC).

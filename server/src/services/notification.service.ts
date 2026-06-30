@@ -110,4 +110,57 @@ export const notificationService = {
       emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
     ]);
   },
+
+  // ============================================================
+  // Phase 5 — Payment notifications (best-effort)
+  // ============================================================
+
+  // Payment confirmed — Pattern B: user + admin (notification matrix).
+  async sendPaymentConfirmed(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+    amountPaise: number;
+  }): Promise<void> {
+    const draftUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}/draft`;
+
+    const userMail = templates.paymentConfirmedUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      amountPaise: booking.amountPaise,
+      draftUrl,
+    });
+    const adminMail = templates.paymentConfirmedAdmin({
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      contactName: booking.contactName,
+      contactEmail: booking.contactEmail,
+      amountPaise: booking.amountPaise,
+    });
+
+    await Promise.all([
+      emailService.sendEmail({ to: booking.contactEmail, ...userMail }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+    ]);
+  },
+
+  // Failed payment attempt — admin only (notification matrix).
+  async sendPaymentFailed(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+    contactPhone: string;
+  }): Promise<void> {
+    const adminMail = templates.paymentFailedAdmin({
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      contactName: booking.contactName,
+      contactEmail: booking.contactEmail,
+      contactPhone: booking.contactPhone,
+    });
+    await emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail });
+  },
 };

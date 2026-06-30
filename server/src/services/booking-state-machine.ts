@@ -42,3 +42,21 @@ export function assertUserCancellable(booking: {
     );
   }
 }
+
+// Payment can be initiated only when the draft is ready and not yet paid (api_contract.md §5.1).
+// A failed prior attempt leaves paymentStatus=pending, so retries remain payable.
+export function assertPayable(booking: {
+  status: BookingStatus;
+  paymentStatus: PaymentStatus;
+}): void {
+  if (booking.paymentStatus === PaymentStatus.paid) {
+    throw new ApiError(409, 'PAYMENT_ALREADY_CAPTURED', 'This booking has already been paid');
+  }
+  if (booking.status !== BookingStatus.draft_ready) {
+    throw new ApiError(
+      409,
+      'INVALID_STATUS',
+      'Payment can only be initiated once your draft is ready',
+    );
+  }
+}
