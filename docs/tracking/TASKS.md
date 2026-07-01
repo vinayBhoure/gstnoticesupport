@@ -222,14 +222,16 @@
 ### EP13 — Admin Dashboard (backend_plan Phase 6)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | `GET /admin/bookings` — list all bookings; filter by status | Auth: admin only |
-| ⬚ | `GET /admin/bookings/:id` — detail including user info, all documents, all payment attempts | |
-| ⬚ | `PATCH /admin/bookings/:id/status` — transitions `→ in_review` and `→ complete` only | Illegal transitions → `INVALID_TRANSITION` |
-| ⬚ | `POST /admin/bookings/:id/draft-upload-url` — two-step pre-signed PUT, PDF only | Blocked at `filing/complete/cancelled`; confirmed upload sets `draft_s3_key` + auto-transitions to `draft_ready` |
-| ⬚ | `POST /admin/bookings/:id/confirm-draft-upload` | Emails user: draft ready |
-| ⬚ | `PATCH /admin/bookings/:id/note` — admin note ≤5000 chars | Visible to user |
-| ⬚ | `POST /admin/bookings/:id/mark-paid` — Layer 3 override; calls Razorpay Fetch Payment API first | Uses Phase 5 idempotency service; records `source=admin_override` + `performed_by_admin_id` (D66) |
-| ⬚ | `GET /admin/stats` — total bookings by status + revenue | |
+| ✅ | `GET /admin/bookings` — list all bookings; filter by status/paymentStatus/serviceType; offset pagination | Auth: admin only; `paginated()` envelope |
+| ✅ | `GET /admin/bookings/:id` — detail including user info, all documents, all payment attempts | `findByIdForAdmin`; `hasDraft` flag; `draftS3Key` never exposed |
+| ✅ | `PATCH /admin/bookings/:id/status` — transitions `→ in_review` and `→ complete` only | Illegal transitions → `INVALID_TRANSITION` (state machine); emails in_review/complete |
+| ✅ | `POST /admin/bookings/:id/draft-upload-url` — two-step pre-signed PUT, PDF only, ≤20 MB | Blocked at `document_upload/filing/complete/cancelled` → `DRAFT_LOCKED`; rate 15/hr; `drafts/{id}-…` key |
+| ✅ | `POST /admin/bookings/:id/draft-confirm` (api_contract §6.5) | Sets `draft_s3_key` + auto-transitions to `draft_ready`; emails user draft-ready (first) / draft-updated (re-upload); no doc row (draftS3Key only) |
+| ✅ | `PATCH /admin/bookings/:id/note` — admin note ≤5000 chars | Visible to user; empty string clears |
+| ✅ | `POST /admin/bookings/:id/mark-paid` — Layer 3 override; calls Razorpay Fetch Payment API first | Reuses Phase 5 `processCaptured` core; `source=admin_override` + `performed_by_admin_id` (D66/D78); cross-booking guard; `PAYMENT_NOT_CAPTURED`/`RAZORPAY_ERROR` |
+| ✅ | `GET /admin/stats` — total bookings by status + service type + captured revenue | Zero-filled enum keys |
+| ✅ | Newman test suite — 50 requests / 109 assertions, all green | `test/postman/Admin.postman_collection.json` + `run-admin-newman.sh`; see D79, ADMIN_TEST_PLAN.md |
+| ⬚ | Manual verification: mark-paid 200 success + cross-booking guard + idempotency (needs real captured Razorpay test payment) | Deferred, same as EP12/D77 |
 | ⬚ | Admin frontend — bookings table, detail view, status controls, draft upload, note editor, mark-paid | |
 
 ### EP14 — Email Notifications (backend_plan Phase 7)

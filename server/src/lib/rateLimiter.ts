@@ -81,3 +81,10 @@ export const paymentVerifyRateLimiter = createRateLimiter({
   max: 7,
   message: 'Too many verification attempts. Please try again in an hour.',
 });
+
+// Admin rate limiters (api_contract.md §6). Only the draft upload URL is limited.
+export const adminDraftUploadRateLimiter = createRateLimiter({
+  windowMs: HOUR,
+  max: 15,
+  message: 'Too many draft uploads. Please try again in an hour.',
+});

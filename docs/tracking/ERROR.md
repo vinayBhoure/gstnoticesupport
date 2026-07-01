@@ -84,3 +84,17 @@
 **Fix (testing):** Use **Netbanking → Success** on the mock bank page (`api.razorpay.com/v1/gateway/mocksharp/payment`) — the deterministic domestic test-capture path — or a domestic test card. This produces a real `captured` payment, fires the real signed webhook, and transitions the booking to `filing`.
 
 **Note:** This is a test-account capability, not a code issue. Before production, enable the payment methods/cards you intend to accept in the Razorpay dashboard (and complete live-mode KYC).
+
+---
+
+## 8. Admin Newman runner — spurious admin login `401` from a stale `.env` duplicate (EP13, 2026-07-01)
+
+**Symptom:** The first `run-admin-newman.sh` run passed unauthenticated (401) and RBAC (403) checks, but "Login (admin)" itself returned `401 INVALID_CREDENTIALS`. Every subsequent admin-only request then ran on the still-active **user** cookie and failed as `403`/`TypeError` instead of the expected `200` — a single root cause cascading into ~25 apparent failures.
+
+**Cause:** `server/.env` contained **two** `ADMIN_EMAIL=`/`ADMIN_PASSWORD=` lines (an old value followed by the current one). The app and `prisma db seed` both load `.env` via `dotenv`, which is **last-value-wins**, so they use the correct, current password. The runner's credential extraction used `grep -E "^ADMIN_PASSWORD=" | head -1`, which grabs the **first** (stale) duplicate — a 9-character leftover instead of the real 14-character password. `bcrypt.compare` against the DB hash correctly rejected it.
+
+**Diagnosis path:** Verified in order, without ever printing the secret itself: (1) the *literal* credential the user provided also failed login — ruling out a typo on my end; (2) direct DB lookup showed `bcrypt.compare(process.env.ADMIN_PASSWORD, hash)` via `dotenv` was `true`, so the seeded hash was correct; (3) `read_env`'s extracted value was a different *length* (9 vs. 14 chars) than the dotenv-resolved value — isolating the bug to the shell extraction, not the database or the app.
+
+**Fix:** Changed `run-admin-newman.sh` to resolve `ADMIN_EMAIL`/`ADMIN_PASSWORD` via `node -e "require('dotenv').config(); ..."` (the exact mechanism the app and seed script use) instead of `grep | head -1`. The user then deduplicated `server/.env` directly, which independently makes `grep | head -1` correct too — but the dotenv-based extraction is the durable fix regardless of `.env` hygiene.
+
+**Rule:** Any test runner that reads secrets out of `.env` for injection into Newman/curl must resolve them the same way the application does (`dotenv`, last-value-wins), never `grep -E "^KEY=" | head -1` — a duplicate or commented-out line silently produces the wrong value with no error. `test/postman/run-payments-newman.sh` uses the same `grep | head -1` pattern for `ADMIN_EMAIL`/`ADMIN_PASSWORD`/Razorpay secrets and carries the same latent risk if `.env` ever regains a duplicate; not yet migrated to the dotenv-based pattern.

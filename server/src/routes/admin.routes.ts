@@ -1,0 +1,69 @@
+import { Router } from 'express';
+import { adminController } from '../controllers/admin.controller';
+import { authenticate } from '../middleware/authenticate';
+import { requireRole } from '../middleware/requireRole';
+import { validateBody, validateQuery, validateParams } from '../middleware/validate';
+import { adminDraftUploadRateLimiter } from '../lib/rateLimiter';
+import {
+  adminBookingListQuerySchema,
+  adminBookingIdParamsSchema,
+  updateStatusSchema,
+  draftUploadUrlSchema,
+  draftConfirmSchema,
+  updateNoteSchema,
+  markPaidSchema,
+} from '../schemas/admin.schema';
+
+const router = Router();
+
+// Every admin route is gated: authenticate → requireRole('admin'). Applied at the
+// router level (scoped to /admin only — not global, per backend.md §4.2).
+router.use(authenticate, requireRole('admin'));
+
+router.get('/bookings', validateQuery(adminBookingListQuerySchema), adminController.listBookings);
+
+router.get('/stats', adminController.getStats);
+
+router.get(
+  '/bookings/:id',
+  validateParams(adminBookingIdParamsSchema),
+  adminController.getBooking,
+);
+
+router.patch(
+  '/bookings/:id/status',
+  validateParams(adminBookingIdParamsSchema),
+  validateBody(updateStatusSchema),
+  adminController.updateStatus,
+);
+
+router.post(
+  '/bookings/:id/draft-upload-url',
+  adminDraftUploadRateLimiter,
+  validateParams(adminBookingIdParamsSchema),
+  validateBody(draftUploadUrlSchema),
+  adminController.createDraftUploadUrl,
+);
+
+router.post(
+  '/bookings/:id/draft-confirm',
+  validateParams(adminBookingIdParamsSchema),
+  validateBody(draftConfirmSchema),
+  adminController.confirmDraftUpload,
+);
+
+router.patch(
+  '/bookings/:id/note',
+  validateParams(adminBookingIdParamsSchema),
+  validateBody(updateNoteSchema),
+  adminController.updateNote,
+);
+
+router.post(
+  '/bookings/:id/mark-paid',
+  validateParams(adminBookingIdParamsSchema),
+  validateBody(markPaidSchema),
+  adminController.markPaid,
+);
+
+export default router;
