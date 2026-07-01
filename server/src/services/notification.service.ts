@@ -163,4 +163,74 @@ export const notificationService = {
     });
     await emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail });
   },
+
+  // ============================================================
+  // Phase 6 — Admin case-management notifications (user only)
+  // ============================================================
+
+  async sendStatusInReview(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+  }): Promise<void> {
+    const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}`;
+    const { subject, html } = templates.statusInReviewUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      dashboardUrl,
+    });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html });
+  },
+
+  // Draft Ready — mandatory pre-deposit disclosure touchpoint (KB2 §7). The template
+  // renders the disclosure for commissioner_appeal / gstat_appeal.
+  async sendDraftReady(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+  }): Promise<void> {
+    const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}`;
+    const { subject, html } = templates.draftReadyUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      dashboardUrl,
+    });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html });
+  },
+
+  async sendDraftUpdated(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+  }): Promise<void> {
+    const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}`;
+    const { subject, html } = templates.draftUpdatedUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      dashboardUrl,
+    });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html });
+  },
+
+  async sendStatusComplete(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+  }): Promise<void> {
+    const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}`;
+    const { subject, html } = templates.statusCompleteUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      dashboardUrl,
+    });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html });
+  },
 };

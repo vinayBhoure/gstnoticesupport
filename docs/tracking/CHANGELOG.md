@@ -5,6 +5,51 @@
 
 ---
 
+## [2026-07-01] — feat(server): EP13 — Admin Surface (case management + mark-paid override backend)
+
+**The single admin can now run a case end-to-end: review bookings, transition status, upload the draft PDF, add notes, override payment (Layer 3), and view overview stats. All 8 `api_contract.md §6` endpoints. Reuses Phases 0–5 primitives; no existing user-facing behaviour changed. Admin frontend deferred.**
+
+**New endpoints (`/api/v1/admin`, all `authenticate → requireRole('admin')`)**
+- `GET /admin/bookings` — list, offset pagination (default 20, max 100), filters `status`/`paymentStatus`/`serviceType`; each item joins `user{id,name,email}`. `paginated()` envelope.
+- `GET /admin/bookings/:id` — full detail: user, all documents, **all** payment attempts (D66 `source` visible), derived `hasDraft`. `draftS3Key`/`s3Key` never returned.
+- `PATCH /admin/bookings/:id/status` — body `in_review | complete` only; legality enforced by `booking-state-machine.assertTransition` (illegal → `409 INVALID_TRANSITION`); emails user (in_review / complete).
+- `POST /admin/bookings/:id/draft-upload-url` — pre-signed PUT, PDF only, ≤20 MB; gate status ∈ {`in_review`,`draft_ready`} else `409 DRAFT_LOCKED`; key `drafts/{bookingId}-{yyyyMMdd}-{name}-{4rand}.pdf`. Rate: 15/hr.
+- `POST /admin/bookings/:id/draft-confirm` — sets `draft_s3_key` + transitions to `draft_ready`; first draft emails **draft-ready**, re-upload emails **draft-updated**. No `booking_documents` row (draft delivered only via `draftS3Key`, kept out of the user's document list). `s3Key` must be prefixed `drafts/{id}-`.
+- `PATCH /admin/bookings/:id/note` — `admin_note` ≤5000 chars, user-visible; empty string clears.
+- `POST /admin/bookings/:id/mark-paid` — Layer 3 override. `assertPayable` gate → Razorpay **Fetch Payment API** (must be `captured`, else `422 PAYMENT_NOT_CAPTURED`; API failure → `502 RAZORPAY_ERROR`) → **cross-booking guard** (fetched order must belong to this booking) → shared `paymentService.processCaptured({ source: admin_override, performedByAdminId })`. Idempotent via the same D76 core.
+- `GET /admin/stats` — `totalBookings`, `byStatus`, `byServiceType` (zero-filled), `totalRevenuePaise` (sum of `captured`).
+
+**New files** — `routes/admin.routes.ts`, `controllers/admin.controller.ts`, `services/admin.service.ts`, `schemas/admin.schema.ts`, `dto/admin.dto.ts`.
+
+**Modified (additive)** — `routes/index.ts` (register `/admin`); `repositories/booking.repository.ts` (`findAllForAdmin`, `findByIdForAdmin`, `setAdminNote`, `setDraftAndStatus`, `countGroupedByStatus`, `countGroupedByServiceType`); `repositories/payment.repository.ts` (`sumCapturedRevenuePaise`); `lib/s3.ts` (`buildDraftKey`); `lib/rateLimiter.ts` (`adminDraftUploadRateLimiter` 15/hr); `services/notification.service.ts` + `emails/templates.ts` (4 user-facing templates: in_review, draft-ready, draft-updated, complete).
+
+**Pre-deposit disclosure (KB2 §7)** — the draft-ready and draft-updated emails render the statutory pre-deposit notice for `commissioner_appeal` / `gstat_appeal`, matching the client `PreDepositNotice.tsx` copy — the fourth mandatory touchpoint alongside pricing page, booking Step 1, and pay-to-unlock.
+
+**Mark-paid reuses Phase 5, does not insert a new row (D78)** — clarifies D66: the shared `processCaptured` core updates the `created` order row in place to `source=admin_override` + `performed_by_admin_id`; the D66 audit intent is fully met. A repeat `mark-paid` is rejected at the `assertPayable` gate (`PAYMENT_ALREADY_CAPTURED`).
+
+**Verified** — `tsc --noEmit` clean; full route-registry module graph loads at runtime with `.env` (no circular-import/export errors). No `any`/`console.log` in new code. Full Newman acceptance pass (see next entry): **50/50 requests, 109/109 assertions, 0 failures**. `npm run lint` is a pre-existing no-op (no ESLint config in repo) — unrelated to this change.
+
+---
+
+## [2026-07-01] — test: EP13 — Admin Surface Newman suite (50 requests / 109 assertions, all green)
+
+**Automated API test coverage for all 8 `/api/v1/admin` endpoints, mirroring the EP12 Payments Newman setup. Full pass confirmed against a live dev server + seeded admin. See D79.**
+
+**New files**
+- `test/postman/Admin.postman_collection.json` — 12 folders / 50 requests covering: unauthenticated (401), non-admin RBAC (403 on all 8 routes), list (pagination/filters/validation), detail (asserts `draftS3Key`/document `s3Key` are **never** exposed), status transitions (both legal + all illegal → `INVALID_TRANSITION`), draft-upload-url (`INVALID_FILE_TYPE`/`FILE_TOO_LARGE`/`DRAFT_LOCKED` ×2/valid), draft-confirm (foreign-key reject/`DRAFT_LOCKED`/first-draft/re-upload), note (set/update/clear/too-long), mark-paid gates (`VALIDATION_ERROR`/`NOT_FOUND`/`INVALID_STATUS`/`PAYMENT_ALREADY_CAPTURED`/`RAZORPAY_ERROR`), and stats (zero-filled enum keys, count reconciliation).
+- `test/postman/admin-local.postman_environment.json` — placeholders only, no secrets.
+- `test/postman/run-admin-newman.sh` — mints fixtures, injects admin creds, runs Newman.
+- `server/scripts/setup-admin-fixtures.mjs` — one verified `role=user` account (RBAC checks) + 8 bookings pre-pinned to the exact status each test needs (order-independent, no inter-test coupling).
+- `test/postman/ADMIN_TEST_PLAN.md` — full coverage matrix + the manual/deferred paths.
+
+**Result** — `bash test/postman/run-admin-newman.sh`: **50 requests / 50 test-scripts / 109 assertions, 0 failed.**
+
+**Deferred to manual** (same constraint as EP12/D77 — Razorpay exposes no way to fabricate a captured payment via API): `mark-paid` 200 success, the cross-booking guard, idempotency-on-repeat, a real browser→S3 PUT, and email delivery incl. the pre-deposit disclosure.
+
+**Bug found & fixed during this pass (ERROR.md #8)** — the first run failed at admin login (`401`) despite correct credentials, cascading into ~25 apparent downstream failures. Root cause: a stale duplicate `ADMIN_EMAIL`/`ADMIN_PASSWORD` pair in `server/.env` — the app's `dotenv` load is last-value-wins (correct), but the runner's `grep -E "^KEY=" | head -1` extraction grabbed the first (stale) value. Fixed `run-admin-newman.sh` to resolve credentials via `dotenv` directly, matching the app's own resolution; the user also deduplicated `server/.env`. Re-run after both fixes: fully green.
+
+---
+
 ## [2026-06-30] — feat(server): EP12 — Payments (Razorpay, 3-layer reliability backend)
 
 **The draft-gated payment mechanic. A user with a `draft_ready` booking can now pay via Razorpay; payment transitions the booking `draft_ready → filing` (unlocking the draft) exactly once across all reliability layers. Layer 3 (admin mark-paid) deferred to EP13 but its shared transition core is built here. Payment frontend (modal + `/payment/verify` page) deferred.**

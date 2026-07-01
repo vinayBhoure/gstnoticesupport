@@ -37,6 +37,15 @@ export function buildDocumentKey(userId: string, bookingId: string, fileName: st
   return `${userId}/${bookingId}/${stamp}-${safeName}-${rand}.pdf`;
 }
 
+// Admin draft key (api_contract.md §6.4): drafts/{bookingId}-{yyyyMMdd}-{sanitizedName}-{4rand}.pdf.
+// The bookingId prefix lets draft-confirm verify the key was issued for this booking.
+export function buildDraftKey(bookingId: string, fileName: string): string {
+  const stamp = formatDateStamp(new Date());
+  const safeName = sanitizeFilename(fileName);
+  const rand = randomBytes(2).toString('hex'); // 4 hex chars
+  return `drafts/${bookingId}-${stamp}-${safeName}-${rand}.pdf`;
+}
+
 type UploadUrlParams = {
   key: string;
   contentLength: number;

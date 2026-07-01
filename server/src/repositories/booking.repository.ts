@@ -1,11 +1,36 @@
 import { prisma } from '../lib/prisma';
 import { BookingStatus } from '@prisma/client';
-import type { Booking, BookingDocument, PaymentRecord } from '@prisma/client';
+import type {
+  Booking,
+  BookingDocument,
+  PaymentRecord,
+  PaymentStatus,
+  ServiceType,
+} from '@prisma/client';
 import type { CreateBookingInput } from '../schemas/booking.schema';
 
 export type BookingWithRelations = Booking & {
   documents: BookingDocument[];
   paymentRecords: PaymentRecord[];
+};
+
+// Admin views join the owning user and (for detail) the full payment history.
+export type AdminBookingListRow = Booking & {
+  user: { id: string; name: string; email: string };
+};
+
+export type AdminBookingDetailRow = Booking & {
+  user: { id: string; name: string; email: string };
+  documents: BookingDocument[];
+  paymentRecords: PaymentRecord[];
+};
+
+type AdminBookingFilter = {
+  page: number;
+  limit: number;
+  status?: BookingStatus;
+  paymentStatus?: PaymentStatus;
+  serviceType?: ServiceType;
 };
 
 export const bookingRepository = {
@@ -38,5 +63,71 @@ export const bookingRepository = {
       where: { id },
       data: { status, updatedAt: new Date() },
     });
+  },
+
+  // ── Admin surface (Phase 6) ──────────────────────────────────────────────
+  // No userId filter — admin sees every booking (database.md §7.1: admin lookups
+  // use a separate method that does not bake in ownership).
+
+  async findAllForAdmin(
+    filter: AdminBookingFilter,
+  ): Promise<{ data: AdminBookingListRow[]; total: number }> {
+    const where = {
+      ...(filter.status ? { status: filter.status } : {}),
+      ...(filter.paymentStatus ? { paymentStatus: filter.paymentStatus } : {}),
+      ...(filter.serviceType ? { serviceType: filter.serviceType } : {}),
+    };
+    const [data, total] = await prisma.$transaction([
+      prisma.booking.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (filter.page - 1) * filter.limit,
+        take: filter.limit,
+        include: { user: { select: { id: true, name: true, email: true } } },
+      }),
+      prisma.booking.count({ where }),
+    ]);
+    return { data, total };
+  },
+
+  async findByIdForAdmin(id: string): Promise<AdminBookingDetailRow | null> {
+    return prisma.booking.findUnique({
+      where: { id },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        documents: { orderBy: { uploadedAt: 'asc' } },
+        paymentRecords: { orderBy: { createdAt: 'desc' } },
+      },
+    });
+  },
+
+  async setAdminNote(id: string, note: string): Promise<Booking> {
+    return prisma.booking.update({
+      where: { id },
+      data: { adminNote: note, updatedAt: new Date() },
+    });
+  },
+
+  // Draft confirm: set the draft pointer and (for the first draft) transition to
+  // draft_ready. On re-upload the caller passes status = draft_ready (unchanged).
+  async setDraftAndStatus(
+    id: string,
+    draftS3Key: string,
+    status: BookingStatus,
+  ): Promise<Booking> {
+    return prisma.booking.update({
+      where: { id },
+      data: { draftS3Key, status, updatedAt: new Date() },
+    });
+  },
+
+  async countGroupedByStatus(): Promise<{ status: BookingStatus; count: number }[]> {
+    const rows = await prisma.booking.groupBy({ by: ['status'], _count: { _all: true } });
+    return rows.map((r) => ({ status: r.status, count: r._count._all }));
+  },
+
+  async countGroupedByServiceType(): Promise<{ serviceType: ServiceType; count: number }[]> {
+    const rows = await prisma.booking.groupBy({ by: ['serviceType'], _count: { _all: true } });
+    return rows.map((r) => ({ serviceType: r.serviceType, count: r._count._all }));
   },
 };

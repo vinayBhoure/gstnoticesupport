@@ -90,4 +90,13 @@ export const paymentRepository = {
       });
     });
   },
+
+  // Admin stats (Phase 6): total captured revenue across all bookings.
+  async sumCapturedRevenuePaise(): Promise<number> {
+    const result = await prisma.paymentRecord.aggregate({
+      _sum: { amountPaise: true },
+      where: { status: PaymentRecordStatus.captured },
+    });
+    return result._sum.amountPaise ?? 0;
+  },
 };
