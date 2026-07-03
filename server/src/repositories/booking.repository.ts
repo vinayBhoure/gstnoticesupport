@@ -31,7 +31,19 @@ type AdminBookingFilter = {
   status?: BookingStatus;
   paymentStatus?: PaymentStatus;
   serviceType?: ServiceType;
+  search?: string;
+  sortBy: 'createdAt' | 'updatedAt';
+  sortDir: 'asc' | 'desc';
 };
+
+// Statuses that count as "active" for the delete-user gate (Admin User Detail
+// prototype: users are deletable only once every booking is complete/cancelled).
+const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
+  BookingStatus.document_upload,
+  BookingStatus.in_review,
+  BookingStatus.draft_ready,
+  BookingStatus.filing,
+];
 
 export const bookingRepository = {
   async create(data: CreateBookingInput & { userId: string }): Promise<Booking> {
@@ -76,11 +88,23 @@ export const bookingRepository = {
       ...(filter.status ? { status: filter.status } : {}),
       ...(filter.paymentStatus ? { paymentStatus: filter.paymentStatus } : {}),
       ...(filter.serviceType ? { serviceType: filter.serviceType } : {}),
+      ...(filter.search
+        ? {
+            user: {
+              is: {
+                OR: [
+                  { name: { contains: filter.search, mode: 'insensitive' as const } },
+                  { email: { contains: filter.search, mode: 'insensitive' as const } },
+                ],
+              },
+            },
+          }
+        : {}),
     };
     const [data, total] = await prisma.$transaction([
       prisma.booking.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { [filter.sortBy]: filter.sortDir },
         skip: (filter.page - 1) * filter.limit,
         take: filter.limit,
         include: { user: { select: { id: true, name: true, email: true } } },
@@ -88,6 +112,12 @@ export const bookingRepository = {
       prisma.booking.count({ where }),
     ]);
     return { data, total };
+  },
+
+  async countActiveByUserId(userId: string): Promise<number> {
+    return prisma.booking.count({
+      where: { userId, status: { in: ACTIVE_BOOKING_STATUSES } },
+    });
   },
 
   async findByIdForAdmin(id: string): Promise<AdminBookingDetailRow | null> {

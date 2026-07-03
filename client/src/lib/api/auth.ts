@@ -8,6 +8,7 @@ import type {
   LoginInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  ChangePasswordInput,
 } from '@/lib/shared-schemas/auth.schema';
 
 type UserResponse = { user: UserObject };
@@ -39,6 +40,9 @@ export const authApi = {
 
   resetPassword: (payload: ResetPasswordInput): Promise<UserResponse> =>
     apiClient.post<UserResponse>('/auth/reset-password', payload),
+
+  changePassword: (payload: ChangePasswordInput): Promise<null> =>
+    apiClient.post<null>('/auth/change-password', payload),
 
   invalidate: (ref: string, cookie?: string): Promise<null> =>
     apiClient.get<null>(`/auth/invalidate?ref=${encodeURIComponent(ref)}`, { cookie }),

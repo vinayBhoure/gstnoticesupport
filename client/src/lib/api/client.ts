@@ -36,7 +36,10 @@ async function tryRefresh(): Promise<boolean> {
   }
 }
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+async function requestEnvelope<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<ApiEnvelope<T>> {
   const { body, cookie, _retry, headers: extraHeaders, ...rest } = options;
 
   const headers: HeadersInit = {
@@ -65,7 +68,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     !isAuthFlow
   ) {
     const refreshed = await tryRefresh();
-    if (refreshed) return request<T>(path, { ...options, _retry: true });
+    if (refreshed) return requestEnvelope<T>(path, { ...options, _retry: true });
   }
 
   const json = (await response.json()) as ApiResponse<T>;
@@ -80,12 +83,36 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     );
   }
 
-  return (json as ApiEnvelope<T>).data;
+  return json as ApiEnvelope<T>;
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const envelope = await requestEnvelope<T>(path, options);
+  return envelope.data;
+}
+
+export type PaginatedResult<T> = {
+  data: T[];
+  meta: { page: number; limit: number; total: number };
+};
+
+// For the server's `paginated()` envelope — keeps `meta` instead of discarding it.
+async function requestList<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<PaginatedResult<T>> {
+  const envelope = (await requestEnvelope<T[]>(path, options)) as ApiEnvelope<T[]> & {
+    meta: { page: number; limit: number; total: number };
+  };
+  return { data: envelope.data, meta: envelope.meta };
 }
 
 export const apiClient = {
   get: <T>(path: string, options?: RequestOptions): Promise<T> =>
     request<T>(path, { method: 'GET', ...options }),
+
+  getList: <T>(path: string, options?: RequestOptions): Promise<PaginatedResult<T>> =>
+    requestList<T>(path, { method: 'GET', ...options }),
 
   post: <T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> =>
     request<T>(path, { method: 'POST', body, ...options }),

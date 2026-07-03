@@ -29,16 +29,40 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
+// Sortable columns for the admin bookings table (Admin Bookings prototype:
+// Booking Date / Updated headers). Default preserves the original createdAt desc.
+export const BOOKING_SORT_FIELDS = ['createdAt', 'updatedAt'] as const;
+export const SORT_DIRECTIONS = ['asc', 'desc'] as const;
+
 export const adminBookingListQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(DEFAULT_PAGE),
   limit: z.coerce.number().int().positive().max(MAX_LIMIT).optional().default(DEFAULT_LIMIT),
   status: z.enum(BOOKING_STATUSES).optional(),
   paymentStatus: z.enum(PAYMENT_STATUSES).optional(),
   serviceType: z.enum(SERVICE_TYPES).optional(),
+  // Case-insensitive contains on the owning user's name/email.
+  search: z.string().trim().max(255).optional(),
+  sortBy: z.enum(BOOKING_SORT_FIELDS).optional().default('createdAt'),
+  sortDir: z.enum(SORT_DIRECTIONS).optional().default('desc'),
 });
 
 export const adminBookingIdParamsSchema = z.object({
   id: z.string().uuid('Invalid booking ID format'),
+});
+
+export const adminUserListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional().default(DEFAULT_PAGE),
+  limit: z.coerce.number().int().positive().max(MAX_LIMIT).optional().default(DEFAULT_LIMIT),
+  search: z.string().trim().max(255).optional(),
+});
+
+export const adminUserIdParamsSchema = z.object({
+  id: z.string().uuid('Invalid user ID format'),
+});
+
+export const adminDocumentParamsSchema = z.object({
+  id: z.string().uuid('Invalid booking ID format'),
+  documentId: z.string().uuid('Invalid document ID format'),
 });
 
 export const updateStatusSchema = z.object({
@@ -81,6 +105,9 @@ export const markPaidSchema = z.object({
 
 export type AdminBookingListQuery = z.infer<typeof adminBookingListQuerySchema>;
 export type AdminBookingIdParams = z.infer<typeof adminBookingIdParamsSchema>;
+export type AdminUserListQuery = z.infer<typeof adminUserListQuerySchema>;
+export type AdminUserIdParams = z.infer<typeof adminUserIdParamsSchema>;
+export type AdminDocumentParams = z.infer<typeof adminDocumentParamsSchema>;
 export type UpdateStatusInput = z.infer<typeof updateStatusSchema>;
 export type DraftUploadUrlInput = z.infer<typeof draftUploadUrlSchema>;
 export type DraftConfirmInput = z.infer<typeof draftConfirmSchema>;

@@ -7,6 +7,9 @@ import { adminDraftUploadRateLimiter } from '../lib/rateLimiter';
 import {
   adminBookingListQuerySchema,
   adminBookingIdParamsSchema,
+  adminUserListQuerySchema,
+  adminUserIdParamsSchema,
+  adminDocumentParamsSchema,
   updateStatusSchema,
   draftUploadUrlSchema,
   draftConfirmSchema,
@@ -65,5 +68,17 @@ router.post(
   validateBody(markPaidSchema),
   adminController.markPaid,
 );
+
+router.get(
+  '/bookings/:id/documents/:documentId/download-url',
+  validateParams(adminDocumentParamsSchema),
+  adminController.getDocumentDownloadUrl,
+);
+
+router.get('/users', validateQuery(adminUserListQuerySchema), adminController.listUsers);
+
+router.get('/users/:id', validateParams(adminUserIdParamsSchema), adminController.getUser);
+
+router.delete('/users/:id', validateParams(adminUserIdParamsSchema), adminController.deleteUser);
 
 export default router;

@@ -27,11 +27,11 @@ export function LoginForm() {
 
   const mutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: () => {
+    onSuccess: ({ user }) => {
       // Cross-origin auth requires the browser to receive Set-Cookie directly from
       // the backend, so login runs client-side and we navigate here. Access control
-      // is still enforced server-side by requireUser() in the dashboard layout.
-      router.push('/dashboard');
+      // is still enforced server-side by requireUser()/requireAdmin() in the layouts.
+      router.push(user.role === 'admin' ? '/admin' : '/dashboard');
       router.refresh();
     },
     onError: (error) => {

@@ -128,3 +128,53 @@ export type DraftUrlResponse = {
   draftUrl: string;
   expiresAt: string;
 };
+
+// ── Admin surface (mirror server/src/dto/admin.dto.ts) ──
+export type AdminUserSummaryDTO = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export type AdminBookingListItemDTO = {
+  id: string;
+  serviceType: ServiceType;
+  status: BookingStatus;
+  paymentStatus: PaymentStatus;
+  user: AdminUserSummaryDTO;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminBookingDetailDTO = BookingDetailDTO & {
+  user: AdminUserSummaryDTO;
+  documents: BookingDocumentDTO[];
+  paymentRecords: PaymentRecordDTO[];
+  hasDraft: boolean;
+};
+
+export type AdminStatsDTO = {
+  totalBookings: number;
+  byStatus: Record<BookingStatus, number>;
+  byServiceType: Record<ServiceType, number>;
+  totalRevenuePaise: number;
+};
+
+export type AdminUserListItemDTO = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  interestedServices: ServiceType[];
+  createdAt: string;
+};
+
+export type AdminUserDetailDTO = AdminUserListItemDTO & {
+  activeBookingsCount: number;
+};
+
+export type DocumentDownloadResponse = {
+  downloadUrl: string;
+  fileName: string;
+  expiresAt: string;
+};

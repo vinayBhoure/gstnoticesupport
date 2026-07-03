@@ -5,6 +5,7 @@ import type {
   ServiceType,
   BookingStatus,
   PaymentStatus,
+  User,
 } from '@prisma/client';
 import {
   toBookingDetailDTO,
@@ -89,4 +90,34 @@ export function toAdminBookingDetailDTO(
     paymentRecords: booking.paymentRecords.map(toPaymentRecordDTO),
     hasDraft: booking.draftS3Key !== null,
   };
+}
+
+// Admin Users screens (Admin Users / Admin User Detail prototypes). Explicitly
+// listed fields only — hashedPassword/deletedAt never leave the server (database.md §5.3).
+export type AdminUserListItemDTO = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  interestedServices: ServiceType[];
+  createdAt: string;
+};
+
+export type AdminUserDetailDTO = AdminUserListItemDTO & {
+  activeBookingsCount: number;
+};
+
+export function toAdminUserListItemDTO(user: User): AdminUserListItemDTO {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    interestedServices: user.interestedServices,
+    createdAt: user.createdAt.toISOString(),
+  };
+}
+
+export function toAdminUserDetailDTO(user: User, activeBookingsCount: number): AdminUserDetailDTO {
+  return { ...toAdminUserListItemDTO(user), activeBookingsCount };
 }

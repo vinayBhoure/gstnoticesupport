@@ -19,7 +19,7 @@ const SRC_DIR = resolve(__dirname, '../../server/src/schemas');
 const OUT_DIR = resolve(__dirname, '../src/lib/shared-schemas');
 
 // Allow-list: only pure-Zod schemas (no server-only imports like @prisma/client).
-const SYNC = ['auth.schema.ts', 'document.schema.ts', 'booking.schema.ts'];
+const SYNC = ['auth.schema.ts', 'document.schema.ts', 'booking.schema.ts', 'admin.schema.ts'];
 
 const HEADER = (name) =>
   `// AUTO-GENERATED — DO NOT EDIT.\n` +
