@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { LayoutDashboard, LifeBuoy, Menu, Phone, ChevronDown, LogOut } from 'lucide-react';
+import { LayoutDashboard, LifeBuoy, Menu, Phone, ChevronDown, LogOut, User } from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
 import { getErrorMessage } from '@/lib/api/client';
 import { ORG } from '@/lib/site';
@@ -161,6 +161,11 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
               <ChevronDown className="chev" aria-hidden />
             </button>
             <div className={`acct-menu${acctOpen ? ' open' : ''}`} id="acctMenu" role="menu" aria-label="Account">
+              <Link href="/dashboard/profile" role="menuitem">
+                <User className="ic" aria-hidden />
+                My Profile
+              </Link>
+              <div className="divider" aria-hidden />
               <button
                 type="button"
                 role="menuitem"

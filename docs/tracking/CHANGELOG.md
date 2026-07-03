@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-07-03] — feat(client): EP11 My Profile page — read-only account details
+
+**Closes the last EP11 leftover. Branch: `feature/phase-2/profile-page`.**
+
+**`/dashboard/profile`** per `My Profile.html` — Identity panel (avatar initials, name, "Member since") + Contact Details panel (email + Verified badge, mobile or "Not provided", interested-services chips, promotional-updates status, terms-accepted badge). Data comes entirely from the already-fetched `requireUser()` result (`GET /auth/me`) — no extra request. **Read-only by design**: `complete-profile` is a one-time step and `PATCH /user/profile` doesn't exist yet (EP15), so the prototype's edit inputs, KYC/PAN/GSTIN fields, engagement stats, and activity log are omitted rather than faked — a muted note points users to Contact support instead. Linked from the dashboard account menu ("My Profile", above Log out), matching the prototype's account-dropdown placement.
+
+**Verified** — `tsc --noEmit` clean, `next build` green (new `/dashboard/profile` route), lint clean (no new findings beyond pre-existing Phase 1 items).
+
+---
+
 ## [2026-07-03] — feat(client): EP12 payment UI — pay-to-unlock, Razorpay Checkout, and the payment verify page
 
 **Fills the D74 placeholder: users can now actually pay to unlock their draft. Branch: `feature/phase-2/payment-ui`.**
