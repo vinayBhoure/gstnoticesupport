@@ -2,12 +2,12 @@ import type { BookingStatus } from '@/lib/api/types';
 
 // User-facing "what happens next" copy for each booking status.
 export const NEXT_ACTION_COPY: Record<BookingStatus, string> = {
-  document_upload: 'Upload your documents to proceed.',
-  in_review: 'Our team is reviewing your documents.',
-  draft_ready: 'Your draft is ready.',
-  filing: 'Your application is being filed.',
-  complete: 'Service complete.',
-  cancelled: 'This booking was cancelled.',
+  document_upload: 'Upload your documents to proceed',
+  in_review: 'Awaiting review',
+  draft_ready: 'Draft ready — payment required',
+  filing: 'Filing in progress',
+  complete: 'Service complete',
+  cancelled: 'This booking was cancelled',
 };
 
 export function formatBookingDate(iso: string): string {

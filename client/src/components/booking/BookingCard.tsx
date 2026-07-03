@@ -8,23 +8,26 @@ type BookingCardProps = {
   booking: BookingSummaryDTO;
 };
 
+// Booking Summary Card per resources/ui/Dashboard Home.html → .booking-card.
 export function BookingCard({ booking }: BookingCardProps) {
+  const label = SERVICE_META[booking.serviceType].label;
   return (
     <Link
       href={`/dashboard/bookings/${booking.id}`}
-      className="card card-elev flex flex-col gap-3 p-4 transition-colors hover:border-[var(--primary-deep-blue)]"
+      className={`booking-card${booking.status === 'draft_ready' ? ' draft-ready' : ''}`}
+      aria-label={`${label} — ${NEXT_ACTION_COPY[booking.status]} View details.`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <span className="font-semibold text-[var(--primary-navy)]">
-          {SERVICE_META[booking.serviceType].label}
-        </span>
+      <div className="bc-row1">
+        <span className="bc-type">{label}</span>
         <StatusBadge status={booking.status} />
       </div>
-      <p className="text-sm text-[var(--neutral-600)]">{NEXT_ACTION_COPY[booking.status]}</p>
-      <div className="flex items-center gap-3 text-xs text-[var(--neutral-600)]">
+      <p className="bc-next">{NEXT_ACTION_COPY[booking.status]}</p>
+      <div className="bc-meta">
         <span>{formatBookingDate(booking.createdAt)}</span>
-        <span aria-hidden>·</span>
-        <span className="font-mono">Ref {bookingRef(booking.id)}</span>
+        <span className="sep" aria-hidden>
+          ·
+        </span>
+        <span className="mono">{bookingRef(booking.id)}</span>
       </div>
     </Link>
   );

@@ -5,7 +5,23 @@
 
 ---
 
-## [2026-07-01] — feat(server): EP13 — Admin Surface (case management + mark-paid override backend)
+## [2026-07-03] — feat(client): EP11 UI parity — authenticated screens now match the `resources/ui` prototypes exactly
+
+**Full visual parity pass over every existing Phase 2 screen (restyle/re-layout only — zero API, data-flow, or backend change). The user flagged that the EP11 screens worked but did not match the prototype HTML; this branch (`feature/phase-2/ui-parity`) closes that gap and is the base for the payment (EP12) and admin (EP13) frontends.**
+
+**App Shell (new)** — `components/dashboard/DashboardShell.tsx` per `Dashboard Home.html`: fixed 264px sidebar (brand, Dashboard nav, Help & Support), sticky blurred topbar (tap-to-call from `ORG.phone`, account menu with avatar initials + logout), mobile slide-in drawer + scrim with Escape/scrim/navigation close. Mounted via a new nested route group: `(dashboard)/(shell)/…` wraps dashboard home, booking detail, and draft viewer; `(dashboard)/(flow)/…` keeps the booking wizard chromeless (prototype "focused flow shell"). URLs unchanged. `getCurrentUser` wrapped in React `cache()` so layout+page share one `/auth/me` fetch per request.
+
+**Dashboard Home** — time-based greeting (IST) + date, summary strip (Active/Complete/Cancelled), amber attention banner for draft-ready bookings, 3-col Active Services `cards-grid` with prototype `booking-card`s (draft-ready renders first with amber left border), Past Services section, prototype empty state and skeleton `loading.tsx`.
+
+**Booking wizard Steps 1–3** — focused flow shell (logo top bar + "Save & Exit", stepper rail, sticky footer bar with Back/Continue). Step 1: 2×2 Notice Type Selector Cards with icons, prices (from `pricing.tsx` values, now in `SERVICE_META.priceDisplay` — display only, charge stays server-derived), selected checkmark, animated pre-deposit region; Step 2: prototype Form Field Primitives (+91 phone-wrap prefix, mono GSTIN, green focus ring), "A Client" toggle label; Step 3: prototype dropzone (constraints line, privacy note, per-file rows with real XHR upload progress bars + icon→check confirmation animation), Booking Summary reveal after first upload, "Submit Booking" → prototype success state with booking ref.
+
+**Service Detail (booking detail)** — breadcrumb, status row + `booking-meta`, 60/40 two-col layout: left Case Information `dl.kv` + Uploaded Documents `doc-list` + confidentiality note; right sticky status **action panel** with the prototype's per-status panels (Documents Received / Under Review / Draft Ready with Expert Summary + fee row + lock icon [EP12 CTA slot, D74] / Filing with View Draft / green Service Complete / Cancelled with re-book link). Cancel is now the prototype `cancel-link` + inline "Are you sure?" confirm (amber `btn-danger`). Admin note renders as "Expert Summary" inside the panel.
+
+**Draft Viewer** — back link, breadcrumb, "Draft Reply — {service}" head with Download Draft button, amber expiry notice with live 15:00 countdown, `viewer-shell` with the four prototype states (Loading spin-ring / Loaded iframe / **Link Expired** lock + Generate New Link / Load Error + Retry), read-only note.
+
+**Shared components restyled** — `StatusBadge` (prototype `s-*` classes + canonical icons from Service Detail STATUS_CONFIG), `BookingCard`, `Stepper` (rail + connectors, 300ms), `SegmentedToggle`, `PreDepositNotice` (`predep-banner`), `Input` (separated +91 prefix block), `DocumentUpload`. `NEXT_ACTION_COPY` aligned to prototype copy. New `uploadToS3WithProgress` (XHR) in `lib/api/document.ts`.
+
+**Verified** — `tsc --noEmit` clean; `next build` green (all routes resolve, `(shell)`/`(flow)` groups merge correctly); the one new lint finding (drawer close-on-navigation effect) fixed via adjust-state-during-render; remaining lint errors are pre-existing Phase 1 items. Deviations from prototypes are logged as D80.
 
 **The single admin can now run a case end-to-end: review bookings, transition status, upload the draft PDF, add notes, override payment (Layer 3), and view overview stats. All 8 `api_contract.md §6` endpoints. Reuses Phases 0–5 primitives; no existing user-facing behaviour changed. Admin frontend deferred.**
 

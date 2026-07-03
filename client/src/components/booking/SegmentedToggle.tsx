@@ -12,7 +12,7 @@ type SegmentedToggleProps<T extends string> = {
   ariaLabel: string;
 };
 
-// Two-or-more option segmented control (Booking Step 2 prototype). Controlled —
+// Segmented control per resources/ui/Booking Step 2 → .seg-toggle. Controlled —
 // the parent owns the value, so it composes with React Hook Form via setValue.
 export function SegmentedToggle<T extends string>({
   options,
@@ -21,11 +21,7 @@ export function SegmentedToggle<T extends string>({
   ariaLabel,
 }: SegmentedToggleProps<T>) {
   return (
-    <div
-      role="radiogroup"
-      aria-label={ariaLabel}
-      className="inline-flex w-full overflow-hidden rounded-[var(--r-btn)] border border-[var(--neutral-200)]"
-    >
+    <div role="radiogroup" aria-label={ariaLabel} className="seg-toggle">
       {options.map((option) => {
         const isActive = option.value === value;
         return (
@@ -34,13 +30,8 @@ export function SegmentedToggle<T extends string>({
             type="button"
             role="radio"
             aria-checked={isActive}
+            className="seg-btn"
             onClick={() => onChange(option.value)}
-            className={[
-              'min-h-[44px] flex-1 px-4 text-sm font-medium transition-colors',
-              isActive
-                ? 'bg-[var(--accent-green)] text-white'
-                : 'bg-white text-[var(--neutral-900)] hover:bg-[var(--neutral-50)]',
-            ].join(' ')}
           >
             {option.label}
           </button>

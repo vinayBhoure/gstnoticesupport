@@ -6,7 +6,8 @@ import { Eye, EyeOff } from 'lucide-react';
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
   error?: string;
-  // Renders a fixed "+91" prefix and tel input mode (Form Field Primitives, components.md).
+  // Renders the separated "+91" prefix block and tel input mode
+  // (components.md → Form Field Primitive, resources/ui phone-wrap pattern).
   telPrefix?: boolean;
 };
 
@@ -19,17 +20,49 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const isPassword = type === 'password';
   const resolvedType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
+  const describedBy = error && id ? `${id}-error` : undefined;
+
+  if (telPrefix) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        {label && (
+          <label htmlFor={id} className="field__label">
+            {label}
+          </label>
+        )}
+        <div className={`phone-wrap${error ? ' is-error' : ''}`}>
+          <span className="phone-prefix" aria-hidden>
+            +91
+          </span>
+          <input
+            ref={ref}
+            id={id}
+            type={resolvedType ?? 'tel'}
+            className={`phone-input ${className}`.trim()}
+            inputMode="tel"
+            autoComplete={props.autoComplete ?? 'tel'}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy}
+            {...props}
+          />
+        </div>
+        {error && (
+          <p id={describedBy} className="text-sm text-[var(--warning-amber)]" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   const inputClasses = [
     'input',
     error ? 'border-[var(--warning-amber)]' : '',
-    telPrefix ? 'input-has-prefix' : '',
     isPassword ? 'input-has-suffix' : '',
     className,
   ]
     .filter(Boolean)
     .join(' ');
-
-  const describedBy = error && id ? `${id}-error` : undefined;
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -39,14 +72,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         </label>
       )}
       <div className="input-wrap">
-        {telPrefix && <span className="input-prefix">+91</span>}
         <input
           ref={ref}
           id={id}
           type={resolvedType}
           className={inputClasses}
-          inputMode={telPrefix ? 'tel' : props.inputMode}
-          autoComplete={telPrefix ? 'tel' : props.autoComplete}
+          inputMode={props.inputMode}
+          autoComplete={props.autoComplete}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           {...props}
