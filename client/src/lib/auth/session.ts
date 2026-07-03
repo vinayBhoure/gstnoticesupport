@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { UserObject } from '../api/types';
@@ -6,7 +7,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 // Server-Component auth check (frontend.md §1.4). Reads the HTTP-only cookie and
 // forwards it to GET /auth/me. Never trust a client-side check for access control.
-export async function getCurrentUser(): Promise<UserObject | null> {
+// Wrapped in React cache() so layout + page calls in one request share a single fetch.
+export const getCurrentUser = cache(async (): Promise<UserObject | null> => {
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
   if (!cookieHeader) return null;
@@ -23,7 +25,7 @@ export async function getCurrentUser(): Promise<UserObject | null> {
   } catch {
     return null;
   }
-}
+});
 
 // Use at the top of any auth-gated Server Component / layout.
 export async function requireUser(): Promise<UserObject> {

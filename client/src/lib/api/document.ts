@@ -42,3 +42,29 @@ export async function uploadToS3(
     throw new Error(`S3 upload failed (${res.status})`);
   }
 }
+
+// XHR variant with upload progress — fetch cannot report request-body progress.
+// Used where the UI renders a per-file progress bar (Document Upload, admin draft).
+export function uploadToS3WithProgress(
+  uploadUrl: string,
+  file: File,
+  contentType: string,
+  onProgress: (percent: number) => void,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', uploadUrl);
+    xhr.setRequestHeader('Content-Type', contentType);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`S3 upload failed (${xhr.status})`));
+    };
+    xhr.onerror = () => reject(new Error('S3 upload failed (network error)'));
+    xhr.send(file);
+  });
+}
