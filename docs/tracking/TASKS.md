@@ -233,7 +233,10 @@
 | ✅ | `GET /admin/stats` — total bookings by status + service type + captured revenue | Zero-filled enum keys |
 | ✅ | Newman test suite — 50 requests / 109 assertions, all green | `test/postman/Admin.postman_collection.json` + `run-admin-newman.sh`; see D79, ADMIN_TEST_PLAN.md |
 | ⬚ | Manual verification: mark-paid 200 success + cross-booking guard + idempotency (needs real captured Razorpay test payment) | Deferred, same as EP12/D77 |
-| ⬚ | Admin frontend — bookings table, detail view, status controls, draft upload, note editor, mark-paid | |
+| ✅ | Admin frontend — all six prototype screens: Overview, Bookings (search/filters/sort/pagination), Booking Detail (draft upload, status actions, mark-paid, note editor, doc downloads), Users, User Detail (gated delete), Settings (change password + business info) | `(admin)` route group + AdminShell; D81 |
+| ✅ | Role-based routing — admin → `/admin` at login and on any `/dashboard` visit; `requireAdmin()` gates the admin group | D81 |
+| ✅ | Backend additions: `GET/DELETE /admin/users(/:id)`, `POST /auth/change-password`, bookings `search`/`sortBy`/`sortDir`, admin document download-url | User-approved scope extension; smoke-tested live (D81) |
+| ⬚ | Manual QA: actual delete-user (soft-delete + redirect), real change-password, admin draft upload against S3, document download | Destructive/S3 paths not exercised by the smoke test |
 
 ### EP14 — Email Notifications (backend_plan Phase 7)
 | Status | Task | Notes |

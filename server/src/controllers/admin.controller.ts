@@ -4,6 +4,9 @@ import { adminService } from '../services/admin.service';
 import type {
   AdminBookingListQuery,
   AdminBookingIdParams,
+  AdminUserListQuery,
+  AdminUserIdParams,
+  AdminDocumentParams,
   UpdateStatusInput,
   DraftUploadUrlInput,
   DraftConfirmInput,
@@ -73,6 +76,34 @@ export const adminController = {
     res
       .status(200)
       .json(envelope({ booking }, 'Payment verified with Razorpay. Booking transitioned to filing.'));
+  }),
+
+  // GET /admin/bookings/:id/documents/:documentId/download-url
+  getDocumentDownloadUrl: asyncHandler(async (req, res) => {
+    const { id, documentId } = req.validated.params as AdminDocumentParams;
+    const result = await adminService.getDocumentDownloadUrl(id, documentId);
+    res.status(200).json(envelope(result));
+  }),
+
+  // GET /admin/users
+  listUsers: asyncHandler(async (req, res) => {
+    const query = req.validated.query as AdminUserListQuery;
+    const { data, meta } = await adminService.listUsers(query);
+    res.status(200).json(paginated(data, meta));
+  }),
+
+  // GET /admin/users/:id
+  getUser: asyncHandler(async (req, res) => {
+    const { id } = req.validated.params as AdminUserIdParams;
+    const user = await adminService.getUser(id);
+    res.status(200).json(envelope({ user }));
+  }),
+
+  // DELETE /admin/users/:id
+  deleteUser: asyncHandler(async (req, res) => {
+    const { id } = req.validated.params as AdminUserIdParams;
+    await adminService.deleteUser(id);
+    res.status(200).json(envelope(null, 'User deleted.'));
   }),
 
   // GET /admin/stats

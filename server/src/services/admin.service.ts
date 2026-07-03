@@ -1,19 +1,30 @@
 import { BookingStatus, PaymentSource } from '@prisma/client';
 import type { ServiceType } from '@prisma/client';
 import { bookingRepository } from '../repositories/booking.repository';
+import { userRepository } from '../repositories/user.repository';
 import { paymentRepository } from '../repositories/payment.repository';
 import { paymentService } from './payment.service';
 import { notificationService } from './notification.service';
 import { assertTransition, assertPayable } from './booking-state-machine';
 import { ApiError } from '../utils/ApiError';
-import { buildDraftKey, getUploadUrl, uploadUrlExpiresAt } from '../lib/s3';
+import {
+  buildDraftKey,
+  getUploadUrl,
+  uploadUrlExpiresAt,
+  getDownloadUrl,
+  draftUrlExpiresAt,
+} from '../lib/s3';
 import { fetchPayment } from '../lib/razorpay';
 import { logger } from '../lib/logger';
 import {
   toAdminBookingListItemDTO,
   toAdminBookingDetailDTO,
+  toAdminUserListItemDTO,
+  toAdminUserDetailDTO,
   type AdminBookingListItemDTO,
   type AdminBookingDetailDTO,
+  type AdminUserListItemDTO,
+  type AdminUserDetailDTO,
   type AdminStatsDTO,
 } from '../dto/admin.dto';
 import { SERVICE_TYPES } from '../schemas/booking.schema';
@@ -22,6 +33,7 @@ import {
   DRAFT_ALLOWED_CONTENT_TYPE,
   DRAFT_MAX_FILE_SIZE_BYTES,
   type AdminBookingListQuery,
+  type AdminUserListQuery,
   type UpdateStatusInput,
   type DraftUploadUrlInput,
   type DraftConfirmInput,
@@ -42,6 +54,11 @@ type AdminBookingListResult = {
   data: AdminBookingListItemDTO[];
   meta: { page: number; limit: number; total: number };
 };
+type AdminUserListResult = {
+  data: AdminUserListItemDTO[];
+  meta: { page: number; limit: number; total: number };
+};
+type DocumentDownloadResult = { downloadUrl: string; fileName: string; expiresAt: string };
 
 function emptyStatusCounts(): Record<BookingStatus, number> {
   return BOOKING_STATUSES.reduce(
@@ -71,6 +88,9 @@ export const adminService = {
       status: query.status,
       paymentStatus: query.paymentStatus,
       serviceType: query.serviceType,
+      search: query.search,
+      sortBy: query.sortBy,
+      sortDir: query.sortDir,
     });
     return {
       data: data.map(toAdminBookingListItemDTO),
@@ -212,6 +232,64 @@ export const adminService = {
     }
 
     return adminService.getBooking(id);
+  },
+
+  // Pre-signed GET for a user-uploaded document (Admin Booking Detail → Download).
+  // Admin-only; the key never leaves the server — only the short-lived URL does.
+  async getDocumentDownloadUrl(
+    bookingId: string,
+    documentId: string,
+  ): Promise<DocumentDownloadResult> {
+    const booking = await bookingRepository.findByIdForAdmin(bookingId);
+    if (!booking) throw new ApiError(404, 'NOT_FOUND', 'Booking not found');
+
+    const document = booking.documents.find((doc) => doc.id === documentId);
+    if (!document) throw new ApiError(404, 'NOT_FOUND', 'Document not found');
+
+    const downloadUrl = await getDownloadUrl(document.s3Key);
+    return {
+      downloadUrl,
+      fileName: document.fileName,
+      expiresAt: draftUrlExpiresAt().toISOString(),
+    };
+  },
+
+  async listUsers(query: AdminUserListQuery): Promise<AdminUserListResult> {
+    const { data, total } = await userRepository.findAllForAdmin({
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
+    });
+    return {
+      data: data.map(toAdminUserListItemDTO),
+      meta: { page: query.page, limit: query.limit, total },
+    };
+  },
+
+  async getUser(id: string): Promise<AdminUserDetailDTO> {
+    const user = await userRepository.findById(id);
+    if (!user || user.role !== 'user') throw new ApiError(404, 'NOT_FOUND', 'User not found');
+
+    const activeBookingsCount = await bookingRepository.countActiveByUserId(id);
+    return toAdminUserDetailDTO(user, activeBookingsCount);
+  },
+
+  // Soft delete only (database.md §3.1); bookings/payment records are retained.
+  // Blocked while the user has any active booking (Admin User Detail prototype gate).
+  async deleteUser(id: string): Promise<void> {
+    const user = await userRepository.findById(id);
+    if (!user || user.role !== 'user') throw new ApiError(404, 'NOT_FOUND', 'User not found');
+
+    const activeBookingsCount = await bookingRepository.countActiveByUserId(id);
+    if (activeBookingsCount > 0) {
+      throw new ApiError(
+        409,
+        'USER_HAS_ACTIVE_BOOKINGS',
+        'Users can only be deleted once all their bookings are complete or cancelled',
+      );
+    }
+
+    await userRepository.softDelete(id);
   },
 
   async getStats(): Promise<AdminStatsDTO> {

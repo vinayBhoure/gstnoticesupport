@@ -77,6 +77,12 @@ export const invalidateQuerySchema = z.object({
   ref: z.string().uuid('Invalid session reference format'),
 });
 
+// Authenticated password change (Admin Settings prototype; any signed-in user).
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: passwordField,
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type ResendOtpInput = z.infer<typeof resendOtpSchema>;
@@ -85,3 +91,4 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type InvalidateQuery = z.infer<typeof invalidateQuerySchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

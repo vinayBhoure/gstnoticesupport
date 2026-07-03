@@ -42,7 +42,8 @@ export async function requireAdmin(): Promise<UserObject> {
 }
 
 // Use on auth pages so an already-signed-in user skips login/signup.
-export async function redirectIfAuthenticated(to = '/dashboard'): Promise<void> {
+// Role-aware: admins land on the admin surface, users on the dashboard.
+export async function redirectIfAuthenticated(to?: string): Promise<void> {
   const user = await getCurrentUser();
-  if (user) redirect(to);
+  if (user) redirect(to ?? (user.role === 'admin' ? '/admin' : '/dashboard'));
 }

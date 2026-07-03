@@ -17,6 +17,7 @@ import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  changePasswordSchema,
   invalidateQuerySchema,
 } from '../schemas/auth.schema';
 
@@ -31,6 +32,7 @@ router.post('/refresh', authController.refresh);
 router.post('/logout', authenticate, authController.logout);
 router.post('/forgot-password', forgotPasswordRateLimiter, validateBody(forgotPasswordSchema), authController.forgotPassword);
 router.post('/reset-password', resetPasswordRateLimiter, validateBody(resetPasswordSchema), authController.resetPassword);
+router.post('/change-password', authenticate, resetPasswordRateLimiter, validateBody(changePasswordSchema), authController.changePassword);
 router.get('/invalidate', validateQuery(invalidateQuerySchema), authController.invalidate);
 router.get('/me', authenticate, authController.me);
 

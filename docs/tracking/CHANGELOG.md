@@ -5,6 +5,33 @@
 
 ---
 
+## [2026-07-03] — feat(admin): EP13 admin frontend — all six prototype screens + role-based routing + supporting backend endpoints
+
+**The admin can now run the entire operation from the browser. All six `resources/ui/Admin *.html` prototypes are implemented, admins are routed to their own surface at login, and six small backend additions close the gaps the prototypes needed. Branch: `feature/phase-2/admin-surface`.**
+
+**Role-based routing** — login now redirects by role (`admin` → `/admin`, `user` → `/dashboard`); the `(dashboard)` layout bounces admins to `/admin`; `redirectIfAuthenticated` is role-aware; the new `(admin)` layout gates everything with `requireAdmin()` (anonymous → `/login`, non-admin → `/dashboard`).
+
+**New backend endpoints (user-approved scope extension)**
+- `GET /admin/users` — paginated (default 20/max 100), case-insensitive name/email search; `role=user`, soft-deleted excluded.
+- `GET /admin/users/:id` — detail + `activeBookingsCount`.
+- `DELETE /admin/users/:id` — **soft delete only**, blocked with `409 USER_HAS_ACTIVE_BOOKINGS` while any booking is active; bookings/payments retained (database.md §3).
+- `POST /auth/change-password` — authenticated; bcrypt-verifies current password (`401 INVALID_CREDENTIALS`), revokes other refresh tokens on success. Rate-limited.
+- `GET /admin/bookings` gains `search` (user name/email), `sortBy` (`createdAt|updatedAt`), `sortDir` — defaults unchanged (`createdAt desc`) so the existing Newman suite is unaffected.
+- `GET /admin/bookings/:id/documents/:documentId/download-url` — pre-signed GET for user documents (admin download buttons); s3Key never exposed.
+
+**Admin screens** (new `(admin)` route group + `AdminShell` sidebar shell, desktop-primary)
+- **Overview `/admin`** — KPI row (Total Bookings + per-service sub-line, Bookings-by-Status badge grid, Revenue Collected ₹), "Needs attention" queue (draft-ready unpaid + in-review, newest first).
+- **Bookings `/admin/bookings`** — debounced search, status/service/payment filter selects, sortable Booking Date/Updated columns, `paginated()`-driven pagination, booking-ref sub-line, payment + status badges. URL-driven throughout.
+- **Booking Detail `/admin/bookings/[id]`** — user info, document list with per-file Download (fresh pre-signed URL per click), Admin Note editor (5000-char, clears on empty), sticky right column: Draft card (dropzone → XHR progress → confirm auto-transitions to `draft_ready`; Replace; locked once payment begins) and Status Actions (Set to In Review / Mark-as-Paid panel with Razorpay-verified override and exact error mapping / Mark Complete / per-status hints).
+- **Users `/admin/users`** + **User Detail `/admin/users/[id]`** — searchable list; read-only profile; Delete User with type-the-email confirmation dialog, gated on active bookings.
+- **Settings `/admin/settings`** — Change Password (shared `changePasswordSchema`, strength meter, show/hide toggles) + read-only Business Information from `lib/site.ts`.
+
+**Client plumbing** — `admin.schema.ts` added to the schema sync allow-list; `apiClient.getList()` (keeps the `paginated()` envelope's `meta`); `adminApi` module; admin DTO mirrors in `lib/api/types.ts`; `authApi.changePassword`.
+
+**Verified** — server + client `tsc --noEmit` clean; `next build` green (5 admin routes); lint clean for all new files; live smoke test against the dev server: admin login, users list/search/detail (`activeBookingsCount`), bookings search+sort, change-password wrong-current → `401 INVALID_CREDENTIALS`, bogus document download-url → 404, unauthenticated → 401. Destructive paths (actual delete-user, real password change) left for manual QA.
+
+---
+
 ## [2026-07-03] — feat(client): EP11 UI parity — authenticated screens now match the `resources/ui` prototypes exactly
 
 **Full visual parity pass over every existing Phase 2 screen (restyle/re-layout only — zero API, data-flow, or backend change). The user flagged that the EP11 screens worked but did not match the prototype HTML; this branch (`feature/phase-2/ui-parity`) closes that gap and is the base for the payment (EP12) and admin (EP13) frontends.**
