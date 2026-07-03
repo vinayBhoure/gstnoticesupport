@@ -205,7 +205,7 @@
 | ✅ | `lib/api/booking.ts` + `lib/api/document.ts` typed surfaces; `loading.tsx`/`error.tsx`; `booking.schema` sync unblock; auth/invalidate email link fix | EP11 supporting work |
 | ✅ | UI parity pass — dashboard App Shell (sidebar/topbar/drawer), Dashboard Home, booking wizard Steps 1–3 (focused flow shell), Service Detail action panels, Draft Viewer 4-state viewer | `feature/phase-2/ui-parity`; exact match to `resources/ui` prototypes (D80); restyle only, no API/behaviour change |
 | ⬚ | Payment History page — offset pagination + Razorpay receipt links (D64) | |
-| ⬚ | My Profile page — view + update name/phone (`PATCH /user/profile`) | |
+| ✅ | My Profile page — read-only view (avatar/name/member-since, email/phone/services/promotions/terms) | Edit deferred to EP15 (`PATCH /user/profile` not built); D80 |
 
 ### EP12 — Payment Integration (backend_plan Phase 5)
 | Status | Task | Notes |

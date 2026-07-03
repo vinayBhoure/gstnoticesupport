@@ -145,6 +145,36 @@ h3{font-size:24px;font-weight:600;line-height:1.3;}
 @media(max-width:380px){.otp-box{width:40px;min-height:48px;font-size:18px;}}
 
 /* =====================================================
+   MY PROFILE (read-only)
+   Verbatim from resources/ui/My Profile.html <style> (edit affordances,
+   KYC/stats/activity panels omitted — no backend data, D80/plan C1).
+   ===================================================== */
+.panel{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);margin-bottom:24px;overflow:hidden;}
+.panel-head{padding:20px 24px;border-bottom:1px solid var(--neutral-200);display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.panel-head h2{font-size:18px;margin:0;color:var(--primary-navy);}
+.panel-head .ph-sub{font-size:13px;color:var(--neutral-600);margin-top:3px;}
+.panel-body{padding:24px;}
+.avatar-block{display:flex;align-items:center;gap:18px;}
+.av-lg{width:72px;height:72px;border-radius:50%;background:var(--primary-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;flex:0 0 auto;}
+.form-row{display:flex;gap:18px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--neutral-200);}
+.form-row:last-child{border-bottom:none;padding-bottom:0;}
+.form-row .lbl{flex:0 0 240px;}
+.form-row .lbl .ttl{font-size:14px;font-weight:600;color:var(--primary-navy);}
+.form-row .lbl .desc{font-size:13px;color:var(--neutral-600);margin-top:3px;line-height:1.5;}
+.form-row .fld{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
+.ro-field{padding:9px 12px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-btn);font-size:14px;color:var(--neutral-900);min-height:42px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ro-field .v{flex:1;}
+.ro-field .v.muted{color:var(--neutral-600);}
+.verify-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-green);background:rgba(11,139,78,.08);padding:3px 8px;border-radius:var(--r-badge);}
+.verify-badge.amber{color:var(--warning-amber);background:rgba(217,119,6,.08);}
+.chips-row{display:flex;flex-wrap:wrap;gap:8px;}
+.chip-ro{display:inline-flex;align-items:center;padding:6px 12px;min-height:32px;border:1px solid var(--neutral-200);border-radius:var(--r-badge);font-size:13px;font-weight:500;color:var(--neutral-900);background:var(--neutral-50);}
+@media(max-width:767px){
+  .form-row{flex-direction:column;gap:8px;}
+  .form-row .lbl{flex:none;}
+}
+
+/* =====================================================
    PAYMENT VERIFICATION — /payment/verify
    Verbatim from resources/ui/Payment Verification.html <style>.
    Own chromeless shell (wordmark-in-card, no header/back-link).
