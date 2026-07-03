@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-07-03] — feat(client): EP12 payment UI — pay-to-unlock, Razorpay Checkout, and the payment verify page
+
+**Fills the D74 placeholder: users can now actually pay to unlock their draft. Branch: `feature/phase-2/payment-ui`.**
+
+**`PayToUnlock`** (`components/booking/PayToUnlock.tsx`) — renders at the `draft_ready` + unpaid slot in `BookingActionPanel`, below the pre-deposit disclosure (touchpoint #4, KB2 §7) and fee row. Click → `POST /payments/:bookingId/initiate` → loads Razorpay Checkout.js on demand (`lib/razorpay-checkout.ts`, idempotent injector, no `next/script` mount since the script is only needed behind this conditional panel) → opens Checkout with a **`handler` callback, not `callback_url` redirect** — Razorpay's redirect mode POSTs form data, which a Next.js page route can't receive. The handler takes the server-returned `callbackUrl` (already carries `booking_id`) and appends the three `razorpay_*` params as a same-origin GET, so cookies flow naturally and the shape matches `verifyQuerySchema` exactly (no PII in the URL — RULES.md §4.2). `modal.ondismiss` and `payment.failed` both reset the button; `INVALID_STATUS`/`PAYMENT_ALREADY_CAPTURED` from `initiate` trigger a toast + `router.refresh()` (state drifted since page load).
+
+**`/payment/verify`** — dynamic Server Component + `PaymentVerifier` client leaf per `Payment Verification.html` (own chromeless shell, not the shared `AuthCardShell`). The page shape-validates the redirect query with the synced `verifyQuerySchema` **before** any network call — malformed params never reach the API and render the invalid-link state directly. Valid params mount `PaymentVerifier`, a one-shot `useQuery` (`retry:false`) against `GET /payments/verify`, mapped to five states: loading (spinner) → **success** (auto `router.replace` to the booking after 1.5s + a manual fallback link) / **failed** (no amount deducted, retry from service page) / **inconclusive** (booking ref + WhatsApp support link, per plan) / **tampered** (reuses the invalid-link state — no ownership was confirmed, so no booking link is shown). A network/auth error on the verify call itself falls back to the inconclusive-style copy with a Retry button.
+
+**Client plumbing** — `payment.schema.ts` added to the schema sync allow-list; `paymentApi` module (`initiate`, `verify`); `InitiateOrderDTO`/`VerifyResultDTO` mirrored in `lib/api/types.ts`.
+
+**Verified end-to-end against a live server** (no server code changed this branch): `tsc --noEmit` and `next build` clean (new `/payment/verify` route registered), lint clean. Live smoke test: created a `draft_ready` booking via the existing `setup-draft-ready-booking.mjs` fixture, called `POST /payments/:id/initiate` as the owner — response shape (`orderId`, `keyId`, `prefill`, `callbackUrl`) matches exactly what `PayToUnlock` and the verify handler consume; called `GET /payments/verify` with a fabricated signature → `{"outcome":"tampered"}`, confirming the exact fallback path `PaymentVerifier` renders; confirmed malformed-shape and invalid-UUID requests are rejected server-side with `VALIDATION_ERROR` (the client never reaches this — its own Zod shape check intercepts first) and that the route is `401` when unauthenticated. A real captured payment requires live Razorpay Checkout (test card / UPI) and is deferred to manual QA, same constraint as the existing D77 payments Newman suite.
+
+---
+
 ## [2026-07-03] — feat(admin): EP13 admin frontend — all six prototype screens + role-based routing + supporting backend endpoints
 
 **The admin can now run the entire operation from the browser. All six `resources/ui/Admin *.html` prototypes are implemented, admins are routed to their own surface at login, and six small backend additions close the gaps the prototypes needed. Branch: `feature/phase-2/admin-surface`.**
