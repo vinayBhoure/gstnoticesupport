@@ -144,6 +144,43 @@ h3{font-size:24px;font-weight:600;line-height:1.3;}
 .otp-box.has-error{border-color:var(--warning-amber);}
 @media(max-width:380px){.otp-box{width:40px;min-height:48px;font-size:18px;}}
 
+/* =====================================================
+   PAYMENT VERIFICATION — /payment/verify
+   Verbatim from resources/ui/Payment Verification.html <style>.
+   Own chromeless shell (wordmark-in-card, no header/back-link).
+   ===================================================== */
+.pv-page{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px 48px;min-height:100vh;}
+.pv-wrap{display:flex;flex-direction:column;align-items:center;width:100%;max-width:440px;gap:20px;}
+.pv-card{width:100%;background:var(--neutral-white);border:1px solid var(--neutral-200);border-radius:var(--r-card);box-shadow:var(--shadow-md);padding:48px;}
+@media(max-width:640px){.pv-card{padding:32px 24px;}}
+.pv-wordmark{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:32px;}
+.pv-wordmark .bn{font-weight:700;font-size:15px;color:var(--primary-navy);letter-spacing:-.01em;}
+.pv-wordmark .bn span{color:var(--accent-green);}
+.pv-state-zone{min-height:340px;display:flex;}
+.pv-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px;}
+.pv-icon{width:32px;height:32px;flex:0 0 auto;}
+.ic-navy{color:var(--primary-navy);}
+.ic-green{color:var(--accent-green);}
+.ic-muted{color:var(--neutral-600);}
+.pv-state h2{font-size:28px;line-height:1.25;letter-spacing:-.01em;}
+.pv-state .body{font-size:16px;line-height:1.6;color:var(--neutral-600);max-width:38ch;text-wrap:pretty;}
+.pv-spin{animation:pv-rotate .9s linear infinite;}
+@keyframes pv-rotate{to{transform:rotate(360deg);}}
+@media(prefers-reduced-motion:reduce){.pv-spin{animation:none;}}
+.pv-ref{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 24px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-btn);}
+.pv-ref .lbl{font-size:13px;font-weight:500;color:var(--neutral-600);letter-spacing:.02em;}
+.pv-ref .val{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;font-weight:500;color:var(--neutral-900);}
+.pv-actions{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;}
+.pv-actions .btn{width:100%;max-width:300px;}
+.pv-tertiary{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--accent-green);padding:8px 4px;border-radius:4px;min-height:48px;}
+.pv-tertiary:hover{color:var(--accent-green-hover);}
+.pv-tertiary:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.3);}
+.pv-trust{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:8px;padding:0 8px;text-align:center;}
+.pv-trust .row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 18px;font-size:13px;color:var(--neutral-600);line-height:1.5;}
+.pv-trust .row .item{display:inline-flex;align-items:center;gap:6px;}
+.pv-trust .pols{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:13px;color:var(--neutral-600);}
+.pv-trust .pols a:hover{color:var(--primary-navy);}
+
 /* Checkbox */
 .checkbox-wrapper{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
 .checkbox-control{

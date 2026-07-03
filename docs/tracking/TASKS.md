@@ -216,8 +216,9 @@
 | ✅ | Idempotency: `razorpay_payment_id` unique constraint — no double-transition | Atomic conditional `captureAndTransition` (updateMany `status != captured`) + unique-constraint race catch |
 | ✅ | Payment confirmed emails — user + admin | `notificationService.sendPaymentConfirmed`, fired once in shared `processCaptured` core |
 | ✅ | Failed payment email — admin only | `notificationService.sendPaymentFailed` |
-| ⬚ | Pay-to-unlock screen frontend — Razorpay modal integration | Pre-deposit disclosure for GSTAT/Commissioner (KB2 §7) |
-| ⬚ | `/payment/verify` page frontend — reads outcome enum; shows status + WhatsApp link on Inconclusive | SSR; reads Razorpay query params |
+| ✅ | Pay-to-unlock screen frontend — Razorpay Checkout via `handler` callback | Pre-deposit disclosure for GSTAT/Commissioner (KB2 §7); D82 |
+| ✅ | `/payment/verify` page frontend — reads outcome enum; shows status + WhatsApp link on Inconclusive | SSR shape-guard + client leaf; live-verified against server (D82) |
+| ⬚ | Manual QA: a real captured Razorpay test payment through the actual Checkout UI (test card/UPI) | Deferred, same constraint as D77 |
 | 🔄 | External: Razorpay test-mode keys (unblocks dev); live-mode KYC approval needed before prod | Test keys supplied + wired; KYC still required before prod |
 
 ### EP13 — Admin Dashboard (backend_plan Phase 6)

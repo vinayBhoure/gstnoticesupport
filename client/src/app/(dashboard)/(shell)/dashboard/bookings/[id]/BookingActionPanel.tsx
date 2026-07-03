@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FileText, Search, Lock, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
+import { FileText, Search, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 
 import { DocumentUpload } from '@/components/booking/DocumentUpload';
 import { PreDepositNotice } from '@/components/booking/PreDepositNotice';
+import { PayToUnlock } from '@/components/booking/PayToUnlock';
 import { CancelBookingButton } from './CancelBookingButton';
 import { bookingRef } from '@/lib/constants/booking-status';
 import { SERVICE_META } from '@/lib/constants/services';
@@ -87,16 +88,15 @@ export function BookingActionPanel({
         <div>
           {expertSummary}
           <div className="pay-unlock">
+            {/* Pre-deposit disclosure touchpoint #4 (KB2 §7) — must render above the CTA. */}
             <PreDepositNotice serviceType={serviceType} />
             <div className="fee-row">
               <span className="lbl">Reply preparation fee</span>
               <span className="amt">{SERVICE_META[serviceType].priceDisplay}</span>
             </div>
-            <div className="lock-wrap">
-              <Lock className="lock-icon-anim" aria-hidden />
-              {/* EP12 (D74): the "Pay to Unlock Draft" CTA renders here. */}
-              <p className="pbody">Your draft is ready — payment unlocks it.</p>
-            </div>
+            {paymentStatus !== 'paid' && (
+              <PayToUnlock bookingId={bookingId} serviceType={serviceType} />
+            )}
           </div>
           {paymentStatus === 'pending' && <CancelBookingButton bookingId={bookingId} />}
         </div>

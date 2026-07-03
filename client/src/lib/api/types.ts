@@ -178,3 +178,24 @@ export type DocumentDownloadResponse = {
   fileName: string;
   expiresAt: string;
 };
+
+// ── Payments (mirror server/src/dto/payment.dto.ts) ──
+export type InitiateOrderDTO = {
+  orderId: string;
+  amountPaise: number;
+  currency: string;
+  keyId: string;
+  prefill: {
+    name: string;
+    email: string;
+    contact: string;
+  };
+  callbackUrl: string;
+};
+
+export type VerifyOutcome = 'success' | 'failed' | 'inconclusive' | 'tampered';
+
+export type VerifyResultDTO = {
+  outcome: VerifyOutcome;
+  bookingId?: string;
+};
