@@ -6,56 +6,58 @@ type StepperProps = {
   steps: readonly string[];
 };
 
-// Booking step progress indicator (design-system §Stepper). One of the three
-// allowed motion spots (frontend.md §7.5); kept to simple CSS transitions.
+// Booking step progress indicator (components.md → Stepper). One of the three
+// allowed motion spots (frontend.md §7.5) — 300ms ease-out CSS transitions on
+// the bubbles and connectors, per resources/ui/Booking Step 1–3.
 export function Stepper({ currentStep, steps }: StepperProps) {
   return (
-    <ol className="flex items-center justify-center gap-2" aria-label="Progress">
+    <ol className="stepper" aria-label="Booking progress">
       {steps.map((label, index) => {
         const stepNumber = index + 1;
-        const isComplete = stepNumber < currentStep;
-        const isActive = stepNumber === currentStep;
+        const state =
+          stepNumber < currentStep ? 'complete' : stepNumber === currentStep ? 'active' : 'upcoming';
         const isLast = index === steps.length - 1;
 
         return (
-          <li key={label} className="flex items-center gap-2">
-            <div className="flex items-center gap-2.5">
-              <span
-                aria-current={isActive ? 'step' : undefined}
-                className={[
-                  'flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold transition-colors',
-                  isComplete
-                    ? 'border-[var(--accent-green)] bg-[var(--accent-green)] text-white'
-                    : isActive
-                      ? 'border-[var(--accent-green)] bg-white text-[var(--accent-green)]'
-                      : 'border-[var(--neutral-200)] bg-white text-[var(--neutral-600)]',
-                ].join(' ')}
-              >
-                {isComplete ? <Check size={16} aria-hidden /> : stepNumber}
-              </span>
-              <span
-                className={[
-                  'hidden text-sm sm:inline',
-                  isActive
-                    ? 'font-semibold text-[var(--primary-navy)]'
-                    : 'text-[var(--neutral-600)]',
-                ].join(' ')}
-              >
-                {label}
-              </span>
-            </div>
-            {!isLast && (
-              <span
-                aria-hidden
-                className={[
-                  'h-px w-8 transition-colors sm:w-12',
-                  isComplete ? 'bg-[var(--accent-green)]' : 'bg-[var(--neutral-200)]',
-                ].join(' ')}
-              />
-            )}
-          </li>
+          <StepItem
+            key={label}
+            label={label}
+            stepNumber={stepNumber}
+            state={state}
+            connectorComplete={!isLast && stepNumber < currentStep}
+            isLast={isLast}
+          />
         );
       })}
     </ol>
+  );
+}
+
+type StepItemProps = {
+  label: string;
+  stepNumber: number;
+  state: 'complete' | 'active' | 'upcoming';
+  connectorComplete: boolean;
+  isLast: boolean;
+};
+
+function StepItem({ label, stepNumber, state, connectorComplete, isLast }: StepItemProps) {
+  return (
+    <>
+      <li className="step" data-state={state} aria-current={state === 'active' ? 'step' : undefined}>
+        <div className="step__num" aria-hidden>
+          {state === 'complete' ? <Check size={14} strokeWidth={2.8} /> : stepNumber}
+        </div>
+        <span className="step__label">{label}</span>
+      </li>
+      {!isLast && (
+        <li
+          className="step-connector"
+          role="presentation"
+          aria-hidden
+          data-complete={connectorComplete ? 'true' : undefined}
+        />
+      )}
+    </>
   );
 }
