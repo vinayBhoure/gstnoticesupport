@@ -78,6 +78,15 @@
 | ✅ | Change rotating headline text colour to accent-green (`--accent-green`) | `RotatingHeadline.module.css` — WCAG AA (~5.9:1 on white) |
 | ✅ | Apply serif typeface to navbar brand name | `globals.css` `.brand .bn` → `Georgia,'Times New Roman',serif` |
 
+### EP4-Addendum 3 — Landing Page UI Refinement Pass (2026-07-04)
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | Remove "Request Callback" and "Sign Up" from nav (desktop, mobile drawer, mobile sticky bar) | `Navbar.tsx`, `NavAuthActions.tsx`, `ScrollShell.tsx`, `data/common.ts` |
+| ✅ | Service-page "Book Service" CTAs route to `/dashboard/bookings/new` with guest login+return | New `BookServiceButton` + `sanitizeReturnTo`; extends D86, see D88 |
+| ✅ | Center "Choose Your Service" card content; move pre-deposit badge above price | `(public)/page.tsx` + `page.module.css` |
+| ✅ | Remove testimonials CA tab; default to Business Owners; show business name above quote | `data/testimonials.ts`, `data/types.ts`, `Testimonials.tsx` |
+| ✅ | Unify homepage pricing tiers with `/pricing` page spacing/typography | `page.module.css` `.tiers` block — see D88 |
+
 ### EP5 — Phase 1 Hardening & Launch
 | Status | Task | Notes |
 |---|---|---|

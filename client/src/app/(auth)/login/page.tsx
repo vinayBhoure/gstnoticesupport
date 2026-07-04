@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { redirectIfAuthenticated } from '@/lib/auth/session';
+import { sanitizeReturnTo } from '@/lib/auth/return-to';
 import { LoginForm } from './LoginForm';
 
 export const metadata: Metadata = {
@@ -8,7 +9,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function LoginPage() {
-  await redirectIfAuthenticated();
-  return <LoginForm />;
+type LoginPageProps = {
+  searchParams: Promise<{ returnTo?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { returnTo } = await searchParams;
+  const safeReturnTo = sanitizeReturnTo(returnTo);
+  await redirectIfAuthenticated(safeReturnTo);
+  return <LoginForm returnTo={safeReturnTo} />;
 }

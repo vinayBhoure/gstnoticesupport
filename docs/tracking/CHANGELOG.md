@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-07-04] — feat(client): landing page UI refinement — nav cleanup, booking CTA, testimonials, pricing polish
+
+**Ships a landing-page visual/UX pass across the homepage and all 5 service pages, requested directly (no dedicated feature branch this session). See D88 for the prototype-parity and D86-carve-out deviations this introduces.**
+
+- **Navigation** — removed "Request Callback" and "Sign Up" from the desktop header, mobile drawer, and mobile sticky bar (`Navbar.tsx`, `NavAuthActions.tsx`, `ScrollShell.tsx`); nav is now Logo · Services · About · FAQ · Pricing · Contact Us · Log In. Now-unused `NAV_LABELS.callback`/`.signup` removed; the `/signup` route itself is unchanged and still reachable from the login page.
+- **Booking flow** — service pages' "Book Service" CTAs (hero + pricing section, all 5 services) now route to the booking wizard via a new `BookServiceButton` client component: logged-in users go straight to `/dashboard/bookings/new`; guests go to `/login?returnTo=...` and land back on the wizard after authenticating, via a new `sanitizeReturnTo` open-redirect guard (`client/src/lib/auth/return-to.ts`). Home and About page CTAs updated to use the same component for consistency.
+- **Choose Your Service** — card content is now center-aligned; the "Pre-deposit required by law" badge moved above the price.
+- **Testimonials** — removed the "Chartered Accountants" tab; default tab is now "Business Owners"; each card now shows the client's business name above the quote (`TestimonialItem.business`).
+- **Pricing** — homepage tiers and the `/pricing` page now share one consistent spacing/typography rhythm (card padding, feature-list gaps, CTA-block spacing, grid gap); no pricing numbers, feature copy, or pre-deposit disclosure text changed.
+- Verified via `next build` + `next lint` (both clean) and a live Playwright walkthrough of desktop/mobile nav, the guest→login→booking redirect chain, and all three content sections.
+
 ## [2026-07-04] — refactor: remove phone number from Dashboard/Admin app-shell topbars
 
 **Closes the "mobile number removed" requirement from a post-launch implementation audit. Branch: `feature/phase-2/topbar-phone-removal`. See D87 for the prototype-parity deviation this deliberately introduces.**

@@ -28,17 +28,12 @@ export function NavAuthActions({ variant, onNavigate }: NavAuthActionsProps) {
   }
 
   return (
-    <>
-      <Link
-        className={`btn btn-secondary ${ctaClass}`}
-        href={NAV_LABELS.login.href}
-        onClick={onNavigate}
-      >
-        {NAV_LABELS.login.label}
-      </Link>
-      <Link className={`btn btn-primary ${ctaClass}`} href={NAV_LABELS.signup.href} onClick={onNavigate}>
-        {NAV_LABELS.signup.label}
-      </Link>
-    </>
+    <Link
+      className={`btn btn-primary ${ctaClass}`}
+      href={NAV_LABELS.login.href}
+      onClick={onNavigate}
+    >
+      {NAV_LABELS.login.label}
+    </Link>
   );
 }

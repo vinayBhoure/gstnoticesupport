@@ -38,10 +38,8 @@ export const NAV_LINKS: NavItem[] = [
 
 export const NAV_LABELS = {
   servicesDropdown: 'Services',
-  callback: 'Request Callback',
   contact: { href: '/contact', label: 'Contact Us' },
   login: { href: '/login', label: 'Log In' },
-  signup: { href: '/signup', label: 'Sign Up' },
   dashboard: { label: 'Dashboard' },
   logout: 'Log Out',
 } as const;

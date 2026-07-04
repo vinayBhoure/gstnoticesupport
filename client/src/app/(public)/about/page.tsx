@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import styles from './about.module.css';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { BookServiceButton } from '@/components/ui/BookServiceButton';
 import { ORG } from '@/lib/site';
 import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
 import { aboutMeta, aboutHero, aboutMission, aboutCompany, aboutWhy, aboutCta } from '@/data/about';
@@ -24,9 +24,7 @@ export default function AboutPage() {
             {aboutHero.sub}
           </p>
           <div className={styles.ctaRow}>
-            <Link className="btn btn-primary" href="/dashboard/bookings/new">
-              {aboutHero.bookLabel}
-            </Link>
+            <BookServiceButton className="btn btn-primary">{aboutHero.bookLabel}</BookServiceButton>
             <RequestCallbackButton className="btn btn-secondary">{aboutHero.callbackLabel}</RequestCallbackButton>
           </div>
         </div>
@@ -115,9 +113,7 @@ export default function AboutPage() {
           <h2>{aboutCta.heading}</h2>
           <p>{aboutCta.sub}</p>
           <div className={styles.btnRow}>
-            <Link className="btn btn-primary" href="/dashboard/bookings/new">
-              {aboutCta.bookLabel}
-            </Link>
+            <BookServiceButton className="btn btn-primary">{aboutCta.bookLabel}</BookServiceButton>
             <RequestCallbackButton className="btn btn-secondary on-dark">
               {aboutCta.callbackLabel}
             </RequestCallbackButton>
