@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-07-04] — feat: auth-aware public header + Book Service routes to the dashboard
+
+**Closes the "no Login/Sign Up entry point" and "Book Service goes to WhatsApp" gaps from a post-launch implementation audit. Branch: `feature/phase-2/public-header-auth`. See D85 for full rationale, including why this is a client-side check rather than a Server Component fetch.**
+
+- Public marketing header (`Navbar`) now shows **Log In / Sign Up** when logged out, or a role-aware **Dashboard** link when logged in — via a new `NavAuthActions` Client Component leaf backed by a new `useCurrentUser` hook (TanStack Query, `GET /auth/me`). Marketing pages remain fully static (`○` in `next build`) — this is a cosmetic client-side check only, not a Server Component fetch, so the locked SSG guarantee for the public site is preserved.
+- The four **generic** "Book Service" CTAs (homepage hero, homepage final CTA, About page hero, About page final CTA) now route to `/dashboard/bookings/new` instead of a WhatsApp deep-link. Service-specific "Book X — ₹price" CTAs on service pages are unchanged and still open WhatsApp.
+- Removed now-orphaned `whatsappHref` fields and the now-unused `WHATSAPP_LINKS.home`/`.about` entries.
+
 ## [2026-07-04] — feat: My Services, Payment History & Settings pages + user account endpoints
 
 **Completes the user dashboard's remaining prototype screens and wires the mobile tab bar. Branch: `feature/phase-2/user-pages`.**
