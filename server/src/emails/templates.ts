@@ -384,3 +384,61 @@ export function statusCompleteUser(data: {
     `),
   };
 }
+
+export function statusCompleteAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+}): EmailContent {
+  return {
+    subject: `Filing complete — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A booking has been marked complete:</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+      </ul>
+    `),
+  };
+}
+
+// ============================================================
+// Account lifecycle — welcome (post-verification) and deletion
+// ============================================================
+
+export function welcomeUser(data: { name: string; dashboardUrl: string }): EmailContent {
+  return {
+    subject: 'Welcome to GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your email is verified and your account is ready. You can now book a service, upload documents, and track your case from your dashboard.</p>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'Go to dashboard')}</p>
+    `),
+  };
+}
+
+export function accountDeletedUser(data: { name: string }): EmailContent {
+  return {
+    subject: 'Your account has been closed — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your account has been closed as requested. Your booking and payment records are retained as required by law, but your profile is no longer active.</p>
+      <p style="color:${MUTED};">If this wasn't you, please contact us immediately via WhatsApp or email.</p>
+    `),
+  };
+}
+
+export function accountDeletedAdmin(data: { userEmail: string; userId: string }): EmailContent {
+  return {
+    subject: 'Account closed — GST Notice Support',
+    html: layout(`
+      <p>A user account was closed:</p>
+      <ul style="color:${MUTED};">
+        <li>Email: ${escapeHtml(data.userEmail)}</li>
+        <li>User ID: ${escapeHtml(data.userId)}</li>
+      </ul>
+    `),
+  };
+}

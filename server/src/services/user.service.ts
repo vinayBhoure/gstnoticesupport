@@ -2,6 +2,7 @@ import { userRepository } from '../repositories/user.repository';
 import { paymentRepository } from '../repositories/payment.repository';
 import { bookingRepository } from '../repositories/booking.repository';
 import { tokenService } from './token.service';
+import { notificationService } from './notification.service';
 import { ApiError } from '../utils/ApiError';
 import { toUserDTO, type UserDTO } from '../dto/user.dto';
 import { toPaymentHistoryItemDTO, type PaymentHistoryItemDTO } from '../dto/payment.dto';
@@ -79,5 +80,9 @@ export const userService = {
     await userRepository.softDelete(userId);
     await tokenService.revokeAllRefreshTokens(userId);
     await tokenService.blacklistAccessJti(accessJti);
+
+    notificationService
+      .sendAccountDeleted({ name: user.name, email: user.email, userId })
+      .catch(() => {});
   },
 };

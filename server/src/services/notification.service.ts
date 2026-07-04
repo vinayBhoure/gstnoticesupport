@@ -218,6 +218,7 @@ export const notificationService = {
     await emailService.sendEmail({ to: booking.contactEmail, subject, html });
   },
 
+  // Status: Complete — Pattern B: user + admin.
   async sendStatusComplete(booking: {
     id: string;
     serviceType: string;
@@ -225,12 +226,41 @@ export const notificationService = {
     contactEmail: string;
   }): Promise<void> {
     const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}`;
-    const { subject, html } = templates.statusCompleteUser({
+    const userMail = templates.statusCompleteUser({
       name: booking.contactName,
       bookingId: booking.id,
       serviceType: booking.serviceType,
       dashboardUrl,
     });
-    await emailService.sendEmail({ to: booking.contactEmail, subject, html });
+    const adminMail = templates.statusCompleteAdmin({
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      contactName: booking.contactName,
+      contactEmail: booking.contactEmail,
+    });
+    await Promise.all([
+      emailService.sendEmail({ to: booking.contactEmail, ...userMail }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+    ]);
+  },
+
+  // ============================================================
+  // Account lifecycle — welcome (post-verification) and deletion
+  // ============================================================
+
+  async sendWelcome(user: { name: string; email: string }): Promise<void> {
+    const dashboardUrl = `${env.CLIENT_URL}/dashboard`;
+    const { subject, html } = templates.welcomeUser({ name: user.name, dashboardUrl });
+    await emailService.sendEmail({ to: user.email, subject, html });
+  },
+
+  // Account deleted — Pattern B: user + admin (HLD §12.2).
+  async sendAccountDeleted(user: { name: string; email: string; userId: string }): Promise<void> {
+    const userMail = templates.accountDeletedUser({ name: user.name });
+    const adminMail = templates.accountDeletedAdmin({ userEmail: user.email, userId: user.userId });
+    await Promise.all([
+      emailService.sendEmail({ to: user.email, ...userMail }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+    ]);
   },
 };
