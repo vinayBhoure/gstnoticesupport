@@ -6,6 +6,7 @@ import {
   PaymentStatus,
 } from '@prisma/client';
 import type { Booking, PaymentRecord } from '@prisma/client';
+import type { PaymentHistoryRow } from '../dto/payment.dto';
 
 export type PaymentRecordWithBooking = PaymentRecord & { booking: Booking };
 
@@ -89,6 +90,31 @@ export const paymentRepository = {
         },
       });
     });
+  },
+
+  // User Payment History (api_contract.md §2.2): captured records across all of a
+  // user's bookings, newest first, offset-paginated (D64). Only captured payments
+  // appear — pending/failed attempts and cancelled bookings never show (KB1 §8.1).
+  async findCapturedByUserId(
+    userId: string,
+    page: number,
+    limit: number,
+  ): Promise<{ data: PaymentHistoryRow[]; total: number }> {
+    const where = {
+      status: PaymentRecordStatus.captured,
+      booking: { is: { userId } },
+    };
+    const [data, total] = await prisma.$transaction([
+      prisma.paymentRecord.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: { booking: { select: { serviceType: true, status: true } } },
+      }),
+      prisma.paymentRecord.count({ where }),
+    ]);
+    return { data, total };
   },
 
   // Admin stats (Phase 6): total captured revenue across all bookings.
