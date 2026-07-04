@@ -54,14 +54,9 @@ export default function HomePage() {
                   {homeHero.sub}
                 </p>
                 <div className={styles.cta}>
-                  <a
-                    className="btn btn-primary"
-                    href={homeHero.whatsappHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <Link className="btn btn-primary" href="/dashboard/bookings/new">
                     {homeHero.bookLabel}
-                  </a>
+                  </Link>
                   <RequestCallbackButton className="btn btn-secondary">{homeHero.callbackLabel}</RequestCallbackButton>
                 </div>
                 <div className={styles.reassure}>
@@ -424,14 +419,9 @@ export default function HomePage() {
           <h2>{homeFinalCta.heading}</h2>
           <p>{homeFinalCta.sub}</p>
           <div className={styles.cta}>
-            <a
-              className="btn btn-primary"
-              href={homeFinalCta.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link className="btn btn-primary" href="/dashboard/bookings/new">
               {homeFinalCta.bookLabel}
-            </a>
+            </Link>
             <RequestCallbackButton className="btn btn-secondary on-dark">{homeFinalCta.callbackLabel}</RequestCallbackButton>
           </div>
         </div>
