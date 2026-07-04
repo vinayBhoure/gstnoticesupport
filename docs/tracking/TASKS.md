@@ -245,8 +245,8 @@
 ### EP14 — Email Notifications (backend_plan Phase 7)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | React Email templates for all 14 HLD §12.2 events — navy + green branding, typed props | `server/src/emails/` |
-| ⬚ | Matrix completeness audit — every event mapped to trigger, recipients, and template | |
+| ⬚ | React Email templates for all 14 HLD §12.2 events — navy + green branding, typed props | `server/src/emails/` still hand-built HTML strings, not React Email |
+| 🔄 | Matrix completeness audit — every event mapped to trigger, recipients, and template | Post-launch audit (2026-07-04) closed 4 gaps: Account Deleted (User+Admin), welcome email (User), Service Completed (+Admin), Request Callback admin alert — see D85. Remaining known gaps: none open from that audit; full HLD §12.2 re-audit still not run |
 | ⬚ | Verify Resend sending domain passes SPF/DKIM/DMARC | External: domain DNS config |
 | ⬚ | Confirm contact-form email (admin only) and Calendly (handled by Calendly directly) | |
 
