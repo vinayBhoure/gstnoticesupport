@@ -36,7 +36,10 @@ export const userRepository = {
     });
   },
 
-  async updateProfile(id: string, data: { name?: string; phone?: string }): Promise<User> {
+  async updateProfile(
+    id: string,
+    data: { name?: string; phone?: string; allowPromotions?: boolean },
+  ): Promise<User> {
     return prisma.user.update({
       where: { id },
       data: { ...data, updatedAt: new Date() },

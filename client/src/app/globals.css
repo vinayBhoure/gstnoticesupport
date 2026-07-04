@@ -369,7 +369,7 @@ body.drawer-open{overflow:hidden;}
    Renames to avoid public-shell collisions: .brand→.sbrand,
    .hamburger→.sburger.
    ===================================================== */
-:root{ --sidebar-w:264px; --header-h:64px; }
+:root{ --sidebar-w:264px; --header-h:64px; --tabbar-h:64px; }
 
 .app{display:flex;min-height:100vh;background:var(--neutral-50);}
 
@@ -597,6 +597,25 @@ body.drawer-open{overflow:hidden;}
 }
 .app-scrim.open{display:block;}
 
+/* ---------- Mobile bottom tab bar (<lg only) — resources/ui prototypes → .tabbar ---------- */
+.tabbar{
+  display:none;position:fixed;left:0;right:0;bottom:0;z-index:60;height:var(--tabbar-h);
+  background:#fff;border-top:1px solid var(--neutral-200);box-shadow:var(--shadow-sm);
+  grid-template-columns:repeat(4,1fr);
+}
+.tabbar .tab{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  color:var(--neutral-600);text-decoration:none;position:relative;min-height:48px;
+}
+.tabbar .tab .ic{width:24px;height:24px;stroke-width:1.5;}
+.tabbar .tab .lbl{font-size:12px;font-weight:500;line-height:1;}
+.tabbar .tab:focus-visible{outline:none;box-shadow:inset 0 0 0 3px rgba(11,139,78,.35);border-radius:6px;}
+.tabbar .tab[aria-current="page"]{color:var(--primary-navy);}
+.tabbar .tab[aria-current="page"]::after{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:28px;height:2px;background:var(--accent-green);border-radius:0 0 2px 2px;
+}
+
 /* ---------- App shell responsive (<lg): sidebar → slide-in drawer ---------- */
 @media (max-width:1023px){
   .app .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
@@ -606,10 +625,11 @@ body.drawer-open{overflow:hidden;}
   .sburger{display:inline-flex;}
   .topbar .mobile-brand{display:inline-flex;}
   .topbar .tap-call .num{display:none;}
-  .app .content{padding:24px 16px 48px;}
+  .app .content{padding:24px 16px calc(var(--tabbar-h) + 28px);}
   .page-head .greet h1{font-size:28px;}
   .cards-grid{grid-template-columns:1fr;}
   .acct-name{display:none;}
+  .tabbar{display:grid;}
 }
 @media (prefers-reduced-motion: reduce){ .app .sidebar{transition:none;} }
 
@@ -1368,4 +1388,162 @@ textarea.input{min-height:120px;resize:vertical;line-height:1.55;}
   .footer .cols{grid-template-columns:1fr;gap:32px;}
   .footer .strip{flex-direction:column;align-items:flex-start;gap:12px;}
   .footer .strip .ssl{margin-left:0;}
+}
+
+/* =====================================================================
+   USER DASHBOARD — Services List  (resources/ui/Services List.html)
+   ===================================================================== */
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+
+/* Filter chips */
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.filter-bar .chip{
+  display:inline-flex;align-items:center;padding:9px 16px;min-height:38px;
+  border:1.5px solid var(--neutral-200);border-radius:var(--r-badge);
+  font-size:14px;font-weight:500;color:var(--neutral-600);background:#fff;cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;font-family:inherit;
+}
+.filter-bar .chip:hover{border-color:var(--primary-navy);color:var(--primary-navy);}
+.filter-bar .chip:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+.filter-bar .chip[aria-checked="true"]{background:var(--primary-navy);border-color:var(--primary-navy);color:#fff;}
+
+/* Desktop table (≥lg) */
+.tbl-wrap{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);overflow:hidden;}
+.tbl-wrap table{width:100%;border-collapse:collapse;}
+.tbl-wrap thead tr{border-bottom:1px solid var(--neutral-200);}
+.tbl-wrap th{
+  padding:12px 16px;font-size:13px;font-weight:600;color:var(--neutral-600);
+  text-align:left;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;
+}
+.tbl-wrap .trow{position:relative;border-bottom:1px solid var(--neutral-200);cursor:pointer;}
+.tbl-wrap .trow:last-child{border-bottom:none;}
+.tbl-wrap .trow:hover td{background:var(--neutral-50);}
+.tbl-wrap td{padding:0 16px;height:56px;vertical-align:middle;font-size:14px;color:var(--neutral-600);}
+.tbl-wrap td.td-service{font-size:16px;font-weight:600;color:var(--primary-navy);}
+.tbl-wrap .row-anchor{color:inherit;display:block;}
+.tbl-wrap .row-anchor::after{content:"";position:absolute;inset:0;z-index:1;}
+.tbl-wrap .row-anchor:focus-visible{outline:none;}
+.tbl-wrap .trow:focus-within{outline:none;box-shadow:inset 0 0 0 2px rgba(11,139,78,.4);}
+.tbl-wrap .td-date{white-space:nowrap;}
+.tbl-wrap .td-chev{width:40px;text-align:right;}
+.tbl-wrap .td-chev .cic{width:18px;height:18px;color:var(--neutral-200);}
+
+/* Mobile cards stack (<lg) */
+.cards-stack{display:flex;flex-direction:column;gap:12px;}
+@media(min-width:1024px){ .cards-stack-wrap{display:none;} }
+@media(max-width:1023px){ .tbl-wrap{display:none;} .cards-stack-wrap{display:block;} }
+
+/* =====================================================================
+   USER DASHBOARD — Payment History  (resources/ui/Payment History.html)
+   ===================================================================== */
+.payment-table-wrap{
+  background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+  box-shadow:var(--shadow-sm);overflow:hidden;
+}
+.payment-table{width:100%;border-collapse:collapse;font-size:15px;}
+.payment-table thead tr{border-bottom:1px solid var(--neutral-200);background:var(--neutral-50);}
+.payment-table th{
+  padding:13px 16px;font-size:12px;font-weight:600;color:var(--neutral-600);
+  text-align:left;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
+}
+.payment-table th.col-receipt,.payment-table th.col-view{text-align:center;}
+.payment-table tbody tr{border-bottom:1px solid var(--neutral-200);transition:background .12s;}
+.payment-table tbody tr:last-child{border-bottom:none;}
+.payment-table tbody tr:hover{background:var(--neutral-50);}
+.payment-table td{padding:16px;vertical-align:middle;}
+.payment-table .col-date{color:var(--neutral-600);font-size:14px;white-space:nowrap;}
+.payment-table .col-service{color:var(--primary-navy);font-weight:600;white-space:nowrap;}
+.payment-table .col-ref{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;color:var(--neutral-600);white-space:nowrap;}
+.payment-table .col-amount{color:var(--primary-navy);font-weight:600;white-space:nowrap;}
+.payment-table .col-status{white-space:nowrap;}
+.payment-table .col-receipt,.payment-table .col-view{text-align:center;}
+
+.receipt-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;}
+.receipt-link{
+  display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;
+  border-radius:var(--r-btn);transition:background .15s,color .15s;
+}
+.receipt-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+.receipt-available{color:var(--accent-green);cursor:pointer;}
+.receipt-available:hover{background:rgba(11,139,78,.08);}
+
+.view-link{
+  display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;
+  border-radius:var(--r-btn);color:var(--neutral-600);transition:color .15s,background .15s;
+}
+.view-link:hover{background:var(--neutral-50);color:var(--primary-navy);}
+.view-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+
+/* Mobile payment cards (<lg) */
+.payment-cards{display:none;flex-direction:column;gap:12px;}
+.payment-card{
+  background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);
+  box-shadow:var(--shadow-sm);padding:16px;display:flex;flex-direction:column;gap:8px;
+}
+.pc-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.pc-service{font-size:16px;font-weight:600;color:var(--primary-navy);line-height:1.35;}
+.pc-row2{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--neutral-600);}
+.pc-amount{color:var(--primary-navy);font-weight:600;font-size:16px;}
+.pc-sep{color:var(--neutral-200);font-size:10px;}
+.pc-row3{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;color:var(--neutral-600);}
+.pc-row4{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px;padding-top:10px;border-top:1px solid var(--neutral-200);}
+.card-action{
+  display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;
+  min-height:40px;padding:4px 0;background:none;border:none;cursor:pointer;
+  font-family:inherit;transition:color .15s;text-decoration:none;
+}
+.card-action.action-receipt{color:var(--accent-green);}
+.card-action.action-receipt:hover{color:var(--accent-green-hover);}
+.card-action.action-view{color:var(--neutral-600);}
+.card-action.action-view:hover{color:var(--primary-navy);}
+.card-action:focus-visible{outline:none;border-radius:4px;box-shadow:0 0 0 3px rgba(11,139,78,.4);}
+
+@media(max-width:1023px){ .payment-table-wrap{display:none;} .payment-cards{display:flex;} }
+
+/* =====================================================================
+   USER DASHBOARD — Settings  (resources/ui/Settings.html, Phase-2 scope)
+   ===================================================================== */
+.settings-sub{margin-top:6px;margin-bottom:32px;font-size:15px;color:var(--neutral-600);max-width:60ch;line-height:1.5;}
+
+.settings-grid{display:grid;grid-template-columns:220px 1fr;gap:32px;align-items:flex-start;}
+.set-nav{position:sticky;top:80px;display:flex;flex-direction:column;gap:2px;padding:8px;background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);}
+.set-nav a{font-size:14px;color:var(--neutral-900);padding:10px 12px;border-radius:var(--r-btn);line-height:1.4;display:flex;align-items:center;gap:10px;min-height:44px;}
+.set-nav a .ic{width:16px;height:16px;color:var(--neutral-600);flex:0 0 auto;}
+.set-nav a:hover{background:var(--neutral-50);}
+.set-nav a.active{background:rgba(11,139,78,.08);color:var(--primary-navy);font-weight:600;}
+.set-nav a.active .ic{color:var(--accent-green);}
+
+/* Toggle switch */
+.toggle{position:relative;display:inline-block;width:42px;height:24px;flex:0 0 auto;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle .slider{position:absolute;cursor:pointer;inset:0;background:var(--neutral-200);transition:.2s;border-radius:24px;}
+.toggle .slider::before{position:absolute;content:"";height:18px;width:18px;left:3px;top:3px;background:#fff;transition:.2s;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.18);}
+.toggle input:checked + .slider{background:var(--accent-green);}
+.toggle input:checked + .slider::before{transform:translateX(18px);}
+.toggle input:focus-visible + .slider{box-shadow:0 0 0 3px rgba(11,139,78,.35);}
+@media(prefers-reduced-motion:reduce){.toggle .slider,.toggle .slider::before{transition:none;}}
+
+/* Save bar (action row inside a panel body) */
+.save-bar{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:8px;padding-top:18px;border-top:1px solid var(--neutral-200);}
+.save-bar .form-banner{margin-right:auto;}
+
+/* Danger zone — amber, not red (design system: pure red is forbidden; amber is the
+   only destructive-action colour, matching .btn-danger / CancelBookingButton). */
+.danger-zone{border:1px solid var(--neutral-200);background:var(--neutral-50);border-radius:var(--r-card);padding:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;}
+.danger-zone .dz-text{flex:1;min-width:0;}
+.danger-zone .dz-text h3{color:var(--primary-navy);font-size:16px;margin:0;}
+.danger-zone .dz-text p{font-size:13px;color:var(--neutral-600);margin-top:4px;line-height:1.5;max-width:52ch;}
+.danger-zone .dz-blocked{color:var(--warning-amber);font-weight:500;margin-top:12px;}
+.danger-zone .dz-confirm{margin-top:16px;display:flex;flex-direction:column;gap:8px;max-width:360px;}
+.danger-zone .dz-confirm-lbl{font-size:13px;color:var(--neutral-900);}
+.danger-zone .dz-actions{display:flex;gap:10px;flex-wrap:wrap;flex:0 0 auto;}
+
+@media(max-width:900px){
+  .settings-grid{grid-template-columns:1fr;}
+  .set-nav{position:static;flex-direction:row;overflow-x:auto;padding:6px;gap:4px;}
+  .set-nav a{flex:0 0 auto;min-height:42px;}
+  .danger-zone{flex-direction:column;align-items:stretch;}
 }

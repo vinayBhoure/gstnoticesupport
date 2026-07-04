@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-07-04] — feat: My Services, Payment History & Settings pages + user account endpoints
+
+**Completes the user dashboard's remaining prototype screens and wires the mobile tab bar. Branch: `feature/phase-2/user-pages`.**
+
+**New backend endpoints** (`/api/v1/user`, all authenticate-gated; `user.routes.ts` → `user.controller.ts` → `user.service.ts`)
+- `GET /user/payment-history` — captured payments across all of the user's bookings, joined with each booking's service type + status, newest-first, offset-paginated (default 20 / max 100, D64). New `paymentRepository.findCapturedByUserId` + `PaymentHistoryItemDTO`. Only `captured` records appear (KB1 §8.1) — pending/failed attempts and cancelled bookings never show.
+- `PATCH /user/profile` — updates name / phone / `allowPromotions` only; email and `interestedServices` are never editable (D67). Extends `userRepository.updateProfile` to accept `allowPromotions`.
+- `DELETE /user` — self-serve account closure (KB1 §13): type-your-own-email confirmation (D24 — `EMAIL_MISMATCH` 400, no OTP/password), blocked while any booking is active (`ACTIVE_BOOKINGS` 409, reusing `bookingRepository.countActiveByUserId`), then soft-delete + revoke all refresh tokens + blacklist the current access JTI + clear both cookies. Bookings and payment records are retained (tax law); the 7-day S3 hard-delete job is still pending (EP15).
+- `user.schema.ts` added to the client schema-sync allow-list so the frontend validates against the same Zod definitions.
+
+**My Services** (`/dashboard/services`, `Services List.html`) — SSR page fetching `GET /bookings`; `ServicesListView` client leaf provides the All/Active/Complete/Cancelled filter (in-memory — the list is per-user and unpaginated). Desktop stretched-row table; mobile reuses `BookingCard`. New-user vs filtered empty states. Rows link to the Service Detail page.
+
+**Payment History** (`/dashboard/payments`, `Payment History.html`) — fully server-rendered; URL-driven offset pagination via the reused admin `Pagination` component. Desktop table (Date / Service / Reference / Amount / Status / Receipt / View) + mobile cards; amounts formatted in INR from `amountPaise`; status uses the booking's `StatusBadge`. **Receipt link → the booking's Service Detail page** (D83): Razorpay exposes no hosted customer receipt URL and D64 forbids an in-house PDF, so — exactly as the prototype does — the receipt icon opens the service page.
+
+**Settings** (`/dashboard/settings`, `Settings.html`, trimmed to Phase-2 scope per D84) — breadcrumb + scroll-spy side-nav over three panels: **Account** (`AccountSettingsForm`: name, mobile, marketing-email toggle → `PATCH /user/profile`; email shown read-only), **Security** (`ChangePasswordPanel` → existing `POST /auth/change-password`), **Danger zone** (`CloseAccountSection`: disabled with a reason while bookings are active, else type-email confirm → `DELETE /user` → redirect home). 2FA, active sessions/devices, billing entity/GSTIN, data export, and language/timezone from the prototype are **out of Phase-2 scope (HLD §19) and omitted rather than faked** (My Profile precedent). The danger zone uses **amber, not the prototype's red** — pure red is forbidden by the design system and amber is the app's only destructive-action colour (matching `.btn-danger` / CancelBookingButton).
+
+**App shell** — `DashboardShell` sidebar and drawer gain My Services / Payments / Settings links, the account menu gains Settings, and the **mobile bottom tab bar** (Dashboard / Services / Payments / Settings, `<lg` only) is added now that all four targets exist (closes D80h). All dashboard pages get extra mobile bottom padding to clear the bar.
+
+**Verified** — `server` `tsc` build and `client` `next build` both green (new `/dashboard/{services,payments,settings}` routes registered as SSR); `tsc --noEmit` clean on both. Live route smoke test against the running server: the three new `/user/*` routes return `401` unauthenticated (auth gate wired, not 404) with the correct error envelope, a bogus `/user/*` path returns 404. Authenticated browser QA against a logged-in session (incl. the destructive delete flow) is left for staging.
+
+---
+
 ## [2026-07-03] — feat(client): EP11 My Profile page — read-only account details
 
 **Closes the last EP11 leftover. Branch: `feature/phase-2/profile-page`.**

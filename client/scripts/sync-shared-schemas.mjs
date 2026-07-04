@@ -25,6 +25,7 @@ const SYNC = [
   'booking.schema.ts',
   'admin.schema.ts',
   'payment.schema.ts',
+  'user.schema.ts',
 ];
 
 const HEADER = (name) =>

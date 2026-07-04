@@ -6,7 +6,18 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { LayoutDashboard, LifeBuoy, Menu, Phone, ChevronDown, LogOut, User } from 'lucide-react';
+import {
+  LayoutDashboard,
+  FolderOpen,
+  CreditCard,
+  Settings,
+  LifeBuoy,
+  Menu,
+  Phone,
+  ChevronDown,
+  LogOut,
+  User,
+} from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
 import { getErrorMessage } from '@/lib/api/client';
 import { ORG } from '@/lib/site';
@@ -76,7 +87,12 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
     onError: (error) => toast.error(getErrorMessage(error)),
   });
 
+  // Booking detail lives under /dashboard/bookings/* and stays grouped under
+  // Dashboard; each new section lights up only on its own subtree.
   const isDashboard = pathname === '/dashboard' || pathname.startsWith('/dashboard/bookings');
+  const isServices = pathname.startsWith('/dashboard/services');
+  const isPayments = pathname.startsWith('/dashboard/payments');
+  const isSettings = pathname.startsWith('/dashboard/settings');
 
   return (
     <div className="app">
@@ -99,6 +115,30 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
           >
             <LayoutDashboard className="ic" aria-hidden />
             Dashboard
+          </Link>
+          <Link
+            href="/dashboard/services"
+            className="nav-link"
+            aria-current={isServices ? 'page' : undefined}
+          >
+            <FolderOpen className="ic" aria-hidden />
+            My Services
+          </Link>
+          <Link
+            href="/dashboard/payments"
+            className="nav-link"
+            aria-current={isPayments ? 'page' : undefined}
+          >
+            <CreditCard className="ic" aria-hidden />
+            Payments
+          </Link>
+          <Link
+            href="/dashboard/settings"
+            className="nav-link"
+            aria-current={isSettings ? 'page' : undefined}
+          >
+            <Settings className="ic" aria-hidden />
+            Settings
           </Link>
         </nav>
         <div className="side-foot">
@@ -165,6 +205,10 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
                 <User className="ic" aria-hidden />
                 My Profile
               </Link>
+              <Link href="/dashboard/settings" role="menuitem">
+                <Settings className="ic" aria-hidden />
+                Settings
+              </Link>
               <div className="divider" aria-hidden />
               <button
                 type="button"
@@ -183,6 +227,38 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
           <div className="content-inner">{children}</div>
         </main>
       </div>
+
+      {/* Mobile bottom tab bar (<lg only) — resources/ui prototypes → .tabbar. */}
+      <nav className="tabbar" aria-label="Primary">
+        <Link href="/dashboard" className="tab" aria-current={isDashboard ? 'page' : undefined}>
+          <LayoutDashboard className="ic" aria-hidden />
+          <span className="lbl">Dashboard</span>
+        </Link>
+        <Link
+          href="/dashboard/services"
+          className="tab"
+          aria-current={isServices ? 'page' : undefined}
+        >
+          <FolderOpen className="ic" aria-hidden />
+          <span className="lbl">Services</span>
+        </Link>
+        <Link
+          href="/dashboard/payments"
+          className="tab"
+          aria-current={isPayments ? 'page' : undefined}
+        >
+          <CreditCard className="ic" aria-hidden />
+          <span className="lbl">Payments</span>
+        </Link>
+        <Link
+          href="/dashboard/settings"
+          className="tab"
+          aria-current={isSettings ? 'page' : undefined}
+        >
+          <Settings className="ic" aria-hidden />
+          <span className="lbl">Settings</span>
+        </Link>
+      </nav>
     </div>
   );
 }

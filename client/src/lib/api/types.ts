@@ -199,3 +199,17 @@ export type VerifyResultDTO = {
   outcome: VerifyOutcome;
   bookingId?: string;
 };
+
+// Mirrors server/src/dto/payment.dto.ts → PaymentHistoryItemDTO (user Payment History).
+export type PaymentHistoryItemDTO = {
+  id: string;
+  bookingId: string;
+  serviceType: ServiceType;
+  bookingStatus: BookingStatus;
+  razorpayOrderId: string;
+  razorpayPaymentId: string | null;
+  amountPaise: number;
+  currency: string;
+  status: PaymentRecordStatus;
+  createdAt: string;
+};

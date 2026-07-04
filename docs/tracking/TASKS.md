@@ -204,8 +204,11 @@
 | ✅ | Draft viewer — fetches pre-signed GET URL per load; gated to `filing/complete` | Never stores URL; 15-min countdown + regenerate |
 | ✅ | `lib/api/booking.ts` + `lib/api/document.ts` typed surfaces; `loading.tsx`/`error.tsx`; `booking.schema` sync unblock; auth/invalidate email link fix | EP11 supporting work |
 | ✅ | UI parity pass — dashboard App Shell (sidebar/topbar/drawer), Dashboard Home, booking wizard Steps 1–3 (focused flow shell), Service Detail action panels, Draft Viewer 4-state viewer | `feature/phase-2/ui-parity`; exact match to `resources/ui` prototypes (D80); restyle only, no API/behaviour change |
-| ⬚ | Payment History page — offset pagination + Razorpay receipt links (D64) | |
-| ✅ | My Profile page — read-only view (avatar/name/member-since, email/phone/services/promotions/terms) | Edit deferred to EP15 (`PATCH /user/profile` not built); D80 |
+| ✅ | Payment History page — offset pagination (D64); captured payments only; receipt/view links → Service Detail (D83) | SSR Server Component; `userApi.paymentHistory`; reuses `Pagination`/`StatusBadge`; desktop table + mobile cards |
+| ✅ | My Services page — full booking list with All/Active/Complete/Cancelled filter; desktop table + mobile `BookingCard` | SSR + `ServicesListView` client filter; rows → Service Detail; `/dashboard/services` |
+| ✅ | Settings page — Account (name/mobile/marketing), Security (change password), Danger zone (close account); Phase-2 scope only (D84) | `PATCH /user/profile` + `POST /auth/change-password` + `DELETE /user`; 2FA/sessions/billing/export/language omitted per HLD §19 |
+| ✅ | Mobile bottom tab bar added to `DashboardShell` (Dashboard/Services/Payments/Settings); sidebar + drawer links wired (D80h closed) | <lg only; all four target pages now exist |
+| ✅ | My Profile page — read-only view (avatar/name/member-since, email/phone/services/promotions/terms) | Edit now available on Settings page (EP15) |
 
 ### EP12 — Payment Integration (backend_plan Phase 5)
 | Status | Task | Notes |
@@ -251,8 +254,8 @@
 | Status | Task | Notes |
 |---|---|---|
 | ⬚ | Rate-limit audit — every endpoint has its limiter attached and tested | Per LLD §6 matrix |
-| ⬚ | Account deletion — soft-delete, block when booking active, email confirmation; schedule S3 hard-delete after 7 days | `DELETE /user` |
-| ⬚ | `PATCH /user/profile` + `GET /user/payment-history` confirmed (offset pagination, D64) | |
+| 🔄 | Account deletion — `DELETE /user`: soft-delete + block when booking active (`ACTIVE_BOOKINGS`) + type-email confirmation (D24, `EMAIL_MISMATCH`) + revoke sessions + clear cookies. **Remaining:** scheduled S3 hard-delete after 7 days | Endpoint + Settings danger-zone UI built (EP15 pull-forward); S3 cleanup job still pending |
+| ✅ | `PATCH /user/profile` (name/phone/allowPromotions; email + interestedServices not editable) + `GET /user/payment-history` (offset pagination, captured only, D64) | Routes under `/api/v1/user`; consumed by Settings + Payment History pages |
 | ⬚ | Sentry integration with PII scrubbing + source maps | |
 | ⬚ | Security pass — Helmet config, CORS per env, cookie flags (`Domain=.gstnoticesupport.in`, Secure, HttpOnly, SameSite=Lax) | |
 | ⬚ | GitHub Actions CI/CD for `server/` — build + deploy on push to `staging`/`main` | |
