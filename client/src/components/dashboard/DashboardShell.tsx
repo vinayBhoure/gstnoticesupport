@@ -13,14 +13,12 @@ import {
   Settings,
   LifeBuoy,
   Menu,
-  Phone,
   ChevronDown,
   LogOut,
   User,
 } from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
 import { getErrorMessage } from '@/lib/api/client';
-import { ORG } from '@/lib/site';
 
 type DashboardShellProps = {
   userName: string;
@@ -34,12 +32,6 @@ function initials(name: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join('');
-}
-
-// "+919343297622" → "+91 93432 97622" (display only; tel: uses the raw value)
-function formatPhone(phone: string): string {
-  const match = phone.match(/^(\+91)(\d{5})(\d{5})$/);
-  return match ? `${match[1]} ${match[2]} ${match[3]}` : phone;
 }
 
 export function DashboardShell({ userName, children }: DashboardShellProps) {
@@ -179,11 +171,6 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
           </Link>
 
           <span className="spacer" />
-
-          <a className="tap-call" href={`tel:${ORG.phone}`}>
-            <Phone className="ic" aria-hidden />
-            <span className="num">{formatPhone(ORG.phone)}</span>
-          </a>
 
           <div className="acct" ref={acctRef}>
             <button

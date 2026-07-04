@@ -13,13 +13,11 @@ import {
   Settings,
   LifeBuoy,
   Menu,
-  Phone,
   ChevronDown,
   LogOut,
 } from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
 import { getErrorMessage } from '@/lib/api/client';
-import { ORG } from '@/lib/site';
 
 type AdminShellProps = {
   userName: string;
@@ -33,11 +31,6 @@ function initials(name: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join('');
-}
-
-function formatPhone(phone: string): string {
-  const match = phone.match(/^(\+91)(\d{5})(\d{5})$/);
-  return match ? `${match[1]} ${match[2]} ${match[3]}` : phone;
 }
 
 const NAV_ITEMS = [
@@ -158,11 +151,6 @@ export function AdminShell({ userName, children }: AdminShellProps) {
           </Link>
 
           <span className="spacer" />
-
-          <a className="tap-call" href={`tel:${ORG.phone}`}>
-            <Phone className="ic" aria-hidden />
-            <span className="num">{formatPhone(ORG.phone)}</span>
-          </a>
 
           <div className="acct" ref={acctRef}>
             <button
