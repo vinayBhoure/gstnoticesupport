@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-07-04] — feat: notification-matrix gap closures (account deleted, welcome, service-complete admin alert, callback)
+
+**Closes four notification gaps identified in a post-launch implementation audit. Branch: `feature/phase-2/notification-gaps`. See D85 for full rationale and the audit's reconciliation against HLD §12.2.**
+
+- **Account Deleted → User + Admin** — `notificationService.sendAccountDeleted`, fired from `userService.deleteAccount` right after the soft-delete succeeds (email/name captured before deletion). Closes the one undisputed gap from the audit.
+- **Welcome email → User** — `notificationService.sendWelcome`, fired from `authService.verifyOtp` once the account is confirmed (not at signup). New `welcomeUser` template.
+- **Service Completed → also Admin** — `sendStatusComplete` extended to email both user and admin (`statusCompleteAdmin` template added); the existing call site in `admin.service.ts` is unchanged.
+- **Request Callback → admin-only platform alert** — new `POST /api/callback` Next.js Route Handler (mirrors the existing `/api/contact` pattern: Resend + React Email + `checkRateLimit`), fired by a single app-wide `CalendlyCallbackListener` mounted once in root `layout.tsx`. Deliberately **not** wired per-`RequestCallbackButton` instance — `useCalendlyEventListener` attaches a global `window` listener, so one app-wide mount avoids firing duplicate emails when multiple callback buttons are mounted on the same page. Admin-only because Calendly's client event exposes no invitee name/email without an API token (not available); the user's own confirmation email continues to come directly from Calendly, unchanged.
+- No changes to the payment/webhook idempotency core, the booking state machine, or any existing endpoint contract.
+
 ## [2026-07-04] — feat: My Services, Payment History & Settings pages + user account endpoints
 
 **Completes the user dashboard's remaining prototype screens and wires the mobile tab bar. Branch: `feature/phase-2/user-pages`.**

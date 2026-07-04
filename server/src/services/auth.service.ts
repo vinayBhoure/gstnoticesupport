@@ -59,6 +59,10 @@ export const authService = {
     await otpService.verify(user.id, input.otp);
     const verified = await userRepository.updateEmailVerified(user.id, true);
 
+    notificationService
+      .sendWelcome({ name: verified.name, email: verified.email })
+      .catch(() => {});
+
     const { accessToken, refreshToken } = await tokenService.issueAuthTokens(verified);
     return { user: toUserDTO(verified), tokens: { accessToken, refreshToken } };
   },
