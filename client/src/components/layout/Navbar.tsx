@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { NavAuthActions } from '@/components/layout/NavAuthActions';
 import { NAV_LABELS, NAV_LINKS, NAV_SERVICE_ITEMS } from '@/data/common';
 
 export function Navbar() {
@@ -85,6 +86,7 @@ export function Navbar() {
           <div className="right">
             <RequestCallbackButton className="btn btn-secondary nav-cta">{NAV_LABELS.callback}</RequestCallbackButton>
             <Link className="btn btn-primary nav-cta" href={NAV_LABELS.contact.href}>{NAV_LABELS.contact.label}</Link>
+            <NavAuthActions variant="desktop" />
             <button
               ref={hamburgerRef}
               className="hamburger"
@@ -165,6 +167,7 @@ export function Navbar() {
           <Link className="btn btn-primary btn-block" href={NAV_LABELS.contact.href} onClick={closeDrawer}>
             {NAV_LABELS.contact.label}
           </Link>
+          <NavAuthActions variant="mobile" onNavigate={closeDrawer} />
         </div>
       </aside>
     </>
