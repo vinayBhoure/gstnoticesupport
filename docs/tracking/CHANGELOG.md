@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-07-04] — refactor: remove phone number from Dashboard/Admin app-shell topbars
+
+**Closes the "mobile number removed" requirement from a post-launch implementation audit. Branch: `feature/phase-2/topbar-phone-removal`. See D85 for the prototype-parity deviation this deliberately introduces.**
+
+- Removed the `.tap-call` phone link and its `formatPhone` helper from both `DashboardShell` and `AdminShell` topbars.
+- `ORG.phone` itself is unchanged — still used by WhatsApp links, the Organization JSON-LD schema, and the Admin Settings business-info panel.
+- No other shell element affected; `next build` confirms route structure and rendering strategy are unchanged.
+
 ## [2026-07-04] — feat: My Services, Payment History & Settings pages + user account endpoints
 
 **Completes the user dashboard's remaining prototype screens and wires the mobile tab bar. Branch: `feature/phase-2/user-pages`.**
