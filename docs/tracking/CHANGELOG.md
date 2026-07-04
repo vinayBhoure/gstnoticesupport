@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-07-04] — fix: admin notifications delivered to external inbox + email delivery observability
+
+**Root-cause fix for "admin receives no notification emails" (users always did). Branch: `feature/phase-2/admin-notification-delivery`. See D89.**
+
+- Confirmed every admin-notification trigger is correctly wired in code — the failure was delivery, not dispatch. Both `ADMIN_EMAIL` (server) and `CONTACT_TO_EMAIL` (client) pointed at `admin@gstnoticesupport.in`, the same domain as the Resend sender, whose SPF/DKIM/DMARC are not yet verified, so same-domain mail could silently bounce/suppress.
+- **Recipient repointed** to an external inbox the operator reads (`.env` local change; not committed). `.env.example` on both sides now warns against a recipient on the sender's own domain until DNS is verified.
+- **Email transport now surfaces outcomes**: `emailService.sendEmail` accepts an optional `event` name and returns `{ok:true,id}` / `{ok:false,reason}`, logging `Email sent`/failure with the event slug and Resend id — still best-effort (never throws, callers unchanged) and still never logs recipient/OTP/body. Every `notificationService` call and the client contact/callback routes now log delivery results.
+- **Manual follow-up** (documented, not code): verify the `gstnoticesupport.in` sending domain (SPF/DKIM/DMARC) in Resend so branded same-domain admin addresses become deliverable.
+- No new endpoints, no schema/DB change, no in-app notification system.
+
 ## [2026-07-04] — feat(client): landing page UI refinement — nav cleanup, booking CTA, testimonials, pricing polish
 
 **Ships a landing-page visual/UX pass across the homepage and all 5 service pages, requested directly (no dedicated feature branch this session). See D88 for the prototype-parity and D86-carve-out deviations this introduces.**
