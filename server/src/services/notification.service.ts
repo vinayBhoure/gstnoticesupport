@@ -6,7 +6,7 @@ import * as templates from '../emails/templates';
 export const notificationService = {
   async sendSignupOtp(to: string, data: { name: string; otp: string }): Promise<void> {
     const { subject, html } = templates.signupOtp(data);
-    await emailService.sendEmail({ to, subject, html });
+    await emailService.sendEmail({ to, subject, html, event: 'signup_otp' });
   },
 
   async sendPasswordResetOtp(
@@ -19,7 +19,7 @@ export const notificationService = {
       otp: data.otp,
       resetUrl,
     });
-    await emailService.sendEmail({ to, subject, html });
+    await emailService.sendEmail({ to, subject, html, event: 'password_reset_otp' });
   },
 
   // Login security alert — Pattern A: user (with invalidation link) + admin (informational).
@@ -42,14 +42,14 @@ export const notificationService = {
       userAgent: ctx.userAgent,
     });
     await Promise.all([
-      emailService.sendEmail({ to: user.email, ...userMail }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+      emailService.sendEmail({ to: user.email, ...userMail, event: 'login_alert_user' }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'login_alert_admin' }),
     ]);
   },
 
   async sendAccountCreatedAdmin(data: { userEmail: string; userId: string }): Promise<void> {
     const { subject, html } = templates.accountCreatedAdmin(data);
-    await emailService.sendEmail({ to: env.ADMIN_EMAIL, subject, html });
+    await emailService.sendEmail({ to: env.ADMIN_EMAIL, subject, html, event: 'account_created_admin' });
   },
 
   // ============================================================
@@ -82,8 +82,8 @@ export const notificationService = {
     });
 
     await Promise.all([
-      emailService.sendEmail({ to: booking.contactEmail, ...userMail }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+      emailService.sendEmail({ to: booking.contactEmail, ...userMail, event: 'booking_created_user' }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'booking_created_admin' }),
     ]);
   },
 
@@ -106,8 +106,8 @@ export const notificationService = {
     });
 
     await Promise.all([
-      emailService.sendEmail({ to: booking.contactEmail, ...userMail }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+      emailService.sendEmail({ to: booking.contactEmail, ...userMail, event: 'booking_cancelled_user' }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'booking_cancelled_admin' }),
     ]);
   },
 
@@ -141,8 +141,8 @@ export const notificationService = {
     });
 
     await Promise.all([
-      emailService.sendEmail({ to: booking.contactEmail, ...userMail }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+      emailService.sendEmail({ to: booking.contactEmail, ...userMail, event: 'payment_confirmed_user' }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'payment_confirmed_admin' }),
     ]);
   },
 
@@ -161,7 +161,7 @@ export const notificationService = {
       contactEmail: booking.contactEmail,
       contactPhone: booking.contactPhone,
     });
-    await emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail });
+    await emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'payment_failed_admin' });
   },
 
   // ============================================================
@@ -181,7 +181,7 @@ export const notificationService = {
       serviceType: booking.serviceType,
       dashboardUrl,
     });
-    await emailService.sendEmail({ to: booking.contactEmail, subject, html });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html, event: 'status_in_review_user' });
   },
 
   // Draft Ready — mandatory pre-deposit disclosure touchpoint (KB2 §7). The template
@@ -199,7 +199,7 @@ export const notificationService = {
       serviceType: booking.serviceType,
       dashboardUrl,
     });
-    await emailService.sendEmail({ to: booking.contactEmail, subject, html });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html, event: 'draft_ready_user' });
   },
 
   async sendDraftUpdated(booking: {
@@ -215,7 +215,7 @@ export const notificationService = {
       serviceType: booking.serviceType,
       dashboardUrl,
     });
-    await emailService.sendEmail({ to: booking.contactEmail, subject, html });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html, event: 'draft_updated_user' });
   },
 
   // Status: Complete — Pattern B: user + admin.
@@ -239,8 +239,8 @@ export const notificationService = {
       contactEmail: booking.contactEmail,
     });
     await Promise.all([
-      emailService.sendEmail({ to: booking.contactEmail, ...userMail }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+      emailService.sendEmail({ to: booking.contactEmail, ...userMail, event: 'status_complete_user' }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'status_complete_admin' }),
     ]);
   },
 
@@ -251,7 +251,7 @@ export const notificationService = {
   async sendWelcome(user: { name: string; email: string }): Promise<void> {
     const dashboardUrl = `${env.CLIENT_URL}/dashboard`;
     const { subject, html } = templates.welcomeUser({ name: user.name, dashboardUrl });
-    await emailService.sendEmail({ to: user.email, subject, html });
+    await emailService.sendEmail({ to: user.email, subject, html, event: 'welcome_user' });
   },
 
   // Account deleted — Pattern B: user + admin (HLD §12.2).
@@ -259,8 +259,8 @@ export const notificationService = {
     const userMail = templates.accountDeletedUser({ name: user.name });
     const adminMail = templates.accountDeletedAdmin({ userEmail: user.email, userId: user.userId });
     await Promise.all([
-      emailService.sendEmail({ to: user.email, ...userMail }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail }),
+      emailService.sendEmail({ to: user.email, ...userMail, event: 'account_deleted_user' }),
+      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'account_deleted_admin' }),
     ]);
   },
 };

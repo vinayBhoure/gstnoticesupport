@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
   const html = await render(CallbackNotificationEmail({ eventUri, inviteeUri }));
 
-  const { error } = await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from,
     to,
     subject: 'A new callback was scheduled via Calendly',
@@ -69,8 +69,10 @@ export async function POST(request: Request) {
   });
 
   if (error) {
+    console.error('[callback] resend send failed', { reason: error.name });
     return envelope(null, 'Could not send the notification', 502);
   }
 
+  console.info('[callback] sent', { id: data?.id ?? null });
   return envelope({ sent: true }, null, 200);
 }
