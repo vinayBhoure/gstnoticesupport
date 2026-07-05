@@ -1,5 +1,5 @@
 import { emailService } from '../lib/email';
-import { env } from '../lib/env';
+import { env, ADMIN_NOTIFICATION_EMAIL } from '../lib/env';
 import * as templates from '../emails/templates';
 
 // High-level, per-event email dispatch. Later phases reuse these methods.
@@ -43,13 +43,13 @@ export const notificationService = {
     });
     await Promise.all([
       emailService.sendEmail({ to: user.email, ...userMail, event: 'login_alert_user' }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'login_alert_admin' }),
+      emailService.sendEmail({ to: ADMIN_NOTIFICATION_EMAIL, ...adminMail, event: 'login_alert_admin' }),
     ]);
   },
 
   async sendAccountCreatedAdmin(data: { userEmail: string; userId: string }): Promise<void> {
     const { subject, html } = templates.accountCreatedAdmin(data);
-    await emailService.sendEmail({ to: env.ADMIN_EMAIL, subject, html, event: 'account_created_admin' });
+    await emailService.sendEmail({ to: ADMIN_NOTIFICATION_EMAIL, subject, html, event: 'account_created_admin' });
   },
 
   // ============================================================
@@ -83,7 +83,7 @@ export const notificationService = {
 
     await Promise.all([
       emailService.sendEmail({ to: booking.contactEmail, ...userMail, event: 'booking_created_user' }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'booking_created_admin' }),
+      emailService.sendEmail({ to: ADMIN_NOTIFICATION_EMAIL, ...adminMail, event: 'booking_created_admin' }),
     ]);
   },
 
@@ -107,7 +107,7 @@ export const notificationService = {
 
     await Promise.all([
       emailService.sendEmail({ to: booking.contactEmail, ...userMail, event: 'booking_cancelled_user' }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'booking_cancelled_admin' }),
+      emailService.sendEmail({ to: ADMIN_NOTIFICATION_EMAIL, ...adminMail, event: 'booking_cancelled_admin' }),
     ]);
   },
 
@@ -142,7 +142,7 @@ export const notificationService = {
 
     await Promise.all([
       emailService.sendEmail({ to: booking.contactEmail, ...userMail, event: 'payment_confirmed_user' }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'payment_confirmed_admin' }),
+      emailService.sendEmail({ to: ADMIN_NOTIFICATION_EMAIL, ...adminMail, event: 'payment_confirmed_admin' }),
     ]);
   },
 
@@ -161,7 +161,7 @@ export const notificationService = {
       contactEmail: booking.contactEmail,
       contactPhone: booking.contactPhone,
     });
-    await emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'payment_failed_admin' });
+    await emailService.sendEmail({ to: ADMIN_NOTIFICATION_EMAIL, ...adminMail, event: 'payment_failed_admin' });
   },
 
   // ============================================================
@@ -274,7 +274,7 @@ export const notificationService = {
     });
     await Promise.all([
       emailService.sendEmail({ to: booking.contactEmail, ...userMail, event: 'status_complete_user' }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'status_complete_admin' }),
+      emailService.sendEmail({ to: ADMIN_NOTIFICATION_EMAIL, ...adminMail, event: 'status_complete_admin' }),
     ]);
   },
 
@@ -294,7 +294,7 @@ export const notificationService = {
     const adminMail = templates.accountDeletedAdmin({ userEmail: user.email, userId: user.userId });
     await Promise.all([
       emailService.sendEmail({ to: user.email, ...userMail, event: 'account_deleted_user' }),
-      emailService.sendEmail({ to: env.ADMIN_EMAIL, ...adminMail, event: 'account_deleted_admin' }),
+      emailService.sendEmail({ to: ADMIN_NOTIFICATION_EMAIL, ...adminMail, event: 'account_deleted_admin' }),
     ]);
   },
 };
