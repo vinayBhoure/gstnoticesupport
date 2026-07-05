@@ -22,3 +22,13 @@ export function formatBookingDate(iso: string): string {
 export function bookingRef(id: string): string {
   return id.slice(0, 8).toUpperCase();
 }
+
+// Format a paise amount as INR (e.g. 750000 → "₹7,500"). Used wherever a booking's
+// custom quoted fee is shown.
+export function formatInr(paise: number): string {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(paise / 100);
+}

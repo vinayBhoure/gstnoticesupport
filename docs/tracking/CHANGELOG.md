@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-07-05] — feat: Representation Before Authority is now a bookable service (custom per-booking pricing)
+
+**Promotes the existing consultation-only marketing service into a fully bookable one. Branch: `feature/phase-2/representation-service`. See D91.**
+
+- **New `ServiceType` value `representation`** (migration `add_representation_service_and_quoted_amount`) threaded through the Prisma enum, `SERVICE_TYPES`, client `ServiceType` union, `SERVICE_META` (label + "Custom Quote"), `SERVICE_ORDER`, and the wizard's icon map (Gavel).
+- **Per-booking custom pricing**: new nullable `quotedAmountPaise` column. Because representation is consultation-priced, the admin enters the fee on the Draft card when confirming the draft; the Razorpay order and the user's pay-to-unlock screen then use that quote instead of a fixed price. `SERVICE_PRICING` excludes representation; a new `getBookingAmountPaise` resolves fixed price vs. quote.
+- **Server rules**: `draft-confirm` requires a `quotedAmountPaise` (₹500–₹1,00,000) for representation and rejects it for other services; payment initiate returns `409 QUOTE_REQUIRED` if a representation booking is somehow payable without a quote (defensive — it can't reach draft_ready without one).
+- **Booking wizard**: representation appears as a 5th service card (third row) with a "Custom Quote" price and a note that the fee is confirmed after case review.
+- **Fee display**: the booking detail meta and the pay-to-unlock fee row show the quoted amount (via a shared `formatInr` helper) when set, else the fixed display price.
+- **Marketing**: the service page + pricing card keep the consultation positioning but the CTAs now say "Book This Service" (they already routed to the wizard) and copy explains the quote-in-dashboard flow. No pre-deposit applies. Verified via server `tsc`, client `tsc`, and a full `next build` (representation page still static).
+
 ## [2026-07-04] — feat: admin can upload a final (post-payment) draft; user gets a version toggle
 
 **Adds a post-payment deliverable distinct from the pre-payment draft. Branch: `feature/phase-2/final-draft`. See D90.**

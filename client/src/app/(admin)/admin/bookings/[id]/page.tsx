@@ -126,7 +126,9 @@ export default async function AdminBookingDetailPage({
           <DraftCard
             bookingId={booking.id}
             status={booking.status}
+            serviceType={booking.serviceType}
             hasDraft={booking.hasDraft}
+            quotedAmountPaise={booking.quotedAmountPaise}
             updatedAt={booking.updatedAt}
           />
           <FinalDraftCard

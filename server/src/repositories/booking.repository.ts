@@ -144,10 +144,16 @@ export const bookingRepository = {
     id: string,
     draftS3Key: string,
     status: BookingStatus,
+    quotedAmountPaise?: number,
   ): Promise<Booking> {
     return prisma.booking.update({
       where: { id },
-      data: { draftS3Key, status, updatedAt: new Date() },
+      data: {
+        draftS3Key,
+        status,
+        ...(quotedAmountPaise != null ? { quotedAmountPaise } : {}),
+        updatedAt: new Date(),
+      },
     });
   },
 

@@ -10,7 +10,7 @@ import { ApiRequestError } from '@/lib/api/client';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { BookingActionPanel } from './BookingActionPanel';
 import { SERVICE_META } from '@/lib/constants/services';
-import { formatBookingDate, bookingRef } from '@/lib/constants/booking-status';
+import { formatBookingDate, bookingRef, formatInr } from '@/lib/constants/booking-status';
 import type { BookingDetailWithRelationsDTO } from '@/lib/api/types';
 
 export const metadata: Metadata = {
@@ -37,6 +37,11 @@ export default async function BookingDetailPage({
   }
 
   const serviceLabel = SERVICE_META[booking.serviceType].label;
+  // A custom quote (representation) takes precedence over the fixed display price.
+  const priceLabel =
+    booking.quotedAmountPaise != null
+      ? formatInr(booking.quotedAmountPaise)
+      : SERVICE_META[booking.serviceType].priceDisplay;
 
   return (
     <>
@@ -60,7 +65,7 @@ export default async function BookingDetailPage({
         <span className="dot" aria-hidden />
         <span>Booked {formatBookingDate(booking.createdAt)}</span>
         <span className="dot" aria-hidden />
-        <span>{SERVICE_META[booking.serviceType].priceDisplay}</span>
+        <span>{priceLabel}</span>
       </div>
 
       <div className="two-col">
@@ -120,6 +125,7 @@ export default async function BookingDetailPage({
             documentCount={booking.documents.length}
             adminNote={booking.adminNote}
             hasFinalDraft={booking.hasFinalDraft}
+            quotedAmountPaise={booking.quotedAmountPaise}
           />
         </div>
       </div>

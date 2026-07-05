@@ -49,7 +49,12 @@ export type SignupResponseData = {
 };
 
 // ── Booking domain enums (mirror server/prisma/schema.prisma) ──
-export type ServiceType = 'asmt_10' | 'scn' | 'commissioner_appeal' | 'gstat_appeal';
+export type ServiceType =
+  | 'asmt_10'
+  | 'scn'
+  | 'commissioner_appeal'
+  | 'gstat_appeal'
+  | 'representation';
 export type BookingStatus =
   | 'document_upload'
   | 'in_review'
@@ -88,6 +93,7 @@ export type BookingDetailDTO = {
   consentContactAuthorized: boolean;
   adminNote: string | null;
   hasFinalDraft: boolean;
+  quotedAmountPaise: number | null;
   createdAt: string;
   updatedAt: string;
 };
