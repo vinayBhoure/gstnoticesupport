@@ -365,6 +365,46 @@ export function draftUpdatedUser(data: {
   };
 }
 
+export function finalDraftReadyUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Your final draft is available — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your final draft has been prepared and is now available in your dashboard. You can view and download it any time.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'View final draft')}</p>
+    `),
+  };
+}
+
+export function finalDraftUpdatedUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Your final draft has been updated — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Our team has updated your final draft. You can view and download the latest version in your dashboard.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'View final draft')}</p>
+    `),
+  };
+}
+
 export function statusCompleteUser(data: {
   name: string;
   bookingId: string;

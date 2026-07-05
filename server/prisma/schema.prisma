@@ -130,6 +130,7 @@ model Booking {
   consentInformationAccurate Boolean       @map("consent_information_accurate")
   consentContactAuthorized   Boolean       @map("consent_contact_authorized")
   draftS3Key                 String?       @map("draft_s3_key") @db.Text
+  finalDraftS3Key            String?       @map("final_draft_s3_key") @db.Text
   adminNote                  String?       @map("admin_note") @db.Text
   createdAt                  DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt                  DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)

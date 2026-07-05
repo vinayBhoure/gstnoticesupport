@@ -46,6 +46,16 @@ export function buildDraftKey(bookingId: string, fileName: string): string {
   return `drafts/${bookingId}-${stamp}-${safeName}-${rand}.pdf`;
 }
 
+// Final (post-payment) draft key: final-drafts/{bookingId}-{yyyyMMdd}-{sanitizedName}-{4rand}.pdf.
+// Separate prefix from buildDraftKey so final-draft-confirm can verify the key was
+// issued for this booking without colliding with the pre-payment draft's key.
+export function buildFinalDraftKey(bookingId: string, fileName: string): string {
+  const stamp = formatDateStamp(new Date());
+  const safeName = sanitizeFilename(fileName);
+  const rand = randomBytes(2).toString('hex'); // 4 hex chars
+  return `final-drafts/${bookingId}-${stamp}-${safeName}-${rand}.pdf`;
+}
+
 type UploadUrlParams = {
   key: string;
   contentLength: number;

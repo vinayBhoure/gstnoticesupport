@@ -19,6 +19,7 @@ type BookingActionPanelProps = {
   serviceType: ServiceType;
   documentCount: number;
   adminNote: string | null;
+  hasFinalDraft: boolean;
 };
 
 // Status action panel per resources/ui/Service Detail.html — one panel per
@@ -30,6 +31,7 @@ export function BookingActionPanel({
   serviceType,
   documentCount,
   adminNote,
+  hasFinalDraft,
 }: BookingActionPanelProps) {
   const router = useRouter();
 
@@ -113,7 +115,7 @@ export function BookingActionPanel({
             team files your response.
           </div>
           <Link href={`/dashboard/bookings/${bookingId}/draft`} className="btn btn-primary btn-block">
-            View Draft
+            {hasFinalDraft ? 'View Final Draft' : 'View Draft'}
           </Link>
           <p className="advisory">Filing is in progress — we&apos;ll notify you when it completes.</p>
         </div>
@@ -132,7 +134,7 @@ export function BookingActionPanel({
               className="btn-tertiary"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 5, minHeight: 44 }}
             >
-              View Draft <ArrowRight size={15} aria-hidden />
+              {hasFinalDraft ? 'View Final Draft' : 'View Draft'} <ArrowRight size={15} aria-hidden />
             </Link>
           </div>
         </div>

@@ -60,6 +60,24 @@ export const adminController = {
       );
   }),
 
+  // POST /admin/bookings/:id/final-draft-upload-url
+  createFinalDraftUploadUrl: asyncHandler(async (req, res) => {
+    const { id } = req.validated.params as AdminBookingIdParams;
+    const input = req.validated.body as DraftUploadUrlInput;
+    const result = await adminService.createFinalDraftUploadUrl(id, input);
+    res.status(200).json(envelope(result));
+  }),
+
+  // POST /admin/bookings/:id/final-draft-confirm
+  confirmFinalDraftUpload: asyncHandler(async (req, res) => {
+    const { id } = req.validated.params as AdminBookingIdParams;
+    const input = req.validated.body as DraftConfirmInput;
+    const booking = await adminService.confirmFinalDraftUpload(id, input);
+    res
+      .status(200)
+      .json(envelope({ booking }, 'Final draft uploaded. User notified by email.'));
+  }),
+
   // PATCH /admin/bookings/:id/note
   updateNote: asyncHandler(async (req, res) => {
     const { id } = req.validated.params as AdminBookingIdParams;

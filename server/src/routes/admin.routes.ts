@@ -55,6 +55,21 @@ router.post(
   adminController.confirmDraftUpload,
 );
 
+router.post(
+  '/bookings/:id/final-draft-upload-url',
+  adminDraftUploadRateLimiter,
+  validateParams(adminBookingIdParamsSchema),
+  validateBody(draftUploadUrlSchema),
+  adminController.createFinalDraftUploadUrl,
+);
+
+router.post(
+  '/bookings/:id/final-draft-confirm',
+  validateParams(adminBookingIdParamsSchema),
+  validateBody(draftConfirmSchema),
+  adminController.confirmFinalDraftUpload,
+);
+
 router.patch(
   '/bookings/:id/note',
   validateParams(adminBookingIdParamsSchema),

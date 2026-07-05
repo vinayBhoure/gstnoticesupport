@@ -9,6 +9,7 @@ import { assertTransition, assertPayable } from './booking-state-machine';
 import { ApiError } from '../utils/ApiError';
 import {
   buildDraftKey,
+  buildFinalDraftKey,
   getUploadUrl,
   uploadUrlExpiresAt,
   getDownloadUrl,
@@ -47,6 +48,14 @@ import {
 const DRAFT_UPLOADABLE_STATUSES: BookingStatus[] = [
   BookingStatus.in_review,
   BookingStatus.draft_ready,
+];
+
+// The final draft is the post-payment deliverable — it can only be uploaded (or
+// replaced) once payment has moved the booking into filing, and remains editable
+// through complete. It never changes the booking status.
+const FINAL_DRAFT_UPLOADABLE_STATUSES: BookingStatus[] = [
+  BookingStatus.filing,
+  BookingStatus.complete,
 ];
 
 type UploadUrlResult = { uploadUrl: string; s3Key: string; expiresAt: string };
@@ -176,6 +185,76 @@ export const adminService = {
       notificationService.sendDraftReady(recipient).catch(() => {});
     } else {
       notificationService.sendDraftUpdated(recipient).catch(() => {});
+    }
+
+    return adminService.getBooking(id);
+  },
+
+  // Final (post-payment) draft upload URL. Same PDF/size limits as the pre-payment
+  // draft, but gated on filing/complete — the final draft cannot be uploaded before
+  // the user has paid. Uses a distinct final-drafts/ key prefix.
+  async createFinalDraftUploadUrl(
+    id: string,
+    input: DraftUploadUrlInput,
+  ): Promise<UploadUrlResult> {
+    const booking = await bookingRepository.findByIdForAdmin(id);
+    if (!booking) throw new ApiError(404, 'NOT_FOUND', 'Booking not found');
+
+    if (input.contentType !== DRAFT_ALLOWED_CONTENT_TYPE) {
+      throw new ApiError(400, 'INVALID_FILE_TYPE', 'Only PDF files are accepted');
+    }
+    if (input.fileSize > DRAFT_MAX_FILE_SIZE_BYTES) {
+      throw new ApiError(400, 'FILE_TOO_LARGE', 'Draft must be 20 MB or smaller');
+    }
+    if (!FINAL_DRAFT_UPLOADABLE_STATUSES.includes(booking.status)) {
+      throw new ApiError(
+        409,
+        'DRAFT_LOCKED',
+        'The final draft can only be uploaded after the user completes payment',
+      );
+    }
+
+    const s3Key = buildFinalDraftKey(id, input.fileName);
+    const uploadUrl = await getUploadUrl({ key: s3Key, contentLength: input.fileSize });
+    return { uploadUrl, s3Key, expiresAt: uploadUrlExpiresAt().toISOString() };
+  },
+
+  // Confirm sets the finalDraftS3Key pointer only — the booking status is unchanged
+  // (it stays filing/complete). First upload emails "final draft ready"; a replacement
+  // emails "final draft updated". The original pre-payment draft (draftS3Key) is left
+  // intact so the user can still access the version they paid to unlock.
+  async confirmFinalDraftUpload(
+    id: string,
+    input: DraftConfirmInput,
+  ): Promise<AdminBookingDetailDTO> {
+    const booking = await bookingRepository.findByIdForAdmin(id);
+    if (!booking) throw new ApiError(404, 'NOT_FOUND', 'Booking not found');
+
+    // The key embeds final-drafts/{bookingId}- — reject a key not issued for this booking.
+    if (!input.s3Key.startsWith(`final-drafts/${id}-`)) {
+      throw new ApiError(400, 'VALIDATION_ERROR', 's3Key does not belong to this booking');
+    }
+    if (!FINAL_DRAFT_UPLOADABLE_STATUSES.includes(booking.status)) {
+      throw new ApiError(
+        409,
+        'DRAFT_LOCKED',
+        'The final draft can only be uploaded after the user completes payment',
+      );
+    }
+
+    const isFirstFinalDraft = booking.finalDraftS3Key === null;
+    await bookingRepository.setFinalDraft(id, input.s3Key);
+
+    const recipient = {
+      id: booking.id,
+      serviceType: booking.serviceType,
+      contactName: booking.contactName,
+      contactEmail: booking.contactEmail,
+    };
+    if (isFirstFinalDraft) {
+      notificationService.sendFinalDraftReady(recipient).catch(() => {});
+    } else {
+      notificationService.sendFinalDraftUpdated(recipient).catch(() => {});
     }
 
     return adminService.getBooking(id);

@@ -151,6 +151,15 @@ export const bookingRepository = {
     });
   },
 
+  // Final (post-payment) draft: set the pointer only — status is unchanged, since the
+  // final draft is uploaded while the booking is already in filing/complete.
+  async setFinalDraft(id: string, finalDraftS3Key: string): Promise<Booking> {
+    return prisma.booking.update({
+      where: { id },
+      data: { finalDraftS3Key, updatedAt: new Date() },
+    });
+  },
+
   async countGroupedByStatus(): Promise<{ status: BookingStatus; count: number }[]> {
     const rows = await prisma.booking.groupBy({ by: ['status'], _count: { _all: true } });
     return rows.map((r) => ({ status: r.status, count: r._count._all }));

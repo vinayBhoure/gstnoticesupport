@@ -34,6 +34,10 @@ export default async function DraftPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <DraftViewer bookingId={id} serviceLabel={SERVICE_META[booking.serviceType].label} />
+    <DraftViewer
+      bookingId={id}
+      serviceLabel={SERVICE_META[booking.serviceType].label}
+      hasFinalDraft={booking.hasFinalDraft}
+    />
   );
 }

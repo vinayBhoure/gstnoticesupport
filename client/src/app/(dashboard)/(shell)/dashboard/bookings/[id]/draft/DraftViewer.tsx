@@ -10,7 +10,10 @@ import { documentApi } from '@/lib/api/document';
 type DraftViewerProps = {
   bookingId: string;
   serviceLabel: string;
+  hasFinalDraft: boolean;
 };
+
+type DraftVariant = 'final' | 'original';
 
 function useCountdown(expiresAt: string | undefined): number {
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -38,10 +41,14 @@ function formatMmSs(totalSeconds: number): string {
 // Read-only draft preview per resources/ui/Draft Viewer.html — four states:
 // Loading / Loaded / Link Expired / Load Error. The pre-signed URL is fetched
 // fresh per load and never stored; it expires in 15 minutes (HLD §9.4).
-export function DraftViewer({ bookingId, serviceLabel }: DraftViewerProps) {
+export function DraftViewer({ bookingId, serviceLabel, hasFinalDraft }: DraftViewerProps) {
+  // When a final draft exists the user can switch between it and the original draft
+  // they paid to unlock; otherwise only the original exists.
+  const [variant, setVariant] = useState<DraftVariant>(hasFinalDraft ? 'final' : 'original');
+
   const { data, isPending, isError, refetch, isFetching } = useQuery({
-    queryKey: ['draft', bookingId],
-    queryFn: () => documentApi.getDraftUrl(bookingId),
+    queryKey: ['draft', bookingId, variant],
+    queryFn: () => documentApi.getDraftUrl(bookingId, hasFinalDraft ? variant : undefined),
     staleTime: 0,
     gcTime: 0,
     retry: false,
@@ -85,6 +92,32 @@ export function DraftViewer({ bookingId, serviceLabel }: DraftViewerProps) {
           </a>
         )}
       </div>
+
+      {hasFinalDraft && (
+        <div
+          className="draft-variant-toggle"
+          role="group"
+          aria-label="Choose draft version"
+          style={{ display: 'flex', gap: 8, margin: '4px 0 16px' }}
+        >
+          <button
+            type="button"
+            className={`btn ${variant === 'final' ? 'btn-primary' : 'btn-secondary'}`}
+            aria-pressed={variant === 'final'}
+            onClick={() => setVariant('final')}
+          >
+            Final Draft
+          </button>
+          <button
+            type="button"
+            className={`btn ${variant === 'original' ? 'btn-primary' : 'btn-secondary'}`}
+            aria-pressed={variant === 'original'}
+            onClick={() => setVariant('original')}
+          >
+            Original Draft
+          </button>
+        </div>
+      )}
 
       {!showFallback && (
         <div className="expiry-notice" role="status" aria-live="polite">

@@ -78,6 +78,17 @@ export const adminApi = {
       .post<BookingResponse>(`/admin/bookings/${id}/draft-confirm`, payload)
       .then((r) => r.booking),
 
+  getFinalDraftUploadUrl: (
+    id: string,
+    payload: DraftUploadUrlInput,
+  ): Promise<UploadUrlResponse> =>
+    apiClient.post<UploadUrlResponse>(`/admin/bookings/${id}/final-draft-upload-url`, payload),
+
+  confirmFinalDraft: (id: string, payload: DraftConfirmInput): Promise<AdminBookingDetailDTO> =>
+    apiClient
+      .post<BookingResponse>(`/admin/bookings/${id}/final-draft-confirm`, payload)
+      .then((r) => r.booking),
+
   updateNote: (id: string, payload: UpdateNoteInput): Promise<AdminBookingDetailDTO> =>
     apiClient
       .patch<BookingResponse>(`/admin/bookings/${id}/note`, payload)
