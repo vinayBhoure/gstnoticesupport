@@ -57,16 +57,18 @@ Self-contained (no fixture): admin creates its own representation + asmt_10 book
 
 **Browser-free (done):** the public representation service + pricing pages were fetched over HTTP and assert the new copy ("Book This Service", "Custom Quote", "quoted in your dashboard") renders and the stale offline/WhatsApp copy is gone (0 occurrences).
 
-**Needs enablement:**
-- **Gmail MCP** (`/mcp` → "claude.ai Gmail"): confirm the `[TEST] Admin notification …` emails (Resend ids logged by `test-notifications.mjs`) actually arrived in the recipient inbox — closes Feature 3 end-to-end.
-- **claude-in-chrome** (Chrome extension connected): 
-  - Booking wizard shows the 5th "Representation Before Authority — Custom Quote" card; book it.
-  - Admin booking detail: Draft card shows the "Quoted fee (₹)" input for representation; Final Draft card is locked pre-payment, a dropzone post-payment (real S3 PUT).
-  - User draft viewer: Final/Original toggle appears once a final draft exists (real S3 GET).
-  - Razorpay **test checkout** (Netbanking → Success, per D77) at the quoted amount → booking → `filing` → download. This is the only path that produces a genuinely captured payment.
+**claude-in-chrome (done, 2026-07-05):** logged in as user and admin and verified the real rendered UI:
+- Booking wizard shows the **5th "Representation Before Authority" card** (Gavel icon, "Custom Quote"); selecting it reveals the consultation note ("fee confirmed after reviewing your case … before paying") and enables Continue.
+- Admin booking detail (representation, draft_ready): Draft card renders the **"Quoted fee (₹)" input prefilled `7500`** with the ₹500–₹1,00,000 helper text; **Final Draft card is locked** ("Available once the user completes payment").
+- Admin booking detail (filing, paid): **Final Draft card in its uploaded state** ("Final draft (PDF)"), and the Draft card correctly locked ("Draft is final once payment begins"). Both Final-Draft states confirmed.
+
+**Residual — genuinely manual (environment/provider limits, not feature gaps):**
+- **Real S3 PUT via the browser dropzone** — the `file_upload` MCP tool in this environment no longer accepts host filesystem paths, so the actual upload could not be driven here. (The URL-generation + confirm contract is fully covered by the FinalDraft Newman suite.)
+- **Razorpay capture** — no API can fabricate a captured test payment (D77); drive Razorpay Checkout (Netbanking → Success) manually to take a booking to `filing`, then confirm the user-side pay-to-unlock quote and the Draft Viewer Final/Original toggle.
+- **True inbox receipt** — `test-notifications.mjs` proves Resend accepted the sends (real ids); confirm arrival in the recipient inbox manually or via the Gmail MCP (`/mcp` → "claude.ai Gmail").
 
 ## What stays manual (not assertable in Newman)
-Real Razorpay capture, real S3 object upload/download, and true inbox receipt — all covered by Layer 3.
+Real Razorpay capture, real S3 object upload/download, and true inbox receipt — see the Layer-3 residual above.
 
 ## Run everything
 ```bash
