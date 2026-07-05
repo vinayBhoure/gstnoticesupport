@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-07-04] — feat: admin can upload a final (post-payment) draft; user gets a version toggle
+
+**Adds a post-payment deliverable distinct from the pre-payment draft. Branch: `feature/phase-2/final-draft`. See D90.**
+
+- **New `finalDraftS3Key` column** (migration `add_final_draft_s3_key`) — the original `draftS3Key` (the version the user pays to unlock) is preserved; the final draft is a separate artifact.
+- **Two new admin endpoints**: `POST /admin/bookings/:id/final-draft-upload-url` and `.../final-draft-confirm` — same PDF/20 MB limits and pre-signed-S3 flow as the pre-payment draft, but gated on `filing`/`complete` (the final draft cannot be uploaded before the user pays). Uses a distinct `final-drafts/{bookingId}-…` S3 key prefix. Uploading never changes the booking status.
+- **New admin UI**: a `Final Draft` card on the booking detail page, shown below the existing Draft card — locked ("Available once the user completes payment") until payment, then a dropzone / replace flow.
+- **User side**: `GET /bookings/:id/draft-url` gains an optional `?variant=original|final` param (omitted → final if present, else original). The Draft Viewer shows a **Final Draft / Original Draft** toggle when a final draft exists; existing "View Draft" links become "View Final Draft".
+- **User email**: first final-draft upload sends "Your final draft is available"; a replacement sends "Your final draft has been updated" (user-only, mirroring the draft-ready/updated pair).
+- DTOs expose only a derived `hasFinalDraft` boolean — the S3 key never leaves the server. Verified via server `tsc`, client `tsc`, and a full `next build` (route strategy unchanged).
+
 ## [2026-07-04] — fix: admin notifications delivered to external inbox + email delivery observability
 
 **Root-cause fix for "admin receives no notification emails" (users always did). Branch: `feature/phase-2/admin-notification-delivery`. See D89.**

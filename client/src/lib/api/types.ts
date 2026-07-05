@@ -87,6 +87,7 @@ export type BookingDetailDTO = {
   consentInformationAccurate: boolean;
   consentContactAuthorized: boolean;
   adminNote: string | null;
+  hasFinalDraft: boolean;
   createdAt: string;
   updatedAt: string;
 };

@@ -21,8 +21,15 @@ export const documentApi = {
       .get<{ documents: BookingDocumentDTO[] }>(`/bookings/${bookingId}/documents`, { cookie })
       .then((r) => r.documents),
 
-  getDraftUrl: (bookingId: string): Promise<DraftUrlResponse> =>
-    apiClient.get<DraftUrlResponse>(`/bookings/${bookingId}/draft-url`),
+  // variant: 'final' | 'original'. Omitted → server returns the final draft if one
+  // exists, else the original.
+  getDraftUrl: (
+    bookingId: string,
+    variant?: 'original' | 'final',
+  ): Promise<DraftUrlResponse> =>
+    apiClient.get<DraftUrlResponse>(
+      `/bookings/${bookingId}/draft-url${variant ? `?variant=${variant}` : ''}`,
+    ),
 };
 
 // Direct browser → S3 upload via the pre-signed PUT URL. This deliberately does

@@ -13,7 +13,9 @@ import type {
 import type { BookingWithRelations } from '../repositories/booking.repository';
 
 // Explicit DTO types — never spread Prisma rows (database.md §5.3).
-// draftS3Key is NEVER returned to clients (api_contract.md line 84).
+// draftS3Key / finalDraftS3Key are NEVER returned to clients — only the derived
+// `hasFinalDraft` flag (api_contract.md line 84). The pre-signed URL is the only way
+// a client ever reaches a draft object.
 // s3Key on documents is NEVER returned to clients (api_contract.md line 105).
 
 export type BookingSummaryDTO = {
@@ -39,6 +41,7 @@ export type BookingDetailDTO = {
   consentInformationAccurate: boolean;
   consentContactAuthorized: boolean;
   adminNote: string | null;
+  hasFinalDraft: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -95,6 +98,7 @@ export function toBookingDetailDTO(booking: Booking): BookingDetailDTO {
     consentInformationAccurate: booking.consentInformationAccurate,
     consentContactAuthorized: booking.consentContactAuthorized,
     adminNote: booking.adminNote,
+    hasFinalDraft: booking.finalDraftS3Key !== null,
     createdAt: booking.createdAt.toISOString(),
     updatedAt: booking.updatedAt.toISOString(),
   };

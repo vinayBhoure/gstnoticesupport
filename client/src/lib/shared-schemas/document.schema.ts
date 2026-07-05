@@ -34,5 +34,15 @@ export const confirmUploadSchema = z.object({
     .max(255, 'fileName must be at most 255 characters'),
 });
 
+// Draft variants for GET /bookings/:id/draft-url. 'original' = the pre-payment draft
+// (draftS3Key); 'final' = the post-payment final draft (finalDraftS3Key). When omitted,
+// the service returns the final draft if one exists, else the original.
+export const DRAFT_VARIANTS = ['original', 'final'] as const;
+
+export const draftUrlQuerySchema = z.object({
+  variant: z.enum(DRAFT_VARIANTS).optional(),
+});
+
 export type UploadUrlInput = z.infer<typeof uploadUrlSchema>;
 export type ConfirmUploadInput = z.infer<typeof confirmUploadSchema>;
+export type DraftUrlQuery = z.infer<typeof draftUrlQuerySchema>;

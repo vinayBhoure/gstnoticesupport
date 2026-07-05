@@ -218,6 +218,40 @@ export const notificationService = {
     await emailService.sendEmail({ to: booking.contactEmail, subject, html, event: 'draft_updated_user' });
   },
 
+  // Final (post-payment) draft — user only. Uploaded while the booking is in
+  // filing/complete; delivered via the Draft Viewer's variant toggle.
+  async sendFinalDraftReady(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+  }): Promise<void> {
+    const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}/draft`;
+    const { subject, html } = templates.finalDraftReadyUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      dashboardUrl,
+    });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html, event: 'final_draft_ready_user' });
+  },
+
+  async sendFinalDraftUpdated(booking: {
+    id: string;
+    serviceType: string;
+    contactName: string;
+    contactEmail: string;
+  }): Promise<void> {
+    const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}/draft`;
+    const { subject, html } = templates.finalDraftUpdatedUser({
+      name: booking.contactName,
+      bookingId: booking.id,
+      serviceType: booking.serviceType,
+      dashboardUrl,
+    });
+    await emailService.sendEmail({ to: booking.contactEmail, subject, html, event: 'final_draft_updated_user' });
+  },
+
   // Status: Complete — Pattern B: user + admin.
   async sendStatusComplete(booking: {
     id: string;

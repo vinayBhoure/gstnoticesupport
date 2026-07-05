@@ -10,6 +10,7 @@ import { PaymentBadge } from '@/components/admin/PaymentBadge';
 import { AdminDocumentList } from '@/components/admin/AdminDocumentList';
 import { AdminNoteEditor } from '@/components/admin/AdminNoteEditor';
 import { DraftCard } from '@/components/admin/DraftCard';
+import { FinalDraftCard } from '@/components/admin/FinalDraftCard';
 import { StatusActions } from '@/components/admin/StatusActions';
 import { SERVICE_META } from '@/lib/constants/services';
 import { formatBookingDate, bookingRef } from '@/lib/constants/booking-status';
@@ -126,6 +127,12 @@ export default async function AdminBookingDetailPage({
             bookingId={booking.id}
             status={booking.status}
             hasDraft={booking.hasDraft}
+            updatedAt={booking.updatedAt}
+          />
+          <FinalDraftCard
+            bookingId={booking.id}
+            status={booking.status}
+            hasFinalDraft={booking.hasFinalDraft}
             updatedAt={booking.updatedAt}
           />
           <StatusActions

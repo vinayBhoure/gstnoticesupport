@@ -119,6 +119,7 @@ export default async function BookingDetailPage({
             serviceType={booking.serviceType}
             documentCount={booking.documents.length}
             adminNote={booking.adminNote}
+            hasFinalDraft={booking.hasFinalDraft}
           />
         </div>
       </div>

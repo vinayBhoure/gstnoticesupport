@@ -16,6 +16,7 @@ import {
   MAX_FILES_PER_BOOKING,
   type UploadUrlInput,
   type ConfirmUploadInput,
+  type DraftUrlQuery,
 } from '../schemas/document.schema';
 
 const DRAFT_ACCESSIBLE_STATUSES: BookingStatus[] = [BookingStatus.filing, BookingStatus.complete];
@@ -93,18 +94,28 @@ export const documentService = {
     return booking.documents.map(toBookingDocumentDTO);
   },
 
-  async getDraftUrl(bookingId: string, userId: string): Promise<DraftUrlResult> {
+  // Draft download URL, gated on filing/complete. When no variant is requested, the
+  // final (post-payment) draft is preferred if one exists, else the original — so
+  // existing "view draft" links surface the best available version automatically.
+  async getDraftUrl(
+    bookingId: string,
+    userId: string,
+    query: DraftUrlQuery = {},
+  ): Promise<DraftUrlResult> {
     const booking = await bookingRepository.findByIdAndUserId(bookingId, userId);
     if (!booking) throw new ApiError(404, 'NOT_FOUND', 'Booking not found');
 
     if (!DRAFT_ACCESSIBLE_STATUSES.includes(booking.status)) {
       throw new ApiError(403, 'DRAFT_NOT_ACCESSIBLE', 'The draft is not available yet');
     }
-    if (!booking.draftS3Key) {
+
+    const variant = query.variant ?? (booking.finalDraftS3Key ? 'final' : 'original');
+    const key = variant === 'final' ? booking.finalDraftS3Key : booking.draftS3Key;
+    if (!key) {
       throw new ApiError(404, 'NOT_FOUND', 'No draft has been uploaded for this booking');
     }
 
-    const draftUrl = await getDownloadUrl(booking.draftS3Key);
+    const draftUrl = await getDownloadUrl(key);
     return { draftUrl, expiresAt: draftUrlExpiresAt().toISOString() };
   },
 };
