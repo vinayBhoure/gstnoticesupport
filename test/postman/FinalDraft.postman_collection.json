@@ -1,0 +1,287 @@
+{
+  "info": {
+    "name": "GST Notice Support — Final Draft",
+    "description": "Post-payment final-draft feature (feature/phase-2/final-draft). Admin uploads a final draft once a booking is in filing/complete; the user reads it via GET /bookings/:id/draft-url?variant=. Fixtures (draft_ready/filing/complete bookings owned by the seeded admin, each with a placeholder original draftS3Key) are minted by server/scripts/setup-final-draft-fixtures.mjs and injected as a single JSON env-var (finalDraftFixturesJson), parsed in the collection pre-request. draft-confirm/draft-url only check the S3 KEY (prefix + which key), never object existence, and the pre-signed GET URL embeds the key path — so the suite asserts drafts/ vs final-drafts/ in the returned URL. Deferred to Layer 3 (browser MCP): the real S3 PUT/GET and the real Razorpay capture that produces filing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.environment.get('_fixturesLoaded')) {",
+          "  const raw = pm.environment.get('finalDraftFixturesJson');",
+          "  if (raw) {",
+          "    try {",
+          "      const f = JSON.parse(raw);",
+          "      Object.keys(f).forEach(function (k) { pm.environment.set(k, f[k]); });",
+          "      pm.environment.set('_fixturesLoaded', '1');",
+          "    } catch (e) { console.log('fixture parse failed', e); }",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Unauthenticated (401)",
+      "item": [
+        {
+          "name": "final-draft-upload-url — no auth (401)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 401', function () { pm.response.to.have.status(401); });",
+            "pm.test('code UNAUTHORIZED', function () { pm.expect(pm.response.json().error.code).to.eql('UNAUTHORIZED'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"final.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-upload-url"] } }
+        },
+        {
+          "name": "final-draft-confirm — no auth (401)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 401', function () { pm.response.to.have.status(401); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"final-drafts/x-1.pdf\",\n  \"fileName\": \"final.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-confirm"] } }
+        }
+      ]
+    },
+    {
+      "name": "2. Login as regular user",
+      "item": [
+        {
+          "name": "Login (test user)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const cookies = pm.response.headers.all().filter(function (h) { return h.key.toLowerCase() === 'set-cookie'; });",
+            "pm.test('access_token cookie set', function () { pm.expect(cookies.some(function (c) { return c.value.startsWith('access_token='); })).to.be.true; });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"{{testUserPassword}}\"\n}" }, "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] } }
+        }
+      ]
+    },
+    {
+      "name": "3. RBAC — non-admin gets 403",
+      "item": [
+        {
+          "name": "final-draft-upload-url — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });",
+            "pm.test('code FORBIDDEN', function () { pm.expect(pm.response.json().error.code).to.eql('FORBIDDEN'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"final.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-upload-url"] } }
+        },
+        {
+          "name": "final-draft-confirm — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"final-drafts/x-1.pdf\",\n  \"fileName\": \"final.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-confirm"] } }
+        }
+      ]
+    },
+    {
+      "name": "4. Login as admin",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const cookies = pm.response.headers.all().filter(function (h) { return h.key.toLowerCase() === 'set-cookie'; });",
+            "pm.test('access_token cookie set', function () { pm.expect(cookies.some(function (c) { return c.value.startsWith('access_token='); })).to.be.true; });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }, "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] } }
+        }
+      ]
+    },
+    {
+      "name": "5. Final-draft upload URL — gates",
+      "item": [
+        {
+          "name": "non-PDF contentType (400 INVALID_FILE_TYPE)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code INVALID_FILE_TYPE', function () { pm.expect(pm.response.json().error.code).to.eql('INVALID_FILE_TYPE'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"final.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"image/png\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-upload-url"] } }
+        },
+        {
+          "name": "over 20 MB (400 FILE_TOO_LARGE)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code FILE_TOO_LARGE', function () { pm.expect(pm.response.json().error.code).to.eql('FILE_TOO_LARGE'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"final.pdf\",\n  \"fileSize\": 26214400,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-upload-url"] } }
+        },
+        {
+          "name": "draft_ready state (409 DRAFT_LOCKED)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+            "pm.test('code DRAFT_LOCKED', function () { pm.expect(pm.response.json().error.code).to.eql('DRAFT_LOCKED'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"final.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/final-draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "final-draft-upload-url"] } }
+        },
+        {
+          "name": "filing valid PDF (200, key final-drafts/<id>-)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const d = pm.response.json().data;",
+            "pm.test('uploadUrl is https string', function () { pm.expect(d.uploadUrl).to.be.a('string'); pm.expect(d.uploadUrl.indexOf('https://')).to.eql(0); });",
+            "pm.test('s3Key prefixed final-drafts/<id>-', function () { pm.expect(d.s3Key.indexOf('final-drafts/' + pm.environment.get('filingId') + '-')).to.eql(0); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"final asmt10.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-upload-url"] } }
+        },
+        {
+          "name": "complete state valid PDF (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('s3Key prefixed final-drafts/<id>-', function () { pm.expect(pm.response.json().data.s3Key.indexOf('final-drafts/' + pm.environment.get('completeId') + '-')).to.eql(0); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"final.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{completeId}}/final-draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{completeId}}", "final-draft-upload-url"] } }
+        }
+      ]
+    },
+    {
+      "name": "6. Draft-url variants — BEFORE final upload",
+      "item": [
+        {
+          "name": "variant=final before upload (404)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 404', function () { pm.response.to.have.status(404); });",
+            "pm.test('code NOT_FOUND', function () { pm.expect(pm.response.json().error.code).to.eql('NOT_FOUND'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/{{filingId}}/draft-url?variant=final", "host": ["{{baseUrl}}"], "path": ["bookings", "{{filingId}}", "draft-url"], "query": [{ "key": "variant", "value": "final" }] } }
+        },
+        {
+          "name": "variant=original (200, url has /drafts/<id>-)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const d = pm.response.json().data;",
+            "pm.test('draftUrl points at original key', function () { pm.expect(d.draftUrl.indexOf('/drafts/' + pm.environment.get('filingId') + '-')).to.be.above(-1); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/{{filingId}}/draft-url?variant=original", "host": ["{{baseUrl}}"], "path": ["bookings", "{{filingId}}", "draft-url"], "query": [{ "key": "variant", "value": "original" }] } }
+        },
+        {
+          "name": "no variant before final -> original (200, /drafts/)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const d = pm.response.json().data;",
+            "pm.test('defaults to original (no final yet)', function () { pm.expect(d.draftUrl.indexOf('/drafts/' + pm.environment.get('filingId') + '-')).to.be.above(-1); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/{{filingId}}/draft-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{filingId}}", "draft-url"] } }
+        },
+        {
+          "name": "variant=bogus (400 VALIDATION_ERROR)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/{{filingId}}/draft-url?variant=bogus", "host": ["{{baseUrl}}"], "path": ["bookings", "{{filingId}}", "draft-url"], "query": [{ "key": "variant", "value": "bogus" }] } }
+        },
+        {
+          "name": "draft_ready booking draft-url (403 DRAFT_NOT_ACCESSIBLE)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });",
+            "pm.test('code DRAFT_NOT_ACCESSIBLE', function () { pm.expect(pm.response.json().error.code).to.eql('DRAFT_NOT_ACCESSIBLE'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/{{draftReadyId}}/draft-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{draftReadyId}}", "draft-url"] } }
+        }
+      ]
+    },
+    {
+      "name": "7. Final-draft confirm",
+      "item": [
+        {
+          "name": "forged key drafts/... (400 VALIDATION_ERROR)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"drafts/{{filingId}}-20260101-forged-ab12.pdf\",\n  \"fileName\": \"final.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-confirm"] } }
+        },
+        {
+          "name": "confirm first (filing) -> 200, hasFinalDraft true",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "pm.environment.set('finalKey', 'final-drafts/' + pm.environment.get('filingId') + '-20260101-final-ab12.pdf');" ] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const b = pm.response.json();",
+              "pm.test('message present', function () { pm.expect(b.message).to.be.a('string'); });",
+              "pm.test('hasFinalDraft true', function () { pm.expect(b.data.booking.hasFinalDraft).to.eql(true); });",
+              "pm.test('status unchanged (still filing)', function () { pm.expect(b.data.booking.status).to.eql('filing'); });",
+              "pm.test('finalDraftS3Key never exposed', function () { pm.expect(b.data.booking).to.not.have.property('finalDraftS3Key'); });"
+            ] } }
+          ],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"{{finalKey}}\",\n  \"fileName\": \"final.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-confirm"] } }
+        },
+        {
+          "name": "confirm again (replace) -> 200",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "pm.environment.set('finalKey', 'final-drafts/' + pm.environment.get('filingId') + '-20260102-finalv2-cd34.pdf');" ] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('hasFinalDraft still true', function () { pm.expect(pm.response.json().data.booking.hasFinalDraft).to.eql(true); });"
+            ] } }
+          ],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"{{finalKey}}\",\n  \"fileName\": \"final-v2.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}/final-draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}", "final-draft-confirm"] } }
+        },
+        {
+          "name": "confirm on complete booking -> 200",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "pm.environment.set('finalKey', 'final-drafts/' + pm.environment.get('completeId') + '-20260101-final-ef56.pdf');" ] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('hasFinalDraft true', function () { pm.expect(pm.response.json().data.booking.hasFinalDraft).to.eql(true); });"
+            ] } }
+          ],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"{{finalKey}}\",\n  \"fileName\": \"final.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{completeId}}/final-draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{completeId}}", "final-draft-confirm"] } }
+        }
+      ]
+    },
+    {
+      "name": "8. Draft-url variants — AFTER final upload",
+      "item": [
+        {
+          "name": "no variant now -> final (200, /final-drafts/)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('defaults to final now', function () { pm.expect(pm.response.json().data.draftUrl.indexOf('/final-drafts/' + pm.environment.get('filingId') + '-')).to.be.above(-1); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/{{filingId}}/draft-url", "host": ["{{baseUrl}}"], "path": ["bookings", "{{filingId}}", "draft-url"] } }
+        },
+        {
+          "name": "variant=final (200, /final-drafts/<id>-)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('serves final key', function () { pm.expect(pm.response.json().data.draftUrl.indexOf('/final-drafts/' + pm.environment.get('filingId') + '-')).to.be.above(-1); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/{{filingId}}/draft-url?variant=final", "host": ["{{baseUrl}}"], "path": ["bookings", "{{filingId}}", "draft-url"], "query": [{ "key": "variant", "value": "final" }] } }
+        },
+        {
+          "name": "variant=original still preserved (200, /drafts/<id>-)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('original still served', function () { const u = pm.response.json().data.draftUrl; pm.expect(u.indexOf('/drafts/' + pm.environment.get('filingId') + '-')).to.be.above(-1); pm.expect(u.indexOf('/final-drafts/')).to.eql(-1); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/{{filingId}}/draft-url?variant=original", "host": ["{{baseUrl}}"], "path": ["bookings", "{{filingId}}", "draft-url"], "query": [{ "key": "variant", "value": "original" }] } }
+        }
+      ]
+    },
+    {
+      "name": "9. DTO — hasFinalDraft on detail, no key leak",
+      "item": [
+        {
+          "name": "admin detail exposes hasFinalDraft, hides keys",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const d = pm.response.json().data.booking;",
+            "pm.test('hasFinalDraft true', function () { pm.expect(d.hasFinalDraft).to.eql(true); });",
+            "pm.test('hasDraft true', function () { pm.expect(d.hasDraft).to.eql(true); });",
+            "pm.test('finalDraftS3Key never exposed', function () { pm.expect(d).to.not.have.property('finalDraftS3Key'); });",
+            "pm.test('draftS3Key never exposed', function () { pm.expect(d).to.not.have.property('draftS3Key'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingId}}", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingId}}"] } }
+        }
+      ]
+    }
+  ]
+}
