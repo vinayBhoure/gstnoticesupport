@@ -4,7 +4,13 @@ import { z } from 'zod';
 // Declared as plain z.enum literals (not z.nativeEnum over a server-only import) so
 // this schema stays client-safe and can be synced into the frontend (RULES.md §3.1/§3.2).
 // Keep these arrays in lockstep with prisma/schema.prisma.
-export const SERVICE_TYPES = ['asmt_10', 'scn', 'commissioner_appeal', 'gstat_appeal'] as const;
+export const SERVICE_TYPES = [
+  'asmt_10',
+  'scn',
+  'commissioner_appeal',
+  'gstat_appeal',
+  'representation',
+] as const;
 export const FILING_FOR_VALUES = ['self', 'others'] as const;
 
 // Canonical Indian GSTIN format regex (format-only, no external API per LLD).

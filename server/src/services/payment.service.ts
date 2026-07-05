@@ -5,7 +5,7 @@ import { bookingRepository } from '../repositories/booking.repository';
 import { notificationService } from './notification.service';
 import { assertPayable } from './booking-state-machine';
 import { ApiError } from '../utils/ApiError';
-import { getServicePriceInPaise } from '../lib/pricing';
+import { getBookingAmountPaise } from '../lib/pricing';
 import { createOrder, fetchPayment, verifyPaymentRedirectSignature } from '../lib/razorpay';
 import { env } from '../lib/env';
 import { logger } from '../lib/logger';
@@ -48,8 +48,9 @@ export const paymentService = {
 
     assertPayable(booking);
 
-    // Price is always derived server-side from the service type — never from the client.
-    const amountPaise = getServicePriceInPaise(booking.serviceType);
+    // Price is always derived server-side — a fixed map for standard services, or the
+    // admin's per-booking quote for consultation-priced representation. Never from the client.
+    const amountPaise = getBookingAmountPaise(booking);
 
     let order;
     try {

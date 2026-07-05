@@ -19,6 +19,7 @@ import {
   ShieldAlert,
   Scale,
   Landmark,
+  Gavel,
   type LucideIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -45,6 +46,7 @@ const SERVICE_ICONS: Record<ServiceType, LucideIcon> = {
   scn: ShieldAlert,
   commissioner_appeal: Scale,
   gstat_appeal: Landmark,
+  representation: Gavel,
 };
 
 type FormValues = z.input<typeof createBookingSchema>;
@@ -99,7 +101,8 @@ export function NewBookingWizard() {
   // to the appeal services, per the locked KB; prototype's data-predep flags
   // are inverted and the KB wins).
   const topRow = SERVICE_ORDER.slice(0, 2);
-  const bottomRow = SERVICE_ORDER.slice(2);
+  const bottomRow = SERVICE_ORDER.slice(2, 4);
+  const extraRow = SERVICE_ORDER.slice(4);
   const showPredep = requiresPreDeposit(serviceType);
 
   const stepperStep = submitted ? 4 : step;
@@ -173,7 +176,28 @@ export function NewBookingWizard() {
                   />
                 ))}
               </div>
+
+              {extraRow.length > 0 && (
+                <div className="cards-row">
+                  {extraRow.map((value) => (
+                    <ServiceCard
+                      key={value}
+                      value={value}
+                      isSelected={serviceType === value}
+                      onSelect={() => setValue('serviceType', value, { shouldValidate: true })}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
+
+            {serviceType === 'representation' && (
+              <p className="pricing-note" role="note">
+                <CheckCircle size={15} strokeWidth={1.5} className="ic-check" aria-hidden />
+                This is a consultation-based service. Our team confirms the fee after reviewing
+                your case — you&apos;ll see the exact quote in your dashboard before paying.
+              </p>
+            )}
 
             <p className="pricing-note">
               <CheckCircle size={15} strokeWidth={1.5} className="ic-check" aria-hidden />

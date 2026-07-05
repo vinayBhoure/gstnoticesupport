@@ -8,7 +8,7 @@ import { DocumentUpload } from '@/components/booking/DocumentUpload';
 import { PreDepositNotice } from '@/components/booking/PreDepositNotice';
 import { PayToUnlock } from '@/components/booking/PayToUnlock';
 import { CancelBookingButton } from './CancelBookingButton';
-import { bookingRef } from '@/lib/constants/booking-status';
+import { bookingRef, formatInr } from '@/lib/constants/booking-status';
 import { SERVICE_META } from '@/lib/constants/services';
 import type { BookingStatus, PaymentStatus, ServiceType } from '@/lib/api/types';
 
@@ -20,6 +20,7 @@ type BookingActionPanelProps = {
   documentCount: number;
   adminNote: string | null;
   hasFinalDraft: boolean;
+  quotedAmountPaise: number | null;
 };
 
 // Status action panel per resources/ui/Service Detail.html — one panel per
@@ -32,6 +33,7 @@ export function BookingActionPanel({
   documentCount,
   adminNote,
   hasFinalDraft,
+  quotedAmountPaise,
 }: BookingActionPanelProps) {
   const router = useRouter();
 
@@ -94,7 +96,11 @@ export function BookingActionPanel({
             <PreDepositNotice serviceType={serviceType} />
             <div className="fee-row">
               <span className="lbl">Reply preparation fee</span>
-              <span className="amt">{SERVICE_META[serviceType].priceDisplay}</span>
+              <span className="amt">
+                {quotedAmountPaise != null
+                  ? formatInr(quotedAmountPaise)
+                  : SERVICE_META[serviceType].priceDisplay}
+              </span>
             </div>
             {paymentStatus !== 'paid' && (
               <PayToUnlock bookingId={bookingId} serviceType={serviceType} />

@@ -42,6 +42,7 @@ export type BookingDetailDTO = {
   consentContactAuthorized: boolean;
   adminNote: string | null;
   hasFinalDraft: boolean;
+  quotedAmountPaise: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -99,6 +100,7 @@ export function toBookingDetailDTO(booking: Booking): BookingDetailDTO {
     consentContactAuthorized: booking.consentContactAuthorized,
     adminNote: booking.adminNote,
     hasFinalDraft: booking.finalDraftS3Key !== null,
+    quotedAmountPaise: booking.quotedAmountPaise,
     createdAt: booking.createdAt.toISOString(),
     updatedAt: booking.updatedAt.toISOString(),
   };

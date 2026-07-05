@@ -1,8 +1,9 @@
 import type { ServiceType } from '@/lib/api/types';
 
-// Display metadata for the four GST services. Order drives the selection grid.
+// Display metadata for the GST services. Order drives the selection grid.
 // priceDisplay is display-only and must match src/data/pricing.tsx — the charge
-// itself is always derived server-side.
+// itself is always derived server-side. `representation` is consultation-priced, so
+// its priceDisplay is 'Custom Quote' and the actual fee is quoted per booking.
 export const SERVICE_META: Record<
   ServiceType,
   { label: string; description: string; priceDisplay: string }
@@ -27,6 +28,17 @@ export const SERVICE_META: Record<
     description: 'Appeal before the GST Appellate Tribunal.',
     priceDisplay: '₹14,999',
   },
+  representation: {
+    label: 'Representation Before Authority',
+    description: 'Appearance and representation before the GST officer or appellate authority.',
+    priceDisplay: 'Custom Quote',
+  },
 };
 
-export const SERVICE_ORDER: ServiceType[] = ['asmt_10', 'scn', 'commissioner_appeal', 'gstat_appeal'];
+export const SERVICE_ORDER: ServiceType[] = [
+  'asmt_10',
+  'scn',
+  'commissioner_appeal',
+  'gstat_appeal',
+  'representation',
+];

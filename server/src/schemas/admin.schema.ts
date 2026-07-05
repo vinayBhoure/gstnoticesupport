@@ -25,6 +25,11 @@ export const ADMIN_TRANSITION_STATUSES = ['in_review', 'complete'] as const;
 export const DRAFT_MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
 export const DRAFT_ALLOWED_CONTENT_TYPE = 'application/pdf';
 
+// Per-booking custom fee bounds (paise) for consultation-priced services
+// (representation). The admin enters this at draft-confirm; the user pays it.
+export const QUOTE_MIN_PAISE = 50_000; // ₹500
+export const QUOTE_MAX_PAISE = 10_000_000; // ₹1,00,000
+
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -92,6 +97,14 @@ export const draftConfirmSchema = z.object({
     .trim()
     .min(1, 'fileName is required')
     .max(255, 'fileName must be at most 255 characters'),
+  // Required for representation bookings, rejected for others — the service enforces
+  // that rule (it has the booking's serviceType); here we only bound the value.
+  quotedAmountPaise: z
+    .number()
+    .int('quotedAmountPaise must be an integer')
+    .min(QUOTE_MIN_PAISE, 'Quote must be at least ₹500')
+    .max(QUOTE_MAX_PAISE, 'Quote must be at most ₹1,00,000')
+    .optional(),
 });
 
 // Empty string clears the note (api_contract.md §6.6).

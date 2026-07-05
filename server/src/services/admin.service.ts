@@ -172,8 +172,26 @@ export const adminService = {
       throw new ApiError(409, 'DRAFT_LOCKED', 'A draft cannot be uploaded at this stage');
     }
 
+    // representation is consultation-priced: the admin must supply the fee quote here,
+    // and it is meaningless (rejected) for fixed-price services.
+    if (booking.serviceType === 'representation' && input.quotedAmountPaise == null) {
+      throw new ApiError(400, 'QUOTE_REQUIRED', 'Enter the quoted fee for this representation booking');
+    }
+    if (booking.serviceType !== 'representation' && input.quotedAmountPaise != null) {
+      throw new ApiError(
+        400,
+        'VALIDATION_ERROR',
+        'quotedAmountPaise only applies to representation bookings',
+      );
+    }
+
     const isFirstDraft = booking.status === BookingStatus.in_review;
-    await bookingRepository.setDraftAndStatus(id, input.s3Key, BookingStatus.draft_ready);
+    await bookingRepository.setDraftAndStatus(
+      id,
+      input.s3Key,
+      BookingStatus.draft_ready,
+      input.quotedAmountPaise,
+    );
 
     const recipient = {
       id: booking.id,
