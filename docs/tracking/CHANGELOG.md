@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-07-05] — fix: decouple admin notification recipient from the admin login identity
+
+**Corrects D89. Branch: `fix/admin-notification-recipient-decouple`. See D92.**
+
+- D89 repointed `ADMIN_EMAIL` to an external inbox, but `ADMIN_EMAIL` is also the admin account's **login/seed identity** (looked up by the seed and every admin fixture/test). Changing it broke admin login, the seed lookup, and the Admin/Payments/FinalDraft Newman suites (no admin row for the new address).
+- New optional **`ADMIN_NOTIFICATION_EMAIL`** env var (falls back to `ADMIN_EMAIL`) is now the delivery target for all admin notification emails. `ADMIN_EMAIL` is restored to the branded identity (`admin@gstnoticesupport.in`); `ADMIN_NOTIFICATION_EMAIL` carries the external inbox. Surfaced while building the feature test suites.
+- No behavior change to which events notify admin; only where the mail is delivered vs. who the admin logs in as.
+
 ## [2026-07-05] — feat: Representation Before Authority is now a bookable service (custom per-booking pricing)
 
 **Promotes the existing consultation-only marketing service into a fully bookable one. Branch: `feature/phase-2/representation-service`. See D91.**
