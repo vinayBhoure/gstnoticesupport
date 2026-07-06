@@ -29,6 +29,7 @@ enum ServiceType {
   scn
   commissioner_appeal
   gstat_appeal
+  representation
 
   @@map("service_enum")
 }
@@ -130,6 +131,10 @@ model Booking {
   consentInformationAccurate Boolean       @map("consent_information_accurate")
   consentContactAuthorized   Boolean       @map("consent_contact_authorized")
   draftS3Key                 String?       @map("draft_s3_key") @db.Text
+  finalDraftS3Key            String?       @map("final_draft_s3_key") @db.Text
+  // Per-booking custom fee (paise) for consultation-priced services (representation).
+  // Set by the admin at draft-confirm; the Razorpay order uses it instead of a fixed price.
+  quotedAmountPaise          Int?          @map("quoted_amount_paise")
   adminNote                  String?       @map("admin_note") @db.Text
   createdAt                  DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt                  DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)

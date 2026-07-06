@@ -112,7 +112,7 @@ export type PricingFaqItem = {
   answer: ReactNode;
 };
 
-export type TestimonialTabId = 'ca' | 'adv' | 'biz';
+export type TestimonialTabId = 'adv' | 'biz';
 
 export type TestimonialTab = {
   id: TestimonialTabId;
@@ -121,6 +121,7 @@ export type TestimonialTab = {
 
 export type TestimonialItem = {
   quote: string;
+  business: string;
   name: string;
   meta: string;
 };

@@ -14,6 +14,7 @@ import type {
   CompleteProfileInput,
   LoginInput,
   ResetPasswordInput,
+  ChangePasswordInput,
 } from '../schemas/auth.schema';
 
 const BCRYPT_COST = 12;
@@ -57,6 +58,10 @@ export const authService = {
 
     await otpService.verify(user.id, input.otp);
     const verified = await userRepository.updateEmailVerified(user.id, true);
+
+    notificationService
+      .sendWelcome({ name: verified.name, email: verified.email })
+      .catch(() => {});
 
     const { accessToken, refreshToken } = await tokenService.issueAuthTokens(verified);
     return { user: toUserDTO(verified), tokens: { accessToken, refreshToken } };
@@ -163,6 +168,25 @@ export const authService = {
 
     const { accessToken, refreshToken } = await tokenService.issueAuthTokens(updated);
     return { user: toUserDTO(updated), tokens: { accessToken, refreshToken } };
+  },
+
+  // Authenticated password change (Admin Settings, and any signed-in user).
+  // The current session stays valid; other refresh tokens are revoked so a
+  // stolen session elsewhere cannot outlive the password change.
+  async changePassword(userId: string, input: ChangePasswordInput): Promise<void> {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new ApiError(404, 'NOT_FOUND', 'Account not found');
+    }
+
+    const matches = await bcrypt.compare(input.currentPassword, user.hashedPassword);
+    if (!matches) {
+      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect current password');
+    }
+
+    const hashedPassword = await bcrypt.hash(input.newPassword, BCRYPT_COST);
+    await userRepository.updatePassword(userId, hashedPassword);
+    await tokenService.revokeAllRefreshTokens(userId);
   },
 
   // Blacklists the access-token jti from the login "This wasn't me" link.

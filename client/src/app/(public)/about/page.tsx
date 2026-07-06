@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import styles from './about.module.css';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { BookServiceButton } from '@/components/ui/BookServiceButton';
 import { ORG } from '@/lib/site';
 import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
 import { aboutMeta, aboutHero, aboutMission, aboutCompany, aboutWhy, aboutCta } from '@/data/about';
@@ -23,14 +24,7 @@ export default function AboutPage() {
             {aboutHero.sub}
           </p>
           <div className={styles.ctaRow}>
-            <a
-              className="btn btn-primary"
-              href={aboutHero.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {aboutHero.bookLabel}
-            </a>
+            <BookServiceButton className="btn btn-primary">{aboutHero.bookLabel}</BookServiceButton>
             <RequestCallbackButton className="btn btn-secondary">{aboutHero.callbackLabel}</RequestCallbackButton>
           </div>
         </div>
@@ -119,14 +113,7 @@ export default function AboutPage() {
           <h2>{aboutCta.heading}</h2>
           <p>{aboutCta.sub}</p>
           <div className={styles.btnRow}>
-            <a
-              className="btn btn-primary"
-              href={aboutCta.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {aboutCta.bookLabel}
-            </a>
+            <BookServiceButton className="btn btn-primary">{aboutCta.bookLabel}</BookServiceButton>
             <RequestCallbackButton className="btn btn-secondary on-dark">
               {aboutCta.callbackLabel}
             </RequestCallbackButton>

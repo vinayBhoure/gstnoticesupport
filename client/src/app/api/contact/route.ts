@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     ContactNotificationEmail({ name, mobile, email, query }),
   );
 
-  const { error } = await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from,
     to,
     replyTo: email,
@@ -69,8 +69,10 @@ export async function POST(request: Request) {
   });
 
   if (error) {
+    console.error('[contact] resend send failed', { reason: error.name });
     return envelope(null, 'Could not send your message', 502);
   }
 
+  console.info('[contact] sent', { id: data?.id ?? null });
   return envelope({ sent: true }, null, 200);
 }

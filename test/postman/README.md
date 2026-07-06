@@ -58,3 +58,8 @@ bash test/postman/run-newman.sh
 - `gst-local.postman_environment.json` — environment (placeholders only; no secrets).
 - `run-newman.sh` — loads admin creds from `server/.env` and runs Newman.
 - `package.json` — pins Newman; `npm test` entry point.
+
+## Other suites
+
+- **Payments (EP12):** `Payments.postman_collection.json` + `run-payments-newman.sh`. See the collection description and `decisions.md` D76–D77.
+- **Admin Surface (EP13):** `Admin.postman_collection.json` + `run-admin-newman.sh` (`bash run-admin-newman.sh`). 50 assertions across the 8 `/api/v1/admin` endpoints — RBAC, list/detail, status transitions, draft upload/confirm, notes, mark-paid gates, and stats. Full coverage matrix and the manual/deferred paths (real captured Razorpay payment, S3 PUT, email) are in **`ADMIN_TEST_PLAN.md`**.

@@ -16,7 +16,7 @@
 
 /* ---------- NOTICE SELECTOR ---------- */
 .noticeGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;}
-.noticeCard{display:flex;flex-direction:column;padding:24px;height:100%;transition:border-color .15s,box-shadow .15s;}
+.noticeCard{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px;height:100%;transition:border-color .15s,box-shadow .15s;}
 .noticeCard:hover{border-color:var(--primary-navy);box-shadow:var(--shadow-md);transform:translateY(-2px);}
 .noticeCard:focus-visible{outline:none;border-color:var(--primary-navy);box-shadow:0 0 0 3px rgba(10,37,64,.25);}
 .noticeCard .icWrap{width:46px;height:46px;border-radius:var(--r-btn);background:var(--neutral-50);display:flex;align-items:center;justify-content:center;color:var(--primary-deep-blue);margin-bottom:16px;}
@@ -24,9 +24,9 @@
 .noticeCard .desc{font-size:14px;color:var(--neutral-600);margin-top:8px;line-height:1.5;flex:1;}
 .noticeCard .price{font-size:20px;font-weight:700;color:var(--primary-navy);margin-top:16px;}
 .noticeCard .price small{font-size:13px;font-weight:500;color:var(--neutral-600);}
-.noticeCard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;}
+.noticeCard .foot{display:flex;align-items:center;justify-content:center;margin-top:14px;}
 .noticeCard .getlink{display:inline-flex;align-items:center;gap:5px;color:var(--accent-green);font-weight:600;font-size:14px;}
-.noticeCard .badgeAmber{margin-top:14px;align-self:flex-start;}
+.noticeCard .badgeAmber{margin-top:12px;align-self:center;}
 
 /* ---------- HOW IT WORKS ---------- */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;position:relative;}
@@ -68,19 +68,19 @@
 .pillar p{color:rgba(255,255,255,.8);font-size:15px;margin-top:10px;line-height:1.55;}
 
 /* ---------- PRICING ---------- */
-.tiers{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;align-items:stretch;}
-.tier{padding:26px 22px;display:flex;flex-direction:column;height:100%;position:relative;transition:box-shadow .15s ease,border-color .15s ease,transform .15s ease;}
+.tiers{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;align-items:stretch;}
+.tier{padding:32px 28px;display:flex;flex-direction:column;height:100%;position:relative;transition:box-shadow .15s ease,border-color .15s ease,transform .15s ease;}
 .tier:hover{box-shadow:var(--shadow-md);border-color:var(--primary-navy);transform:translateY(-2px);}
 .tier.popular{border-color:var(--accent-green);box-shadow:var(--shadow-md);}
 .tier.popular:hover{border-color:var(--accent-green);}
 .tier .popBadge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);}
-.tier h3{font-size:21px;min-height:calc(21px * 1.3 * 2);display:flex;align-items:flex-start;}
-.tier .price{font-size:48px;font-weight:700;color:var(--primary-navy);margin:14px 0 4px;letter-spacing:-.02em;}
+.tier h3{font-size:22px;min-height:calc(22px * 1.3 * 2);display:flex;align-items:flex-start;color:var(--primary-navy);}
+.tier .price{font-size:48px;font-weight:700;color:var(--primary-navy);margin:16px 0 4px;letter-spacing:-.02em;line-height:1;}
 .tier .price small{font-size:15px;font-weight:500;color:var(--neutral-600);}
-.tier ul{list-style:none;margin:22px 0 28px;display:flex;flex-direction:column;gap:12px;}
-.tier ul li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--neutral-900);}
+.tier ul{list-style:none;margin:22px 0 0;display:flex;flex-direction:column;gap:11px;flex:1;}
+.tier ul li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--neutral-900);line-height:1.45;}
 .tier ul li .ic{width:17px;height:17px;color:var(--accent-green);flex:0 0 auto;margin-top:2px;}
-.tierFoot{margin-top:auto;display:flex;flex-direction:column;gap:14px;}
+.tierFoot{margin-top:auto;padding-top:20px;display:flex;flex-direction:column;gap:12px;}
 .tierFoot .badgeAmber{align-self:flex-start;}
 .pricingNote{text-align:center;font-size:14px;color:var(--neutral-600);margin-top:28px;max-width:70ch;margin-left:auto;margin-right:auto;line-height:1.6;}
 
@@ -94,6 +94,7 @@
 .tpanelActive{display:block;}
 .tscroll{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
 .tcard{padding:28px;}
+.tcard .biz{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-green);margin-bottom:12px;}
 .tcard .qm{font-family:Georgia,serif;font-size:56px;line-height:.6;color:var(--neutral-200);height:30px;}
 .tcard .quote{font-size:16px;color:var(--neutral-900);line-height:1.6;margin:8px 0 22px;}
 .tcard .div{height:1px;background:var(--neutral-200);margin-bottom:18px;}

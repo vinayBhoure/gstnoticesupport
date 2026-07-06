@@ -78,6 +78,15 @@
 | ✅ | Change rotating headline text colour to accent-green (`--accent-green`) | `RotatingHeadline.module.css` — WCAG AA (~5.9:1 on white) |
 | ✅ | Apply serif typeface to navbar brand name | `globals.css` `.brand .bn` → `Georgia,'Times New Roman',serif` |
 
+### EP4-Addendum 3 — Landing Page UI Refinement Pass (2026-07-04)
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | Remove "Request Callback" and "Sign Up" from nav (desktop, mobile drawer, mobile sticky bar) | `Navbar.tsx`, `NavAuthActions.tsx`, `ScrollShell.tsx`, `data/common.ts` |
+| ✅ | Service-page "Book Service" CTAs route to `/dashboard/bookings/new` with guest login+return | New `BookServiceButton` + `sanitizeReturnTo`; extends D86, see D88 |
+| ✅ | Center "Choose Your Service" card content; move pre-deposit badge above price | `(public)/page.tsx` + `page.module.css` |
+| ✅ | Remove testimonials CA tab; default to Business Owners; show business name above quote | `data/testimonials.ts`, `data/types.ts`, `Testimonials.tsx` |
+| ✅ | Unify homepage pricing tiers with `/pricing` page spacing/typography | `page.module.css` `.tiers` block — see D88 |
+
 ### EP5 — Phase 1 Hardening & Launch
 | Status | Task | Notes |
 |---|---|---|
@@ -171,57 +180,82 @@
 ### EP10 — Auth Frontend & Route Protection (frontend, backend_plan Phase 2)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Login page (`/login`) — RHF + zodResolver + TanStack Query mutation | |
-| ⬚ | Signup page (`/signup`) — email + password | |
-| ⬚ | OTP verification page (`/verify-otp`) | |
-| ⬚ | Forgot password + reset password pages | |
-| ⬚ | Complete profile page (`/complete-profile`) — name + phone (D67) | One-time, post-OTP-verify |
-| ⬚ | Auth check helper for Server Components — reads JWT cookie, redirects to `/login` if absent | |
-| ⬚ | Admin role guard — redirects to `/dashboard` if `role !== admin` | |
+| ✅ | Typed API client (`lib/api/client.ts`) — envelope unwrap, `ApiRequestError`, 401→refresh→retry | Shared typed gateway; `credentials:include` for cross-origin cookies |
+| ✅ | Auth API calls (`lib/api/auth.ts`) — typed payloads via shared Zod schemas | |
+| ✅ | Shared Zod schema sync script (`client/scripts/sync-shared-schemas.mjs`) — copies `auth.schema.ts` + `document.schema.ts` from server on `predev`/`prebuild` | Solves Turbopack monorepo boundary; server is sole source of truth |
+| ✅ | TanStack Query `Providers` (`app/providers.tsx`) — mounted in root layout | `staleTime:60s`, `retry:1`, `refetchOnWindowFocus:false` |
+| ✅ | SSR session helpers (`lib/auth/session.ts`) — `getCurrentUser`, `requireUser`, `requireAdmin`, `redirectIfAuthenticated` | Cookie-forwarding `GET /auth/me`; no client-side token |
+| ✅ | Extended `Input` component — password show/hide toggle, `+91` tel prefix, `aria-invalid`, `forwardRef` | |
+| ✅ | New `Checkbox` component — `forwardRef`, `label: React.ReactNode`, error + a11y | |
+| ✅ | New `OTPInput` component — 6-box, paste distribution, arrow/backspace nav, `inputMode="numeric"` | |
+| ✅ | `AuthCardShell` layout component — 440px card, wordmark, trust strip, Privacy/Terms links | |
+| ✅ | `(auth)/layout.tsx` passthrough — no Navbar/Footer | |
+| ✅ | Login page (`/login`) — RHF + zodResolver + TanStack Query mutation | `EMAIL_NOT_VERIFIED` info banner; generic error (no cred disclosure) |
+| ✅ | Signup page (`/signup`) — email + password | Three-generic `useForm` for `.default()` schemas |
+| ✅ | OTP verification page (`/verify-otp`) — OTPInput + resend; `useWatch` pattern | |
+| ✅ | Complete profile page (`/complete-profile`) — name + phone (D67); one-time gate | Redirects to `/dashboard` if `user.phone` already set |
+| ✅ | Forgot password page (`/forgot-password`) — email → sent confirmation; neutral response | |
+| ✅ | Reset password page (`/reset-password`) — OTPInput + new password | Reads `?uid` from searchParams |
+| ✅ | Auth invalidate page (`/auth/invalidate`) — fully SSR; success/expired/invalid states | "This wasn't me" link; no JSON leak to client |
+| ✅ | Dashboard skeleton (`/dashboard`) — SSR, `requireUser()` gate; `LogoutButton` client leaf | Placeholder pending EP11 App Shell |
+| ✅ | `(dashboard)/layout.tsx` — `requireUser()` auth gate | Full AppShell deferred to EP11 |
+| 🔄 | Live E2E validation — full auth flow against running server (signup → OTP → complete-profile → dashboard → logout → login → forgot/reset) | Pending: requires `server/.env` + Resend live |
+| ✅ | Backend fix: `notification.service.ts` invalidation link → `CLIENT_URL/auth/invalidate?ref=...` (currently points to API URL) | Done EP11 — D75 |
 
 ### EP11 — User Dashboard & Booking Flow Frontend (frontend, backend_plan Phases 3 + 4)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Dashboard home — booking list with status badges | SSR Server Component |
-| ⬚ | Booking Step 1 — service selection + pre-deposit disclosure for GSTAT/Commissioner | KB2 §7 — must appear here |
-| ⬚ | Booking Step 2 — personal info + GSTN + consents | RHF + zodResolver |
-| ⬚ | Booking Step 3 — document upload (multi-file, PDF, ≤5 MB each) | Pre-signed PUT flow |
-| ⬚ | Booking detail page — status timeline, documents, admin note, draft viewer | |
-| ⬚ | Draft viewer — fetches pre-signed GET URL per load; gated to `filing/complete` | Never store pre-signed URL in state |
-| ⬚ | Payment History page — offset pagination + Razorpay receipt links (D64) | |
-| ⬚ | My Profile page — view + update name/phone (`PATCH /user/profile`) | |
+| ✅ | Dashboard home — booking list with status badges | SSR Server Component; `bookingApi.list` cookie-forwarded |
+| ✅ | Booking Step 1 — service selection + pre-deposit disclosure for GSTAT/Commissioner | KB2 §7 — `PreDepositNotice` |
+| ✅ | Booking Step 2 — personal info + GSTN + consents | RHF + zodResolver (synced `booking.schema.ts`) |
+| ✅ | Booking Step 3 — document upload (multi-file, PDF, ≤5 MB each) | `DocumentUpload`: pre-signed PUT → confirm |
+| ✅ | Booking detail page — status info, documents, admin note, status-dependent action panel | Pay-to-unlock deferred (no payment backend); cancel wired |
+| ✅ | Draft viewer — fetches pre-signed GET URL per load; gated to `filing/complete` | Never stores URL; 15-min countdown + regenerate |
+| ✅ | `lib/api/booking.ts` + `lib/api/document.ts` typed surfaces; `loading.tsx`/`error.tsx`; `booking.schema` sync unblock; auth/invalidate email link fix | EP11 supporting work |
+| ✅ | UI parity pass — dashboard App Shell (sidebar/topbar/drawer), Dashboard Home, booking wizard Steps 1–3 (focused flow shell), Service Detail action panels, Draft Viewer 4-state viewer | `feature/phase-2/ui-parity`; exact match to `resources/ui` prototypes (D80); restyle only, no API/behaviour change |
+| ✅ | Payment History page — offset pagination (D64); captured payments only; receipt/view links → Service Detail (D83) | SSR Server Component; `userApi.paymentHistory`; reuses `Pagination`/`StatusBadge`; desktop table + mobile cards |
+| ✅ | My Services page — full booking list with All/Active/Complete/Cancelled filter; desktop table + mobile `BookingCard` | SSR + `ServicesListView` client filter; rows → Service Detail; `/dashboard/services` |
+| ✅ | Settings page — Account (name/mobile/marketing), Security (change password), Danger zone (close account); Phase-2 scope only (D84) | `PATCH /user/profile` + `POST /auth/change-password` + `DELETE /user`; 2FA/sessions/billing/export/language omitted per HLD §19 |
+| ✅ | Mobile bottom tab bar added to `DashboardShell` (Dashboard/Services/Payments/Settings); sidebar + drawer links wired (D80h closed) | <lg only; all four target pages now exist |
+| ✅ | My Profile page — read-only view (avatar/name/member-since, email/phone/services/promotions/terms) | Edit now available on Settings page (EP15) |
 
 ### EP12 — Payment Integration (backend_plan Phase 5)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | `POST /payments/:bookingId/initiate` — create Razorpay Order, insert `payment_records` row at `status=created` | Gated: `status=draft_ready` + `payment_status=pending`; rate: 5/hr |
-| ⬚ | `POST /webhooks/razorpay` — `express.raw()`, HMAC-SHA256 verify, idempotency, transition → `filing` | Layer 1; exempt from rate limiting; always returns 200 |
-| ⬚ | `GET /payments/verify` — signature verify + Razorpay Fetch Payment API; returns outcome enum | Layer 2; rate: 7/hr; no redirect |
-| ⬚ | Idempotency: `razorpay_payment_id` unique constraint — no double-transition | Validated via `payment_records` lookup before any state change |
-| ⬚ | Payment confirmed emails — user + admin | Fire inside webhook + verify handlers |
-| ⬚ | Failed payment email — admin only | |
-| ⬚ | Pay-to-unlock screen frontend — Razorpay modal integration | Pre-deposit disclosure for GSTAT/Commissioner (KB2 §7) |
-| ⬚ | `/payment/verify` page frontend — reads outcome enum; shows status + WhatsApp link on Inconclusive | SSR; reads Razorpay query params |
-| ⬚ | External: Razorpay test-mode keys (unblocks dev); live-mode KYC approval needed before prod | Start KYC early — longest external blocker |
+| ✅ | `POST /payments/:bookingId/initiate` — create Razorpay Order, insert `payment_records` row at `status=created` | Gated via `assertPayable` (`draft_ready` + not paid); price server-derived; rate: 5/hr |
+| ✅ | `POST /webhooks/razorpay` — `express.raw()`, HMAC-SHA256 verify, idempotency, transition → `filing` | Layer 1; mounted before `express.json()`; exempt from rate limiting; always returns 200 |
+| ✅ | `GET /payments/verify` — signature verify + Razorpay Fetch Payment API; returns outcome enum | Layer 2; rate: 7/hr; no redirect; success/failed/inconclusive/tampered |
+| ✅ | Idempotency: `razorpay_payment_id` unique constraint — no double-transition | Atomic conditional `captureAndTransition` (updateMany `status != captured`) + unique-constraint race catch |
+| ✅ | Payment confirmed emails — user + admin | `notificationService.sendPaymentConfirmed`, fired once in shared `processCaptured` core |
+| ✅ | Failed payment email — admin only | `notificationService.sendPaymentFailed` |
+| ✅ | Pay-to-unlock screen frontend — Razorpay Checkout via `handler` callback | Pre-deposit disclosure for GSTAT/Commissioner (KB2 §7); D82 |
+| ✅ | `/payment/verify` page frontend — reads outcome enum; shows status + WhatsApp link on Inconclusive | SSR shape-guard + client leaf; live-verified against server (D82) |
+| ⬚ | Manual QA: a real captured Razorpay test payment through the actual Checkout UI (test card/UPI) | Deferred, same constraint as D77 |
+| 🔄 | External: Razorpay test-mode keys (unblocks dev); live-mode KYC approval needed before prod | Test keys supplied + wired; KYC still required before prod |
 
 ### EP13 — Admin Dashboard (backend_plan Phase 6)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | `GET /admin/bookings` — list all bookings; filter by status | Auth: admin only |
-| ⬚ | `GET /admin/bookings/:id` — detail including user info, all documents, all payment attempts | |
-| ⬚ | `PATCH /admin/bookings/:id/status` — transitions `→ in_review` and `→ complete` only | Illegal transitions → `INVALID_TRANSITION` |
-| ⬚ | `POST /admin/bookings/:id/draft-upload-url` — two-step pre-signed PUT, PDF only | Blocked at `filing/complete/cancelled`; confirmed upload sets `draft_s3_key` + auto-transitions to `draft_ready` |
-| ⬚ | `POST /admin/bookings/:id/confirm-draft-upload` | Emails user: draft ready |
-| ⬚ | `PATCH /admin/bookings/:id/note` — admin note ≤5000 chars | Visible to user |
-| ⬚ | `POST /admin/bookings/:id/mark-paid` — Layer 3 override; calls Razorpay Fetch Payment API first | Uses Phase 5 idempotency service; records `source=admin_override` + `performed_by_admin_id` (D66) |
-| ⬚ | `GET /admin/stats` — total bookings by status + revenue | |
-| ⬚ | Admin frontend — bookings table, detail view, status controls, draft upload, note editor, mark-paid | |
+| ✅ | `GET /admin/bookings` — list all bookings; filter by status/paymentStatus/serviceType; offset pagination | Auth: admin only; `paginated()` envelope |
+| ✅ | `GET /admin/bookings/:id` — detail including user info, all documents, all payment attempts | `findByIdForAdmin`; `hasDraft` flag; `draftS3Key` never exposed |
+| ✅ | `PATCH /admin/bookings/:id/status` — transitions `→ in_review` and `→ complete` only | Illegal transitions → `INVALID_TRANSITION` (state machine); emails in_review/complete |
+| ✅ | `POST /admin/bookings/:id/draft-upload-url` — two-step pre-signed PUT, PDF only, ≤20 MB | Blocked at `document_upload/filing/complete/cancelled` → `DRAFT_LOCKED`; rate 15/hr; `drafts/{id}-…` key |
+| ✅ | `POST /admin/bookings/:id/draft-confirm` (api_contract §6.5) | Sets `draft_s3_key` + auto-transitions to `draft_ready`; emails user draft-ready (first) / draft-updated (re-upload); no doc row (draftS3Key only) |
+| ✅ | `PATCH /admin/bookings/:id/note` — admin note ≤5000 chars | Visible to user; empty string clears |
+| ✅ | `POST /admin/bookings/:id/mark-paid` — Layer 3 override; calls Razorpay Fetch Payment API first | Reuses Phase 5 `processCaptured` core; `source=admin_override` + `performed_by_admin_id` (D66/D78); cross-booking guard; `PAYMENT_NOT_CAPTURED`/`RAZORPAY_ERROR` |
+| ✅ | `GET /admin/stats` — total bookings by status + service type + captured revenue | Zero-filled enum keys |
+| ✅ | Newman test suite — 50 requests / 109 assertions, all green | `test/postman/Admin.postman_collection.json` + `run-admin-newman.sh`; see D79, ADMIN_TEST_PLAN.md |
+| ⬚ | Manual verification: mark-paid 200 success + cross-booking guard + idempotency (needs real captured Razorpay test payment) | Deferred, same as EP12/D77 |
+| ✅ | Admin frontend — all six prototype screens: Overview, Bookings (search/filters/sort/pagination), Booking Detail (draft upload, status actions, mark-paid, note editor, doc downloads), Users, User Detail (gated delete), Settings (change password + business info) | `(admin)` route group + AdminShell; D81 |
+| ✅ | Role-based routing — admin → `/admin` at login and on any `/dashboard` visit; `requireAdmin()` gates the admin group | D81 |
+| ✅ | Backend additions: `GET/DELETE /admin/users(/:id)`, `POST /auth/change-password`, bookings `search`/`sortBy`/`sortDir`, admin document download-url | User-approved scope extension; smoke-tested live (D81) |
+| ⬚ | Manual QA: actual delete-user (soft-delete + redirect), real change-password, admin draft upload against S3, document download | Destructive/S3 paths not exercised by the smoke test |
 
 ### EP14 — Email Notifications (backend_plan Phase 7)
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | React Email templates for all 14 HLD §12.2 events — navy + green branding, typed props | `server/src/emails/` |
-| ⬚ | Matrix completeness audit — every event mapped to trigger, recipients, and template | |
+| ⬚ | React Email templates for all 14 HLD §12.2 events — navy + green branding, typed props | `server/src/emails/` still hand-built HTML strings, not React Email |
+| 🔄 | Matrix completeness audit — every event mapped to trigger, recipients, and template | Post-launch audit (2026-07-04) closed 4 gaps: Account Deleted (User+Admin), welcome email (User), Service Completed (+Admin), Request Callback admin alert — see D85. Remaining known gaps: none open from that audit; full HLD §12.2 re-audit still not run |
 | ⬚ | Verify Resend sending domain passes SPF/DKIM/DMARC | External: domain DNS config |
 | ⬚ | Confirm contact-form email (admin only) and Calendly (handled by Calendly directly) | |
 
@@ -229,8 +263,8 @@
 | Status | Task | Notes |
 |---|---|---|
 | ⬚ | Rate-limit audit — every endpoint has its limiter attached and tested | Per LLD §6 matrix |
-| ⬚ | Account deletion — soft-delete, block when booking active, email confirmation; schedule S3 hard-delete after 7 days | `DELETE /user` |
-| ⬚ | `PATCH /user/profile` + `GET /user/payment-history` confirmed (offset pagination, D64) | |
+| 🔄 | Account deletion — `DELETE /user`: soft-delete + block when booking active (`ACTIVE_BOOKINGS`) + type-email confirmation (D24, `EMAIL_MISMATCH`) + revoke sessions + clear cookies. **Remaining:** scheduled S3 hard-delete after 7 days | Endpoint + Settings danger-zone UI built (EP15 pull-forward); S3 cleanup job still pending |
+| ✅ | `PATCH /user/profile` (name/phone/allowPromotions; email + interestedServices not editable) + `GET /user/payment-history` (offset pagination, captured only, D64) | Routes under `/api/v1/user`; consumed by Settings + Payment History pages |
 | ⬚ | Sentry integration with PII scrubbing + source maps | |
 | ⬚ | Security pass — Helmet config, CORS per env, cookie flags (`Domain=.gstnoticesupport.in`, Secure, HttpOnly, SameSite=Lax) | |
 | ⬚ | GitHub Actions CI/CD for `server/` — build + deploy on push to `staging`/`main` | |

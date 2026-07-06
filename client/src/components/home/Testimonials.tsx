@@ -6,9 +6,9 @@ import { TESTIMONIAL_TABS as TABS, TESTIMONIALS } from '@/data/testimonials';
 import type { TestimonialTabId as Tab } from '@/data/types';
 
 export function Testimonials() {
-  const [active, setActive] = useState<Tab>('ca');
+  const [active, setActive] = useState<Tab>('biz');
   const [activeDot, setActiveDot] = useState(0);
-  const scrollRefs = useRef<Record<Tab, HTMLDivElement | null>>({ ca: null, adv: null, biz: null });
+  const scrollRefs = useRef<Record<Tab, HTMLDivElement | null>>({ adv: null, biz: null });
 
   const selectTab = useCallback((id: Tab) => {
     setActive(id);
@@ -83,6 +83,7 @@ export function Testimonials() {
           >
             {TESTIMONIALS[t.id].map((tm) => (
               <div key={tm.name} className={`card card-elev ${styles.tcard}`}>
+                <div className={styles.biz}>{tm.business}</div>
                 <div className={styles.qm}>&ldquo;</div>
                 <p className={styles.quote}>{tm.quote}</p>
                 <div className={styles.div} />

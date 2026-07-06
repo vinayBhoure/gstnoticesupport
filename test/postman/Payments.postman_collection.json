@@ -1,0 +1,904 @@
+{
+  "info": {
+    "name": "GST Notice Support — Payments",
+    "description": "Phase 5 (EP12) Razorpay payment endpoints: POST /payments/:bookingId/initiate, POST /webhooks/razorpay (Layer 1), GET /payments/verify (Layer 2). Auth: seeded admin login (creds injected at runtime via --env-var). Webhook/redirect signatures are computed in pre-request scripts with CryptoJS using RAZORPAY_WEBHOOK_SECRET / RAZORPAY_KEY_SECRET (injected at runtime, never committed). Requires two draft_ready bookings minted by setup-draft-ready-booking.mjs (injected as draftReadyBookingId / draftReadyBookingId2). The verify \"success\" branch and a real captured webhook need an actually-captured Razorpay test payment (checkout modal) — the synthetic signed webhook here proves the capture→filing→idempotency core instead.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Initiate — unauthenticated (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 401', function () { pm.response.to.have.status(401); });",
+              "const body = pm.response.json();",
+              "pm.test('error code UNAUTHORIZED', function () { pm.expect(body.error.code).to.eql('UNAUTHORIZED'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/payments/{{draftReadyBookingId}}/initiate",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "{{draftReadyBookingId}}",
+            "initiate"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Verify — unauthenticated (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 401', function () { pm.response.to.have.status(401); });",
+              "const body = pm.response.json();",
+              "pm.test('error code UNAUTHORIZED', function () { pm.expect(body.error.code).to.eql('UNAUTHORIZED'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/payments/verify?razorpay_payment_id=pay_x&razorpay_order_id=order_x&razorpay_signature=sig_x&booking_id={{draftReadyBookingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "verify"
+          ],
+          "query": [
+            {
+              "key": "razorpay_payment_id",
+              "value": "pay_x"
+            },
+            {
+              "key": "razorpay_order_id",
+              "value": "order_x"
+            },
+            {
+              "key": "razorpay_signature",
+              "value": "sig_x"
+            },
+            {
+              "key": "booking_id",
+              "value": "{{draftReadyBookingId}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('envelope success=true', function () { pm.expect(body.success).to.eql(true); });",
+              "const cookies = pm.response.headers.all().filter(function (h) { return h.key.toLowerCase() === 'set-cookie'; });",
+              "pm.test('access_token cookie set', function () { pm.expect(cookies.some(function (c) { return c.value.startsWith('access_token='); })).to.be.true; });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Initiate — non-existent booking (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', function () { pm.response.to.have.status(404); });",
+              "const body = pm.response.json();",
+              "pm.test('error code NOT_FOUND', function () { pm.expect(body.error.code).to.eql('NOT_FOUND'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/payments/{{nonExistentUuid}}/initiate",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "{{nonExistentUuid}}",
+            "initiate"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create booking — document_upload (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+              "const body = pm.response.json();",
+              "pm.test('status = document_upload', function () { pm.expect(body.data.booking.status).to.eql('document_upload'); });",
+              "pm.environment.set('docUploadBookingId', body.data.booking.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"serviceType\": \"asmt_10\",\n  \"contactName\": \"Ravi Kumar\",\n  \"contactEmail\": \"ravi@example.com\",\n  \"contactPhone\": \"+919876543210\",\n  \"organizationName\": \"Ravi Enterprises\",\n  \"filingFor\": \"self\",\n  \"gstn\": \"29AABCU9603R1ZX\",\n  \"consentInformationAccurate\": true,\n  \"consentContactAuthorized\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/bookings",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bookings"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Initiate — invalid status document_upload (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+              "const body = pm.response.json();",
+              "pm.test('error code INVALID_STATUS', function () { pm.expect(body.error.code).to.eql('INVALID_STATUS'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/payments/{{docUploadBookingId}}/initiate",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "{{docUploadBookingId}}",
+            "initiate"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Initiate — success on draft_ready (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+              "const body = pm.response.json();",
+              "pm.test('envelope success=true', function () { pm.expect(body.success).to.eql(true); });",
+              "pm.test('amountPaise is server-derived 299900', function () { pm.expect(body.data.amountPaise).to.eql(299900); });",
+              "pm.test('currency INR', function () { pm.expect(body.data.currency).to.eql('INR'); });",
+              "pm.test('orderId present', function () { pm.expect(body.data.orderId).to.be.a('string').and.match(/^order_/); });",
+              "pm.test('keyId is test key', function () { pm.expect(body.data.keyId).to.match(/^rzp_test_/); });",
+              "pm.test('prefill present', function () { pm.expect(body.data.prefill).to.be.an('object'); });",
+              "pm.environment.set('capturedOrderId', body.data.orderId);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/payments/{{draftReadyBookingId}}/initiate",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "{{draftReadyBookingId}}",
+            "initiate"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Webhook — missing signature (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"event\":\"payment.captured\",\"payload\":{\"payment\":{\"entity\":{\"id\":\"pay_x\",\"order_id\":\"order_x\",\"status\":\"captured\"}}}}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/razorpay",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "webhooks",
+            "razorpay"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Webhook — bad signature (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Razorpay-Signature",
+            "value": "deadbeefdeadbeef"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"event\":\"payment.captured\",\"payload\":{\"payment\":{\"entity\":{\"id\":\"pay_x\",\"order_id\":\"order_x\",\"status\":\"captured\"}}}}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/razorpay",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "webhooks",
+            "razorpay"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Webhook — valid signature, unknown order (200)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const order = 'order_unknown_' + Date.now();",
+              "const pid = 'pay_unknown_' + Date.now();",
+              "const body = JSON.stringify({ event: \"payment.captured\", payload: { payment: { entity: { id: pid, order_id: order, status: \"captured\" } } } });",
+              "const secret = pm.environment.get('razorpayWebhookSecret');",
+              "const sig = CryptoJS.HmacSHA256(body, secret).toString(CryptoJS.enc.Hex);",
+              "pm.environment.set('webhookBody', body);",
+              "pm.environment.set('webhookSig', sig);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Razorpay-Signature",
+            "value": "{{webhookSig}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{{webhookBody}}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/razorpay",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "webhooks",
+            "razorpay"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Webhook — payment.captured (200)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "let pid = pm.environment.get('capturedPaymentId');",
+              "if (!pid) { pid = 'pay_test_' + Date.now() + '_' + Math.floor(Math.random() * 1000000); pm.environment.set('capturedPaymentId', pid); }",
+              "const order = pm.environment.get('capturedOrderId');",
+              "const body = JSON.stringify({ event: \"payment.captured\", payload: { payment: { entity: { id: pid, order_id: order, status: \"captured\" } } } });",
+              "const secret = pm.environment.get('razorpayWebhookSecret');",
+              "const sig = CryptoJS.HmacSHA256(body, secret).toString(CryptoJS.enc.Hex);",
+              "pm.environment.set('webhookBody', body);",
+              "pm.environment.set('webhookSig', sig);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('webhook acknowledged', function () { pm.expect(body.success).to.eql(true); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Razorpay-Signature",
+            "value": "{{webhookSig}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{{webhookBody}}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/razorpay",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "webhooks",
+            "razorpay"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Booking detail — transitioned to filing (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const b = pm.response.json().data.booking;",
+              "pm.test('booking status = filing', function () { pm.expect(b.status).to.eql('filing'); });",
+              "pm.test('paymentStatus = paid', function () { pm.expect(b.paymentStatus).to.eql('paid'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/bookings/{{draftReadyBookingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bookings",
+            "{{draftReadyBookingId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Webhook — duplicate delivery, idempotent (200)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const pid = pm.environment.get('capturedPaymentId');",
+              "const order = pm.environment.get('capturedOrderId');",
+              "const body = JSON.stringify({ event: \"payment.captured\", payload: { payment: { entity: { id: pid, order_id: order, status: \"captured\" } } } });",
+              "const secret = pm.environment.get('razorpayWebhookSecret');",
+              "const sig = CryptoJS.HmacSHA256(body, secret).toString(CryptoJS.enc.Hex);",
+              "pm.environment.set('webhookBody', body);",
+              "pm.environment.set('webhookSig', sig);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200 (idempotent re-delivery)', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Razorpay-Signature",
+            "value": "{{webhookSig}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{{webhookBody}}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/razorpay",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "webhooks",
+            "razorpay"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Booking detail — still filing after duplicate (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const b = pm.response.json().data.booking;",
+              "pm.test('still filing (single transition)', function () { pm.expect(b.status).to.eql('filing'); });",
+              "pm.test('still paid', function () { pm.expect(b.paymentStatus).to.eql('paid'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/bookings/{{draftReadyBookingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bookings",
+            "{{draftReadyBookingId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Initiate — already captured (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+              "const body = pm.response.json();",
+              "pm.test('error code PAYMENT_ALREADY_CAPTURED', function () { pm.expect(body.error.code).to.eql('PAYMENT_ALREADY_CAPTURED'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/payments/{{draftReadyBookingId}}/initiate",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "{{draftReadyBookingId}}",
+            "initiate"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Initiate — success on draft_ready #2 (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', function () { pm.response.to.have.status(201); });",
+              "const body = pm.response.json();",
+              "pm.environment.set('failedOrderId', body.data.orderId);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/payments/{{draftReadyBookingId2}}/initiate",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "{{draftReadyBookingId2}}",
+            "initiate"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Webhook — payment.failed (200)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const order = pm.environment.get('failedOrderId');",
+              "const pid = 'pay_failed_' + Date.now();",
+              "const body = JSON.stringify({ event: \"payment.failed\", payload: { payment: { entity: { id: pid, order_id: order, status: \"failed\" } } } });",
+              "const secret = pm.environment.get('razorpayWebhookSecret');",
+              "const sig = CryptoJS.HmacSHA256(body, secret).toString(CryptoJS.enc.Hex);",
+              "pm.environment.set('webhookBody', body);",
+              "pm.environment.set('webhookSig', sig);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-Razorpay-Signature",
+            "value": "{{webhookSig}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{{webhookBody}}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/razorpay",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "webhooks",
+            "razorpay"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Booking detail #2 — stays draft_ready after failed (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const b = pm.response.json().data.booking;",
+              "pm.test('still draft_ready (failed attempt does not transition)', function () { pm.expect(b.status).to.eql('draft_ready'); });",
+              "pm.test('paymentStatus still pending (retryable)', function () { pm.expect(b.paymentStatus).to.eql('pending'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/bookings/{{draftReadyBookingId2}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bookings",
+            "{{draftReadyBookingId2}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Verify — validation error (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "const body = pm.response.json();",
+              "pm.test('error code VALIDATION_ERROR', function () { pm.expect(body.error.code).to.eql('VALIDATION_ERROR'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/payments/verify?booking_id={{draftReadyBookingId2}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "verify"
+          ],
+          "query": [
+            {
+              "key": "booking_id",
+              "value": "{{draftReadyBookingId2}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Verify — tampered signature (200 tampered)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('outcome = tampered', function () { pm.expect(body.data.outcome).to.eql('tampered'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/payments/verify?razorpay_payment_id=pay_tamper&razorpay_order_id=order_tamper&razorpay_signature=0000000000&booking_id={{draftReadyBookingId2}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "verify"
+          ],
+          "query": [
+            {
+              "key": "razorpay_payment_id",
+              "value": "pay_tamper"
+            },
+            {
+              "key": "razorpay_order_id",
+              "value": "order_tamper"
+            },
+            {
+              "key": "razorpay_signature",
+              "value": "0000000000"
+            },
+            {
+              "key": "booking_id",
+              "value": "{{draftReadyBookingId2}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Verify — inconclusive (200)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const order = pm.environment.get('failedOrderId');",
+              "const pid = 'pay_fake_verify_' + Date.now();",
+              "const secret = pm.environment.get('razorpayKeySecret');",
+              "const sig = CryptoJS.HmacSHA256(order + '|' + pid, secret).toString(CryptoJS.enc.Hex);",
+              "pm.environment.set('verifyOrderId', order);",
+              "pm.environment.set('verifyPaymentId', pid);",
+              "pm.environment.set('verifySig', sig);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const body = pm.response.json();",
+              "pm.test('outcome = inconclusive (Razorpay fetch could not confirm)', function () { pm.expect(body.data.outcome).to.eql('inconclusive'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/payments/verify?razorpay_payment_id={{verifyPaymentId}}&razorpay_order_id={{verifyOrderId}}&razorpay_signature={{verifySig}}&booking_id={{draftReadyBookingId2}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "payments",
+            "verify"
+          ],
+          "query": [
+            {
+              "key": "razorpay_payment_id",
+              "value": "{{verifyPaymentId}}"
+            },
+            {
+              "key": "razorpay_order_id",
+              "value": "{{verifyOrderId}}"
+            },
+            {
+              "key": "razorpay_signature",
+              "value": "{{verifySig}}"
+            },
+            {
+              "key": "booking_id",
+              "value": "{{draftReadyBookingId2}}"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

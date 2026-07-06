@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/site';
+import { CalendlyCallbackListener } from '@/components/analytics/CalendlyCallbackListener';
+import { Providers } from './providers';
 import './globals.css';
 
 const DEFAULT_TITLE = 'GST Notice Support — Expert GST Litigation Help in 24 Hours';
@@ -46,8 +48,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body>
-        {children}
+        <Providers>{children}</Providers>
         <Toaster position="bottom-center" toastOptions={{ duration: 5000 }} />
+        <CalendlyCallbackListener />
       </body>
     </html>
   );

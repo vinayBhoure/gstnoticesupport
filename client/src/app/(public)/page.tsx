@@ -9,6 +9,7 @@ import { AnimateIn } from '@/components/ui/AnimateIn';
 import { HeroScrollIndicator } from '@/components/ui/HeroScrollIndicator';
 import { CountUp } from '@/components/ui/CountUp';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { BookServiceButton } from '@/components/ui/BookServiceButton';
 import { RotatingHeadline } from '@/components/ui/RotatingHeadline';
 import {
   homeMeta, homeHero, homeNotices, homeSteps, homeTrust, homeOutcomes,
@@ -54,14 +55,7 @@ export default function HomePage() {
                   {homeHero.sub}
                 </p>
                 <div className={styles.cta}>
-                  <a
-                    className="btn btn-primary"
-                    href={homeHero.whatsappHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {homeHero.bookLabel}
-                  </a>
+                  <BookServiceButton className="btn btn-primary">{homeHero.bookLabel}</BookServiceButton>
                   <RequestCallbackButton className="btn btn-secondary">{homeHero.callbackLabel}</RequestCallbackButton>
                 </div>
                 <div className={styles.reassure}>
@@ -120,10 +114,10 @@ export default function HomePage() {
                 <div className={styles.icWrap}><notice3.Icon style={{ width: 23, height: 23 }} /></div>
                 <h3>{notice3.title}</h3>
                 <p className={styles.desc}>{notice3.description}</p>
-                <div className={styles.price}>{notice3.priceDisplay} <small>{notice3.priceNote}</small></div>
                 <span className={`badge badge-amber ${styles.badgeAmber}`}>
                   <AlertTriangle style={{ width: 13, height: 13 }} />{notice3.badge}
                 </span>
+                <div className={styles.price}>{notice3.priceDisplay} <small>{notice3.priceNote}</small></div>
                 <div className={styles.foot}><span className={styles.getlink}>{homeNotices.getHelpLabel} <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
               </Link>
             </AnimateIn>
@@ -132,10 +126,10 @@ export default function HomePage() {
                 <div className={styles.icWrap}><notice4.Icon style={{ width: 23, height: 23 }} /></div>
                 <h3>{notice4.title}</h3>
                 <p className={styles.desc}>{notice4.description}</p>
-                <div className={styles.price}>{notice4.priceDisplay} <small>{notice4.priceNote}</small></div>
                 <span className={`badge badge-amber ${styles.badgeAmber}`}>
                   <AlertTriangle style={{ width: 13, height: 13 }} />{notice4.badge}
                 </span>
+                <div className={styles.price}>{notice4.priceDisplay} <small>{notice4.priceNote}</small></div>
                 <div className={styles.foot}><span className={styles.getlink}>{homeNotices.getHelpLabel} <ArrowRight style={{ width: 15, height: 15 }} /></span></div>
               </Link>
             </AnimateIn>
@@ -424,14 +418,7 @@ export default function HomePage() {
           <h2>{homeFinalCta.heading}</h2>
           <p>{homeFinalCta.sub}</p>
           <div className={styles.cta}>
-            <a
-              className="btn btn-primary"
-              href={homeFinalCta.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {homeFinalCta.bookLabel}
-            </a>
+            <BookServiceButton className="btn btn-primary">{homeFinalCta.bookLabel}</BookServiceButton>
             <RequestCallbackButton className="btn btn-secondary on-dark">{homeFinalCta.callbackLabel}</RequestCallbackButton>
           </div>
         </div>

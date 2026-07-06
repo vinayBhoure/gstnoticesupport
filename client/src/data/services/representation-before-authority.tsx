@@ -2,9 +2,9 @@ import { Scale, MessageSquare, FileText, CalendarClock, ShieldCheck } from 'luci
 import { WHATSAPP_LINKS } from '../common';
 import type { ServicePageContent } from '../types';
 
-// NOTE: Placeholder copy for review. Representation Before Authority is a
-// consultation-based, offline-priced service — no fixed fee. Fee is confirmed
-// with the client before any engagement begins.
+// NOTE: Representation Before Authority is a consultation-priced service — no fixed
+// fee. It is bookable online (like the other services); after we review the case, the
+// admin sets a custom fee quote that the client pays in their dashboard to proceed.
 export const representationContent: ServicePageContent = {
   meta: {
     title: 'Representation Before Authority — GST Personal Hearing & Appearance | GST Notice Support',
@@ -22,7 +22,7 @@ export const representationContent: ServicePageContent = {
     refLine: 'PERSONAL HEARING · GST OFFICER & APPELLATE AUTHORITY',
     heading: 'Representation Before Authority — Expert Appearance at GST Hearings',
     sub: 'When your case requires physical or virtual appearance before the GST Officer or Appellate Authority, our CAs and Advocates appear and argue on your behalf. Consultation-based — fee depends on case complexity, jurisdiction, and hearing schedule, and is confirmed before any engagement.',
-    bookLabel: 'Discuss My Case on WhatsApp',
+    bookLabel: 'Book This Service',
     whatsappHref: WHATSAPP_LINKS.representation,
     callbackLabel: 'Request a Callback',
   },
@@ -46,7 +46,7 @@ export const representationContent: ServicePageContent = {
       refRow: 'Right to be heard · CGST Act, 2017',
       paragraphs: [
         <p key="p1">Appearance before the <span className="mono">GST Officer</span> or <span className="mono">Appellate Authority</span> at a scheduled personal hearing — physical or virtual.</p>,
-        <p key="p2">Pricing is <strong>case-specific and confirmed offline</strong> before engagement. No fixed online fee.</p>,
+        <p key="p2">Pricing is <strong>case-specific</strong>. Book online now; after we review your case we confirm the fee, quoted in your dashboard before you pay.</p>,
       ],
     },
   },
@@ -122,7 +122,7 @@ export const representationContent: ServicePageContent = {
     heading: 'Consultation-Based. Quoted to Your Case.',
     lede: 'Representation is priced to the engagement — number of hearings, forum, jurisdiction, and complexity. We confirm the fee with you before any work begins.',
     amount: 'Custom Quote',
-    amountMeta: 'Fee depends on case complexity, jurisdiction & hearing schedule · confirmed offline before engagement',
+    amountMeta: 'Fee depends on case complexity, jurisdiction & hearing schedule · confirmed after case review, quoted in your dashboard before payment',
     includedLabel: 'What’s typically included',
     included: [
       'Case review and hearing strategy',
@@ -131,9 +131,9 @@ export const representationContent: ServicePageContent = {
       'Appearance on scheduled hearing dates',
       'Post-hearing outcome guidance',
     ],
-    ctaLabel: 'Discuss My Case on WhatsApp',
+    ctaLabel: 'Book This Service',
     whatsappHref: WHATSAPP_LINKS.representation,
-    payNote: 'Scope and fee are agreed in writing before any engagement begins. No fixed online fee for this service.',
+    payNote: 'Book online now — after we review your case, the fee is confirmed and quoted in your dashboard, where you pay to proceed.',
   },
   related: {
     eyebrow: 'Related services',

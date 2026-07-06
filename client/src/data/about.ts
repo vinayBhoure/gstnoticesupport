@@ -1,6 +1,5 @@
 import { Receipt, BadgeCheck, MapPin, Clock } from 'lucide-react';
 import { ORG } from '@/lib/site';
-import { WHATSAPP_LINKS } from './common';
 import type { PageMeta, SectionHead, TrustCard } from './types';
 
 export const aboutMeta: PageMeta = {
@@ -12,7 +11,6 @@ export const aboutHero = {
   heading: 'India\'s GST Litigation Experts — Backed by Real Credentials',
   sub: 'We are a team of ICAI-registered Chartered Accountants and Bar Council-enrolled Advocates specialising in GST litigation, notice handling, and appellate representation across India.',
   bookLabel: 'Book Service',
-  whatsappHref: WHATSAPP_LINKS.about,
   callbackLabel: 'Request Callback',
 } as const;
 
@@ -83,6 +81,5 @@ export const aboutCta = {
   heading: 'Have a GST Notice? Let\'s Handle It.',
   sub: 'Expert filing and appeal support — fixed fee, no surprises.',
   bookLabel: 'Book Service',
-  whatsappHref: WHATSAPP_LINKS.about,
   callbackLabel: 'Request a Callback',
 } as const;
