@@ -10,7 +10,7 @@
 //
 // Only schemas with NO server-only imports (e.g. @prisma/client) are syncable.
 
-import { mkdirSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -34,6 +34,20 @@ const HEADER = (name) =>
   `// Regenerate with: npm run sync:schemas\n\n`;
 
 function main() {
+  // Standalone client-only deploys (e.g. Hostinger repo with no `server/` sibling)
+  // ship pre-generated files in OUT_DIR. Skip the sync instead of failing the build.
+  if (!existsSync(SRC_DIR)) {
+    const missing = SYNC.filter((name) => !existsSync(join(OUT_DIR, name)));
+    if (missing.length > 0) {
+      throw new Error(
+        `[sync:schemas] server/src/schemas not found and OUT_DIR is missing: ${missing.join(', ')}. ` +
+          `Run this from the monorepo, or commit the missing generated files.`,
+      );
+    }
+    process.stdout.write('[sync:schemas] server/src/schemas not found — using committed generated files.\n');
+    return;
+  }
+
   const available = new Set(readdirSync(SRC_DIR));
   mkdirSync(OUT_DIR, { recursive: true });
 

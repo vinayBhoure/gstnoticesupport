@@ -49,6 +49,10 @@ if (!result.success) {
     console.error(`  ${e.path.join('.')}: ${e.message}`);
   });
   process.exit(1);
+  // Unreachable at runtime (process.exit terminates the process). The throw is here
+  // so TypeScript narrows `result` to the success branch below without relying on
+  // @types/node's `process.exit` being typed as `never` in every build environment.
+  throw new Error('unreachable');
 }
 
 export const env = result.data;

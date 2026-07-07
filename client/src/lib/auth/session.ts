@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { UserObject } from '../api/types';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '');
 
 // Server-Component auth check (frontend.md §1.4). Reads the HTTP-only cookie and
 // forwards it to GET /auth/me. Never trust a client-side check for access control.
