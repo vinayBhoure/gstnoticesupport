@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-07-08] — fix: resolve production deploy blockers on the split Hostinger frontend/backend repos
+
+**See D93, ERROR.md #9–#11.**
+
+- **Schema-sync build crash** in the standalone `frontend.gstnoticesupport` repo (client-only, no `server/` sibling): `sync-shared-schemas.mjs` now skips gracefully and uses the already-committed generated files instead of throwing `ENOENT`.
+- **CORS blocked on login** (`No 'Access-Control-Allow-Origin' header`): root cause was a trailing slash on the backend's `CLIENT_URL` env var, which broke the `cors` package's exact-origin match. Also fixed a related double-slash in API request URLs (`client.ts`/`session.ts` now strip trailing slashes from `NEXT_PUBLIC_API_URL` defensively).
+- **Login/signup succeeded but never redirected past `/login`**: the auth cookie was scoped only to `api.gstnoticesupport.in` (no `COOKIE_DOMAIN` set), so the frontend's own Server Components never saw it when calling `/auth/me`. Fixed via `COOKIE_DOMAIN=.gstnoticesupport.in` on the backend.
+- **Backend `tsc` build failure on Hostinger** (`'env' is possibly 'undefined'`): `server/src/lib/env.ts`'s control-flow narrowing after `process.exit(1)` depended on `@types/node`'s `never` return type, which didn't hold in Hostinger's build environment. Added an explicit `throw` so the narrowing no longer depends on that.
+- All fixes applied in this monorepo and manually synced into the two standalone deploy repos.
+
 ## [2026-07-05] — fix: decouple admin notification recipient from the admin login identity
 
 **Corrects D89. Branch: `fix/admin-notification-recipient-decouple`. See D92.**
