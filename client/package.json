@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "sync:schemas": "node scripts/sync-shared-schemas.mjs",
+    "predev": "npm run sync:schemas",
     "dev": "next dev",
+    "prebuild": "npm run sync:schemas",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -12,6 +15,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.8",
+    "@tanstack/react-query": "^5.101.2",
     "lucide-react": "^1.17.0",
     "next": "16.2.7",
     "react": "19.2.4",

@@ -1,0 +1,520 @@
+{
+  "info": {
+    "name": "GST Notice Support — Admin Surface",
+    "description": "Phase 6 (EP13) admin endpoints under /api/v1/admin. Auth: seeded admin login for functional tests; a verified role=user account for RBAC 403 checks (both injected at runtime via --env-var). Fixtures (one test user + eight bookings pinned to specific states) are minted by server/scripts/setup-admin-fixtures.mjs and injected as a single JSON env-var (adminFixturesJson), parsed in the collection pre-request. Deferred (need a real captured Razorpay test payment, like EP12/D77): mark-paid 200 success, 422 PAYMENT_NOT_CAPTURED, cross-booking guard, and the real browser->S3 PUT — see ADMIN_TEST_PLAN.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.environment.get('_fixturesLoaded')) {",
+          "  const raw = pm.environment.get('adminFixturesJson');",
+          "  if (raw) {",
+          "    try {",
+          "      const f = JSON.parse(raw);",
+          "      Object.keys(f).forEach(function (k) { pm.environment.set(k, f[k]); });",
+          "      pm.environment.set('_fixturesLoaded', '1');",
+          "    } catch (e) { console.log('fixture parse failed', e); }",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Unauthenticated (401)",
+      "item": [
+        {
+          "name": "List bookings — no auth (401)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 401', function () { pm.response.to.have.status(401); });",
+            "pm.test('code UNAUTHORIZED', function () { pm.expect(pm.response.json().error.code).to.eql('UNAUTHORIZED'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"] } }
+        },
+        {
+          "name": "Mark-paid — no auth (401)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 401', function () { pm.response.to.have.status(401); });",
+            "pm.test('code UNAUTHORIZED', function () { pm.expect(pm.response.json().error.code).to.eql('UNAUTHORIZED'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razorpayPaymentId\": \"pay_x\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/mark-paid", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "mark-paid"] } }
+        },
+        {
+          "name": "Stats — no auth (401)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 401', function () { pm.response.to.have.status(401); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/stats", "host": ["{{baseUrl}}"], "path": ["admin", "stats"] } }
+        }
+      ]
+    },
+    {
+      "name": "2. Login as regular user",
+      "item": [
+        {
+          "name": "Login (test user)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const cookies = pm.response.headers.all().filter(function (h) { return h.key.toLowerCase() === 'set-cookie'; });",
+            "pm.test('access_token cookie set', function () { pm.expect(cookies.some(function (c) { return c.value.startsWith('access_token='); })).to.be.true; });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"{{testUserPassword}}\"\n}" }, "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] } }
+        }
+      ]
+    },
+    {
+      "name": "3. RBAC — non-admin gets 403",
+      "item": [
+        {
+          "name": "List — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });",
+            "pm.test('code FORBIDDEN', function () { pm.expect(pm.response.json().error.code).to.eql('FORBIDDEN'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"] } }
+        },
+        {
+          "name": "Stats — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/stats", "host": ["{{baseUrl}}"], "path": ["admin", "stats"] } }
+        },
+        {
+          "name": "Detail — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}"] } }
+        },
+        {
+          "name": "Status — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_review\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{docUploadId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{docUploadId}}", "status"] } }
+        },
+        {
+          "name": "Draft-upload-url — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"d.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewId}}/draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewId}}", "draft-upload-url"] } }
+        },
+        {
+          "name": "Draft-confirm — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"drafts/x-1.pdf\",\n  \"fileName\": \"d.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewConfirmId}}/draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewConfirmId}}", "draft-confirm"] } }
+        },
+        {
+          "name": "Note — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"note\": \"x\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/note", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "note"] } }
+        },
+        {
+          "name": "Mark-paid — user (403)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 403', function () { pm.response.to.have.status(403); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razorpayPaymentId\": \"pay_x\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/mark-paid", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "mark-paid"] } }
+        }
+      ]
+    },
+    {
+      "name": "4. Login as admin",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const cookies = pm.response.headers.all().filter(function (h) { return h.key.toLowerCase() === 'set-cookie'; });",
+            "pm.test('access_token cookie set', function () { pm.expect(cookies.some(function (c) { return c.value.startsWith('access_token='); })).to.be.true; });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }, "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] } }
+        }
+      ]
+    },
+    {
+      "name": "5. List — GET /admin/bookings",
+      "item": [
+        {
+          "name": "List default (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const b = pm.response.json();",
+            "pm.test('success true', function () { pm.expect(b.success).to.eql(true); });",
+            "pm.test('data is array', function () { pm.expect(b.data).to.be.an('array'); });",
+            "pm.test('meta has page/limit/total numbers', function () { pm.expect(b.meta.page).to.be.a('number'); pm.expect(b.meta.limit).to.be.a('number'); pm.expect(b.meta.total).to.be.a('number'); });",
+            "pm.test('items carry user + no PII contact fields', function () { if (b.data.length) { const it = b.data[0]; pm.expect(it.user).to.be.an('object'); pm.expect(it.user).to.have.property('email'); pm.expect(it).to.not.have.property('gstn'); pm.expect(it).to.not.have.property('contactEmail'); } });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"] } }
+        },
+        {
+          "name": "List paginated limit=5 (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const b = pm.response.json();",
+            "pm.test('limit echoed = 5', function () { pm.expect(b.meta.limit).to.eql(5); });",
+            "pm.test('data length <= 5', function () { pm.expect(b.data.length).to.be.at.most(5); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings?page=1&limit=5", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "5" }] } }
+        },
+        {
+          "name": "List filter status=draft_ready (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const b = pm.response.json();",
+            "pm.test('every item status = draft_ready', function () { b.data.forEach(function (it) { pm.expect(it.status).to.eql('draft_ready'); }); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings?status=draft_ready&limit=100", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"], "query": [{ "key": "status", "value": "draft_ready" }, { "key": "limit", "value": "100" }] } }
+        },
+        {
+          "name": "List filter serviceType=asmt_10 (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const b = pm.response.json();",
+            "pm.test('every item serviceType = asmt_10', function () { b.data.forEach(function (it) { pm.expect(it.serviceType).to.eql('asmt_10'); }); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings?serviceType=asmt_10&limit=100", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"], "query": [{ "key": "serviceType", "value": "asmt_10" }, { "key": "limit", "value": "100" }] } }
+        },
+        {
+          "name": "List limit=200 over max (400)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings?limit=200", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"], "query": [{ "key": "limit", "value": "200" }] } }
+        },
+        {
+          "name": "List page=0 (400)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings?page=0", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"], "query": [{ "key": "page", "value": "0" }] } }
+        },
+        {
+          "name": "List status=bogus (400)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings?status=bogus", "host": ["{{baseUrl}}"], "path": ["admin", "bookings"], "query": [{ "key": "status", "value": "bogus" }] } }
+        }
+      ]
+    },
+    {
+      "name": "6. Detail — GET /admin/bookings/:id",
+      "item": [
+        {
+          "name": "Detail valid (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const d = pm.response.json().data.booking;",
+            "pm.test('has user object', function () { pm.expect(d.user).to.be.an('object'); pm.expect(d.user).to.have.property('name'); });",
+            "pm.test('documents is array', function () { pm.expect(d.documents).to.be.an('array'); });",
+            "pm.test('paymentRecords is array (all attempts)', function () { pm.expect(d.paymentRecords).to.be.an('array'); });",
+            "pm.test('hasDraft is boolean', function () { pm.expect(d.hasDraft).to.be.a('boolean'); });",
+            "pm.test('draftS3Key never exposed', function () { pm.expect(d).to.not.have.property('draftS3Key'); });",
+            "pm.test('document s3Key never exposed', function () { d.documents.forEach(function (x) { pm.expect(x).to.not.have.property('s3Key'); }); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}"] } }
+        },
+        {
+          "name": "Detail invalid uuid (400)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings/not-a-uuid", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "not-a-uuid"] } }
+        },
+        {
+          "name": "Detail non-existent (404)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 404', function () { pm.response.to.have.status(404); });",
+            "pm.test('code NOT_FOUND', function () { pm.expect(pm.response.json().error.code).to.eql('NOT_FOUND'); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/bookings/{{nonExistentUuid}}", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{nonExistentUuid}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "7. Status — PATCH /admin/bookings/:id/status",
+      "item": [
+        {
+          "name": "document_upload -> in_review (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('booking now in_review', function () { pm.expect(pm.response.json().data.booking.status).to.eql('in_review'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_review\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{docUploadTransitionId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{docUploadTransitionId}}", "status"] } }
+        },
+        {
+          "name": "in_review -> complete illegal (409)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+            "pm.test('code INVALID_TRANSITION', function () { pm.expect(pm.response.json().error.code).to.eql('INVALID_TRANSITION'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"complete\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewId}}", "status"] } }
+        },
+        {
+          "name": "draft_ready -> in_review illegal (409)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+            "pm.test('code INVALID_TRANSITION', function () { pm.expect(pm.response.json().error.code).to.eql('INVALID_TRANSITION'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_review\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "status"] } }
+        },
+        {
+          "name": "draft_ready -> complete illegal (409)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+            "pm.test('code INVALID_TRANSITION', function () { pm.expect(pm.response.json().error.code).to.eql('INVALID_TRANSITION'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"complete\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "status"] } }
+        },
+        {
+          "name": "invalid enum draft_ready (400)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"draft_ready\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{docUploadId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{docUploadId}}", "status"] } }
+        },
+        {
+          "name": "missing status body (400)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{docUploadId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{docUploadId}}", "status"] } }
+        },
+        {
+          "name": "filing -> complete (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('booking now complete', function () { pm.expect(pm.response.json().data.booking.status).to.eql('complete'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"complete\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingCompleteId}}/status", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingCompleteId}}", "status"] } }
+        }
+      ]
+    },
+    {
+      "name": "8. Draft upload URL — POST /admin/bookings/:id/draft-upload-url",
+      "item": [
+        {
+          "name": "non-PDF contentType (400 INVALID_FILE_TYPE)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code INVALID_FILE_TYPE', function () { pm.expect(pm.response.json().error.code).to.eql('INVALID_FILE_TYPE'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"d.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"image/png\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewId}}/draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewId}}", "draft-upload-url"] } }
+        },
+        {
+          "name": "over 20 MB (400 FILE_TOO_LARGE)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code FILE_TOO_LARGE', function () { pm.expect(pm.response.json().error.code).to.eql('FILE_TOO_LARGE'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"d.pdf\",\n  \"fileSize\": 26214400,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewId}}/draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewId}}", "draft-upload-url"] } }
+        },
+        {
+          "name": "missing fileName (400 VALIDATION_ERROR)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewId}}/draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewId}}", "draft-upload-url"] } }
+        },
+        {
+          "name": "document_upload state (409 DRAFT_LOCKED)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+            "pm.test('code DRAFT_LOCKED', function () { pm.expect(pm.response.json().error.code).to.eql('DRAFT_LOCKED'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"d.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{docUploadId}}/draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{docUploadId}}", "draft-upload-url"] } }
+        },
+        {
+          "name": "filing state (409 DRAFT_LOCKED)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+            "pm.test('code DRAFT_LOCKED', function () { pm.expect(pm.response.json().error.code).to.eql('DRAFT_LOCKED'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"d.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingPaidId}}/draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingPaidId}}", "draft-upload-url"] } }
+        },
+        {
+          "name": "in_review valid PDF (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const d = pm.response.json().data;",
+            "pm.test('uploadUrl is https string', function () { pm.expect(d.uploadUrl).to.be.a('string'); pm.expect(d.uploadUrl.indexOf('https://')).to.eql(0); });",
+            "pm.test('s3Key prefixed drafts/<id>-', function () { pm.expect(d.s3Key.indexOf('drafts/' + pm.environment.get('inReviewId') + '-')).to.eql(0); });",
+            "pm.test('expiresAt present', function () { pm.expect(d.expiresAt).to.be.a('string'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"draft asmt10.pdf\",\n  \"fileSize\": 1048576,\n  \"contentType\": \"application/pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewId}}/draft-upload-url", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewId}}", "draft-upload-url"] } }
+        }
+      ]
+    },
+    {
+      "name": "9. Draft confirm — POST /admin/bookings/:id/draft-confirm",
+      "item": [
+        {
+          "name": "foreign s3Key (400 VALIDATION_ERROR)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"drafts/00000000-0000-4000-8000-000000000000-20260101-x-ab12.pdf\",\n  \"fileName\": \"draft.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewConfirmId}}/draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewConfirmId}}", "draft-confirm"] } }
+        },
+        {
+          "name": "filing state (409 DRAFT_LOCKED)",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "pm.environment.set('draftKey', 'drafts/' + pm.environment.get('filingPaidId') + '-20260101-draft-ab12.pdf');" ] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+              "pm.test('code DRAFT_LOCKED', function () { pm.expect(pm.response.json().error.code).to.eql('DRAFT_LOCKED'); });"
+            ] } }
+          ],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"{{draftKey}}\",\n  \"fileName\": \"draft.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingPaidId}}/draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingPaidId}}", "draft-confirm"] } }
+        },
+        {
+          "name": "in_review first draft -> draft_ready (200)",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "pm.environment.set('draftKey', 'drafts/' + pm.environment.get('inReviewConfirmId') + '-20260101-draft-ab12.pdf');" ] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "const b = pm.response.json();",
+              "pm.test('message present', function () { pm.expect(b.message).to.be.a('string'); });",
+              "pm.test('booking now draft_ready', function () { pm.expect(b.data.booking.status).to.eql('draft_ready'); });",
+              "pm.test('hasDraft true', function () { pm.expect(b.data.booking.hasDraft).to.eql(true); });"
+            ] } }
+          ],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"{{draftKey}}\",\n  \"fileName\": \"draft.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{inReviewConfirmId}}/draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{inReviewConfirmId}}", "draft-confirm"] } }
+        },
+        {
+          "name": "draft_ready re-upload stays draft_ready (200)",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "pm.environment.set('draftKey', 'drafts/' + pm.environment.get('draftReadyReuploadId') + '-20260102-draftv2-cd34.pdf');" ] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('booking still draft_ready', function () { pm.expect(pm.response.json().data.booking.status).to.eql('draft_ready'); });"
+            ] } }
+          ],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"s3Key\": \"{{draftKey}}\",\n  \"fileName\": \"draft-v2.pdf\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyReuploadId}}/draft-confirm", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyReuploadId}}", "draft-confirm"] } }
+        }
+      ]
+    },
+    {
+      "name": "10. Note — PATCH /admin/bookings/:id/note",
+      "item": [
+        {
+          "name": "set note (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('adminNote reflected', function () { pm.expect(pm.response.json().data.booking.adminNote).to.eql('Pre-deposit of 12000 required.'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"note\": \"Pre-deposit of 12000 required.\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/note", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "note"] } }
+        },
+        {
+          "name": "update note (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('adminNote updated', function () { pm.expect(pm.response.json().data.booking.adminNote).to.eql('Updated note.'); });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"note\": \"Updated note.\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/note", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "note"] } }
+        },
+        {
+          "name": "clear note with empty string (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "pm.test('adminNote cleared', function () { const n = pm.response.json().data.booking.adminNote; pm.expect(n === '' || n === null).to.be.true; });"
+          ] } }],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"note\": \"\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/note", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "note"] } }
+        },
+        {
+          "name": "note over 5000 chars (400)",
+          "event": [
+            { "listen": "prerequest", "script": { "type": "text/javascript", "exec": [ "pm.environment.set('longNote', 'x'.repeat(5001));" ] } },
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+              "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+            ] } }
+          ],
+          "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"note\": \"{{longNote}}\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/note", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "note"] } }
+        }
+      ]
+    },
+    {
+      "name": "11. Mark paid — POST /admin/bookings/:id/mark-paid (auto-testable gates)",
+      "item": [
+        {
+          "name": "missing razorpayPaymentId (400)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 400', function () { pm.response.to.have.status(400); });",
+            "pm.test('code VALIDATION_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('VALIDATION_ERROR'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/mark-paid", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "mark-paid"] } }
+        },
+        {
+          "name": "non-existent booking (404)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 404', function () { pm.response.to.have.status(404); });",
+            "pm.test('code NOT_FOUND', function () { pm.expect(pm.response.json().error.code).to.eql('NOT_FOUND'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razorpayPaymentId\": \"pay_x\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{nonExistentUuid}}/mark-paid", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{nonExistentUuid}}", "mark-paid"] } }
+        },
+        {
+          "name": "not draft_ready -> 409 INVALID_STATUS",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+            "pm.test('code INVALID_STATUS', function () { pm.expect(pm.response.json().error.code).to.eql('INVALID_STATUS'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razorpayPaymentId\": \"pay_x\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{docUploadId}}/mark-paid", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{docUploadId}}", "mark-paid"] } }
+        },
+        {
+          "name": "already paid -> 409 (PAYMENT_ALREADY_CAPTURED)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 409', function () { pm.response.to.have.status(409); });",
+            "pm.test('code is PAYMENT_ALREADY_CAPTURED or INVALID_STATUS', function () { pm.expect(['PAYMENT_ALREADY_CAPTURED','INVALID_STATUS']).to.include(pm.response.json().error.code); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razorpayPaymentId\": \"pay_x\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{filingPaidId}}/mark-paid", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{filingPaidId}}", "mark-paid"] } }
+        },
+        {
+          "name": "draft_ready + unknown paymentId -> 502 RAZORPAY_ERROR",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 502', function () { pm.response.to.have.status(502); });",
+            "pm.test('code RAZORPAY_ERROR', function () { pm.expect(pm.response.json().error.code).to.eql('RAZORPAY_ERROR'); });"
+          ] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"razorpayPaymentId\": \"pay_UNKNOWN0000000\"\n}" }, "url": { "raw": "{{baseUrl}}/admin/bookings/{{draftReadyId}}/mark-paid", "host": ["{{baseUrl}}"], "path": ["admin", "bookings", "{{draftReadyId}}", "mark-paid"] } }
+        }
+      ]
+    },
+    {
+      "name": "12. Stats — GET /admin/stats",
+      "item": [
+        {
+          "name": "stats shape (200)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('status is 200', function () { pm.response.to.have.status(200); });",
+            "const d = pm.response.json().data;",
+            "pm.test('totalBookings is number', function () { pm.expect(d.totalBookings).to.be.a('number'); });",
+            "pm.test('byStatus has all 6 keys', function () { ['document_upload','in_review','draft_ready','filing','complete','cancelled'].forEach(function (k) { pm.expect(d.byStatus[k]).to.be.a('number'); }); });",
+            "pm.test('byServiceType has all 4 keys', function () { ['asmt_10','scn','commissioner_appeal','gstat_appeal'].forEach(function (k) { pm.expect(d.byServiceType[k]).to.be.a('number'); }); });",
+            "pm.test('totalRevenuePaise number >= 0', function () { pm.expect(d.totalRevenuePaise).to.be.a('number'); pm.expect(d.totalRevenuePaise).to.be.at.least(0); });",
+            "pm.test('byStatus sums to totalBookings', function () { const sum = Object.keys(d.byStatus).reduce(function (a, k) { return a + d.byStatus[k]; }, 0); pm.expect(sum).to.eql(d.totalBookings); });"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/admin/stats", "host": ["{{baseUrl}}"], "path": ["admin", "stats"] } }
+        }
+      ]
+    }
+  ]
+}

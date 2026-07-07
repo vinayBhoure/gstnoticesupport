@@ -3,7 +3,6 @@ import {
   FileSearch, FileWarning, Gavel, Landmark, UserCheck, ClipboardList,
   MessageSquare, ShieldCheck, MapPin, Tag, Lock, Scale,
 } from 'lucide-react';
-import { WHATSAPP_LINKS } from './common';
 import type {
   CaseOutcome, NoticeCard, PricingTier, ProcessStep, SectionHead,
   SecurityPillar, StatItem, TrustCard,
@@ -32,7 +31,6 @@ export const homeHero = {
   ],
   sub: 'Our team is backed with experienced Chartered Accountants (CAs), Company Secretaries (CSs), and Advocates specializes in preparing replies to GST notices, filing appeals, and representing clients before GST authorities across India.',
   bookLabel: 'Book Service',
-  whatsappHref: WHATSAPP_LINKS.home,
   callbackLabel: 'Request a Callback',
   reassurance: [
     'Response within 24 hours',
@@ -229,6 +227,5 @@ export const homeFinalCta = {
   heading: 'Don\'t Let a GST Notice Become a Bigger Problem',
   sub: 'Get expert legal support within 24 hours.',
   bookLabel: 'Book Service',
-  whatsappHref: WHATSAPP_LINKS.home,
   callbackLabel: 'Request a Callback',
 } as const;

@@ -111,7 +111,7 @@ export const pricingTable: SectionHead & { cards: PricingTableCard[] } = {
       noticeTag: 'Personal hearing · appearance',
       title: 'Representation Before Authority',
       priceDisplay: 'Custom',
-      priceSub: 'Consultation-based · offline',
+      priceSub: 'Consultation-based · quoted to your case',
       features: [
         'Personal hearing appearance',
         'Oral submissions before authority',
@@ -126,9 +126,9 @@ export const pricingTable: SectionHead & { cards: PricingTableCard[] } = {
 };
 
 export const pricingRepresentation = {
-  tag: 'Consultation-based · offline service',
+  tag: 'Consultation-based · booked online',
   heading: 'Representation Before Authority',
-  body: 'Handling where physical or virtual appearance before the GST Officer or Appellate Authority is required. Pricing depends on case complexity, jurisdiction, and hearing schedule. This service is discussed and confirmed offline before any engagement.',
+  body: 'Handling where physical or virtual appearance before the GST Officer or Appellate Authority is required. Pricing depends on case complexity, jurisdiction, and hearing schedule. Book online — after we review your case, the fee is confirmed and quoted in your dashboard, where you pay to proceed.',
   ctaLabel: 'Request a Callback for Representation',
   detailsLabel: 'View Service Details',
   detailsHref: '/services/representation-before-authority',

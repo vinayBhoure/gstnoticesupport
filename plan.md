@@ -56,6 +56,76 @@ These are fixed for the entire Phase 2 build. Each phase's execution prompt inhe
 
 ---
 
+## Backend roadmap alignment (`backend_plan.md`)
+
+The backend is built in 9 phases (0–8). This section reconciles its locked decisions and phase
+order against this frontend plan. **Where `api_contract.md` and `backend_plan.md` disagree, the
+contract is the wire format the frontend codes against — but the two genuine conflicts below must
+be reconciled by the backend before the affected frontend form/page can be finalized.**
+
+### A. Backend decisions that RESOLVE prior open questions
+
+| Backend decision | Was (frontend OQ) | Now (apply this) |
+|---|---|---|
+| **D64** — Payment History: offset pagination (default 20, max 100) + Razorpay **receipt URL** per row; no in-house invoice PDF | OQ-12 "flat array, no meta"; OQ-13 "no invoice download" | Payment History is **paginated** (`page`/`limit`) and **each row links to the Razorpay-hosted receipt**. Build the list paginated; render a "View Receipt ↗" link. *(The `api_contract.md §2.2` example still shows a flat array with no receipt field — it must be updated to add `meta` + receipt URL; frontend wires to the D64 shape.)* |
+| **D65** — Login alert email = IP + sanitized User-Agent only | OQ (login alert content) | No frontend impact. `/auth/invalidate` page unchanged. |
+| **D67** — `complete-profile` collects `name` + `phone`; `PATCH /user/profile` handles later updates | OQ-4 "phone not in `UserObject`, degrade gracefully"; OQ-5 "complete-profile = interestedServices only" | **If D67 is the final word:** phone **is** captured and editable → the Settings profile sub-section **shows and edits phone** (OQ-4's graceful-degrade fallback is no longer needed). **But this collides with the contract — see Conflict 1.** |
+
+### B. Conflicts requiring backend reconciliation (⚠️ do not invent a resolution)
+
+1. **⚠️ `complete-profile` scope — HARD CONFLICT.** `api_contract.md §1.4` says complete-profile
+   captures **`interestedServices`** (and `UserObject` includes `interestedServices` but **no
+   `phone`**, with no other capture point for phone). `backend_plan.md` **D67** says complete-profile
+   captures **`name` + `phone`**. These cannot both be true, and under D67 there is **no capture
+   point for `interestedServices`** even though `UserObject` returns it. **This blocks finalizing
+   `CompleteProfileForm` (Phase 2.1) and the Settings phone field (Phase 2.2).** *Recommended
+   resolution:* reconcile to a single contract — likely complete-profile captures
+   `interestedServices` **and** `phone` (and `UserObject` adds `phone`) — then update
+   `api_contract.md` §1.1/§1.4/§2.1 + the `UserObject` shape accordingly. Until reconciled, build the
+   form shell but treat its exact fields as the one open blocker.
+2. **Contract response-shape drift (non-blocking).** `GET /user/payment-history` (`§2.2`) and
+   `PATCH /user/profile` (`§2.1`) response/field shapes do not yet reflect D64 (pagination + receipt)
+   or D67 (phone). Frontend codes to the resolved decisions; flag the contract examples as
+   needing an update so FE and BE agree before integration QA.
+
+### C. Confirmations (no change, now backed by the backend plan)
+
+- **OQ-8 transport** — backend **confirms** direct cross-subdomain auth: cookie
+  `Domain=.gstnoticesupport.in`, `Secure`, `HttpOnly`, `SameSite=Lax`, CORS per-environment. **But it
+  is only wired/validated in backend Phase 8** (staging) — so live cross-subdomain auth QA for FE 2.1
+  cannot fully complete until backend Phase 8.
+- **OQ-3 enum** — backend enums come from `schema.prisma`; canonical is snake_case (`asmt_10` …). The
+  `ASMT10_REPLY`/`SCN_REPLY` text in `api_contract.md §7.3–7.4` is stale. Code to snake_case.
+- **OQ-2 Confirm Draft** — the backend plan contains **no confirm-draft endpoint in any phase**, yet
+  Phase 7 audits a 14-event matrix that includes "user confirms draft → admin notified". So this is a
+  **mutual FE+BE gap**: the email has no trigger. Strengthens the OQ-2 flag — it is a contract gap on
+  both sides, not just a missing FE wire.
+
+### D. Backend-phase → frontend-screen readiness map (integration order ≠ build order)
+
+Frontend phases are ordered by the **frontend dependency spine**; backend data lands in a different
+order. Build the frontend in the planned order, but **integrate/QA each screen only once its backing
+backend phase ships** (mock or stub the rest).
+
+| Backend phase | Unlocks (frontend can integrate against live API) |
+|---|---|
+| BE 2 — Auth | **FE 2.1** all auth screens, session guard, refresh middleware |
+| BE 3 — Bookings | **FE 2.2** bookings list + detail (read); **FE 2.3** booking create + cancel |
+| BE 4 — Documents | **FE 2.3** document upload; `draft-url` fetch in Draft Viewer |
+| BE 5 — Payments | **FE 2.3** PayToUnlock (initiate) + `/payment/verify` |
+| BE 6 — Admin | **FE 2.4** all admin screens (admin draft upload also produces the draft FE 2.3 views) |
+| **BE 8 — User endpoints + hardening** | **FE 2.2** Payment History (`GET /user/payment-history`), profile edit (`PATCH /user/profile`), account delete (`DELETE /user`); **OQ-8** cross-subdomain validation |
+| *(no backend phase)* | **OQ-2** Draft Viewer "Confirm Draft" action — unbuildable end-to-end until a contract decision adds the endpoint |
+
+> **Key integration insight:** **FE 2.2's** Payments / profile-edit / account-delete depend on **BE
+> Phase 8 (the last backend phase)**, while **FE 2.3** depends on BE Phases 3–5 (earlier). So the
+> read-only dashboard's *data wiring* lands late even though the *UI* is built early. Plan to build
+> FE 2.2's UI on schedule but defer its live integration (or use the API client's mocked responses)
+> for Payments/profile/delete until BE Phase 8. Bookings list/detail in FE 2.2 integrate earlier (BE
+> Phase 3).
+
+---
+
 ## Phasing strategy
 
 Four phases, ordered to minimize integration risk by building the dependency spine first
@@ -128,6 +198,10 @@ and all 6 auth screens. After this phase a user can complete the entire account 
 - `client/src/app/(auth)/signup/page.tsx` (+ `SignupForm.tsx` client leaf)
 - `client/src/app/(auth)/verify-otp/page.tsx` (+ `VerifyOtpForm.tsx`)
 - `client/src/app/(auth)/complete-profile/page.tsx` (+ `CompleteProfileForm.tsx`)
+  — **⚠️ field set is the one open blocker (Conflict 1, Backend Alignment §B):** `api_contract.md`
+  says `interestedServices`; `backend_plan.md` D67 says `name` + `phone`. Build the page + form
+  shell now; finalize the exact fields once the contract is reconciled. The `CheckboxGroup`
+  (multi-select) primitive is needed **if** `interestedServices` stays here (or moves to signup).
 - `client/src/app/(auth)/login/page.tsx` (+ `LoginForm.tsx`)
 - `client/src/app/(auth)/forgot-password/page.tsx` (+ `ForgotPasswordForm.tsx`, two visible states)
 - `client/src/app/(auth)/auth/invalidate/page.tsx` — public SSR confirmation page (OQ-10).
@@ -151,7 +225,8 @@ and all 6 auth screens. After this phase a user can complete the entire account 
 |---|---|---|
 | Input | Extend | password toggle + `+91` + inputmode |
 | Button, Card | Reuse | auth CTAs + card surface |
-| Checkbox, CheckboxGroup | New | consent flags + `interestedServices` |
+| Checkbox | New | consent flags (termsAccepted, booking consents) — needed regardless |
+| CheckboxGroup | New | `interestedServices` multi-select — **placement pending Conflict 1** (complete-profile vs signup); component still required |
 | AuthCardShell | New | `components.md → Auth Card Shell` |
 | OTPInput | New | `components.md → OTP Input` |
 | Toaster | Reuse | already in root layout |
@@ -177,10 +252,14 @@ None. (`logo.png` already at `client/public/logo.png` for the AuthCardShell word
   Server Component trees. (`audit.md §8.1`)
 - `client/src/styles/tokens.css` — append-only Phase 2 section.
 - `client/tsconfig.json` — add alias (non-breaking).
-- **OQ-8 (⚠️ blocking transport):** direct browser → `api.gstnoticesupport.in` with
-  `credentials: 'include'` requires the Express backend CORS config (`origin: https://gstnoticesupport.in`,
-  `credentials: true`, cookie `Domain=.gstnoticesupport.in`, `SameSite=Lax`, `Secure=true`).
-  **Must be confirmed on the backend before any auth screen can be QA'd against the live API.**
+- **⚠️ Conflict 1 (complete-profile field set):** `api_contract.md` (`interestedServices`) vs
+  `backend_plan.md` D67 (`name` + `phone`). Blocks finalizing `CompleteProfileForm`. Build the shell;
+  reconcile before locking fields. (Backend Alignment §B.)
+- **OQ-8 (⚠️ transport — confirmed but late):** the backend plan **confirms** direct cross-subdomain
+  auth (cookie `Domain=.gstnoticesupport.in`, `Secure`, `HttpOnly`, `SameSite=Lax`, CORS per-env), but
+  **only wires/validates it in backend Phase 8**. FE 2.1 can be built and unit-tested now; full
+  cross-subdomain auth QA against the live API waits on backend Phase 8 (or a dev backend with the
+  same CORS/cookie config).
 - Public `Navbar` "Book Service" CTA → **do not touch** (OQ-9, product decision deferred).
 
 ### Acceptance criteria
@@ -233,8 +312,10 @@ status, documents list, admin note — **no PayToUnlock/cancel yet**, Q2 default
 - `client/src/app/(dashboard)/dashboard/services/[id]/page.tsx` — Service Detail **read-only layer**:
   booking detail, documents list, admin note, status header. Payment/cancel slot left as a clearly
   marked placeholder for Phase 3.
-- `client/src/app/(dashboard)/dashboard/payments/page.tsx` — Payment History (flat list; render all
-  items — no `meta` from backend yet, OQ-12).
+- `client/src/app/(dashboard)/dashboard/payments/page.tsx` — Payment History. **Per backend D64:
+  offset-paginated** (`page`/`limit`, default 20 / max 100) **with a per-row "View Receipt ↗" link to
+  the Razorpay-hosted receipt** (no in-house invoice PDF). Build paginated; resolves OQ-12 + OQ-13.
+  *(Backing endpoint `GET /user/payment-history` lands in backend Phase 8 — integrate then.)*
 - `client/src/app/(dashboard)/dashboard/settings/page.tsx` (+ `ProfileForm.tsx`,
   `DeleteAccountSection.tsx` client leaves) — profile edit + account delete. My Profile is a
   sub-section here, **not** a separate `/dashboard/profile` route (OQ-15). Deferred settings content
@@ -271,11 +352,18 @@ None new. `logo.png` reused in AppShell header.
 None (TanStack Query + framer-motion installed in Phase 1).
 
 ### Phase 2.2 touch-points & integration risks
-- **OQ-4 (⚠️ `phone` not in `UserObject`):** the profile sub-section cannot reliably display a phone
-  number from `/auth/me`. Default: omit phone from the profile UI until backend adds it, or derive
-  from latest booking `contactPhone` — do not invent a source. Plan the UI to degrade gracefully.
-- **OQ-12 (payment history pagination):** `GET /user/payment-history` returns a flat array, no
-  `meta`. Build the list as paginatable but render all items for now; note the gap, don't block.
+- **OQ-4 → reframed by D67:** the backend now intends to **capture `phone` at complete-profile** and
+  let `PATCH /user/profile` edit it. So the profile sub-section **plans to show + edit phone** —
+  *contingent on Conflict 1 being resolved and `UserObject`/`PATCH profile` gaining a `phone` field*.
+  The earlier "omit/degrade" fallback applies only if D67 is reversed. Do not invent a source.
+- **OQ-12/OQ-13 → resolved by D64:** Payment History is **paginated** with a **Razorpay receipt link**
+  per row (no in-house invoice). Wire to the D64 shape (`meta` + receipt URL), which the contract
+  example must be updated to match.
+- **Backend Phase 8 dependency (⚠️ integration timing):** `GET /user/payment-history`,
+  `PATCH /user/profile`, and `DELETE /user` are owned by **backend Phase 8 (last)**. Build FE 2.2's
+  UI on schedule; defer live integration of Payments / profile-edit / account-delete until BE Phase 8
+  (use the API client's mock surface meanwhile). **Bookings list + detail integrate earlier (BE
+  Phase 3).**
 - **OQ-3 (`interestedServices` enum):** treat `UserObject` snake_case values as canonical; the stale
   `ASMT10_REPLY`/`SCN_REPLY` text in the `/admin/users` example is a backend correction item.
 - Service Detail links from Services List resolve to the read-only page (no dead 404) — the payment
@@ -379,6 +467,9 @@ None new (framer-motion from Phase 1; Razorpay loaded via `next/script`, not an 
   "Confirm Draft" [Primary] button against a **TBD endpoint**. **Draft Viewer's primary action
   cannot ship until this endpoint is defined and added to the contract.** Do not invent a path.
   Build the rest of the Draft Viewer (fetch + render draft) so only the confirm action is blocked.
+  **Confirmed mutual gap:** `backend_plan.md` defines **no confirm-draft endpoint in any phase**, yet
+  its Phase 7 matrix audits a "user confirms draft → admin notified" email — which therefore has no
+  trigger. This needs a contract decision (new endpoint) before either side can implement it.
 - **Pre-deposit disclosure (KB2 §7, `frontend.md §8.3`):** must appear at booking Step 1 AND on the
   PayToUnlock screen for Commissioner + GSTAT. Both are in this phase — never omit either.
 - **Razorpay callback URL** is set server-side in `initiate` (`/payment/verify?booking_id=`);
@@ -482,6 +573,11 @@ None new.
   `draft_ready` on confirm) — respect `DRAFT_LOCKED` 409.
 - **Mark-paid** is visible only at `draft_ready` + payment `pending`/`failed`; backend verifies with
   Razorpay — frontend just submits `razorpayPaymentId` and handles `PAYMENT_NOT_CAPTURED` 422.
+- **D66 (payment audit fields):** `payment_records` gains a `source` enum
+  (`webhook | verify | admin_override`) and `performed_by_admin_id`; `mark-paid` inserts a new row
+  with `source=admin_override`. Booking Detail's "all payment attempts" list **may surface `source`**
+  per row (optional, low-effort) so the admin can distinguish a manual override from a webhook
+  capture. Wire only if/when the contract's `PaymentRecordObject` exposes these fields.
 - **Status transitions** via `PATCH …/status` accept only `in_review` | `complete`; UI must not
   offer other transitions.
 - Admin mobile is minimal fallback only (drawer + horizontally-scrollable tables, not card-collapse)
@@ -507,16 +603,19 @@ Phase 3 (DocumentUpload pattern for admin draft upload, if shared).
 
 ## Cross-phase open-question ledger (⚠️ = decision/backend action required)
 
-| OQ | Phase affected | Status for the build |
+| OQ | Phase affected | Status for the build (updated vs `backend_plan.md`) |
 |---|---|---|
-| OQ-2 ⚠️ | 3 | **Blocks Draft Viewer "Confirm Draft" action.** Build everything else; flag the button. |
-| OQ-4 ⚠️ | 2 | Profile phone display degrades gracefully; no invented source. |
-| OQ-6 ⚠️ | 2, 4 | `/dashboard/settings` deferred content + `/admin/settings` reserved, not built. |
-| OQ-8 ⚠️ | 1 | Backend CORS + cookie config must be confirmed before auth QA against live API. |
+| **Conflict 1** ⚠️ | 1, 2 | **NEW — hard contract conflict.** complete-profile: `api_contract` (`interestedServices`) vs D67 (`name`+`phone`). Blocks finalizing `CompleteProfileForm` + Settings phone field. Backend must reconcile. |
+| OQ-2 ⚠️ | 3 | **Blocks Draft Viewer "Confirm Draft".** Now confirmed a **mutual FE+BE gap** — no endpoint in `backend_plan.md` either; its Phase 7 email has no trigger. Build everything else; flag the button. |
+| OQ-4 | 2 | **Reframed by D67** — phone is intended to be captured/editable → plan to show + edit phone, **contingent on Conflict 1** and `UserObject` gaining `phone`. Graceful-degrade only if D67 reversed. |
+| OQ-6 ⚠️ | 2, 4 | `/dashboard/settings` deferred content + `/admin/settings` reserved, not built. (Unchanged — no backend endpoint.) |
+| OQ-8 ⚠️ | 1 | **Confirmed by backend**, but cross-subdomain cookie/CORS is only validated in **BE Phase 8** → full live auth QA waits on it. |
 | OQ-9 ⚠️ | (pre-launch) | Public "Book Service" CTA destination — product decision, do not touch in build. |
-| OQ-12 | 2 | Payment history renders flat (no `meta` yet). |
-| OQ-3 | 2, 4 | Code to canonical `UserObject` enum; stale contract example flagged. |
-| OQ-1, 5, 7, 10, 11, 13, 14, 15, 16, 17, 18 | various | Confirmed defaults applied inline above. |
+| OQ-12 | 2 | **Resolved by D64** — payment history is **paginated** (`page`/`limit`). Wire to `meta`; contract example needs updating. |
+| OQ-13 | 2 | **Resolved by D64** — per-row **Razorpay receipt URL** (no in-house invoice PDF). Add "View Receipt ↗" link. |
+| OQ-3 | 2, 4 | Code to canonical `UserObject` snake_case enum; stale `ASMT10_REPLY` contract example flagged (backend uses `schema.prisma` enums). |
+| **Integration timing** | 2 | **NEW** — FE 2.2 Payments / profile-edit / account-delete depend on **BE Phase 8 (last)**; build UI on schedule, defer live integration. Bookings list/detail integrate at BE Phase 3. |
+| OQ-1, 5, 7, 10, 11, 14, 15, 16, 17, 18 | various | Confirmed defaults applied inline above. (OQ-5 now subsumed by Conflict 1.) |
 
 ---
 

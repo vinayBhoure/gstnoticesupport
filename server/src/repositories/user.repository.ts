@@ -1,6 +1,12 @@
 import { prisma } from '../lib/prisma';
 import type { User, UserRole } from '@prisma/client';
 
+type AdminUserFilter = {
+  page: number;
+  limit: number;
+  search?: string;
+};
+
 export const userRepository = {
   async findById(id: string): Promise<User | null> {
     // Prisma middleware auto-excludes deleted users (lib/prisma.ts)
@@ -30,7 +36,10 @@ export const userRepository = {
     });
   },
 
-  async updateProfile(id: string, data: { name?: string; phone?: string }): Promise<User> {
+  async updateProfile(
+    id: string,
+    data: { name?: string; phone?: string; allowPromotions?: boolean },
+  ): Promise<User> {
     return prisma.user.update({
       where: { id },
       data: { ...data, updatedAt: new Date() },
@@ -50,5 +59,32 @@ export const userRepository = {
       where: { id },
       data: { deletedAt: new Date(), updatedAt: new Date() },
     });
+  },
+
+  // Admin users list (role=user only; the soft-delete guard extension already
+  // excludes deleted rows — the explicit filter documents intent, database.md §3.2).
+  async findAllForAdmin(filter: AdminUserFilter): Promise<{ data: User[]; total: number }> {
+    const where = {
+      role: 'user' as UserRole,
+      deletedAt: null,
+      ...(filter.search
+        ? {
+            OR: [
+              { name: { contains: filter.search, mode: 'insensitive' as const } },
+              { email: { contains: filter.search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
+    const [data, total] = await prisma.$transaction([
+      prisma.user.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (filter.page - 1) * filter.limit,
+        take: filter.limit,
+      }),
+      prisma.user.count({ where }),
+    ]);
+    return { data, total };
   },
 };

@@ -10,6 +10,7 @@ import type {
   LoginInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  ChangePasswordInput,
   InvalidateQuery,
 } from '../schemas/auth.schema';
 
@@ -86,6 +87,12 @@ export const authController = {
     const { user, tokens } = await authService.resetPassword(input);
     setAuthCookies(res, tokens);
     res.status(200).json(envelope({ user }, 'Password updated successfully.'));
+  }),
+
+  changePassword: asyncHandler(async (req, res) => {
+    const input = req.validated.body as ChangePasswordInput;
+    await authService.changePassword(req.user!.id, input);
+    res.status(200).json(envelope(null, 'Password updated.'));
   }),
 
   invalidate: asyncHandler(async (req, res) => {

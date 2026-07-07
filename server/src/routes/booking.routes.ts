@@ -2,9 +2,9 @@ import { Router } from 'express';
 import { bookingController } from '../controllers/booking.controller';
 import { documentController } from '../controllers/document.controller';
 import { authenticate } from '../middleware/authenticate';
-import { validateBody, validateParams } from '../middleware/validate';
+import { validateBody, validateParams, validateQuery } from '../middleware/validate';
 import { createBookingSchema, bookingIdParamSchema } from '../schemas/booking.schema';
-import { uploadUrlSchema, confirmUploadSchema } from '../schemas/document.schema';
+import { uploadUrlSchema, confirmUploadSchema, draftUrlQuerySchema } from '../schemas/document.schema';
 import { documentUploadRateLimiter, draftUrlRateLimiter } from '../lib/rateLimiter';
 
 const router = Router();
@@ -43,6 +43,7 @@ router.get(
   authenticate,
   draftUrlRateLimiter,
   validateParams(bookingIdParamSchema),
+  validateQuery(draftUrlQuerySchema),
   documentController.getDraftUrl,
 );
 

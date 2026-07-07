@@ -9,6 +9,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { serviceSchema } from '@/lib/structured-data';
 import { AnimateIn } from '@/components/ui/AnimateIn';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
+import { BookServiceButton } from '@/components/ui/BookServiceButton';
 import { commissionerAppealContent as content } from '@/data/services/commissioner-appeal';
 
 export const dynamic = 'force-static';
@@ -40,14 +41,7 @@ export default function CommissionerAppealPage() {
           <p className={styles.sub}>{content.hero.sub}</p>
 
           <div className={styles.heroCta}>
-            <a
-              className="btn btn-primary"
-              href={content.hero.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {content.hero.bookLabel}
-            </a>
+            <BookServiceButton className="btn btn-primary">{content.hero.bookLabel}</BookServiceButton>
             <RequestCallbackButton className="btn btn-secondary">{content.hero.callbackLabel}</RequestCallbackButton>
           </div>
 
@@ -189,14 +183,7 @@ export default function CommissionerAppealPage() {
             </div>
 
             <div className={styles.ctaRow}>
-              <a
-                className="btn btn-primary"
-                href={content.pricing.whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {content.pricing.ctaLabel}
-              </a>
+              <BookServiceButton className="btn btn-primary">{content.pricing.ctaLabel}</BookServiceButton>
             </div>
             <p className={styles.payNote}>{content.pricing.payNote}</p>
           </div>

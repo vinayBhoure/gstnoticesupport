@@ -48,3 +48,53 @@
 **Fix:** Rename the local variable (used `const res = ...`) in the test script.
 
 **Note:** Re-running the full Newman suite against a long-lived server eventually trips the `upload-url` 7/hr rate limit (in-memory counter persists across runs). Restart the server to reset the counter between full re-runs.
+
+---
+
+## 5. Schema sync script blocked — `@prisma/client` string in comment (EP11, 2026-06-29)
+
+**Symptom:** `npm run sync:schemas` silently skipped `booking.schema.ts` despite adding it to the allow-list. A secondary `grep` scan revealed the sync script checks every file for the literal string `@prisma/client` and refuses to copy any file containing it.
+
+**Cause:** The refactored `booking.schema.ts` still had a comment reading *"not z.nativeEnum from @prisma/client"*, which contains the blocked substring verbatim.
+
+**Fix:** Reword all comments to avoid the substring. The comment was changed to *"not z.nativeEnum over a server-only import"*. The schema itself had already dropped the import — only the comment was the issue.
+
+**Rule:** Any comment in a server schema intended for client sync must not mention the string `@prisma/client`. The sync guard (`BLOCK_PATTERN`) in `client/scripts/sync-shared-schemas.mjs` is intentional and must not be weakened.
+
+---
+
+## 6. Newman payment fixture — `ERR_MODULE_NOT_FOUND: Cannot find package 'dotenv'` (EP12, 2026-07-01)
+
+**Symptom:** The payments Newman runner failed at the fixture step: `npx tsx` (run with cwd `server/`) could not resolve `dotenv` / `@prisma/client` from a script located at `test/postman/setup-draft-ready-booking.mjs`.
+
+**Cause:** Node ESM resolves bare imports starting from the **importing file's** directory and walking up — not from the process cwd. A script under `test/postman/` walks `test/postman → test → repo root`, none of which contain `dotenv`/`@prisma/client` (those live in `server/node_modules`). `NODE_PATH` does not help ESM bare-specifier resolution.
+
+**Fix:** Relocate the fixture to `server/scripts/setup-draft-ready-booking.mjs` so resolution finds `server/node_modules`. The runner calls it via `(cd ../../server && npx tsx scripts/setup-draft-ready-booking.mjs)`.
+
+**Rule:** Any standalone `.mjs`/`.ts` script that imports server dependencies must live under `server/` (or be run with those deps resolvable from its own location), regardless of cwd.
+
+---
+
+## 7. Razorpay test checkout — "International cards are not supported" (EP12, 2026-07-01)
+
+**Symptom:** Completing the Razorpay **test** Checkout with the common test card `4111 1111 1111 1111` returned "Payment could not be completed. International cards are not supported."
+
+**Cause:** International payments are not enabled on the test account, and that card BIN is treated as international.
+
+**Fix (testing):** Use **Netbanking → Success** on the mock bank page (`api.razorpay.com/v1/gateway/mocksharp/payment`) — the deterministic domestic test-capture path — or a domestic test card. This produces a real `captured` payment, fires the real signed webhook, and transitions the booking to `filing`.
+
+**Note:** This is a test-account capability, not a code issue. Before production, enable the payment methods/cards you intend to accept in the Razorpay dashboard (and complete live-mode KYC).
+
+---
+
+## 8. Admin Newman runner — spurious admin login `401` from a stale `.env` duplicate (EP13, 2026-07-01)
+
+**Symptom:** The first `run-admin-newman.sh` run passed unauthenticated (401) and RBAC (403) checks, but "Login (admin)" itself returned `401 INVALID_CREDENTIALS`. Every subsequent admin-only request then ran on the still-active **user** cookie and failed as `403`/`TypeError` instead of the expected `200` — a single root cause cascading into ~25 apparent failures.
+
+**Cause:** `server/.env` contained **two** `ADMIN_EMAIL=`/`ADMIN_PASSWORD=` lines (an old value followed by the current one). The app and `prisma db seed` both load `.env` via `dotenv`, which is **last-value-wins**, so they use the correct, current password. The runner's credential extraction used `grep -E "^ADMIN_PASSWORD=" | head -1`, which grabs the **first** (stale) duplicate — a 9-character leftover instead of the real 14-character password. `bcrypt.compare` against the DB hash correctly rejected it.
+
+**Diagnosis path:** Verified in order, without ever printing the secret itself: (1) the *literal* credential the user provided also failed login — ruling out a typo on my end; (2) direct DB lookup showed `bcrypt.compare(process.env.ADMIN_PASSWORD, hash)` via `dotenv` was `true`, so the seeded hash was correct; (3) `read_env`'s extracted value was a different *length* (9 vs. 14 chars) than the dotenv-resolved value — isolating the bug to the shell extraction, not the database or the app.
+
+**Fix:** Changed `run-admin-newman.sh` to resolve `ADMIN_EMAIL`/`ADMIN_PASSWORD` via `node -e "require('dotenv').config(); ..."` (the exact mechanism the app and seed script use) instead of `grep | head -1`. The user then deduplicated `server/.env` directly, which independently makes `grep | head -1` correct too — but the dotenv-based extraction is the durable fix regardless of `.env` hygiene.
+
+**Rule:** Any test runner that reads secrets out of `.env` for injection into Newman/curl must resolve them the same way the application does (`dotenv`, last-value-wins), never `grep -E "^KEY=" | head -1` — a duplicate or commented-out line silently produces the wrong value with no error. `test/postman/run-payments-newman.sh` uses the same `grep | head -1` pattern for `ADMIN_EMAIL`/`ADMIN_PASSWORD`/Razorpay secrets and carries the same latent risk if `.env` ever regains a duplicate; not yet migrated to the dotenv-based pattern.

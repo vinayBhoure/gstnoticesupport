@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Razorpay TEST Checkout — manual payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+      body { font-family: system-ui, Arial, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #0A2540; }
+      label { display: block; margin: 12px 0 4px; font-weight: 600; font-size: 14px; }
+      input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+      button { margin-top: 20px; padding: 12px 22px; background: #16A34A; color: #fff; border: 0; border-radius: 6px; font-weight: 700; cursor: pointer; }
+      pre { background: #f1f5f9; padding: 14px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+      .hint { color: #5B6B7B; font-size: 13px; }
+      .ok { color: #16A34A; font-weight: 700; }
+      .err { color: #b91c1c; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <h2>Razorpay TEST Checkout</h2>
+    <p class="hint">
+      Paste the <code>keyId</code> and <code>orderId</code> from a <code>POST /payments/:bookingId/initiate</code>
+      response, then pay with a Razorpay <strong>test card</strong>. On success this prints the three values
+      Layer&nbsp;2 verify needs.
+    </p>
+
+    <label>Key ID (rzp_test_…)</label>
+    <input id="keyId" placeholder="rzp_test_xxxxxxxx" />
+
+    <label>Order ID (order_…)</label>
+    <input id="orderId" placeholder="order_xxxxxxxx" />
+
+    <button id="pay">Pay with test card</button>
+
+    <h3>Result</h3>
+    <pre id="out">— waiting —</pre>
+
+    <p class="hint">
+      Test success card: <code>4111 1111 1111 1111</code> · any future expiry · any CVV · OTP <code>1234</code>
+      (if prompted, click <strong>Success</strong>). To test a failure, use card <code>5104 0600 0000 0008</code>.
+    </p>
+
+    <script>
+      // Prefill from query string: checkout.html?keyId=...&orderId=...
+      const qs = new URLSearchParams(location.search);
+      if (qs.get('keyId')) document.getElementById('keyId').value = qs.get('keyId');
+      if (qs.get('orderId')) document.getElementById('orderId').value = qs.get('orderId');
+
+      document.getElementById('pay').onclick = function () {
+        const key = document.getElementById('keyId').value.trim();
+        const order = document.getElementById('orderId').value.trim();
+        const out = document.getElementById('out');
+        if (!key || !order) { out.innerHTML = '<span class="err">Enter both keyId and orderId.</span>'; return; }
+
+        const rzp = new Razorpay({
+          key: key,
+          order_id: order,
+          name: 'GST Notice Support (TEST)',
+          description: 'Manual Layer-2 verify test',
+          handler: function (response) {
+            // Razorpay returns the three values verify needs.
+            out.innerHTML =
+              '<span class="ok">PAYMENT SUCCESS</span>\n\n' +
+              'razorpay_payment_id=' + response.razorpay_payment_id + '\n' +
+              'razorpay_order_id=' + response.razorpay_order_id + '\n' +
+              'razorpay_signature=' + response.razorpay_signature + '\n\n' +
+              '# Hand these to test/manual/verify.sh:\n' +
+              'bash verify.sh ' + response.razorpay_payment_id + ' ' +
+              response.razorpay_order_id + ' ' + response.razorpay_signature + ' <bookingId>';
+          },
+          modal: { ondismiss: function () { out.innerHTML = '<span class="err">Checkout dismissed (no payment).</span>'; } },
+        });
+        rzp.on('payment.failed', function (resp) {
+          out.innerHTML = '<span class="err">PAYMENT FAILED</span>\n\n' + JSON.stringify(resp.error, null, 2);
+        });
+        rzp.open();
+      };
+    </script>
+  </body>
+</html>

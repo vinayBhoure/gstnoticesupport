@@ -46,6 +46,12 @@ function button(href: string, label: string): string {
   return `<a href="${href}" style="display:inline-block;padding:12px 22px;background:${GREEN};color:#FFFFFF;text-decoration:none;border-radius:6px;font-weight:bold;">${escapeHtml(label)}</a>`;
 }
 
+// Paise → ₹ formatted with Indian grouping, e.g. 299900 → "₹2,999".
+function formatRupees(amountPaise: number): string {
+  const rupees = Math.round(amountPaise / 100);
+  return `₹${rupees.toLocaleString('en-IN')}`;
+}
+
 export function signupOtp(data: { name: string; otp: string }): EmailContent {
   return {
     subject: 'Verify your email — GST Notice Support',
@@ -205,6 +211,273 @@ export function bookingCancelledAdmin(data: {
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
         <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+      </ul>
+    `),
+  };
+}
+
+// ============================================================
+// Phase 5 — Payment notifications
+// ============================================================
+
+export function paymentConfirmedUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  amountPaise: number;
+  draftUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Payment confirmed — your draft is now available',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>We have received your payment of <strong>${escapeHtml(formatRupees(data.amountPaise))}</strong>. Your draft is now unlocked and ready to view.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.draftUrl, 'View your draft')}</p>
+      <p style="color:${MUTED};">Our team will proceed with the filing stage and keep you updated.</p>
+    `),
+  };
+}
+
+export function paymentConfirmedAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+  amountPaise: number;
+}): EmailContent {
+  return {
+    subject: `Payment received — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A payment has been confirmed and the booking has moved to the filing stage:</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Amount: ${escapeHtml(formatRupees(data.amountPaise))}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+      </ul>
+    `),
+  };
+}
+
+export function paymentFailedAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+}): EmailContent {
+  return {
+    subject: `Payment attempt failed — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A payment attempt failed. The booking remains at draft stage and the user can retry.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+        <li>Phone: ${escapeHtml(data.contactPhone)}</li>
+      </ul>
+      <p style="color:${MUTED};">Consider following up via WhatsApp or email if the user needs assistance.</p>
+    `),
+  };
+}
+
+// ============================================================
+// Phase 6 — Admin case-management notifications (user-facing)
+// ============================================================
+
+// Statutory pre-deposit disclosure — mandatory Draft Ready touchpoint (KB2 §7,
+// frontend.md §8.3). Copy mirrors client PreDepositNotice.tsx exactly.
+const PRE_DEPOSIT_SERVICE_TYPES: ReadonlySet<string> = new Set([
+  'commissioner_appeal',
+  'gstat_appeal',
+]);
+
+function preDepositBlock(serviceType: string): string {
+  if (!PRE_DEPOSIT_SERVICE_TYPES.has(serviceType)) return '';
+  return `<div style="margin:20px 0;padding:14px 16px;background:#FFFBEB;border-left:3px solid #D97706;border-radius:6px;">
+    <p style="margin:0;color:${NAVY};font-size:14px;">A pre-deposit as per GST Act is required before this service is filed. Our team will advise the exact amount.</p>
+  </div>`;
+}
+
+export function statusInReviewUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Your case is now under review — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Our team has started reviewing your case. We will prepare your draft and notify you the moment it is ready.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'View booking')}</p>
+    `),
+  };
+}
+
+export function draftReadyUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Your draft is ready — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your draft has been prepared and is ready. Complete the payment to unlock and view the full document.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      ${preDepositBlock(data.serviceType)}
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'Review & pay to unlock')}</p>
+    `),
+  };
+}
+
+export function draftUpdatedUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Your draft has been updated — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Our team has updated your draft. Complete the payment to unlock and view the latest version.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      ${preDepositBlock(data.serviceType)}
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'Review & pay to unlock')}</p>
+    `),
+  };
+}
+
+export function finalDraftReadyUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Your final draft is available — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your final draft has been prepared and is now available in your dashboard. You can view and download it any time.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'View final draft')}</p>
+    `),
+  };
+}
+
+export function finalDraftUpdatedUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Your final draft has been updated — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Our team has updated your final draft. You can view and download the latest version in your dashboard.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'View final draft')}</p>
+    `),
+  };
+}
+
+export function statusCompleteUser(data: {
+  name: string;
+  bookingId: string;
+  serviceType: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: 'Your filing is complete — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your filing is now complete. Thank you for trusting GST Notice Support with your case.</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'View booking')}</p>
+    `),
+  };
+}
+
+export function statusCompleteAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+}): EmailContent {
+  return {
+    subject: `Filing complete — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A booking has been marked complete:</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+      </ul>
+    `),
+  };
+}
+
+// ============================================================
+// Account lifecycle — welcome (post-verification) and deletion
+// ============================================================
+
+export function welcomeUser(data: { name: string; dashboardUrl: string }): EmailContent {
+  return {
+    subject: 'Welcome to GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your email is verified and your account is ready. You can now book a service, upload documents, and track your case from your dashboard.</p>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'Go to dashboard')}</p>
+    `),
+  };
+}
+
+export function accountDeletedUser(data: { name: string }): EmailContent {
+  return {
+    subject: 'Your account has been closed — GST Notice Support',
+    html: layout(`
+      <p>Hi ${escapeHtml(data.name)},</p>
+      <p>Your account has been closed as requested. Your booking and payment records are retained as required by law, but your profile is no longer active.</p>
+      <p style="color:${MUTED};">If this wasn't you, please contact us immediately via WhatsApp or email.</p>
+    `),
+  };
+}
+
+export function accountDeletedAdmin(data: { userEmail: string; userId: string }): EmailContent {
+  return {
+    subject: 'Account closed — GST Notice Support',
+    html: layout(`
+      <p>A user account was closed:</p>
+      <ul style="color:${MUTED};">
+        <li>Email: ${escapeHtml(data.userEmail)}</li>
+        <li>User ID: ${escapeHtml(data.userId)}</li>
       </ul>
     `),
   };

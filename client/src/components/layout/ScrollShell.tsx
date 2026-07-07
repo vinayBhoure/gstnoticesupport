@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 
 const WaIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -35,8 +34,7 @@ export function ScrollShell({ whatsappHref }: ScrollShellProps) {
       </a>
 
       <div className={`mobile-bar${showBar ? ' show' : ''}`} id="mobileBar">
-        <RequestCallbackButton className="btn btn-secondary">Request Callback</RequestCallbackButton>
-        <Link className="btn btn-primary" href="/contact">Contact Us</Link>
+        <Link className="btn btn-primary btn-block" href="/contact">Contact Us</Link>
       </div>
     </>
   );

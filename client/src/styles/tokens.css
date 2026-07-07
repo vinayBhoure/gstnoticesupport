@@ -1,6 +1,5 @@
 /* tokens.css — gstnoticesupport shared design tokens + base + component classes
-   Source of truth: resources/ui/css/tokens.css
-   This is a copy for Next.js — do not edit here. Edit the source and re-copy. */
+   Source of truth: design-system/design.md + components.md. Do not invent values. */
 
 :root{
   /* color (design.md §2.1 — locked) */
