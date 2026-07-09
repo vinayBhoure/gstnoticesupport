@@ -140,3 +140,27 @@
 **Fix:** Changed `run-admin-newman.sh` to resolve `ADMIN_EMAIL`/`ADMIN_PASSWORD` via `node -e "require('dotenv').config(); ..."` (the exact mechanism the app and seed script use) instead of `grep | head -1`. The user then deduplicated `server/.env` directly, which independently makes `grep | head -1` correct too — but the dotenv-based extraction is the durable fix regardless of `.env` hygiene.
 
 **Rule:** Any test runner that reads secrets out of `.env` for injection into Newman/curl must resolve them the same way the application does (`dotenv`, last-value-wins), never `grep -E "^KEY=" | head -1` — a duplicate or commented-out line silently produces the wrong value with no error. `test/postman/run-payments-newman.sh` uses the same `grep | head -1` pattern for `ADMIN_EMAIL`/`ADMIN_PASSWORD`/Razorpay secrets and carries the same latent risk if `.env` ever regains a duplicate; not yet migrated to the dotenv-based pattern.
+
+---
+
+## 12. Cross-origin auth cookie invisible to Next.js Server Components — login redirect loop (2026-07-10)
+
+**Symptom:** After a successful login (`200` response, cookie visibly set in the browser), the app immediately redirected back to `/login`/`/signup` in a loop. Occurred first on a Vercel (frontend) + Render (backend) trial deployment (`frontend-gstnoticesupport.vercel.app` / `backend-gstnoticesupport.onrender.com`), and is the same underlying failure mode as ERROR.md #10 on the split-Hostinger-subdomain setup.
+
+**Cause:** `client/src/lib/auth/session.ts`'s `getCurrentUser()` reads the incoming request's own cookies via Next's `cookies()` and forwards them to `GET /auth/me` — this only works if the browser actually attaches the auth cookie to requests made to the **frontend's own host** (Vercel/Render case) or the whole `*.gstnoticesupport.in` zone (Hostinger split case). On Vercel+Render, the login cookie is set by the backend on `*.onrender.com`; `*.onrender.com` and `*.vercel.app` are both on the Public Suffix List and share no parent domain, so **no `COOKIE_DOMAIN` value can make the cookie visible to both** — unlike the Hostinger subdomain case (ERROR.md #10), which was fixable with `COOKIE_DOMAIN=.gstnoticesupport.in` because both hosts share the real `gstnoticesupport.in` parent.
+
+**Fix:** Not a config fix this time — the underlying split-domain topology was abandoned. See D94: frontend and backend now run in one unified Node process on one origin (`server.js` at repo root), so the cookie is host-only and same-origin for every request path, and this whole bug class cannot recur regardless of `COOKIE_DOMAIN` value.
+
+**Rule:** Before choosing any split frontend/backend hosting pair, confirm both hosts sit under a domain you control (a custom subdomain, not the platform's default `*.vercel.app`/`*.onrender.com`/`*.pages.dev` etc.) — those default hostnames are public suffixes and permanently rule out sharing an HttpOnly cookie via `Domain=`.
+
+---
+
+## 13. Local smoke-testing a background Node process — false "completed" signal from double-backgrounding (2026-07-10)
+
+**Symptom:** While verifying the new unified `server.js` locally, a background shell call of the form `node server.js > log 2>&1 &` followed by `echo "PID:$!"`, launched with the tool's own background-run option, reported "completed" almost instantly — even though the server was meant to keep listening. The redirected log file showed nothing useful at that point.
+
+**Cause:** The tracked background task was the *wrapper* script (`cd ... && node ... & ; echo PID`), not `node` itself. The wrapper finishes the instant it backgrounds `node` with its own `&` and echoes the PID — so "completed" only ever meant "the wrapper exited," not "the server exited." The child process's lifetime past that point is not guaranteed once its parent shell invocation ends.
+
+**Fix:** Pass the real long-running command directly to the tool's own background-run flag (no internal `&`, no wrapper script). Then a "completed" notification is honest — it means that exact process exited — and a still-running server simply never posts one (poll its output file or curl it instead of waiting for completion).
+
+**Rule:** Never nest shell `&` backgrounding inside a command that is itself already being launched in background mode.

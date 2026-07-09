@@ -90,8 +90,8 @@
 ### EP5 — Phase 1 Hardening & Launch
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Hostinger hPanel env vars set for frontend (staging) | Replace: Vercel/Railway tasks no longer applicable |
-| ⬚ | Hostinger hPanel env vars set for backend (staging) | Entry point: `dist/index.js` |
+| ⬚ | Hostinger hPanel — configure single unified Node.js Web App (Entry file `server.js`, Build `npm run build`, Start `npm start`) | Supersedes the earlier separate frontend/backend hPanel apps — see D94 |
+| ⬚ | Hostinger hPanel env vars — `CLIENT_URL`/`API_URL`/`NEXT_PUBLIC_API_URL=https://gstnoticesupport.in`, `COOKIE_DOMAIN` unset | Single-origin deployment, D94 |
 | ⬚ | Cloudflare DNS + SSL "Full (strict)" | Blocked: Cloudflare account pending |
 | ⬚ | Trust signals (legal name, CIN, GSTIN, address, grievance officer) | Blocked: content pending via env |
 | ~~⛔~~ | ~~Production phone number visible in header~~ | Removed — phone eliminated site-wide per 2026-06-10 changelist |
@@ -269,7 +269,8 @@
 | ⬚ | Security pass — Helmet config, CORS per env, cookie flags (`Domain=.gstnoticesupport.in`, Secure, HttpOnly, SameSite=Lax) | |
 | ⬚ | GitHub Actions CI/CD for `server/` — build + deploy on push to `staging`/`main` | |
 | ⬚ | NeonDB staging branch — mirror production schema; validate staging deploy | |
-| ⬚ | Cross-subdomain auth validation — authenticated request from frontend domain reaches API subdomain with cookie | |
+| ✅ | Unified single-process deployment — `server.js` boots Express + Next in one Node process, resolving the cross-origin auth cookie problem class entirely (no subdomain split to validate) | See D94, ERROR.md #12; local build+boot smoke test green: `/health`, `/`, `/login`, `/api/contact` (405, reaches Next not Express), `/api/v1/auth/me` (401), `/api/v1/does-not-exist` (404) |
+| ⬚ | Live login smoke test against deployed `https://gstnoticesupport.in` (unified process) | Needs Hostinger hPanel entry-file/build/start config done first (EP5) |
 | ⬚ | Live Razorpay smoke test — real ₹ payment transitions booking to `filing` end-to-end | Requires live-mode KYC approval |
 | ⬚ | Production Razorpay key starts with `rzp_live_` — deploying with test key is a critical error | |
 
