@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-07-10] — fix: unify frontend + backend into a single Node process for single-domain Hostinger deployment
+
+**Root-cause fix for the cross-origin login redirect loop. See D94, ERROR.md #12–#13.**
+
+- **New `server.js`** (repo root) boots both Next.js (custom-server API) and Express in one process, dispatching by path: `/api/v1/*` and `/health*` → Express, everything else → Next. Verified locally that `/api/contact`/`/api/callback` (Next's own Route Handlers) are correctly reached, not swallowed by Express.
+- **New `server/src/app.ts`** — `createApp()` extracted from `server/src/index.ts` (now a thin listener); `express.json()` is now scoped to `/api/v1` only (was global), so Next's own routes parse their own request bodies untouched.
+- **New root `package.json`** — declares `next`/`dotenv` as direct dependencies (required for `server.js`'s own `require()` resolution) and orchestrates `npm run build` across `client/` + `server/` + `prisma generate`.
+- **`server/.env.example`** — removed a stray duplicate `COOKIE_DOMAIN` placeholder; documented that `COOKIE_DOMAIN` should stay unset for this single-origin deployment.
+- No change was needed in `server/src/utils/cookies.ts` — `sameSite:'lax'` was already hardcoded and `COOKIE_DOMAIN` was already optional; the fix here is topology + config, not cookie code.
+- Verified via a real local production build + boot: `/health` (Express, 200), `/` and `/login` (Next, 200), `/api/contact` GET (405 — proves it reached Next, not Express), `/api/v1/auth/me` unauthenticated (401 Express JSON), `/api/v1/does-not-exist` (404 Express JSON, distinct shape from the 405 above).
+- **Remaining, needs the operator's Hostinger dashboard**: confirm hPanel's Entry-file field can point at root `server.js` with `client/`+`server/` present alongside it after deploy, set the Build/Start commands, set `CLIENT_URL`/`API_URL`/`NEXT_PUBLIC_API_URL` to `https://gstnoticesupport.in`, leave `COOKIE_DOMAIN` unset, then re-run the login smoke test live.
+
 ## [2026-07-08] — fix: resolve production deploy blockers on the split Hostinger frontend/backend repos
 
 **See D93, ERROR.md #9–#11.**
