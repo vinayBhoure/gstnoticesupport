@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-07-10] — fix: relocate client/server/test/server.js/package.json into repo/ for Hostinger's fixed root-folder constraint
+
+**See D95, follows directly from D94.**
+
+- Hostinger's Node.js Web App hosting can only point at an existing top-level subfolder as the deployment root — not the bare git repository root. `client/`, `server/`, `test/`, `server.js`, `package.json`, and `package-lock.json` all moved (via `git mv`, history preserved) into a new `repo/` folder, which is now the folder Hostinger's hPanel should be pointed at.
+- No code changes were needed in `server.js`, the root `package.json` scripts, or any of the 7 Newman/manual test scripts under `test/` — all of them already resolved paths relative to their own location rather than an assumed absolute depth, so moving them together as a unit changed nothing at runtime. Confirmed by grepping the full tree post-move and by directly resolving each affected path.
+- Fixed the one genuine break: 7 `.gitignore` patterns (`client/.next/`, `server/dist/`, etc.) were anchored to the true repo root and stopped matching after the move. Relocated them into a new `repo/.gitignore`; the root `.gitignore` now holds only universal patterns.
+- Re-verified end-to-end from the new location: full `npm install` + `npm run build` (server `tsc`, `prisma generate`, `next build` — identical route manifest), and the same production-mode smoke test used in the original fix (`/health` 200, `/`/`/login` 200, `/api/contact` GET 405, `/api/v1/auth/me` 401, `/api/v1/does-not-exist` 404) — all identical results to before the move.
+
 ## [2026-07-10] — fix: unify frontend + backend into a single Node process for single-domain Hostinger deployment
 
 **Root-cause fix for the cross-origin login redirect loop. See D94, ERROR.md #12–#13.**

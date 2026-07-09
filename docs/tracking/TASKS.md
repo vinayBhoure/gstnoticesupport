@@ -90,7 +90,7 @@
 ### EP5 — Phase 1 Hardening & Launch
 | Status | Task | Notes |
 |---|---|---|
-| ⬚ | Hostinger hPanel — configure single unified Node.js Web App (Entry file `server.js`, Build `npm run build`, Start `npm start`) | Supersedes the earlier separate frontend/backend hPanel apps — see D94 |
+| ⬚ | Hostinger hPanel — configure single unified Node.js Web App, root folder `repo/` (Entry file `server.js`, Build `npm run build`, Start `npm start`) | Supersedes the earlier separate frontend/backend hPanel apps — see D94, D95 |
 | ⬚ | Hostinger hPanel env vars — `CLIENT_URL`/`API_URL`/`NEXT_PUBLIC_API_URL=https://gstnoticesupport.in`, `COOKIE_DOMAIN` unset | Single-origin deployment, D94 |
 | ⬚ | Cloudflare DNS + SSL "Full (strict)" | Blocked: Cloudflare account pending |
 | ⬚ | Trust signals (legal name, CIN, GSTIN, address, grievance officer) | Blocked: content pending via env |
