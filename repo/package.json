@@ -4,8 +4,8 @@
   "private": true,
   "description": "Deployment entry point that boots client/ (Next.js) and server/ (Express) in one process for single-domain hosting. See server.js.",
   "scripts": {
-    "build:server": "cd server && npm install && npx prisma generate && npm run build",
-    "build:client": "cd client && npm install && npm run build",
+    "build:server": "cd server && npm install --include=dev && npx prisma generate && npm run build",
+    "build:client": "cd client && npm install --include=dev && npm run build",
     "build": "npm run build:server && npm run build:client",
     "start": "node server.js"
   },

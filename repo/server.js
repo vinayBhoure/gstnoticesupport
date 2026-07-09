@@ -14,10 +14,30 @@
 // docs) and is not built by tsc — it runs as plain CommonJS via `node
 // server.js`, requiring the already-built server/dist/app.js and client/'s
 // installed `next` package directly.
-
-require('dotenv').config({ path: require('path').join(__dirname, 'server', '.env') });
+//
+// Self-build on first boot: some Hostinger deployment presets (the generic
+// Node.js "Entry file" flow) expose no separate build-command field — they
+// only run `npm install` then execute this file directly. This app needs a
+// build step first (tsc for server/dist, next build for client/.next, prisma
+// generate), so if those artifacts are missing we run `npm run build`
+// ourselves before requiring anything that depends on them. This is a no-op
+// (near-instant fs.existsSync checks) on every restart after the first.
 
 const path = require('path');
+const fs = require('fs');
+const { execSync } = require('child_process');
+
+const serverDistEntry = path.join(__dirname, 'server', 'dist', 'app.js');
+const clientBuildId = path.join(__dirname, 'client', '.next', 'BUILD_ID');
+
+if (!fs.existsSync(serverDistEntry) || !fs.existsSync(clientBuildId)) {
+  process.stdout.write('Build artifacts missing — running `npm run build` before starting...\n');
+  execSync('npm run build', { cwd: __dirname, stdio: 'inherit' });
+  process.stdout.write('Build complete.\n');
+}
+
+require('dotenv').config({ path: path.join(__dirname, 'server', '.env') });
+
 const http = require('http');
 const next = require('next');
 const { createApp } = require('./server/dist/app');
