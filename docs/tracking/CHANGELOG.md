@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-07-11] — perf: server hot-path optimizations (trust proxy, compression, caches)
+
+**Branch: `fix/server-performance` (phase 2). Implements the P1–P5 findings of the Express/Prisma performance audit. Behavior-preserving except two user-approved short cache windows. See D95.**
+
+- **`trust proxy = 1`** (`server/src/index.ts`): the app runs behind Hostinger's reverse proxy with no Cloudflare, so `req.ip` previously resolved to the proxy's internal address — meaning every `express-rate-limit` limiter bucketed *all* users under one IP and the D65 login-alert email logged the wrong IP. Set to exactly one trusted hop (not `true`, which is spoofable).
+- **Response compression** (`compression()` middleware): with no CDN in front, the origin is the only place API payloads get gzipped on the way to the browser.
+- **jti blacklist negative cache** (`server/src/lib/jtiCache.ts`): `authenticate` hit NeonDB on every authed request to check the (near-empty) token blacklist. Now a "not blacklisted" verdict is cached for 5s, removing that round-trip for active sessions. Only negative results are cached, and `blacklistAccessJti()` invalidates the entry so same-process logout / "This wasn't me" is immediate — the ≤5s window only applies across separate processes, and Hostinger runs one.
+- **Admin stats cache** (`adminService.getStats`): the three dashboard aggregate queries are cached for 30s. Snapshots are computed together so they stay internally consistent (`Σ byStatus == totalBookings`); the D79 Admin Newman suite is unaffected.
+- **Neon pooling documented** (`server/.env.example`): require the `-pooler` runtime host and document `connection_limit`/`pool_timeout` so the persistent Hostinger process doesn't exhaust Neon's connection ceiling. Local `.env` updated; the deployed Hostinger env still needs the same params applied + a restart (tracked in TASKS.md).
+- Validated with `npm run typecheck` (clean) and a manual auth smoke test (login → authed request → logout → immediate 401). No changes to payment idempotency, the state machine, webhook raw-body handling, or middleware-order semantics.
+
 ## [2026-07-11] — perf: shared scroll-reveal observers + bundle-size CI guardrail
 
 **Branch: `fix/client-performance-audit` (phase 2). Closes audit finding 7 and adds the long-term "CI budget check" recommendation, adapted to this repo's actual toolchain.**

@@ -289,6 +289,18 @@
 | ⬚ | Cloudflare edge cache review — confirm `Accept` header forwarding for AVIF negotiation + edge respects the new origin `Cache-Control` | ops/config, not code |
 | ⬚ | Move large static media (hero video) off the Hostinger Node origin to a CDN-fronted object store | long-term, needs an infra decision |
 
+### Post-Launch — Server Performance Optimization (2026-07-11, `fix/server-performance`)
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | `trust proxy = 1` so `req.ip` is the real client behind Hostinger's proxy | fixes express-rate-limit bucketing all users under the proxy IP + D65 login-alert IP (D95) |
+| ✅ | `compression()` middleware — gzip responses at the origin | no CDN in front to compress (D95) |
+| ✅ | Short-TTL (5s) negative cache for jti blacklist lookups in `authenticate` | removes ~1 NeonDB round-trip per authed request; logout invalidates same-process immediately (`lib/jtiCache.ts`) |
+| ✅ | Cache admin dashboard stats aggregates for 30s (`adminService.getStats`) | snapshots stay internally consistent; D79 Newman suite unaffected |
+| ✅ | Document Neon pooled endpoint + `connection_limit`/`pool_timeout` in `.env.example` | local `.env` updated; verified host already on `-pooler` (D95) |
+| ⬚ | Apply `connection_limit=5&pool_timeout=10` to the Hostinger backend env + restart | ops/config — mirror the local `.env` change on the deployed app |
+| ⬚ | Verify Hostinger's proxy actually forwards `X-Forwarded-For` (confirm `req.ip` ≠ internal IP) | if empty, needs a Hostinger-side proxy config before `trust proxy` helps |
+| ⬚ | Stand up Cloudflare (free tier) in front of both domains, then revisit `trust proxy` (→ 2 / CF IP list) | biggest remaining infra lever; recorded in D95 |
+
 ---
 
 ## Blocked Items (waiting on external input)
