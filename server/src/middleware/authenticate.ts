@@ -2,6 +2,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { ApiError } from '../utils/ApiError';
 import { verifyAccessToken } from '../lib/jwt';
 import { tokenBlacklistRepository } from '../repositories/token-blacklist.repository';
+import { isKnownClean, markClean } from '../lib/jtiCache';
 
 export const authenticate = asyncHandler(async (req, _res, next) => {
   const token = req.cookies?.access_token as unknown;
@@ -14,8 +15,12 @@ export const authenticate = asyncHandler(async (req, _res, next) => {
     throw new ApiError(401, 'UNAUTHORIZED', 'Invalid or expired session');
   }
 
-  if (await tokenBlacklistRepository.existsByJti(payload.jti)) {
-    throw new ApiError(401, 'UNAUTHORIZED', 'Session has been invalidated');
+  // Skip the DB round-trip when this JTI was confirmed clean within the cache window.
+  if (!isKnownClean(payload.jti)) {
+    if (await tokenBlacklistRepository.existsByJti(payload.jti)) {
+      throw new ApiError(401, 'UNAUTHORIZED', 'Session has been invalidated');
+    }
+    markClean(payload.jti);
   }
 
   req.user = {
