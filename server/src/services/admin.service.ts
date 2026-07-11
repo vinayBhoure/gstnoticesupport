@@ -89,6 +89,13 @@ function emptyServiceCounts(): Record<ServiceType, number> {
   );
 }
 
+// The admin overview does not need second-accurate counts. Cache the three aggregate
+// queries for a short window so repeated dashboard loads don't re-run them every time.
+// Cached snapshots stay internally consistent (Σ byStatus == totalBookings) since all
+// three are recomputed together.
+const STATS_TTL_MS = 30_000;
+let statsCache: { value: AdminStatsDTO; expiresAt: number } | null = null;
+
 export const adminService = {
   async listBookings(query: AdminBookingListQuery): Promise<AdminBookingListResult> {
     const { data, total } = await bookingRepository.findAllForAdmin({
@@ -390,6 +397,10 @@ export const adminService = {
   },
 
   async getStats(): Promise<AdminStatsDTO> {
+    if (statsCache && statsCache.expiresAt > Date.now()) {
+      return statsCache.value;
+    }
+
     const [statusRows, serviceRows, totalRevenuePaise] = await Promise.all([
       bookingRepository.countGroupedByStatus(),
       bookingRepository.countGroupedByServiceType(),
@@ -404,6 +415,8 @@ export const adminService = {
 
     const totalBookings = statusRows.reduce((sum, row) => sum + row.count, 0);
 
-    return { totalBookings, byStatus, byServiceType, totalRevenuePaise };
+    const value: AdminStatsDTO = { totalBookings, byStatus, byServiceType, totalRevenuePaise };
+    statsCache = { value, expiresAt: Date.now() + STATS_TTL_MS };
+    return value;
   },
 };
