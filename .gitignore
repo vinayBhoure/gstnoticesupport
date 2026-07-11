@@ -104,3 +104,11 @@ temp/
 .playwright-mcp/
 GRAPHIFY_CLAUDE_CODE.md
 audit.md
+
+# ────────────────────────────────────────────────────────────────
+# graphify (graph.json / GRAPH_REPORT.md / graph.html are committed —
+# manifest.json, cost.json, and cache/ are local re-derivable state)
+# ────────────────────────────────────────────────────────────────
+graphify-out/manifest.json
+graphify-out/cost.json
+graphify-out/cache/
