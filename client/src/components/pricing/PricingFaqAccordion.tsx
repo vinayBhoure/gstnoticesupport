@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import styles from '@/app/(public)/pricing/pricing.module.css';
 import { PRICING_FAQS as faqs } from '@/data/pricing-faq';
@@ -13,12 +13,22 @@ export function PricingFaqAccordion() {
     setOpenIndex(prev => (prev === index ? null : index));
   }
 
+  // Reading ref.current during render is unsafe under concurrent rendering
+  // (react-hooks/refs) — the measured scrollHeight is applied imperatively
+  // here instead, after commit but before paint, so the max-height
+  // transition still animates with no visible flash.
+  useLayoutEffect(() => {
+    faqs.forEach((faq, i) => {
+      const el = bodyRefs.current[i];
+      if (!el) return;
+      el.style.maxHeight = openIndex === i ? `${el.scrollHeight}px` : '0';
+    });
+  }, [openIndex]);
+
   return (
     <div className={styles.faqList} role="list">
       {faqs.map((faq, i) => {
         const isOpen = openIndex === i;
-        const bodyEl = bodyRefs.current[i];
-        const maxHeight = isOpen && bodyEl ? `${bodyEl.scrollHeight}px` : '0';
 
         return (
           <div key={faq.id} className={styles.faqItem} role="listitem">
@@ -35,7 +45,6 @@ export function PricingFaqAccordion() {
               className={styles.faqBody}
               id={faq.id}
               role="region"
-              style={{ maxHeight }}
               ref={el => { bodyRefs.current[i] = el; }}
             >
               <div className={styles.faqBodyInner}>{faq.answer}</div>

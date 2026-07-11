@@ -73,6 +73,8 @@ export default function HomePage() {
                   muted
                   loop
                   playsInline
+                  poster="/hero-poster.jpg"
+                  preload="metadata"
                 >
                   <source src="/hero-section.mp4" type="video/mp4" />
                 </video>

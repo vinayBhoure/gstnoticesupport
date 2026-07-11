@@ -4,6 +4,7 @@ import { ScrollShell } from '@/components/layout/ScrollShell';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { organizationSchema } from '@/lib/structured-data';
 import { WHATSAPP_LINKS } from '@/data/common';
+import { CalendlyListenerLoader } from '@/components/analytics/CalendlyListenerLoader';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <main id="main">{children}</main>
       <Footer />
       <ScrollShell whatsappHref={WHATSAPP_LINKS.generalQuery} />
+      <CalendlyListenerLoader />
     </>
   );
 }

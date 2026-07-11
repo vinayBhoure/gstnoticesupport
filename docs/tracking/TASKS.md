@@ -273,6 +273,22 @@
 | ⬚ | Live Razorpay smoke test — real ₹ payment transitions booking to `filing` end-to-end | Requires live-mode KYC approval |
 | ⬚ | Production Razorpay key starts with `rzp_live_` — deploying with test key is a critical error | |
 
+### Post-Launch — Client Performance Audit (2026-07-11, `fix/client-performance-audit`)
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | Cache `/public` assets immutably + enable AVIF + longer image-optimizer TTL | `next.config.ts headers()`; was `max-age=0` on video/logo vs. 1yr-immutable on `/_next/static` |
+| ✅ | Hero video compressed 11.18 MB → 1.65 MB (1080p → 720p) + poster frame | replaces unposterred autoplay (blank box on load) |
+| ✅ | Logo source shrunk 908 KB → 51 KB (1254px → 256px) | delivered bytes were already optimizer-correct; this was a source-weight/decode-CPU/repo-size fix |
+| ✅ | react-calendly code-split out of the root layout, scoped to `(public)` routes only | was shipping ~16 KB gzip on 100% of routes incl. admin/dashboard/404 |
+| ✅ | Dashboard bookings fetch now starts concurrently with the auth check | was serial; only needs the cookie header, not the resolved user |
+| ✅ | Shared IntersectionObservers in `useInView` (was 1 observer per animated element) | ~28 on homepage alone; public API unchanged, zero call-site changes |
+| ✅ | Build-time bundle-size guardrail (`postbuild`) — fails the build on oversized `/public` assets or JS chunks | client-only substitute for the "GitHub Actions CI/CD" line above — this repo has no `.github/workflows` at all; runs on every `next build` including the Hostinger deploy path |
+| ✅ | Resolved 11 pre-existing lint errors surfaced during the audit (unescaped entities, unsafe ref reads during render, setState-in-effect) | none introduced by the audit work; fixed since the branch already touched 2 of the 5 files |
+| ⬚ | Logged-in dashboard render path QA (bookings-fetch parallelization) | needs a live `server/` API; `server/.env` not present in the dev sandbox this was built in |
+| ⬚ | Manual scroll-through QA of reveal animations (shared-observer refactor) | `/`, `/pricing`, one service page — no browser automation available in the dev sandbox |
+| ⬚ | Cloudflare edge cache review — confirm `Accept` header forwarding for AVIF negotiation + edge respects the new origin `Cache-Control` | ops/config, not code |
+| ⬚ | Move large static media (hero video) off the Hostinger Node origin to a CDN-fronted object store | long-term, needs an infra decision |
+
 ---
 
 ## Blocked Items (waiting on external input)
