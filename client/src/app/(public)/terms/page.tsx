@@ -34,7 +34,7 @@ export default function TermsPage() {
             <p>
               By accessing <strong>gstnoticesupport.in</strong> or using any service offered by
               {ORG.legalName}, you agree to be bound
-              by these Terms &amp; Conditions (<strong>"Terms"</strong>) and our{' '}
+              by these Terms &amp; Conditions (<strong>&quot;Terms&quot;</strong>) and our{' '}
               <Link href="/privacy">Privacy Policy</Link>. If you do not agree to these Terms, you
               must not use our website or services.
             </p>
