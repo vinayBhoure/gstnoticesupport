@@ -1,16 +1,16 @@
-# Graph Report - gstnoticesupport  (2026-07-11)
+# Graph Report - gstnoticesupport  (2026-07-12)
 
 ## Corpus Check
-- 284 files · ~411,993 words
+- 284 files · ~375,374 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2798 nodes · 4275 edges · 215 communities (195 shown, 20 thin omitted)
+- 2819 nodes · 4299 edges · 216 communities (196 shown, 20 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 161 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ad378789`
+- Built from commit: `f9b7f577`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -128,10 +128,10 @@
 - [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
+- [[_COMMUNITY_Community 113|Community 113]]
 - [[_COMMUNITY_Community 114|Community 114]]
 - [[_COMMUNITY_Community 115|Community 115]]
 - [[_COMMUNITY_Community 116|Community 116]]
-- [[_COMMUNITY_Community 117|Community 117]]
 - [[_COMMUNITY_Community 118|Community 118]]
 - [[_COMMUNITY_Community 119|Community 119]]
 - [[_COMMUNITY_Community 120|Community 120]]
@@ -203,12 +203,12 @@
 - [[_COMMUNITY_Community 186|Community 186]]
 - [[_COMMUNITY_Community 187|Community 187]]
 - [[_COMMUNITY_Community 188|Community 188]]
-- [[_COMMUNITY_Community 199|Community 199]]
+- [[_COMMUNITY_Community 189|Community 189]]
 - [[_COMMUNITY_Community 200|Community 200]]
 - [[_COMMUNITY_Community 201|Community 201]]
 - [[_COMMUNITY_Community 202|Community 202]]
 - [[_COMMUNITY_Community 203|Community 203]]
-- [[_COMMUNITY_Community 207|Community 207]]
+- [[_COMMUNITY_Community 204|Community 204]]
 - [[_COMMUNITY_Community 208|Community 208]]
 - [[_COMMUNITY_Community 209|Community 209]]
 - [[_COMMUNITY_Community 210|Community 210]]
@@ -216,9 +216,10 @@
 - [[_COMMUNITY_Community 212|Community 212]]
 - [[_COMMUNITY_Community 213|Community 213]]
 - [[_COMMUNITY_Community 214|Community 214]]
+- [[_COMMUNITY_Community 215|Community 215]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Changelog — gstnoticesupport.in` - 35 edges
+1. `Changelog — gstnoticesupport.in` - 37 edges
 2. `GST Notice Support — Project Knowledge Base` - 27 edges
 3. `components.md — Shared Component Prompts` - 27 edges
 4. `components.md — Shared Component Prompts` - 27 edges
@@ -238,8 +239,8 @@
   docs/ui-ux/components.md → test/postman/ADMIN_TEST_PLAN.md
 - `OTP Input Component` --semantically_similar_to--> `test/README.md — Phase 2 Auth API Test Suite`  [INFERRED] [semantically similar]
   docs/ui-ux/components.md → test/README.md
-- `Tech Stack Overview (README)` --conceptually_related_to--> `High-Level Design (HLD)`  [INFERRED]
-  README.md → docs/architecture/gstnoticesupport_HLD.md
+- `D80 - EP11 UI-Parity Deviations` --conceptually_related_to--> `Component Reuse Matrix`  [INFERRED]
+  docs/tracking/decisions.md → audit.md
 
 ## Hyperedges (group relationships)
 - **Three-Layer Payment Reliability: Spec to Implementation** — hld_three_layer_reliability, kb2_three_layer_design, decisions_D76_idempotency_core, apicontract_webhook_endpoint, lld_payment_records_table [INFERRED 0.85]
@@ -255,115 +256,115 @@
 - **design.md duplicate family across uploads** — design_doc, design50a0276d_doc, designuploads_doc [INFERRED 0.90]
 - **Admin API test coverage workflow (automated + deferred manual Razorpay path)** — admintestplan_doc, postmanreadme_doc, checkouthtml_doc, decision_d77 [INFERRED 0.80]
 
-## Communities (215 total, 20 thin omitted)
+## Communities (216 total, 20 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.05
-Nodes (56): AdminDocumentList(), AdminDocumentListProps, AdminNoteEditor(), AdminNoteEditorProps, DeleteUserCard(), DeleteUserCardProps, DraftCard(), DraftCardProps (+48 more)
+Cohesion: 0.07
+Nodes (41): AdminBookingDetailDTO, AdminBookingListItemDTO, AdminStatsDTO, AdminUserDetailDTO, AdminUserListItemDTO, AdminUserSummaryDTO, BookingWithAdminRelations, BookingWithUser (+33 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.06
-Nodes (52): AdminBookingDetailDTO, AdminBookingListItemDTO, AdminStatsDTO, AdminUserDetailDTO, AdminUserListItemDTO, AdminUserSummaryDTO, BookingWithAdminRelations, BookingWithUser (+44 more)
+Cohesion: 0.05
+Nodes (40): Envelope, POST(), ContactForm(), Envelope, POST(), checkRateLimit(), RateLimitResult, store (+32 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.06
-Nodes (47): authController, AccessTokenPayload, hashToken(), RefreshTokenPayload, verifyRefreshToken(), adminDraftUploadRateLimiter, forgotPasswordRateLimiter, loginRateLimiter (+39 more)
+Cohesion: 0.07
+Nodes (43): authController, adminDraftUploadRateLimiter, documentUploadRateLimiter, draftUrlRateLimiter, forgotPasswordRateLimiter, loginRateLimiter, otpResendRateLimiter, otpVerifyRateLimiter (+35 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.05
-Nodes (38): BookingControls(), PAYMENT_OPTIONS, STATUS_OPTIONS, pageHref(), Pagination(), PaginationProps, RowLink(), RowLinkProps (+30 more)
-
-### Community 4 - "Community 4"
 Cohesion: 0.04
 Nodes (48): `200 OK`, `200 OK`, `200 OK`, `200 OK`, `200 OK`, `200 OK`, `200 OK`, `200 OK` (+40 more)
 
-### Community 5 - "Community 5"
+### Community 4 - "Community 4"
 Cohesion: 0.08
-Nodes (36): HOME_FAQ_UI, HOME_FAQS, homeDisclaimer, homeFaqHead, homeFinalCta, homeHero, homeMeta, homeNotices (+28 more)
+Nodes (37): HOME_FAQ_UI, HOME_FAQS, homeDisclaimer, homeFaqHead, homeFinalCta, homeHero, homeMeta, homeNotices (+29 more)
 
-### Community 6 - "Community 6"
-Cohesion: 0.1
-Nodes (28): Asmt10Page(), metadata, CommissionerAppealPage(), metadata, WHATSAPP_LINKS, ServicePageContent, GstatAppealPage(), metadata (+20 more)
-
-### Community 7 - "Community 7"
+### Community 5 - "Community 5"
 Cohesion: 0.05
 Nodes (43): 1. Add Timeline Expectations, 2. Add Document Checklist Format, 3. Introduce Status Tracking, 4. Add Secure Document Upload System, 5. Improve Terminology Consistency, Additional Notes, Business Perspective Analysis, Client Dependency Points (+35 more)
 
-### Community 8 - "Community 8"
-Cohesion: 0.08
-Nodes (27): webhookController, emailService, resend, SendEmailInput, SendEmailResult, envSchema, result, logger (+19 more)
-
-### Community 9 - "Community 9"
-Cohesion: 0.21
-Nodes (40): App Shell (Sidebar) Pattern, Auth Card Shell Pattern, Booking Status State Machine, Design Tokens (css/tokens.css), FAQ Accordion Pattern, Marketing Footer Component, GNS Client Session State (js/app-state.js), Mobile Bottom Tab Bar (+32 more)
-
-### Community 10 - "Community 10"
+### Community 6 - "Community 6"
 Cohesion: 0.05
 Nodes (40): ADMIN_TEST_PLAN.md — EP13 Admin Surface API Test Plan, checkout.html — Razorpay TEST checkout harness, GET /admin/bookings/:id, GET /admin/bookings, Admin.postman_collection.json, POST /admin/bookings/:id/draft-confirm, POST /admin/bookings/:id/draft-upload-url, admin-local.postman_environment.json (+32 more)
 
+### Community 7 - "Community 7"
+Cohesion: 0.21
+Nodes (40): App Shell (Sidebar) Pattern, Auth Card Shell Pattern, Booking Status State Machine, Design Tokens (css/tokens.css), FAQ Accordion Pattern, Marketing Footer Component, GNS Client Session State (js/app-state.js), Mobile Bottom Tab Bar (+32 more)
+
+### Community 8 - "Community 8"
+Cohesion: 0.07
+Nodes (31): apiClient, BASE_URL, requestEnvelope(), RequestOptions, tryRefresh(), paymentApi, AdminStatsDTO, AdminUserListItemDTO (+23 more)
+
+### Community 9 - "Community 9"
+Cohesion: 0.05
+Nodes (37): [2026-06-06] — EP1: Project scaffold, design system, and server foundation, [2026-06-06] — EP2: All public marketing pages shipped (SSG, 10 routes), [2026-06-06] — fix: FAQ accordion answers now expand correctly, [2026-06-07] — EP3: Contact form (Resend), Calendly popup, toast, WhatsApp, [2026-06-08] — EP4: SEO plumbing (metadata, OG image, sitemap, robots, JSON-LD), [2026-06-08] — refactor: FAQ page accordion (content-based height, a11y), [2026-06-09] — docs: Phase 2 component specs; repo hygiene, [2026-06-10] — feat: WhatsApp-first booking, hero video, nav cleanup, site-wide phone removal (+29 more)
+
+### Community 10 - "Community 10"
+Cohesion: 0.07
+Nodes (32): DeleteUserCard(), DeleteUserCardProps, AdminUserListParams, BookingResponse, UserResponse, AdminUserDetailDTO, AdminUserDetailPage(), formatMobile() (+24 more)
+
 ### Community 11 - "Community 11"
-Cohesion: 0.12
-Nodes (29): AdminOverviewPage(), formatInr(), metadata, STATUS_ORDER, BookingStatus, BookingSummaryDTO, BookingCard(), BookingCardProps (+21 more)
+Cohesion: 0.08
+Nodes (25): BookingControls(), PAYMENT_OPTIONS, STATUS_OPTIONS, AdminOverviewPage(), formatInr(), metadata, STATUS_ORDER, pageHref() (+17 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.07
-Nodes (27): bookingApi, BookingDetailDTO, ServiceType, PRE_DEPOSIT_SERVICES, PreDepositNotice(), PreDepositNoticeProps, requiresPreDeposit(), SegmentedOption (+19 more)
+Cohesion: 0.12
+Nodes (23): Asmt10Page(), metadata, CommissionerAppealPage(), metadata, WHATSAPP_LINKS, ServicePageContent, GstatAppealPage(), metadata (+15 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.08
-Nodes (28): userController, InitiateOrderDTO, PaymentHistoryItemDTO, PaymentHistoryRow, toPaymentHistoryItemDTO(), VerifyOutcome, VerifyResultDTO, toUserDTO() (+20 more)
+Cohesion: 0.1
+Nodes (25): bookingController, documentController, healthController, requireRole(), router, healthRouter, BookingIdParam, bookingIdParamSchema (+17 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.06
-Nodes (35): [2026-06-06] — EP1: Project scaffold, design system, and server foundation, [2026-06-06] — EP2: All public marketing pages shipped (SSG, 10 routes), [2026-06-06] — fix: FAQ accordion answers now expand correctly, [2026-06-07] — EP3: Contact form (Resend), Calendly popup, toast, WhatsApp, [2026-06-08] — EP4: SEO plumbing (metadata, OG image, sitemap, robots, JSON-LD), [2026-06-08] — refactor: FAQ page accordion (content-based height, a11y), [2026-06-09] — docs: Phase 2 component specs; repo hygiene, [2026-06-10] — feat: WhatsApp-first booking, hero video, nav cleanup, site-wide phone removal (+27 more)
+Cohesion: 0.09
+Nodes (23): CalendlyCallbackListener, CalendlyListenerLoader(), metadata, FOOTER_COLUMNS, FOOTER_LABELS, FOOTER_POLICIES, NAV_LABELS, NAV_LINKS (+15 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.08
-Nodes (15): metadata, size, aboutCompany, aboutCta, aboutHero, aboutMeta, aboutMission, aboutWhy (+7 more)
+Cohesion: 0.1
+Nodes (24): bookingApi, BookingDetailDTO, BookingDetailWithRelationsDTO, BASE_URL, getCurrentUser, requireUser(), DashboardShell(), DashboardShellProps (+16 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.09
-Nodes (24): apiClient, PaginatedResult, PaymentHistoryItemDTO, userApi, UserResponse, metadata, PaymentsPage(), SearchParams (+16 more)
+Nodes (23): AdminDocumentList(), AdminDocumentListProps, AdminNoteEditor(), AdminNoteEditorProps, FinalDraftCard(), FinalDraftCardProps, UploadState, PAY_CONFIG (+15 more)
 
 ### Community 17 - "Community 17"
+Cohesion: 0.09
+Nodes (24): PaginatedResult, PaymentHistoryItemDTO, userApi, UserResponse, metadata, PaymentsPage(), SearchParams, AccountSettingsForm() (+16 more)
+
+### Community 18 - "Community 18"
+Cohesion: 0.08
+Nodes (23): ServiceType, PRE_DEPOSIT_SERVICES, PreDepositNotice(), PreDepositNoticeProps, requiresPreDeposit(), SegmentedOption, SegmentedToggle(), SegmentedToggleProps (+15 more)
+
+### Community 19 - "Community 19"
 Cohesion: 0.06
 Nodes (31): 10. Future Work, 11. Context Handoff, 1. Project Summary, 2. Core Requirements, 3. Key Decisions, 4. System Design, 5. Data Model, 6. Rate Limit Matrix (+23 more)
 
-### Community 18 - "Community 18"
+### Community 20 - "Community 20"
 Cohesion: 0.1
-Nodes (32): Component Reuse Matrix, Phase 2 Frontend Audit, Phase 2 Frontend Gap Analysis, components-07b73c2a.md (uploads revision), components-25231725.md (uploads revision), components-84c03f26.md (uploads revision), Admin Data Table Component, Admin Stat Card (+24 more)
+Nodes (32): Component Reuse Matrix, components-07b73c2a.md (uploads revision), components-25231725.md (uploads revision), components-84c03f26.md (uploads revision), Admin Data Table Component, Admin Stat Card, App Shell Component, Auth Card Shell Component (+24 more)
 
-### Community 19 - "Community 19"
+### Community 21 - "Community 21"
 Cohesion: 0.2
 Nodes (30): accountCreatedAdmin(), accountDeletedAdmin(), accountDeletedUser(), bookingCancelledAdmin(), bookingCancelledUser(), bookingCreatedAdmin(), bookingCreatedUser(), button() (+22 more)
 
-### Community 20 - "Community 20"
+### Community 22 - "Community 22"
+Cohesion: 0.1
+Nodes (24): ExtendedPrismaClient, globalForPrisma, buildDocumentKey(), buildDraftKey(), buildFinalDraftKey(), draftUrlExpiresAt(), formatDateStamp(), getDownloadUrl() (+16 more)
+
+### Community 23 - "Community 23"
 Cohesion: 0.06
 Nodes (30): Auth Endpoints Tested, CI/CD Integration, code:bash (# From project root), code:block2 (✅ 25/25 PASSED (100%)), code:bash (# All tests (default)), code:js (// New test), code:bash (#!/bin/bash), "ECONNREFUSED: Connection refused" (+22 more)
 
-### Community 21 - "Community 21"
-Cohesion: 0.11
-Nodes (23): bookingController, documentController, documentUploadRateLimiter, draftUrlRateLimiter, IssueLike, validateBody(), validateParams(), router (+15 more)
-
-### Community 22 - "Community 22"
-Cohesion: 0.09
-Nodes (23): documentApi, uploadToS3WithProgress(), BookingDetailWithRelationsDTO, DraftUrlResponse, UploadUrlResponse, DocumentUpload(), DocumentUploadProps, fmtSize() (+15 more)
-
-### Community 23 - "Community 23"
-Cohesion: 0.1
-Nodes (21): paymentApi, InitiateOrderDTO, VerifyResultDTO, PayToUnlock(), PayToUnlockProps, loadRazorpayScript(), RazorpayCheckoutInstance, RazorpayCheckoutOptions (+13 more)
-
 ### Community 24 - "Community 24"
+Cohesion: 0.14
+Nodes (22): DraftCard(), DraftCardProps, UploadState, BookingStatus, BookingSummaryDTO, BookingCard(), BookingCardProps, bookingRef() (+14 more)
+
+### Community 25 - "Community 25"
 Cohesion: 0.12
 Nodes (26): adminController, router, ADMIN_TRANSITION_STATUSES, AdminBookingIdParams, adminBookingIdParamsSchema, AdminBookingListQuery, adminBookingListQuerySchema, AdminDocumentParams (+18 more)
 
-### Community 25 - "Community 25"
-Cohesion: 0.07
-Nodes (27): 1. User Flow, 2. Admin Flow, 3. Shared State Machine — Full Service Lifecycle, 4. Notification Matrix (Email via Resend), 5. Key Design Principles, Account Deletion Rules, Admin Cancellation Rules, Admin Flow — State Machine (text) (+19 more)
-
 ### Community 26 - "Community 26"
 Cohesion: 0.07
-Nodes (27): Admin Data Table, Admin Stat Card, App Shell (authenticated — sidebar), Auth Card Shell, Booking Summary Card (authenticated), Buttons, components.md — Shared Component Prompts, Confirmation Dialog (destructive) (+19 more)
+Nodes (27): 1. User Flow, 2. Admin Flow, 3. Shared State Machine — Full Service Lifecycle, 4. Notification Matrix (Email via Resend), 5. Key Design Principles, Account Deletion Rules, Admin Cancellation Rules, Admin Flow — State Machine (text) (+19 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.07
@@ -374,376 +375,376 @@ Cohesion: 0.07
 Nodes (27): Admin Data Table, Admin Stat Card, App Shell (authenticated — sidebar), Auth Card Shell, Booking Summary Card (authenticated), Buttons, components.md — Shared Component Prompts, Confirmation Dialog (destructive) (+19 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.12
-Nodes (26): Accessibility Constraints — 48px tap targets, WCAG AA contrast, visible focus rings, prefers-reduced-motion, App shell (authenticated screens) — persistent left sidebar desktop, slide-in drawer mobile, admin is desktop-primary, Persistent contact affordances — phone always visible, WhatsApp float after scroll, sticky mobile bottom bar, Design Principles, priority order — trust before conversion, one decision per screen, restraint, specificity, readability, Iconography — Lucide outline icons, 1.5px stroke, supplement labels never replace, Interaction Rules — explicit states, one primary button rule, whole-card clickable, single-item accordions, Layout Behavior — mobile-first responsive, Tailwind breakpoints, stepper for multi-step flows, design.md — gstnoticesupport Design System (+18 more)
+Cohesion: 0.07
+Nodes (27): Admin Data Table, Admin Stat Card, App Shell (authenticated — sidebar), Auth Card Shell, Booking Summary Card (authenticated), Buttons, components.md — Shared Component Prompts, Confirmation Dialog (destructive) (+19 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.14
-Nodes (15): healthController, paymentController, verifyAccessToken(), authenticate, requireRole(), healthRouter, router, InitiateParams (+7 more)
+Cohesion: 0.12
+Nodes (15): webhookController, emailService, resend, SendEmailInput, SendEmailResult, envSchema, result, logger (+7 more)
 
 ### Community 31 - "Community 31"
+Cohesion: 0.12
+Nodes (20): InitiateOrderDTO, PaymentHistoryItemDTO, PaymentHistoryRow, toPaymentHistoryItemDTO(), VerifyOutcome, VerifyResultDTO, createOrder(), CreateOrderParams (+12 more)
+
+### Community 32 - "Community 32"
+Cohesion: 0.11
+Nodes (20): documentApi, uploadToS3WithProgress(), DraftUrlResponse, UploadUrlResponse, DocumentUpload(), DocumentUploadProps, fmtSize(), SessionUpload (+12 more)
+
+### Community 33 - "Community 33"
+Cohesion: 0.14
+Nodes (18): userController, toUserDTO(), UserDTO, authenticate, AdminUserFilter, userRepository, router, DeleteAccountInput (+10 more)
+
+### Community 34 - "Community 34"
+Cohesion: 0.08
+Nodes (23): Blocked Items (waiting on external input), EP10 — Auth Frontend & Route Protection (frontend, backend_plan Phase 2), EP11 — User Dashboard & Booking Flow Frontend (frontend, backend_plan Phases 3 + 4), EP12 — Payment Integration (backend_plan Phase 5), EP13 — Admin Dashboard (backend_plan Phase 6), EP14 — Email Notifications (backend_plan Phase 7), EP15 — Phase 2 Hardening & Launch (backend_plan Phase 8), EP1 — Project Scaffold, Tooling & Design System (+15 more)
+
+### Community 35 - "Community 35"
 Cohesion: 0.08
 Nodes (23): App Shell (authenticated — sidebar), Auth Card Shell, Booking Summary Card (authenticated), Buttons, components.md — Shared Component Prompts, Document Upload (highest-stakes component), Expert Profile Card, Final CTA Section (public) (+15 more)
 
-### Community 32 - "Community 32"
+### Community 36 - "Community 36"
 Cohesion: 0.08
 Nodes (23): code:block1 (server/src/schemas/auth.schema.ts), code:block2 (Branch: testing), Commit Info, Detailed Results Table, Error 1: Invalid UUID Format Not Validated ✅ FIXED, Error 2: No Check if JTI Exists ✅ FIXED, Errors Found & Fixed, Executive Summary (+15 more)
 
-### Community 33 - "Community 33"
-Cohesion: 0.12
-Nodes (24): Booking Step 1 — Service Selection page, Case Details form — name, email, mobile (+91), GSTIN (mono), organisation, Filing For segmented toggle — Self vs A Client, with conditional client-name field, Booking Step 2 — Personal Info page, Privacy note — cites design.md §6 trust signal near sensitive data entry, Booking Summary panel — appears after >=1 upload success, Document Upload Component — drag/drop zone, desktop, Booking Step 3 — Document Upload page (+16 more)
-
-### Community 34 - "Community 34"
-Cohesion: 0.14
-Nodes (16): UserObject, BASE_URL, getCurrentUser, requireUser(), DashboardShell(), DashboardShellProps, initials(), DashboardLayout() (+8 more)
-
-### Community 35 - "Community 35"
-Cohesion: 0.13
-Nodes (16): metadata, FOOTER_COLUMNS, FOOTER_LABELS, FOOTER_POLICIES, NAV_LABELS, NAV_LINKS, NAV_SERVICE_ITEMS, NOT_FOUND (+8 more)
-
-### Community 36 - "Community 36"
-Cohesion: 0.09
-Nodes (22): Blocked Items (waiting on external input), EP10 — Auth Frontend & Route Protection (frontend, backend_plan Phase 2), EP11 — User Dashboard & Booking Flow Frontend (frontend, backend_plan Phases 3 + 4), EP12 — Payment Integration (backend_plan Phase 5), EP13 — Admin Dashboard (backend_plan Phase 6), EP14 — Email Notifications (backend_plan Phase 7), EP15 — Phase 2 Hardening & Launch (backend_plan Phase 8), EP1 — Project Scaffold, Tooling & Design System (+14 more)
-
 ### Community 37 - "Community 37"
+Cohesion: 0.13
+Nodes (15): metadata, metadata, aboutCompany, aboutCta, aboutHero, aboutMeta, aboutMission, aboutWhy (+7 more)
+
+### Community 38 - "Community 38"
+Cohesion: 0.11
+Nodes (23): GET /bookings/:id/draft-url, POST /bookings/:id/upload-url, Locked Backend Invariants, 2026-06-16 EP2 Auth & Identity, 2026-06-23 EP9 Document Handling, 2026-07-03 EP12 Payment UI, 2026-07-03 EP13 Admin Frontend, 2026-07-04 Final Draft Upload Feature (+15 more)
+
+### Community 39 - "Community 39"
+Cohesion: 0.12
+Nodes (22): Missing Confirm-Draft Endpoint (Contract Gap), complete-profile Field-Set Conflict, Confirm Draft - Hard Backend Gap (OQ-2), Phase 2 Frontend Audit, Phase 2 Frontend Gap Analysis, 2026-06-17 EP3 Booking Lifecycle, D63 - Hostinger Hosting Decision, D64 - Payment History Pagination + Receipt Link (+14 more)
+
+### Community 40 - "Community 40"
 Cohesion: 0.13
 Nodes (22): Admin Note field, Draft upload panel — dropzone/uploading/uploaded states for admin-prepared draft PDF, Admin Booking Detail page, Mark as Paid action — fallback for off-portal payments; verifies Razorpay Payment ID before any status change, Razorpay (payment verification reference in Mark as Paid), Status Actions panel — status-gated admin action buttons (Set to In Review, Mark as Paid, Mark Complete), Uploaded Documents section, Controls bar — filter/search for bookings table (+14 more)
 
-### Community 38 - "Community 38"
-Cohesion: 0.16
-Nodes (13): FAQ_GROUPS, FAQ_SEARCH_UI, faqCta, faqHero, faqMeta, faqSchema, faqStillQuestions, FaqGroup (+5 more)
+### Community 41 - "Community 41"
+Cohesion: 0.11
+Nodes (6): size, ORG, metadata, metadata, metadata, metadata
 
-### Community 39 - "Community 39"
+### Community 42 - "Community 42"
 Cohesion: 0.1
 Nodes (20): 15. Notification Matrix, 16. Confirmed Integrations, 19. Out of Scope (Future Phases / Post-Deployment), 1. Project Metadata, 21. Tech Stack Status, 23. Decision Log, 24. Final Context Summary, 3. Scope: Phase 1 vs Phase 2 (+12 more)
 
-### Community 40 - "Community 40"
-Cohesion: 0.15
-Nodes (15): PRICING_FAQS, PaymentPolicyItem, pricingCta, pricingFaqHead, pricingHero, pricingMeta, pricingPaymentPolicy, pricingRepresentation (+7 more)
+### Community 43 - "Community 43"
+Cohesion: 0.14
+Nodes (21): App shell (authenticated screens) — persistent left sidebar desktop, slide-in drawer mobile, admin is desktop-primary, Persistent contact affordances — phone always visible, WhatsApp float after scroll, sticky mobile bottom bar, Design Principles, priority order — trust before conversion, one decision per screen, restraint, specificity, readability, Iconography — Lucide outline icons, 1.5px stroke, supplement labels never replace, Interaction Rules — explicit states, one primary button rule, whole-card clickable, single-item accordions, Layout Behavior — mobile-first responsive, Tailwind breakpoints, stepper for multi-step flows, design.md — gstnoticesupport Design System, Radius & Depth — cards 12px, buttons/inputs 8px, badges 6px, no pill shapes, sparing shadows (+13 more)
 
-### Community 41 - "Community 41"
+### Community 44 - "Community 44"
+Cohesion: 0.15
+Nodes (14): PRICING_FAQS, PaymentPolicyItem, pricingCta, pricingFaqHead, pricingHero, pricingMeta, pricingPaymentPolicy, pricingRepresentation (+6 more)
+
+### Community 45 - "Community 45"
 Cohesion: 0.17
 Nodes (15): addBooking(), clearSession(), closeLogoutModal(), getBooking(), getBookings(), getSession(), hasActiveBookings(), injectDeleteModal() (+7 more)
 
-### Community 42 - "Community 42"
-Cohesion: 0.14
-Nodes (20): About Us page, About page hero — "India's GST Litigation Experts — Backed by Real Credentials", Why Choose Us section, Category filter — updates / bench / practice, Blog hero — "Field Notes from the GST Litigation Bench", Blog page, Pre-deposit disclosure banner — animated reveal, aria-live announced, Notice Type Service Selector — 4 radio cards for booking step 1 (+12 more)
-
-### Community 43 - "Community 43"
-Cohesion: 0.11
-Nodes (19): 20. Open Questions & Pending Decisions, Confirmed Closed (no more discussion needed), O10 — Team Page Content, O11 — Testimonials & Case Outcomes, O12 — Company Legal Details for Footer, O13 — Logo & Brand Guidelines, O14 — Mobile Numbers (A and B), O15 — Email Address for Website Inquiries (+11 more)
-
-### Community 44 - "Community 44"
-Cohesion: 0.13
-Nodes (15): CompleteProfileForm(), CompleteProfileFormProps, CompleteProfilePage(), metadata, CompleteProfileInput, completeProfileSchema, emailField, InvalidateQuery (+7 more)
-
-### Community 45 - "Community 45"
-Cohesion: 0.11
-Nodes (17): 1. Design Principles (priority order), 2.1 Color Tokens (locked — do not alter), 2.2 Typography (locked), 2.3 Spacing (8px base grid), 2.4 Radius & Depth, 2.5 Iconography, 2. Visual Direction, 3. Interaction Rules (+9 more)
-
 ### Community 46 - "Community 46"
-Cohesion: 0.11
-Nodes (17): 1. Design Principles (priority order), 2.1 Color Tokens (locked — do not alter), 2.2 Typography (locked), 2.3 Spacing (8px base grid), 2.4 Radius & Depth, 2.5 Iconography, 2. Visual Direction, 3. Interaction Rules (+9 more)
+Cohesion: 0.16
+Nodes (20): Booking Step 1 — Service Selection page, Pre-deposit disclosure banner — animated reveal, aria-live announced, Case Details form — name, email, mobile (+91), GSTIN (mono), organisation, Filing For segmented toggle — Self vs A Client, with conditional client-name field, Booking Step 2 — Personal Info page, Booking Summary panel — appears after >=1 upload success, Document Upload Component — drag/drop zone, desktop, Booking Step 3 — Document Upload page (+12 more)
 
 ### Community 47 - "Community 47"
-Cohesion: 0.11
-Nodes (17): App Shell (authenticated — sidebar), Buttons, components.md — Shared Component Prompts, Document Upload (highest-stakes component), Expert Profile Card, Final CTA Section (public), Footer (public), Navbar (public, sticky) (+9 more)
+Cohesion: 0.18
+Nodes (12): FAQ_GROUPS, FAQ_SEARCH_UI, faqCta, faqHero, faqMeta, faqSchema, faqStillQuestions, FaqSection() (+4 more)
 
 ### Community 48 - "Community 48"
 Cohesion: 0.11
-Nodes (17): App Shell (authenticated — sidebar), Buttons, components.md — Shared Component Prompts, Document Upload (highest-stakes component), Expert Profile Card, Final CTA Section (public), Footer (public), Navbar (public, sticky) (+9 more)
+Nodes (19): 20. Open Questions & Pending Decisions, Confirmed Closed (no more discussion needed), O10 — Team Page Content, O11 — Testimonials & Case Outcomes, O12 — Company Legal Details for Footer, O13 — Logo & Brand Guidelines, O14 — Mobile Numbers (A and B), O15 — Email Address for Website Inquiries (+11 more)
 
 ### Community 49 - "Community 49"
 Cohesion: 0.11
-Nodes (17): 1. Design Principles (priority order), 2.1 Color Tokens (locked — do not alter), 2.2 Typography (locked), 2.3 Spacing (8px base grid), 2.4 Radius & Depth, 2.5 Iconography, 2. Visual Direction, 3. Interaction Rules (+9 more)
+Nodes (19): Backend Development Roadmap, 8-Phase Backend Roadmap Sequencing, Error #8 - Admin Login 401 from Stale .env Duplicate, Three Design Principles, High-Level Design (HLD), Pre-Deposit Disclosure (HLD), Soft Delete + 7-Day S3 Cleanup Strategy, Pre-Deposit Disclosure Strategy (4 mandatory points) (+11 more)
 
 ### Community 50 - "Community 50"
+Cohesion: 0.15
+Nodes (19): About Us page, About page hero — "India's GST Litigation Experts — Backed by Real Credentials", Why Choose Us section, Category filter — updates / bench / practice, Blog hero — "Field Notes from the GST Litigation Bench", Blog page, Notice Type Service Selector — 4 radio cards for booking step 1, Commissioner Appeal service card — ₹9,999, data-predep=false (+11 more)
+
+### Community 51 - "Community 51"
 Cohesion: 0.11
 Nodes (17): 1. Design Principles (priority order), 2.1 Color Tokens (locked — do not alter), 2.2 Typography (locked), 2.3 Spacing (8px base grid), 2.4 Radius & Depth, 2.5 Iconography, 2. Visual Direction, 3. Interaction Rules (+9 more)
 
-### Community 51 - "Community 51"
-Cohesion: 0.16
-Nodes (18): API Contract, GET /bookings/:id/draft-url, Common Error Codes, POST /payments/:bookingId/initiate, POST /admin/bookings/:id/mark-paid, Response Envelope Convention, GET /payments/verify, POST /payments/webhook (+10 more)
-
 ### Community 52 - "Community 52"
-Cohesion: 0.15
-Nodes (11): getBookingAmountPaise(), SERVICE_PRICING, otpRepository, ALLOWED_TRANSITIONS, assertPayable(), assertTransition(), assertUserCancellable(), canTransition() (+3 more)
+Cohesion: 0.11
+Nodes (17): 1. Design Principles (priority order), 2.1 Color Tokens (locked — do not alter), 2.2 Typography (locked), 2.3 Spacing (8px base grid), 2.4 Radius & Depth, 2.5 Iconography, 2. Visual Direction, 3. Interaction Rules (+9 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.13
-Nodes (17): Missing Confirm-Draft Endpoint (Contract Gap), Confirm Draft - Hard Backend Gap (OQ-2), App Shell Component, Admin Flow (Access to Filing & Completion), Platform Interaction Flows, Shared State Machine - Full Service Lifecycle, User Flow (Discovery to Completion), Account Deletion Rules (KB1) (+9 more)
+Cohesion: 0.11
+Nodes (17): App Shell (authenticated — sidebar), Buttons, components.md — Shared Component Prompts, Document Upload (highest-stakes component), Expert Profile Card, Final CTA Section (public), Footer (public), Navbar (public, sticky) (+9 more)
 
 ### Community 54 - "Community 54"
-Cohesion: 0.21
-Nodes (17): Brand Color Palette (Navy Blue + Green), Navy Blue and Green Brand Colors, GST Notice Support (Brand Name), "GST Notice Support" Wordmark, Circular "C"-shaped Swoosh Enclosing GST Text, Brand Color Palette (Navy Blue + Green), Circular GST Monogram, GST Monogram Circular Emblem (+9 more)
+Cohesion: 0.11
+Nodes (17): App Shell (authenticated — sidebar), Buttons, components.md — Shared Component Prompts, Document Upload (highest-stakes component), Expert Profile Card, Final CTA Section (public), Footer (public), Navbar (public, sticky) (+9 more)
 
 ### Community 55 - "Community 55"
-Cohesion: 0.16
-Nodes (13): Banner, ChangePasswordForm(), strength(), STRENGTH_COLORS, STRENGTH_LABELS, UserResponse, SignupResponseData, Banner (+5 more)
+Cohesion: 0.11
+Nodes (17): 1. Design Principles (priority order), 2.1 Color Tokens (locked — do not alter), 2.2 Typography (locked), 2.3 Spacing (8px base grid), 2.4 Radius & Depth, 2.5 Iconography, 2. Visual Direction, 3. Interaction Rules (+9 more)
 
 ### Community 56 - "Community 56"
-Cohesion: 0.12
-Nodes (15): code:block1 (Phase 0  Foundation), Dependency graph (at a glance), gstnoticesupport.in — Backend Development Roadmap, How to read this document, Locked invariants the team must not break (carry through every phase), Open items — all resolved (2026-06-16), Phase 0 — Foundation Hardening, Phase 1 — Data Layer (Prisma + NeonDB) (+7 more)
+Cohesion: 0.11
+Nodes (17): 1. Design Principles (priority order), 2.1 Color Tokens (locked — do not alter), 2.2 Typography (locked), 2.3 Spacing (8px base grid), 2.4 Radius & Depth, 2.5 Iconography, 2. Visual Direction, 3. Interaction Rules (+9 more)
 
 ### Community 57 - "Community 57"
 Cohesion: 0.12
-Nodes (16): Detailed Phase Breakdown, Phase 10 — Auth Frontend & Route Protection, Phase 11 — Booking Workflow, Phase 12 — Document Upload (S3 Pre-Signed), Phase 13 — Admin Dashboard & Draft Management, Phase 14 — Payment: Razorpay Three-Layer Reliability, Phase 15 — Lifecycle Completion, Hardening & Launch, Phase 1 — Project Scaffold, Tooling & Design System (+8 more)
+Nodes (18): D77 - Newman + Manual Payment Verification Split, Error #7 - Razorpay Test Checkout International Cards, Admin Flow (Access to Filing & Completion), Platform Interaction Flows, Shared State Machine - Full Service Lifecycle, User Flow (Discovery to Completion), Draft-Gated Payment Model, Draft & Payment Flow (KB1 mechanic) (+10 more)
 
 ### Community 58 - "Community 58"
+Cohesion: 0.18
+Nodes (13): Banner, ChangePasswordForm(), strength(), STRENGTH_COLORS, STRENGTH_LABELS, authApi, UserResponse, SignupResponseData (+5 more)
+
+### Community 59 - "Community 59"
+Cohesion: 0.18
+Nodes (12): paymentController, paymentInitiateRateLimiter, paymentVerifyRateLimiter, IssueLike, validateBody(), validateParams(), validateQuery(), router (+4 more)
+
+### Community 60 - "Community 60"
+Cohesion: 0.2
+Nodes (17): API Contract, Common Error Codes, POST /payments/:bookingId/initiate, POST /admin/bookings/:id/mark-paid, Response Envelope Convention, GET /payments/verify, POST /payments/webhook, 2026-06-30 EP12 Payments Backend (+9 more)
+
+### Community 61 - "Community 61"
+Cohesion: 0.21
+Nodes (17): Brand Color Palette (Navy Blue + Green), Navy Blue and Green Brand Colors, GST Notice Support (Brand Name), "GST Notice Support" Wordmark, Circular "C"-shaped Swoosh Enclosing GST Text, Brand Color Palette (Navy Blue + Green), Circular GST Monogram, GST Monogram Circular Emblem (+9 more)
+
+### Community 62 - "Community 62"
+Cohesion: 0.12
+Nodes (16): Detailed Phase Breakdown, Phase 10 — Auth Frontend & Route Protection, Phase 11 — Booking Workflow, Phase 12 — Document Upload (S3 Pre-Signed), Phase 13 — Admin Dashboard & Draft Management, Phase 14 — Payment: Razorpay Three-Layer Reliability, Phase 15 — Lifecycle Completion, Hardening & Launch, Phase 1 — Project Scaffold, Tooling & Design System (+8 more)
+
+### Community 63 - "Community 63"
 Cohesion: 0.12
 Nodes (16): `200 OK`, `200 OK`, `200 OK`, 2.1 `PATCH /user/profile`, 2.2 `GET /user/payment-history`, 2.3 `DELETE /user`, 2. User, code:jsonc ({) (+8 more)
 
-### Community 59 - "Community 59"
-Cohesion: 0.13
-Nodes (13): body, card, ContactNotificationEmailProps, container, divider, eyebrow, fieldLabel, fieldRow (+5 more)
+### Community 64 - "Community 64"
+Cohesion: 0.12
+Nodes (15): code:block1 (Phase 0  Foundation), Dependency graph (at a glance), gstnoticesupport.in — Backend Development Roadmap, How to read this document, Locked invariants the team must not break (carry through every phase), Open items — all resolved (2026-06-16), Phase 0 — Foundation Hardening, Phase 1 — Data Layer (Prisma + NeonDB) (+7 more)
 
-### Community 60 - "Community 60"
-Cohesion: 0.13
-Nodes (13): body, CallbackNotificationEmailProps, card, container, divider, eyebrow, fieldLabel, fieldRow (+5 more)
+### Community 65 - "Community 65"
+Cohesion: 0.12
+Nodes (16): Documents Required section, How It Works — 3-step process (upload, expert review, response filed), ASMT-10 Reply Service marketing page, Pricing & CTA section, What We Do section, ASMT-10 Scrutiny Notice service card — ₹4,999, Dashboard Home Mobile — iOS device preview wrapper, iOS device frame preview — React IOSDevice component loaded from frames/ios-frame.jsx (+8 more)
 
-### Community 61 - "Community 61"
+### Community 66 - "Community 66"
 Cohesion: 0.17
-Nodes (9): authApi, metadata, AuthCardShell(), AuthCardShellProps, metadata, ResetPasswordForm(), ResetPasswordFormProps, ResetPasswordInput (+1 more)
+Nodes (11): sanitizeReturnTo(), Banner, LoginForm(), LoginFormProps, LoginPage(), LoginPageProps, metadata, LoginInput (+3 more)
 
-### Community 62 - "Community 62"
+### Community 67 - "Community 67"
+Cohesion: 0.13
+Nodes (15): `200 OK`, `200 OK`, `200 OK`, 7.1 `GET /admin/bookings/:id/documents`, 7.4 `GET /admin/users/:id`, 7.5 `DELETE /admin/users/:id`, 7. Admin — Documents, code:jsonc ({) (+7 more)
+
+### Community 68 - "Community 68"
 Cohesion: 0.13
 Nodes (15): `200 OK`, `200 OK`, `201 Created`, 3.1 `POST /bookings`, 3.2 `GET /bookings`, 3.3 `GET /bookings/:id`, 3. Bookings (user), code:jsonc ({) (+7 more)
 
-### Community 63 - "Community 63"
-Cohesion: 0.13
-Nodes (15): `200 OK`, `200 OK`, `200 OK`, 7.1 `GET /admin/bookings/:id/documents`, 7.2 `GET /admin/bookings/:id/documents/:docId/download-url`, 7.5 `DELETE /admin/users/:id`, 7. Admin — Documents, code:jsonc ({) (+7 more)
-
-### Community 64 - "Community 64"
+### Community 69 - "Community 69"
 Cohesion: 0.13
 Nodes (14): 11.1 States, 11.2 Transition Rules, 11.3 State Reflection, 11. Service Status State Machine, 19. Out of Scope, 20. Open Gaps & Future Work, 21. Glossary, 3.1 Frontend Stack (+6 more)
 
-### Community 65 - "Community 65"
+### Community 70 - "Community 70"
+Cohesion: 0.19
+Nodes (9): IntersectCallback, SharedEntry, sharedObservers, useInView(), UseInViewOptions, AnimateIn(), AnimateInProps, CountUp() (+1 more)
+
+### Community 71 - "Community 71"
+Cohesion: 0.22
+Nodes (9): InitiateParams, initiateParamsSchema, VerifyQuery, verifyQuerySchema, InvalidLinkState(), metadata, SearchParams, PaymentVerifier() (+1 more)
+
+### Community 72 - "Community 72"
 Cohesion: 0.14
 Nodes (13): `200 OK`, `200 OK`, 4.3 `GET /bookings/:id/documents`, 4.4 `GET /bookings/:id/draft-url`, 4. Documents (user), Appendix — Full error code reference, Appendix — Pricing reference (for `amountPaise` values), code:jsonc ({) (+5 more)
 
-### Community 66 - "Community 66"
+### Community 73 - "Community 73"
 Cohesion: 0.14
 Nodes (14): 22.10 Validation, 22.11 Security, 22.12 Monitoring, 22.13 Content & Trust, 22.1 Architecture & Deployment, 22.2 Frontend, 22.3 Backend, 22.4 Authentication (+6 more)
 
-### Community 67 - "Community 67"
-Cohesion: 0.2
-Nodes (14): complete-profile Field-Set Conflict, D63 - Hostinger Hosting Decision, D64 - Payment History Pagination + Receipt Link, D65 - Login Security Alert Content, D66 - payment_records source + performed_by_admin_id, D67 - complete-profile Collects name+phone, D78 - mark-paid Reuses D76 Core, D80 - EP11 UI-Parity Deviations (+6 more)
-
-### Community 68 - "Community 68"
-Cohesion: 0.16
-Nodes (14): Backend Development Roadmap, Locked Backend Invariants, 2026-06-16 EP2 Auth & Identity, 2026-07-08 Split-Repo Deploy Blocker Fixes, client/AGENTS.md, Next.js Breaking-Changes Warning, client/CLAUDE.md, D93 - Split-Repo Hostinger Deploy Config (+6 more)
-
-### Community 69 - "Community 69"
-Cohesion: 0.14
-Nodes (14): 2026-07-03 EP12 Payment UI, D77 - Newman + Manual Payment Verification Split, Error #7 - Razorpay Test Checkout International Cards, Draft-Gated Payment Model, Pre-Deposit Disclosure (HLD), KB2 Decision Log (D34-D62), Project Knowledge Base 2, Payment Verification Page Specification (+6 more)
-
-### Community 70 - "Community 70"
+### Community 74 - "Community 74"
 Cohesion: 0.19
 Nodes (14): Book Service Button (nav, primary green CTA), Hero Headline ("GST Notice? Get Expert Legal Support in 24 Hours."), Hero Subheading (ICAI CAs / Bar Council Advocates, fully managed, fixed fee), Hero Video Placeholder (black box, unloaded media player), Homepage Hero Screenshot (frame-probe.png), Logo Element Bounding-Box Probe Overlay (red rectangle), Site Navbar (Logo, Services, About, Resources, Pricing, Phone, Request Callback, Book Service), Phone Number Display (+91 98000 00000) (+6 more)
 
-### Community 71 - "Community 71"
+### Community 75 - "Community 75"
 Cohesion: 0.18
 Nodes (14): Account Nav Item (active), Account Settings Panel, Billing Nav Item, Breadcrumb: Dashboard / Settings, Danger Zone Nav Item, Devices Nav Item, Email Address Field, Mobile Number Field (+6 more)
 
-### Community 72 - "Community 72"
-Cohesion: 0.23
-Nodes (7): ContactForm(), metadata, contactContent, contactHero, contactMeta, ContactFormData, contactSchema
+### Community 76 - "Community 76"
+Cohesion: 0.19
+Nodes (7): ForgotPasswordForm(), metadata, metadata, AuthCardShell(), AuthCardShellProps, ForgotPasswordInput, forgotPasswordSchema
 
-### Community 73 - "Community 73"
+### Community 77 - "Community 77"
 Cohesion: 0.15
 Nodes (13): Auth — HTTP-only cookies, code:jsonc (// Success (single object)), code:block2 (ServiceType   : asmt_10 | scn | commissioner_appeal | gstat_), code:jsonc ({), code:jsonc ({), code:jsonc ({), code:jsonc ({), code:jsonc ({) (+5 more)
 
-### Community 74 - "Community 74"
+### Community 78 - "Community 78"
 Cohesion: 0.22
 Nodes (13): Secondary CTA: Request a Callback, Primary CTA: Upload Your Notice, Hero Headline: GST Notice? Get Expert Legal Support in 24 Hours., Hero Media Placeholder (video/image player, dark rounded panel), GSTNoticeSupport Logo/Wordmark, Nav Button: Book Service (primary CTA), Nav Button: Request Callback, Homepage Navbar (Services, About, Resources, Pricing) (+5 more)
 
-### Community 75 - "Community 75"
+### Community 79 - "Community 79"
 Cohesion: 0.21
 Nodes (11): colors, extractCookies(), http, https, logTest(), makeRequest(), results, runTests() (+3 more)
 
-### Community 76 - "Community 76"
+### Community 80 - "Community 80"
 Cohesion: 0.17
 Nodes (11): 📡 API Reference, code:json ({), code:block8 (gstnoticesupport/), 🤝 Contributing, ◆ GST Notice Support, 🏛️ Key Design Decisions, 📝 License, 📁 Project Structure (+3 more)
 
-### Community 77 - "Community 77"
+### Community 81 - "Community 81"
 Cohesion: 0.17
 Nodes (12): `200 OK`, `201 Created`, 5.1 `POST /payments/:bookingId/initiate`, 5.2 `GET /payments/verify`, 5. Payments, code:jsonc ({), code:jsonc (// Outcome: "success" — payment captured, booking → filing), Errors (+4 more)
 
-### Community 78 - "Community 78"
+### Community 82 - "Community 82"
 Cohesion: 0.17
 Nodes (12): 14.10 Sensitive Data in URLs, 14.11 Users Page (Admin), 14.1 Transport Security, 14.2 Authentication Security, 14.3 Payment Security, 14.4 File Upload Security, 14.5 Document Access Security, 14.6 Input Validation (+4 more)
 
-### Community 79 - "Community 79"
+### Community 83 - "Community 83"
 Cohesion: 0.17
 Nodes (11): 10. Independent Hostinger deploys — CORS blocked + login doesn't redirect (D93, 2026-07-08), 11. Backend `tsc` build failure on Hostinger — `'env' is possibly 'undefined'` (D93, 2026-07-08), 1. SignUp Error, 2. S3 pre-signed PUT — `SignatureDoesNotMatch` (Phase 4, 2026-06-23), 3. S3 PUT — `AccessDenied: not authorized to perform: s3:PutObject` (Phase 4, 2026-06-23), 4. Newman — `Identifier 'data' has already been declared` (Phase 4, 2026-06-23), 5. Schema sync script blocked — `@prisma/client` string in comment (EP11, 2026-06-29), 6. Newman payment fixture — `ERR_MODULE_NOT_FOUND: Cannot find package 'dotenv'` (EP12, 2026-07-01) (+3 more)
 
-### Community 80 - "Community 80"
-Cohesion: 0.2
-Nodes (12): POST /bookings/:id/upload-url, 2026-06-17 EP3 Booking Lifecycle, 2026-06-23 EP9 Document Handling, 2026-07-03 EP13 Admin Frontend, 2026-07-04 Final Draft Upload Feature, 2026-07-05 Representation Bookable Service, Changelog, D69 - 404 for Foreign-Booking Lookups (+4 more)
-
-### Community 81 - "Community 81"
-Cohesion: 0.17
-Nodes (12): Documents Required section, How It Works — 3-step process (upload, expert review, response filed), ASMT-10 Reply Service marketing page, Pricing & CTA section, What We Do section, ASMT-10 Scrutiny Notice service card — ₹4,999, Dashboard Home Mobile — iOS device preview wrapper, iOS device frame preview — React IOSDevice component loaded from frames/ios-frame.jsx (+4 more)
-
-### Community 82 - "Community 82"
-Cohesion: 0.24
-Nodes (12): Cancel This Service Link, Case Information Card (name, email, mobile, GSTIN, org, filing period), Draft Ready Status Badge, Expert Summary Card (admin-authored case analysis), Header Bar (logo, phone, user profile menu), Pay to Unlock Draft Button (locked padlock icon), Pre-deposit Disclosure Line Item (Rs 19,000, as per GST Act), Reply Preparation Fee Line Item (Rs 4,999) (+4 more)
-
-### Community 83 - "Community 83"
-Cohesion: 0.22
-Nodes (7): VerifyOtpInput, verifyOtpSchema, OTPInput(), OTPInputProps, metadata, VerifyOtpForm(), VerifyOtpFormProps
-
 ### Community 84 - "Community 84"
-Cohesion: 0.24
-Nodes (8): sanitizeReturnTo(), Banner, LoginForm(), LoginFormProps, LoginPage(), LoginPageProps, metadata, loginSchema
+Cohesion: 0.18
+Nodes (11): Screen Prompt Template — lean prompts referencing design.md/components.md by section/name, App shell, Design principles (priority order), Forbidden trust-eroding patterns — countdown timers, viewer badges, early pop-ups, guarantee language, stock photos, Forbidden (trust-eroding) patterns, GST Notice Support — Project Instructions, GST Notice Support — Project Instructions (resources/ui/CLAUDE.md), Non-negotiables (the short list) (+3 more)
 
 ### Community 85 - "Community 85"
 Cohesion: 0.24
-Nodes (8): redirectIfAuthenticated(), SignupInput, signupSchema, metadata, SignupPage(), SignupForm(), Checkbox, CheckboxProps
+Nodes (12): Cancel This Service Link, Case Information Card (name, email, mobile, GSTIN, org, filing period), Draft Ready Status Badge, Expert Summary Card (admin-authored case analysis), Header Bar (logo, phone, user profile menu), Pay to Unlock Draft Button (locked padlock icon), Pre-deposit Disclosure Line Item (Rs 19,000, as per GST Act), Reply Preparation Fee Line Item (Rs 4,999) (+4 more)
 
 ### Community 86 - "Community 86"
-Cohesion: 0.22
-Nodes (9): colors, http, https, logTest(), makeRequest(), results, runTests(), testState (+1 more)
+Cohesion: 0.24
+Nodes (8): redirectIfAuthenticated(), SignupInput, signupSchema, metadata, SignupPage(), SignupForm(), Checkbox, CheckboxProps
 
 ### Community 87 - "Community 87"
-Cohesion: 0.18
-Nodes (11): 22. Risks & Edge Cases, Edge Case: Admin Uploads Wrong Draft, Edge Case: GSTN Validation, Edge Case: Pre-deposit Confusion, Edge Case: User Pays Then Immediately Cancels Email Account, Edge Case: User Pays Twice, Risk: Document Upload Limits, Risk: Missing Team Section (+3 more)
+Cohesion: 0.22
+Nodes (7): metadata, ResetPasswordForm(), ResetPasswordFormProps, ResetPasswordInput, resetPasswordSchema, OTPInput(), OTPInputProps
 
 ### Community 88 - "Community 88"
 Cohesion: 0.18
-Nodes (10): 11. Decision Log, 12. Final Context Summary, 1. Session Context, 8.1 Admin Cannot Cancel Bookings — Deferred to Future Scope, 8.2 Admin "Mark as Paid" — Added to Phase 2 Scope, 8. Admin Scope Boundary Changes, 9. Updated Out of Scope, Document Maintenance (+2 more)
+Nodes (10): emailField, InvalidateQuery, invalidateQuerySchema, nameField, otpField, passwordField, phoneField, ResendOtpInput (+2 more)
 
 ### Community 89 - "Community 89"
-Cohesion: 0.18
-Nodes (11): 10. Updated Open Questions & Pending Decisions, O10 — Signed URL Generation — Auth Check Depth, O1 — Tech Stack, O2 — Data Handling on Account Deletion, O3 — Admin Notes Format, O4 — Overview Page Granularity (Admin), O5 — Team Section Redesign (New), O6 — Webhook Endpoint URL (+3 more)
+Cohesion: 0.22
+Nodes (9): colors, http, https, logTest(), makeRequest(), results, runTests(), testState (+1 more)
 
 ### Community 90 - "Community 90"
 Cohesion: 0.18
-Nodes (10): code:bash (cd test/postman && npm install), Feature Test Plan — Final Draft · Representation · Admin Notifications, Final Draft — `run-finaldraft-newman.sh` → **53 assertions / 24 requests / 0 failures**, Layer 1 — Newman (API contract & gating), Layer 2 — Scripts (`tsx`, run from `server/`), Layer 3 — MCP end-to-end (interactive), Prerequisites, Representation — `run-representation-newman.sh` → **33 assertions / 14 requests / 0 failures** (+2 more)
+Nodes (11): 22. Risks & Edge Cases, Edge Case: Admin Uploads Wrong Draft, Edge Case: GSTN Validation, Edge Case: Pre-deposit Confusion, Edge Case: User Pays Then Immediately Cancels Email Account, Edge Case: User Pays Twice, Risk: Document Upload Limits, Risk: Missing Team Section (+3 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.18
-Nodes (11): 8-Phase Backend Roadmap Sequencing, Backend Roadmap Alignment Section, Phase 2 Frontend Build Plan, Project README, Key Design Decisions Table (README), 15-Phase Roadmap (README), Tech Stack Overview (README), EP1-EP15 Task Board (+3 more)
+Nodes (10): 11. Decision Log, 12. Final Context Summary, 1. Session Context, 8.1 Admin Cannot Cancel Bookings — Deferred to Future Scope, 8.2 Admin "Mark as Paid" — Added to Phase 2 Scope, 8. Admin Scope Boundary Changes, 9. Updated Out of Scope, Document Maintenance (+2 more)
 
 ### Community 92 - "Community 92"
+Cohesion: 0.18
+Nodes (11): 10. Updated Open Questions & Pending Decisions, O10 — Signed URL Generation — Auth Check Depth, O1 — Tech Stack, O2 — Data Handling on Account Deletion, O3 — Admin Notes Format, O4 — Overview Page Granularity (Admin), O5 — Team Section Redesign (New), O6 — Webhook Endpoint URL (+3 more)
+
+### Community 93 - "Community 93"
+Cohesion: 0.18
+Nodes (10): code:bash (cd test/postman && npm install), Feature Test Plan — Final Draft · Representation · Admin Notifications, Final Draft — `run-finaldraft-newman.sh` → **53 assertions / 24 requests / 0 failures**, Layer 1 — Newman (API contract & gating), Layer 2 — Scripts (`tsx`, run from `server/`), Layer 3 — MCP end-to-end (interactive), Prerequisites, Representation — `run-representation-newman.sh` → **33 assertions / 14 requests / 0 failures** (+2 more)
+
+### Community 94 - "Community 94"
+Cohesion: 0.18
+Nodes (11): 2026-07-05 Representation Bookable Service, D91 - Representation Service Bookable + Custom Pricing, Account Deletion Rules (KB1), User-Initiated Cancellation Rules, KB1 Decision Log (D1-D33), Design System UI/UX Constraints (KB1), Project Knowledge Base 1, Service Status Lifecycle (KB1) (+3 more)
+
+### Community 95 - "Community 95"
 Cohesion: 0.24
 Nodes (6): CalendlyCallbackListener(), inter, jetbrainsMono, metadata, Providers(), ProvidersProps
 
-### Community 93 - "Community 93"
-Cohesion: 0.24
-Nodes (6): ForgotPasswordForm(), metadata, ForgotPasswordInput, forgotPasswordSchema, Input, InputProps
-
-### Community 94 - "Community 94"
-Cohesion: 0.2
-Nodes (10): Acceptance criteria, API wiring, Assets, Components, Dependencies, Dependencies on prior phases, File-level implementation plan, Phase 2.2 — Dashboard Shell + Passive (read-only) Pages (+2 more)
-
-### Community 95 - "Community 95"
-Cohesion: 0.2
-Nodes (10): Acceptance criteria, API wiring, Assets, Components, Dependencies, Dependencies on prior phases, File-level implementation plan, Phase 2.3 — Booking + Payment + Draft (+2 more)
-
 ### Community 96 - "Community 96"
-Cohesion: 0.2
-Nodes (10): Acceptance criteria, API wiring, Assets, Components, Dependencies, Dependencies on prior phases, File-level implementation plan, Phase 2.4 — Admin (+2 more)
-
-### Community 97 - "Community 97"
-Cohesion: 0.2
-Nodes (10): Acceptance criteria, API wiring, Assets, Components, Dependencies (new packages), Dependencies on prior phases, File-level implementation plan, Phase 2.1 — Foundation + Auth (+2 more)
-
-### Community 98 - "Community 98"
 Cohesion: 0.2
 Nodes (10): 4. Services Catalog & Pricing, Documents Required per Service, Payment & Refund Policy, Pre-Deposit Charges (Government-Side), Service 1 — GSTAT Appeal, Service 2 — Commissioner Appeal, Service 3 — SCN Reply, Service 4 — ASMT-10 Reply (+2 more)
 
-### Community 99 - "Community 99"
+### Community 97 - "Community 97"
 Cohesion: 0.2
 Nodes (10): 5.1 Razorpay Orders Flow (Not Payment Links), 5.2 Three-Layer Payment Reliability Architecture, 5.3 Signature Verification — Mandatory, 5.4 Idempotency — Implementation Rule, 5.5 Complete Payment Journey (State Diagram), 5. Razorpay Payment Flow — Final Design, code:block1 (User clicks "Pay to Unlock"), Layer 1 — Webhook with Signature Verification and Idempotency (Primary) (+2 more)
 
-### Community 100 - "Community 100"
+### Community 98 - "Community 98"
 Cohesion: 0.2
 Nodes (9): Auth strategy, code:bash (cd test/postman), code:bash (bash test/postman/run-newman.sh), Files, GST Notice Support — Postman / Newman API Tests, Other suites, Prerequisites, Run (+1 more)
 
+### Community 99 - "Community 99"
+Cohesion: 0.2
+Nodes (10): Acceptance criteria, API wiring, Assets, Components, Dependencies, Dependencies on prior phases, File-level implementation plan, Phase 2.3 — Booking + Payment + Draft (+2 more)
+
+### Community 100 - "Community 100"
+Cohesion: 0.2
+Nodes (10): Acceptance criteria, API wiring, Assets, Components, Dependencies (new packages), Dependencies on prior phases, File-level implementation plan, Phase 2.1 — Foundation + Auth (+2 more)
+
 ### Community 101 - "Community 101"
-Cohesion: 0.29
-Nodes (10): D70 - Booking State Machine Module, Service Status State Machine, Three Design Principles, High-Level Design (HLD), booking_documents table schema, bookings table schema, LLD Data Model (4 core + 3 aux tables), Low-Level Design (LLD) (+2 more)
+Cohesion: 0.2
+Nodes (10): Acceptance criteria, API wiring, Assets, Components, Dependencies, Dependencies on prior phases, File-level implementation plan, Phase 2.2 — Dashboard Shell + Passive (read-only) Pages (+2 more)
 
 ### Community 102 - "Community 102"
+Cohesion: 0.2
+Nodes (10): Acceptance criteria, API wiring, Assets, Components, Dependencies, Dependencies on prior phases, File-level implementation plan, Phase 2.4 — Admin (+2 more)
+
+### Community 103 - "Community 103"
 Cohesion: 0.27
 Nodes (10): server/src/controllers/auth.controller.ts, server/src/routes/auth.routes.ts, server/src/schemas/auth.schema.ts, server/src/services/auth.service.ts, server/src/middleware/authenticate.ts, test/test-runner.js, tokenBlacklistRepository, OTP Input Component (+2 more)
 
-### Community 103 - "Community 103"
-Cohesion: 0.33
-Nodes (6): useInView(), UseInViewOptions, AnimateIn(), AnimateInProps, CountUp(), CountUpProps
-
 ### Community 104 - "Community 104"
-Cohesion: 0.22
-Nodes (9): 📋 4 Bookable GST Services, 📊 Admin Dashboard, 💎 Draft-Gated Payment Model, ✨ Features, 🔐 OTP-Based Authentication, 📁 Secure Document Upload, 🔄 Service Status State Machine, 🛡️ Three-Layer Payment Reliability (+1 more)
+Cohesion: 0.2
+Nodes (10): Company Identity section — CIN, GSTIN, legal name, office address, Expert Team section — real photos, ICAI/Bar reg numbers, LinkedIn, min. 3 members, Privacy note — cites design.md §6 trust signal near sensitive data entry, Contact Details panel — phone, WhatsApp, email, office address, hours, Grievance Officer contact (grievance@gstnoticesupport.in), Request Callback banner, Accessibility Constraints — 48px tap targets, WCAG AA contrast, visible focus rings, prefers-reduced-motion, Design System §3.2 People & Proof — expert card, stats, testimonial, trust badges (+2 more)
 
 ### Community 105 - "Community 105"
-Cohesion: 0.22
-Nodes (9): 16.1 Three Design Principles, 16.2 Color Palette, 16.3 Typography, 16.4 Spacing & Layout, 16.5 Iconography, 16.6 Forbidden UI Patterns, 16.7 Mobile-First Patterns, 16.8 Trust Signal Requirements (+1 more)
+Cohesion: 0.31
+Nodes (8): checkChunks(), checkPublicAssets(), CHUNKS_DIR, __dirname, fmt(), main(), PUBLIC_DIR, PUBLIC_FILE_BUDGETS
 
 ### Community 106 - "Community 106"
-Cohesion: 0.22
-Nodes (9): 5.1 Next.js App Router Structure, 5.2 Rendering Strategy, 5.3 Server Components vs Client Components, 5.4 State Management, 5.5 Forms, 5.6 SEO, 5.7 Responsive Design, 5. Frontend Architecture (+1 more)
+Cohesion: 0.25
+Nodes (5): AccessTokenPayload, hashToken(), RefreshTokenPayload, verifyAccessToken(), verifyRefreshToken()
 
 ### Community 107 - "Community 107"
 Cohesion: 0.22
-Nodes (9): 17. Design System (UI/UX Constraints), Border Radius, Color Palette (locked), Forbidden Colors, Forbidden UI Patterns, Iconography, Reference Patterns (replicate / avoid), Spacing (+1 more)
+Nodes (9): 📋 4 Bookable GST Services, 📊 Admin Dashboard, 💎 Draft-Gated Payment Model, ✨ Features, 🔐 OTP-Based Authentication, 📁 Secure Document Upload, 🔄 Service Status State Machine, 🛡️ Three-Layer Payment Reliability (+1 more)
 
 ### Community 108 - "Community 108"
 Cohesion: 0.22
-Nodes (8): Blocked Items, EP12 — Definition of Done (Verified 2026-07-01, backend), EP1 — Definition of Done (Verified 2026-06-06), EP2 — Definition of Done (Verified 2026-06-06), Phase 1 — Marketing Site, Phase 2 — Full Platform, Project Progress Tracking — gstnoticesupport.in, Timeline
+Nodes (9): 5.1 Next.js App Router Structure, 5.2 Rendering Strategy, 5.3 Server Components vs Client Components, 5.4 State Management, 5.5 Forms, 5.6 SEO, 5.7 Responsive Design, 5. Frontend Architecture (+1 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.22
-Nodes (8): Auth & fixture strategy, code:bash (bash test/postman/run-admin-newman.sh), Coverage matrix (50 assertions, 12 folders), Deferred to manual (needs a real captured Razorpay TEST payment — D77), EP13 Admin Surface — API Test Plan, Files, Prerequisites (developer side), Run
+Nodes (9): 16.1 Three Design Principles, 16.2 Color Palette, 16.3 Typography, 16.4 Spacing & Layout, 16.5 Iconography, 16.6 Forbidden UI Patterns, 16.7 Mobile-First Patterns, 16.8 Trust Signal Requirements (+1 more)
 
 ### Community 110 - "Community 110"
+Cohesion: 0.22
+Nodes (9): 17. Design System (UI/UX Constraints), Border Radius, Color Palette (locked), Forbidden Colors, Forbidden UI Patterns, Iconography, Reference Patterns (replicate / avoid), Spacing (+1 more)
+
+### Community 111 - "Community 111"
+Cohesion: 0.22
+Nodes (8): Blocked Items, EP12 — Definition of Done (Verified 2026-07-01, backend), EP1 — Definition of Done (Verified 2026-06-06), EP2 — Definition of Done (Verified 2026-06-06), Phase 1 — Marketing Site, Phase 2 — Full Platform, Project Progress Tracking — gstnoticesupport.in, Timeline
+
+### Community 112 - "Community 112"
+Cohesion: 0.22
+Nodes (8): Auth & fixture strategy, code:bash (bash test/postman/run-admin-newman.sh), Coverage matrix (50 assertions, 12 folders), Deferred to manual (needs a real captured Razorpay TEST payment — D77), EP13 Admin Surface — API Test Plan, Files, Prerequisites (developer side), Run
+
+### Community 113 - "Community 113"
 Cohesion: 0.31
 Nodes (9): Booking.status State Machine (document_upload, in_review, draft_ready, filing, complete, cancelled), Booking Status Badges (Draft Ready, In Review, Filing, Complete, Cancelled), Book New Service Button, Status Filter Tabs (All / Active / Complete / Cancelled), My Services Dashboard Page, Service Bookings Table (Service, Date, Status, Next Action, View), Sidebar Navigation (Dashboard, My Services, Payments, Settings), Prototype State Toggle (Populated / Empty filtered / Empty new user / Loading) (+1 more)
 
-### Community 111 - "Community 111"
-Cohesion: 0.39
-Nodes (6): Envelope, POST(), checkRateLimit(), RateLimitResult, store, ContactNotificationEmail()
+### Community 114 - "Community 114"
+Cohesion: 0.29
+Nodes (6): CompleteProfileForm(), CompleteProfileFormProps, CompleteProfilePage(), metadata, CompleteProfileInput, completeProfileSchema
 
-### Community 112 - "Community 112"
+### Community 115 - "Community 115"
+Cohesion: 0.29
+Nodes (5): VerifyOtpInput, verifyOtpSchema, metadata, VerifyOtpForm(), VerifyOtpFormProps
+
+### Community 116 - "Community 116"
 Cohesion: 0.36
 Nodes (6): AdminShell(), AdminShellProps, initials(), NAV_ITEMS, AdminLayout(), requireAdmin()
 
-### Community 114 - "Community 114"
+### Community 118 - "Community 118"
 Cohesion: 0.25
 Nodes (4): clientEnvPath, contactTo, here, results
 
-### Community 115 - "Community 115"
-Cohesion: 0.25
-Nodes (8): 8.1 Authentication Mechanism, 8.2 Signup Flow, 8.3 Login Flow, 8.4 Forgot Password Flow, 8.5 Role Model, 8.6 Authorization Checks, 8.7 Session Lifecycle, 8. Authentication & Authorization
-
-### Community 116 - "Community 116"
+### Community 119 - "Community 119"
 Cohesion: 0.25
 Nodes (8): 6.1 Express Server Structure, 6.2 Request Flow, 6.3 Critical Middleware Configuration, 6.4 Error Handling, 6.5 Logging, 6.6 Rate Limiting, 6. Backend Architecture, code:block2 (src/)
 
-### Community 117 - "Community 117"
+### Community 120 - "Community 120"
+Cohesion: 0.25
+Nodes (8): 8.1 Authentication Mechanism, 8.2 Signup Flow, 8.3 Login Flow, 8.4 Forgot Password Flow, 8.5 Role Model, 8.6 Authorization Checks, 8.7 Session Lifecycle, 8. Authentication & Authorization
+
+### Community 121 - "Community 121"
 Cohesion: 0.25
 Nodes (8): 6.1 Route, 6.2 Page Design, 6.3 Outcome 1 — Payment Verified Successfully, 6.4 Outcome 2 — Payment Failed or Abandoned, 6.5 Outcome 3 — Verification Inconclusive, 6.6 Outcome 4 — Tampered or Invalid Signature, 6.7 Edge Cases on the Verification Page, 6. Payment Verification Page Specification
 
-### Community 118 - "Community 118"
-Cohesion: 0.25
-Nodes (7): Screen Prompt Template — lean prompts referencing design.md/components.md by section/name, Design principles (priority order), Forbidden (trust-eroding) patterns, GST Notice Support — Project Instructions, Non-negotiables (the short list), Source of truth (READ BEFORE ANY DESIGN WORK), Working rules
-
-### Community 119 - "Community 119"
-Cohesion: 0.25
-Nodes (8): Company Identity section — CIN, GSTIN, legal name, office address, Expert Team section — real photos, ICAI/Bar reg numbers, LinkedIn, min. 3 members, Contact Details panel — phone, WhatsApp, email, office address, hours, Grievance Officer contact (grievance@gstnoticesupport.in), Request Callback banner, Design System §3.2 People & Proof — expert card, stats, testimonial, trust badges, Trust & Credibility Patterns — legal identity footer, real-photo team credibility, outcome proof, specific testimonials, upload reassurance, India-specific trust signals, Forbidden trust-eroding patterns — countdown timers, viewer badges, early pop-ups, guarantee language, stock photos
-
-### Community 120 - "Community 120"
+### Community 122 - "Community 122"
 Cohesion: 0.33
 Nodes (6): __dirname, HEADER(), main(), OUT_DIR, SRC_DIR, SYNC
-
-### Community 121 - "Community 121"
-Cohesion: 0.43
-Nodes (5): Envelope, POST(), CallbackData, callbackSchema, CallbackNotificationEmail()
-
-### Community 122 - "Community 122"
-Cohesion: 0.29
-Nodes (6): Cross-phase open-question ledger (⚠️ = decision/backend action required), Execution note, Global guardrails (restated), Locked development practices (apply to every phase), Phase 2 Frontend Build Plan — gstnoticesupport.in, Phasing strategy
 
 ### Community 123 - "Community 123"
 Cohesion: 0.29
@@ -751,11 +752,11 @@ Nodes (7): 🏗️ Architecture, code:block1 (┌──────────�
 
 ### Community 124 - "Community 124"
 Cohesion: 0.29
-Nodes (7): `200 OK`, 4.1 `POST /bookings/:id/upload-url`, code:jsonc ({), code:jsonc ({), Errors, Path params, Request body
+Nodes (7): `200 OK`, 5.3 `POST /payments/webhook`, code:jsonc ({), code:jsonc ({ "success": true }), Errors, Request body (Razorpay standard webhook payload), Request headers
 
 ### Community 125 - "Community 125"
 Cohesion: 0.29
-Nodes (7): `200 OK`, 5.3 `POST /payments/webhook`, code:jsonc ({), code:jsonc ({ "success": true }), Errors, Request body (Razorpay standard webhook payload), Request headers
+Nodes (7): `200 OK`, 4.1 `POST /bookings/:id/upload-url`, code:jsonc ({), code:jsonc ({), Errors, Path params, Request body
 
 ### Community 126 - "Community 126"
 Cohesion: 0.29
@@ -767,19 +768,19 @@ Nodes (7): `201 Created`, 4.2 `POST /bookings/:id/confirm-upload`, code:jsonc ({
 
 ### Community 128 - "Community 128"
 Cohesion: 0.29
-Nodes (7): 9.1 Storage Layer, 9.2 Upload Pattern, 9.3 File Constraints, 9.4 Draft Delivery Pattern, 9.5 Draft Re-Upload by Admin, 9.6 S3 Lifecycle Policy, 9. File Handling Architecture
+Nodes (7): 15.1 Performance Targets, 15.2 Rendering Strategy for Performance, 15.3 Image Optimization, 15.4 Code Splitting, 15.5 SEO Foundations, 15.6 SEO Targeting, 15. Performance & SEO Architecture
 
 ### Community 129 - "Community 129"
 Cohesion: 0.29
-Nodes (7): 18.1 Three Environments, 18.2 Environment Variables, 18.3 Razorpay Mode, 18.4 Promotion Path, 18.5 Database Migrations, 18.6 Backup Strategy, 18. Environment Strategy
+Nodes (7): 9.1 Storage Layer, 9.2 Upload Pattern, 9.3 File Constraints, 9.4 Draft Delivery Pattern, 9.5 Draft Re-Upload by Admin, 9.6 S3 Lifecycle Policy, 9. File Handling Architecture
 
 ### Community 130 - "Community 130"
 Cohesion: 0.29
-Nodes (7): 15.1 Performance Targets, 15.2 Rendering Strategy for Performance, 15.3 Image Optimization, 15.4 Code Splitting, 15.5 SEO Foundations, 15.6 SEO Targeting, 15. Performance & SEO Architecture
+Nodes (7): 4.1 Environments, 4.2 Domain Architecture, 4.3 CORS Configuration, 4.4 Cookie Domain Strategy, 4.5 CDN & DNS, 4.6 CI/CD, 4. Deployment Topology
 
 ### Community 131 - "Community 131"
 Cohesion: 0.29
-Nodes (7): 4.1 Environments, 4.2 Domain Architecture, 4.3 CORS Configuration, 4.4 Cookie Domain Strategy, 4.5 CDN & DNS, 4.6 CI/CD, 4. Deployment Topology
+Nodes (7): 18.1 Three Environments, 18.2 Environment Variables, 18.3 Razorpay Mode, 18.4 Promotion Path, 18.5 Database Migrations, 18.6 Backup Strategy, 18. Environment Strategy
 
 ### Community 132 - "Community 132"
 Cohesion: 0.29
@@ -790,32 +791,32 @@ Cohesion: 0.29
 Nodes (7): 18. Copy & Messaging Guidelines, Anxiety-Reducing Phrases (reuse throughout), CTA Hierarchy, Mandatory Disclaimers (client-provided), Power Words (AVOID), Power Words (USE), Voice
 
 ### Community 134 - "Community 134"
+Cohesion: 0.29
+Nodes (6): Cross-phase open-question ledger (⚠️ = decision/backend action required), Execution note, Global guardrails (restated), Locked development practices (apply to every phase), Phase 2 Frontend Build Plan — gstnoticesupport.in, Phasing strategy
+
+### Community 135 - "Community 135"
 Cohesion: 0.52
 Nodes (7): ASMT-10 Reply pricing card (₹2,999), Book This Service button (repeated CTA pattern), Commissioner Appeal pricing card (₹9,999), GSTAT Appeal pricing card (₹14,999), Pricing Cards Screenshot (4-tier service pricing), Pre-deposit required by law badge (on GSTAT Appeal card), SCN Reply pricing card (₹5,999, Most Popular)
 
-### Community 135 - "Community 135"
-Cohesion: 0.33
-Nodes (6): 1.9 `POST /auth/reset-password`, `200 OK`, code:jsonc ({), code:jsonc ({), Errors, Request body
-
 ### Community 136 - "Community 136"
-Cohesion: 0.33
-Nodes (6): 1.5 `POST /auth/login`, `200 OK`, code:jsonc ({), code:jsonc ({), Errors, Request body
-
-### Community 137 - "Community 137"
 Cohesion: 0.33
 Nodes (6): 1.4 `POST /auth/complete-profile`, `200 OK`, code:jsonc ({), code:jsonc ({), Errors, Request body
 
-### Community 138 - "Community 138"
+### Community 137 - "Community 137"
 Cohesion: 0.33
 Nodes (6): 1.1 `POST /auth/signup`, `201 Created`, code:jsonc ({), code:jsonc ({), Errors, Request body
 
-### Community 139 - "Community 139"
+### Community 138 - "Community 138"
 Cohesion: 0.33
 Nodes (6): 1.3 `POST /auth/resend-otp`, `200 OK`, code:jsonc ({), code:jsonc ({), Errors, Request body
 
-### Community 140 - "Community 140"
+### Community 139 - "Community 139"
 Cohesion: 0.33
 Nodes (6): 1.8 `POST /auth/forgot-password`, `200 OK`, code:jsonc ({), code:jsonc ({), Errors, Request body
+
+### Community 140 - "Community 140"
+Cohesion: 0.33
+Nodes (6): 1.5 `POST /auth/login`, `200 OK`, code:jsonc ({), code:jsonc ({), Errors, Request body
 
 ### Community 141 - "Community 141"
 Cohesion: 0.33
@@ -823,59 +824,59 @@ Nodes (6): 1.2 `POST /auth/verify-otp`, `200 OK`, code:jsonc ({), code:jsonc ({)
 
 ### Community 142 - "Community 142"
 Cohesion: 0.33
-Nodes (6): `200 OK`, 3.4 `POST /bookings/:id/cancel`, code:jsonc ({), Errors, Path params, Request
+Nodes (6): 1.9 `POST /auth/reset-password`, `200 OK`, code:jsonc ({), code:jsonc ({), Errors, Request body
 
 ### Community 143 - "Community 143"
 Cohesion: 0.33
-Nodes (6): 1.1 What We Are Building, 1.2 Phase Boundaries, 1.3 Core User Mechanic, 1.4 Target Users, 1.5 Services & Pricing, 1. Project Overview & Scope
+Nodes (6): `200 OK`, 3.4 `POST /bookings/:id/cancel`, code:jsonc ({), Errors, Path params, Request
 
 ### Community 144 - "Community 144"
 Cohesion: 0.33
-Nodes (6): 13.1 Integration Inventory, 13.2 Calendly Integration, 13.3 WhatsApp Integration, 13.4 Razorpay Webhook Configuration, 13.5 AWS S3 Bucket Configuration, 13. External Integrations
+Nodes (6): 10.1 Razorpay Integration Choice, 10.2 Three-Layer Reliability Architecture, 10.3 Payment Verification Page, 10.4 Idempotency Implementation, 10.5 Pre-Deposit Disclosure, 10. Payment Architecture
 
 ### Community 145 - "Community 145"
 Cohesion: 0.33
-Nodes (6): 10.1 Razorpay Integration Choice, 10.2 Three-Layer Reliability Architecture, 10.3 Payment Verification Page, 10.4 Idempotency Implementation, 10.5 Pre-Deposit Disclosure, 10. Payment Architecture
+Nodes (6): 1.1 What We Are Building, 1.2 Phase Boundaries, 1.3 Core User Mechanic, 1.4 Target Users, 1.5 Services & Pricing, 1. Project Overview & Scope
 
 ### Community 146 - "Community 146"
 Cohesion: 0.33
-Nodes (6): 6. Public Website Specification, Homepage Architecture (per Design Trust Blueprint v1.0), Lead Capture Mechanisms (Phase 1), Mobile-Specific Requirements, Page List (Phase 1), Trust Signals to Display (mandatory)
+Nodes (6): 13.1 Integration Inventory, 13.2 Calendly Integration, 13.3 WhatsApp Integration, 13.4 Razorpay Webhook Configuration, 13.5 AWS S3 Bucket Configuration, 13. External Integrations
 
 ### Community 147 - "Community 147"
 Cohesion: 0.33
-Nodes (6): 9. Booking Flow, Re-upload / Mid-Service Document Sharing, Step 1 — Select Service, Step 2 — Personal Information, Step 3 — Document Upload, Step 4 — Submission
+Nodes (6): 6. Public Website Specification, Homepage Architecture (per Design Trust Blueprint v1.0), Lead Capture Mechanisms (Phase 1), Mobile-Specific Requirements, Page List (Phase 1), Trust Signals to Display (mandatory)
 
 ### Community 148 - "Community 148"
 Cohesion: 0.33
-Nodes (6): 2. Product Vision & Business Context, Audience Truths (design-relevant), Mission (client-provided), Target Users (three personas), Vision (client-provided), What Is GST Notice Support
+Nodes (6): 13. Account Deletion Rules, Admin-Initiated User Deletion (Users page), Data Handling on Deletion, Delete Confirmation, When Delete is Allowed, When Delete is Blocked
 
 ### Community 149 - "Community 149"
 Cohesion: 0.33
-Nodes (6): 13. Account Deletion Rules, Admin-Initiated User Deletion (Users page), Data Handling on Deletion, Delete Confirmation, When Delete is Allowed, When Delete is Blocked
+Nodes (6): 9. Booking Flow, Re-upload / Mid-Service Document Sharing, Step 1 — Select Service, Step 2 — Personal Information, Step 3 — Document Upload, Step 4 — Submission
 
 ### Community 150 - "Community 150"
 Cohesion: 0.33
-Nodes (6): 7. Authentication Flow, Forgot Password, Login, Role Promotion, Security Notes, Signup
+Nodes (6): 2. Product Vision & Business Context, Audience Truths (design-relevant), Mission (client-provided), Target Users (three personas), Vision (client-provided), What Is GST Notice Support
 
 ### Community 151 - "Community 151"
 Cohesion: 0.33
-Nodes (6): 4.1 Storage Architecture, 4.2 Draft Delivery — Signed URLs, 4.3 Draft Viewer Page, 4.4 Admin Draft Upload and Re-Upload, 4.5 Draft Access — Status Gate Summary, 4. PDF Gating Mechanic — Final Design
+Nodes (6): 7. Authentication Flow, Forgot Password, Login, Role Promotion, Security Notes, Signup
 
 ### Community 152 - "Community 152"
-Cohesion: 0.47
-Nodes (6): Narrowed Account Drawer (Menu), App Shell Header (Top), Fixed Bottom Tab Bar, Single-column Case Stack, Full-width Primary CTA, Dashboard Home — Mobile (Prototype Spec)
+Cohesion: 0.33
+Nodes (6): 4.1 Storage Architecture, 4.2 Draft Delivery — Signed URLs, 4.3 Draft Viewer Page, 4.4 Admin Draft Upload and Re-Upload, 4.5 Draft Access — Status Gate Summary, 4. PDF Gating Mechanic — Final Design
 
 ### Community 153 - "Community 153"
-Cohesion: 0.6
-Nodes (4): createBooking(), ensureTestUser(), main(), prisma
+Cohesion: 0.47
+Nodes (6): Narrowed Account Drawer (Menu), App Shell Header (Top), Fixed Bottom Tab Bar, Single-column Case Stack, Full-width Primary CTA, Dashboard Home — Mobile (Prototype Spec)
 
 ### Community 154 - "Community 154"
 Cohesion: 0.6
 Nodes (4): createBooking(), ensureTestUser(), main(), prisma
 
 ### Community 155 - "Community 155"
-Cohesion: 0.4
-Nodes (5): A. Backend decisions that RESOLVE prior open questions, B. Conflicts requiring backend reconciliation (⚠️ do not invent a resolution), Backend roadmap alignment (`backend_plan.md`), C. Confirmations (no change, now backed by the backend plan), D. Backend-phase → frontend-screen readiness map (integration order ≠ build order)
+Cohesion: 0.6
+Nodes (4): createBooking(), ensureTestUser(), main(), prisma
 
 ### Community 156 - "Community 156"
 Cohesion: 0.4
@@ -891,15 +892,15 @@ Nodes (5): 1.7 `POST /auth/logout`, 1. Auth, `200 OK`, code:jsonc ({), Request
 
 ### Community 159 - "Community 159"
 Cohesion: 0.4
-Nodes (5): 1.6 `POST /auth/refresh`, `200 OK`, code:jsonc ({), Errors, Request
+Nodes (5): 1.10 `GET /auth/invalidate`, `200 OK`, code:jsonc ({), Errors, Query params
 
 ### Community 160 - "Community 160"
 Cohesion: 0.4
-Nodes (5): 1.10 `GET /auth/invalidate`, `200 OK`, code:jsonc ({), Errors, Query params
+Nodes (5): 1.6 `POST /auth/refresh`, `200 OK`, code:jsonc ({), Errors, Request
 
 ### Community 161 - "Community 161"
 Cohesion: 0.4
-Nodes (5): `200 OK`, 7.4 `GET /admin/users/:id`, code:jsonc ({), Errors, Path params
+Nodes (5): `200 OK`, 7.2 `GET /admin/bookings/:id/documents/:docId/download-url`, code:jsonc ({), Errors, Path params
 
 ### Community 162 - "Community 162"
 Cohesion: 0.4
@@ -907,19 +908,19 @@ Nodes (5): `200 OK`, 7.3 `GET /admin/users`, code:jsonc ({), Errors, Query param
 
 ### Community 163 - "Community 163"
 Cohesion: 0.4
-Nodes (5): 2.1 Architecture Style, 2.2 High-Level System Components, 2.3 Component Responsibilities, 2.4 Data Flow Pattern, 2. System Architecture
+Nodes (5): 7.1 Core Entities, 7.2 Relationships, 7.3 Indexes, 7.4 Soft Delete Strategy, 7. Data Model
 
 ### Community 164 - "Community 164"
 Cohesion: 0.4
-Nodes (5): 17.1 Error Classification, 17.2 Monitoring Phases, 17.3 Critical Error Paths, 17.4 Logging Conventions, 17. Error Handling & Monitoring
+Nodes (5): 2.1 Architecture Style, 2.2 High-Level System Components, 2.3 Component Responsibilities, 2.4 Data Flow Pattern, 2. System Architecture
 
 ### Community 165 - "Community 165"
 Cohesion: 0.4
-Nodes (5): 7.1 Core Entities, 7.2 Relationships, 7.3 Indexes, 7.4 Soft Delete Strategy, 7. Data Model
+Nodes (5): 12.1 Notification Channel, 12.2 Notification Matrix, 12.3 Email Template Strategy, 12.4 Sender Configuration, 12. Notification Architecture
 
 ### Community 166 - "Community 166"
 Cohesion: 0.4
-Nodes (5): 12.1 Notification Channel, 12.2 Notification Matrix, 12.3 Email Template Strategy, 12.4 Sender Configuration, 12. Notification Architecture
+Nodes (5): 17.1 Error Classification, 17.2 Monitoring Phases, 17.3 Critical Error Paths, 17.4 Logging Conventions, 17. Error Handling & Monitoring
 
 ### Community 167 - "Community 167"
 Cohesion: 0.4
@@ -927,57 +928,61 @@ Nodes (5): 11. Draft & Payment Flow, Critical Conversion Mechanic, Draft PDF Vie
 
 ### Community 168 - "Community 168"
 Cohesion: 0.4
-Nodes (5): 10. Service Status Lifecycle (State Machine), code:block1 ([Document Upload]), State Transition Diagram (textual), States, Status Reflection
+Nodes (5): 8.1 Payment History, 8.2 Book a Service, 8.3 Services Table, 8.4 Account Settings, 8. User Dashboard Specification
 
 ### Community 169 - "Community 169"
 Cohesion: 0.4
-Nodes (5): 8.1 Payment History, 8.2 Book a Service, 8.3 Services Table, 8.4 Account Settings, 8. User Dashboard Specification
+Nodes (5): 12. User-Initiated Cancellation, Admin-Initiated Cancellation, Cancellation Flow, Post-Cancellation Behaviour, When User Can Cancel
 
 ### Community 170 - "Community 170"
 Cohesion: 0.4
-Nodes (5): 12. User-Initiated Cancellation, Admin-Initiated Cancellation, Cancellation Flow, Post-Cancellation Behaviour, When User Can Cancel
+Nodes (5): 10. Service Status Lifecycle (State Machine), code:block1 ([Document Upload]), State Transition Diagram (textual), States, Status Reflection
 
 ### Community 171 - "Community 171"
 Cohesion: 0.4
-Nodes (5): 7.1 Context, 7.2 Disclosure Points — Confirmed, 7.3 Pre-Deposit Copy Rule, 7.4 Admin Responsibility for Pre-Deposit Communication, 7. Pre-Deposit Disclosure Strategy
+Nodes (5): 2.1 Dummy Content Approved for Launch, 2.2 Items Permanently Deferred (Not Dummy — Absent), 2.3 Terms & Conditions, 2.4 Privacy Policy, 2. Content & Launch Gap Resolutions
 
 ### Community 172 - "Community 172"
 Cohesion: 0.4
-Nodes (5): 2.1 Dummy Content Approved for Launch, 2.2 Items Permanently Deferred (Not Dummy — Absent), 2.3 Terms & Conditions, 2.4 Privacy Policy, 2. Content & Launch Gap Resolutions
+Nodes (5): 7.1 Context, 7.2 Disclosure Points — Confirmed, 7.3 Pre-Deposit Copy Rule, 7.4 Admin Responsibility for Pre-Deposit Communication, 7. Pre-Deposit Disclosure Strategy
 
 ### Community 173 - "Community 173"
 Cohesion: 0.4
-Nodes (5): Legal Breadcrumb Navigation (Home / Legal / Privacy Policy), DPDP Act 2023 & IT Rules 2011 Compliance Notice, Site Header (Logo, Phone, Menu), Privacy Policy Page, Scope & Applicability Section
+Nodes (5): A. Backend decisions that RESOLVE prior open questions, B. Conflicts requiring backend reconciliation (⚠️ do not invent a resolution), Backend roadmap alignment (`backend_plan.md`), C. Confirmations (no change, now backed by the backend plan), D. Backend-phase → frontend-screen readiness map (integration order ≠ build order)
 
 ### Community 174 - "Community 174"
+Cohesion: 0.4
+Nodes (5): Legal Breadcrumb Navigation (Home / Legal / Privacy Policy), DPDP Act 2023 & IT Rules 2011 Compliance Notice, Site Header (Logo, Phone, Menu), Privacy Policy Page, Scope & Applicability Section
+
+### Community 175 - "Community 175"
 Cohesion: 0.6
 Nodes (5): GST Notice Support (brand name), GST Notice Support Logo, Navy blue + green brand color pairing, Notice document + shield/checkmark icon, "We Support, You Comply" tagline
 
-### Community 177 - "Community 177"
+### Community 178 - "Community 178"
 Cohesion: 0.67
 Nodes (3): createDraftReadyBooking(), main(), prisma
 
-### Community 178 - "Community 178"
+### Community 179 - "Community 179"
 Cohesion: 0.5
 Nodes (4): code:bash (# Clone the repo), Manual Setup, Prerequisites, 🚀 Quick Start
 
-### Community 179 - "Community 179"
+### Community 180 - "Community 180"
 Cohesion: 0.5
 Nodes (4): 1.11 `GET /auth/me`, `200 OK`, code:jsonc ({), Request
 
-### Community 180 - "Community 180"
+### Community 181 - "Community 181"
 Cohesion: 0.5
 Nodes (4): 3.1 Service Card CTAs ("File Now / Reply Now"), 3.2 Calendly Integration Style, 3.3 Company Registration Details in Footer, 3. Phase 1 Structural Decisions
 
-### Community 181 - "Community 181"
+### Community 182 - "Community 182"
 Cohesion: 0.5
 Nodes (3): Prompt 1 — Users List, Prompt 2 — User Detail, Zone 5 — Admin Users (2 screens) — claude.ai/design prompts
 
-### Community 182 - "Community 182"
+### Community 183 - "Community 183"
 Cohesion: 0.5
 Nodes (4): Graphify x Claude Code Integration Plan, Graphify Setup Pipeline (install to commit), Root CLAUDE.md (Graphify Trigger), Graphify Skill Trigger Rule
 
-### Community 185 - "Community 185"
+### Community 186 - "Community 186"
 Cohesion: 0.67
 Nodes (3): client/public Static Assets Directory, Next.js Logo (next.svg), Next.js Framework
 
@@ -996,7 +1001,7 @@ Nodes (3): client/public Static Assets Directory, Next.js Logo (next.svg), Next.
   resources/ui/uploads/pasted-1780457476207-0.png · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **1365 isolated node(s):** `eslintConfig`, `nextConfig`, `config`, `__dirname`, `SRC_DIR` (+1360 more)
+- **1377 isolated node(s):** `eslintConfig`, `nextConfig`, `config`, `__dirname`, `PUBLIC_DIR` (+1372 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **20 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -1015,5 +1020,5 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
 - **What is the exact relationship between `Commissioner Appeal pricing card (₹9,999)` and `Pre-deposit required by law badge (on GSTAT Appeal card)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `gstnoticesupport.in — API Contract` connect `Community 65` to `Community 126`, `Community 4`, `Community 73`, `Community 77`, `Community 58`, `Community 158`, `Community 62`, `Community 63`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `Motion Guidelines — restrained Framer Motion, allowed in exactly 3 places (booking step, upload confirmation, pay-to-unlock reveal)` connect `Community 46` to `Community 43`, `Community 20`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
