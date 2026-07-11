@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-07-11] — perf: client bundle & rendering audit fixes
+
+**Branch: `fix/client-performance-audit`. Implements findings 1–6 of the Next.js performance audit (finding 7, the homepage scroll-reveal refactor, deferred — low impact vs. prototype-parity regression risk).**
+
+- **`/public` assets now cache immutably**: `hero-section.mp4`, `hero-poster.jpg`, and `logo.png` were served with `Cache-Control: max-age=0` (Next's unconfigured default) while hashed `/_next/static` chunks already got a full year — added an explicit `headers()` rule in `next.config.ts`. Also enabled AVIF (alongside WebP) and raised the image-optimizer cache TTL to 31 days.
+- **Hero video compressed 11.18 MB → 1.65 MB** (1080p → 720p H.264, CRF 28) with a new poster frame + `preload="metadata"`, replacing the previous unposterred autoplay that painted a blank box until the full file downloaded.
+- **Logo source shrunk 908 KB → 51 KB** (1254×1254 → 256×256) — the optimizer already delivered correctly-sized bytes to users, but every first request paid a full decode of the oversized source, and it bloated every checkout/deploy.
+- **react-calendly code-split out of the root layout**: it previously shipped (~16 KB gzip) on every route including `/privacy`, `/terms`, the 404 page, and the entire admin/dashboard surface. Moved the listener to `(public)/layout.tsx` via a new `CalendlyListenerLoader`, and `RequestCallbackButton` now defers loading the popup module until the first click.
+- **Dashboard bookings fetch now starts concurrently with the auth check** instead of waiting for it — `bookingApi.list` only needs the raw cookie header, not the resolved user, so the two requests no longer run serially.
+- Verified via production `next build` + `next start` + `curl` header inspection, `.next` chunk-manifest analysis, and route-table diffing against baseline; see the audit artifact for full evidence. Logged-in dashboard render path flagged for staging QA (Express API not reachable in the dev sandbox this was built in).
+
 ## [2026-07-08] — fix: resolve production deploy blockers on the split Hostinger frontend/backend repos
 
 **See D93, ERROR.md #9–#11.**
