@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { Search, ChevronDown } from 'lucide-react';
 import { RequestCallbackButton } from '@/components/ui/RequestCallbackButton';
 import styles from '@/app/(public)/page.module.css';
@@ -23,6 +23,18 @@ export function FaqAccordion() {
     setOpenIdx(prev => (prev === originalIdx ? null : originalIdx));
   };
 
+  // Reading ref.current during render is unsafe under concurrent rendering
+  // (react-hooks/refs) — the measured scrollHeight is applied imperatively
+  // here instead, after commit but before paint, so the max-height
+  // transition still animates with no visible flash.
+  useLayoutEffect(() => {
+    filtered.forEach((item, listIdx) => {
+      const el = bodyRefs.current[listIdx];
+      if (!el) return;
+      el.style.maxHeight = openIdx === item.originalIdx ? `${el.scrollHeight}px` : '0';
+    });
+  }, [openIdx, filtered]);
+
   return (
     <>
       <div className={styles.faqSearch}>
@@ -40,8 +52,6 @@ export function FaqAccordion() {
       <div className={styles.faqList}>
         {filtered.map((item, listIdx) => {
           const isOpen = openIdx === item.originalIdx;
-          const bodyEl = bodyRefs.current[listIdx];
-          const maxHeight = isOpen && bodyEl ? `${bodyEl.scrollHeight}px` : '0';
 
           return (
             <div key={item.originalIdx} className={styles.faqItem}>
@@ -56,7 +66,6 @@ export function FaqAccordion() {
               <div
                 className={styles.faqA}
                 style={{
-                  maxHeight,
                   overflow: 'hidden',
                   transition: 'max-height 0.28s cubic-bezier(0.4,0,0.2,1)',
                 }}
