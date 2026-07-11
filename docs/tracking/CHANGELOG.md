@@ -5,6 +5,13 @@
 
 ---
 
+## [2026-07-11] — perf: shared scroll-reveal observers + bundle-size CI guardrail
+
+**Branch: `fix/client-performance-audit` (phase 2). Closes audit finding 7 and adds the long-term "CI budget check" recommendation, adapted to this repo's actual toolchain.**
+
+- **`useInView.ts` now shares IntersectionObservers**: the hook previously opened one browser observer per animated element — the homepage alone renders ~28 `AnimateIn`/`CountUp` instances. Refactored to one shared observer per distinct `(threshold, rootMargin)` pair via a module-level registry; public API (`[ref, visible]`, options, defaults) is unchanged, so every call site (`AnimateIn.tsx`, `CountUp.tsx`, homepage, pricing, all 5 service pages) needed zero edits.
+- **New build-time bundle-size guardrail** (`client/scripts/check-bundle-budget.mjs`, wired as `postbuild`): fails `npm run build` if any `public/` asset or `.next/static/chunks/*.js` file exceeds its budget (hero video ≤3MB, other public assets ≤200KB each, largest JS chunk ≤400KB, total chunks ≤2.5MB). This repo has no CI workflows, so the check runs on every local and Hostinger-deploy build instead — it would have caught the original 11MB unposterred hero video before it ever shipped. Negative-tested with a temporary oversized dummy file (never committed).
+
 ## [2026-07-11] — perf: client bundle & rendering audit fixes
 
 **Branch: `fix/client-performance-audit`. Implements findings 1–6 of the Next.js performance audit (finding 7, the homepage scroll-reveal refactor, deferred — low impact vs. prototype-parity regression risk).**
