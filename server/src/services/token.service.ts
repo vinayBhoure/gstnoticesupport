@@ -7,6 +7,7 @@ import {
 } from '../lib/jwt';
 import { refreshTokenRepository } from '../repositories/refresh-token.repository';
 import { tokenBlacklistRepository } from '../repositories/token-blacklist.repository';
+import { invalidate as invalidateJtiCache } from '../lib/jtiCache';
 
 type AuthUser = { id: string; role: string; email: string };
 
@@ -41,6 +42,9 @@ export const tokenService = {
   },
 
   async blacklistAccessJti(jti: string): Promise<void> {
+    // Evict any cached "clean" verdict so this process rejects the JTI immediately,
+    // not after the negative-cache TTL expires (jtiCache.ts).
+    invalidateJtiCache(jti);
     await tokenBlacklistRepository.deleteExpired();
     if (await tokenBlacklistRepository.existsByJti(jti)) return;
     await tokenBlacklistRepository.create({
