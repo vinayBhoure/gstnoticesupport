@@ -301,6 +301,17 @@
 | ⬚ | Verify Hostinger's proxy actually forwards `X-Forwarded-For` (confirm `req.ip` ≠ internal IP) | if empty, needs a Hostinger-side proxy config before `trust proxy` helps |
 | ⬚ | Stand up Cloudflare (free tier) in front of both domains, then revisit `trust proxy` (→ 2 / CF IP list) | biggest remaining infra lever; recorded in D95 |
 
+### Security Audit Follow-ups (D96 — deferred items from `required_changes.md`)
+| Status | Phase·Layer·Priority | Task | Notes |
+|---|---|---|---|
+| ⬚ | P2·server·P2 | Re-run Newman suites against a live server after the rate-limit changes | OTP resend 429 <60s; booking cap 429 past 30/day — adjust any test that trips these |
+| ⬚ | P2·server·P1 | Verify `trust proxy` hop count on Railway (log `req.ip` once live) | raise to 2 if Cloudflare is fronted; identity-keyed caps are unaffected either way |
+| ⬚ | P2·both·P2 | CAPTCHA (Cloudflare Turnstile) on signup / forgot-password / contact / callback | needs sitekey+secret; client widget + server `siteverify` guard |
+| ⬚ | P2·infra·P2 | Cloudflare-in-front of Railway for edge rate limiting / WAF | Railway has no configurable edge limits |
+| ⬚ | P2·infra·P3 | 429 monitoring/alerting via Railway log drain (or Sentry) | alert on `RATE_LIMITED` spikes |
+| ⬚ | P2·server·P3 | Revisit `jtiCache` before enabling Railway replicas | revoked session can stay honored ≤ cache TTL on other replicas; shorten TTL or drop cache |
+| ⬚ | P2·server·P3 | Pass 6 Finding B extras: attachment-disposition on admin doc downloads; frontend CSP | CSP needs nonce plumbing (breakage-prone) |
+
 ---
 
 ## Blocked Items (waiting on external input)

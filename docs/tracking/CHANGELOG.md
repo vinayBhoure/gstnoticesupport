@@ -5,6 +5,19 @@
 
 ---
 
+## [2026-07-15] — security: six-pass AppSec audit — rate limiting, upload verification, headers, leak hardening
+
+**Branch: `fix/server-performance` (phase 2). Findings and rationale in D96; deferred items tracked in `required_changes.md`. Deployment context corrected Hostinger → Railway.**
+
+- **Rate limiting (no-Redis, DB-backed design)** — exact caps on expensive/irreversible actions are enforced as service-layer DB business rules so they survive Railway deploy churn and replica scaling: per-account **OTP resend cooldown** (60s, `otp.service`), per-user **booking daily cap** (30/24h, `booking.repository.countByUserIdSince`), and **one active Razorpay order per booking** (`payment.repository.findActiveByBookingId`). In-memory `express-rate-limit` remains only as a coarse deterrent: new **signup per-IP limiter** (5/hr — the endpoint was previously unlimited and sends two emails/call), **refresh limiter** (60/hr, keyed by refresh-cookie hash so it survives a wrong `trust proxy`), and a **global `/api/v1` backstop** (300/min, registered after the webhook mount so Razorpay retries stay exempt; deviates from backend.md §4.3 by explicit decision — Railway has no edge rate limiting).
+- **`forgotPassword`** now swallows `OTP_COOLDOWN` so its response is identical for registered/unregistered emails (no enumeration oracle introduced by the cooldown).
+- **File-upload content verification** — presigned-GET now pins `ResponseContentType: application/pdf` (a mislabeled object can never be sniffed/rendered as HTML/SVG in a viewer's browser — closes a stored-XSS-to-admin path while keeping inline draft viewing), and confirm-time **magic-byte checks** (`objectStartsWithPdfMagic`, reads bytes 0–7, requires `%PDF-`) now run on user document-confirm and both admin draft-confirm paths.
+- **Info-leak hardening** — frontend now sends `X-Frame-Options`, `X-Content-Type-Options`, HSTS, `Referrer-Policy` and hides `X-Powered-By` (`next.config.ts`); 500 responses carry a `requestId` for server-log correlation without exposing internals; JSON-LD output is `<`-escaped against script-injection.
+- **Secrets/deps** — verified no `.env` ever committed and no real keys in git history (no rotation required); Newman test passwords made env-overridable; stray `COOKIE_DOMAIN` removed from `server/.env.example`; next 16.2.7→16.2.10 and react/-dom 19.2.4→19.2.7 patch bumps (client build re-verified).
+- **`trust proxy`** comment corrected Hostinger → Railway (value kept at 1; verify `req.ip` once live, raise to 2 if Cloudflare is fronted).
+- Validated with `npx tsc --noEmit` (clean) and `npm run build` on both client and server (green). ⚠️ Two behavior changes may affect the Newman suites (OTP resend 429 within 60s; booking cap 429 past 30/day) — re-run against a live server.
+- **Deferred (not implemented, tracked in `required_changes.md`)**: CAPTCHA/Turnstile, Cloudflare-in-front for edge limits, 429 monitoring/alerting, and the `jtiCache` single-process assumption (revisit before enabling Railway replicas). Pass 6 Finding B's stricter attachment-disposition and a frontend CSP were also left as follow-ups.
+
 ## [2026-07-11] — perf: server hot-path optimizations (trust proxy, compression, caches)
 
 **Branch: `fix/server-performance` (phase 2). Implements the P1–P5 findings of the Express/Prisma performance audit. Behavior-preserving except two user-approved short cache windows. See D95.**
