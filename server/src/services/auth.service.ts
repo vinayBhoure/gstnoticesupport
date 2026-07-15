@@ -147,7 +147,15 @@ export const authService = {
     const user = await userRepository.findByEmail(email);
     // Always succeed silently — never reveal whether the email is registered.
     if (!user) return;
-    const otp = await otpService.issue(user.id);
+    let otp: string;
+    try {
+      otp = await otpService.issue(user.id);
+    } catch (err) {
+      // A reset code was already sent within the cooldown window. Stay silent so the
+      // response is identical whether or not the email exists (no enumeration oracle).
+      if (err instanceof ApiError && err.code === 'OTP_COOLDOWN') return;
+      throw err;
+    }
     await notificationService.sendPasswordResetOtp(user.email, {
       name: user.name,
       otp,

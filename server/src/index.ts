@@ -10,14 +10,17 @@ import { notFound } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
 import { apiRouter, healthRouter } from './routes';
 import { webhookController } from './controllers/webhook.controller';
+import { createRateLimiter } from './lib/rateLimiter';
 
 const app = express();
 
-// Hostinger's reverse proxy is the single trusted hop in front of this app, so req.ip
-// must be derived from X-Forwarded-For — otherwise express-rate-limit buckets every
-// user under the proxy IP and the D65 login-alert email logs the wrong IP. NOT `true`
-// (that trusts a client-supplied header and is spoofable). Raise to 2 / a Cloudflare IP
-// list if Cloudflare is ever placed in front (see D95).
+// Railway's edge proxy is the single trusted hop in front of this app, so req.ip must be
+// derived from X-Forwarded-For — otherwise express-rate-limit buckets every user under the
+// proxy IP and the D65 login-alert email logs the wrong IP. NOT `true` (that trusts a
+// client-supplied header and is spoofable). Verify the hop count once on Railway by logging
+// req.ip; raise to 2 if Cloudflare is ever placed in front of Railway. Note: the identity-keyed
+// limits (signup/booking/OTP caps) do not depend on req.ip, so a wrong value here degrades only
+// the coarse IP deterrents, never the expensive-action caps (audit Pass 4).
 app.set('trust proxy', 1);
 
 // Security headers
@@ -49,6 +52,16 @@ app.use(express.json());
 
 // Health check — root level, not under /api/v1
 app.use('/health', healthRouter);
+
+// Global backstop rate limit for the API (DDoS deterrent). High ceiling — the strict
+// per-route limiters above do the real work. Registered AFTER the webhook route so
+// Razorpay's retries stay exempt. Deviates from backend.md §4.3 by explicit decision
+// (Railway has no edge rate limiting) — logged in decisions.md.
+app.use('/api/v1', createRateLimiter({
+  windowMs: 60 * 1000,
+  max: 300,
+  message: 'Too many requests. Please slow down.',
+}));
 
 // Versioned API routes
 app.use('/api/v1', apiRouter);

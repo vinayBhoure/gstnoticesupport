@@ -7,6 +7,7 @@ import {
   getDownloadUrl,
   uploadUrlExpiresAt,
   draftUrlExpiresAt,
+  objectStartsWithPdfMagic,
 } from '../lib/s3';
 import { ApiError } from '../utils/ApiError';
 import { toBookingDocumentDTO, type BookingDocumentDTO } from '../dto/booking.dto';
@@ -69,6 +70,12 @@ export const documentService = {
 
     if (await documentRepository.existsByS3Key(input.s3Key)) {
       throw new ApiError(409, 'DUPLICATE_KEY', 'This document has already been recorded');
+    }
+
+    // Verify the uploaded bytes are actually a PDF (magic header), not just a spoofed
+    // application/pdf content-type on the presigned PUT (audit Pass 6 Finding B).
+    if (!(await objectStartsWithPdfMagic(input.s3Key))) {
+      throw new ApiError(400, 'INVALID_FILE_TYPE', 'The uploaded file is not a valid PDF');
     }
 
     try {

@@ -43,6 +43,15 @@ export const paymentRepository = {
     });
   },
 
+  // Latest still-open order for a booking (status 'created' = not yet captured or failed).
+  // Backs "one active order per booking" — reused on retry instead of minting a duplicate.
+  async findActiveByBookingId(bookingId: string): Promise<PaymentRecord | null> {
+    return prisma.paymentRecord.findFirst({
+      where: { bookingId, status: PaymentRecordStatus.created },
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+
   // A failed attempt marks the payment record only — the booking stays at draft_ready /
   // paymentStatus=pending so the user can retry. Never overwrites a captured record.
   async markFailedByOrderId(orderId: string): Promise<void> {
