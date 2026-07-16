@@ -14,7 +14,6 @@ import {
   uploadUrlExpiresAt,
   getDownloadUrl,
   draftUrlExpiresAt,
-  objectStartsWithPdfMagic,
 } from '../lib/s3';
 import { fetchPayment } from '../lib/razorpay';
 import { logger } from '../lib/logger';
@@ -179,10 +178,6 @@ export const adminService = {
     if (!DRAFT_UPLOADABLE_STATUSES.includes(booking.status)) {
       throw new ApiError(409, 'DRAFT_LOCKED', 'A draft cannot be uploaded at this stage');
     }
-    // Verify the uploaded bytes are actually a PDF, not a spoofed content-type (audit Pass 6 B).
-    if (!(await objectStartsWithPdfMagic(input.s3Key))) {
-      throw new ApiError(400, 'INVALID_FILE_TYPE', 'The uploaded file is not a valid PDF');
-    }
 
     // representation is consultation-priced: the admin must supply the fee quote here,
     // and it is meaningless (rejected) for fixed-price services.
@@ -270,10 +265,6 @@ export const adminService = {
         'DRAFT_LOCKED',
         'The final draft can only be uploaded after the user completes payment',
       );
-    }
-    // Verify the uploaded bytes are actually a PDF, not a spoofed content-type (audit Pass 6 B).
-    if (!(await objectStartsWithPdfMagic(input.s3Key))) {
-      throw new ApiError(400, 'INVALID_FILE_TYPE', 'The uploaded file is not a valid PDF');
     }
 
     const isFirstFinalDraft = booking.finalDraftS3Key === null;

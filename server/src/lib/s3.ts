@@ -94,26 +94,3 @@ export async function getDownloadUrl(key: string): Promise<string> {
 export function draftUrlExpiresAt(): Date {
   return new Date(Date.now() + DRAFT_URL_EXPIRY_SECONDS * 1000);
 }
-
-// Content verification (audit Pass 6 Finding B). In a direct-to-S3 model the file never
-// passes through Express, so type is verified here at confirm time: read only the first
-// bytes and require the "%PDF-" magic header. Defends any future server-side PDF processing
-// against non-PDF bytes that were uploaded under a spoofed application/pdf content-type.
-const PDF_MAGIC = Buffer.from('%PDF-', 'ascii');
-
-export async function objectStartsWithPdfMagic(key: string): Promise<boolean> {
-  try {
-    const res = await s3Client.send(
-      new GetObjectCommand({ Bucket: env.AWS_S3_BUCKET_NAME, Key: key, Range: 'bytes=0-7' }),
-    );
-    const body = res.Body as { transformToByteArray: () => Promise<Uint8Array> } | undefined;
-    if (!body) return false;
-    const head = Buffer.from(await body.transformToByteArray());
-    return head.subarray(0, PDF_MAGIC.length).equals(PDF_MAGIC);
-  } catch (err) {
-    // Object was never uploaded (NoSuchKey) → treat as invalid. Re-throw anything else
-    // (e.g. a transient S3 error) so it surfaces as a 500, not a misleading 400.
-    if (err instanceof Error && err.name === 'NoSuchKey') return false;
-    throw err;
-  }
-}

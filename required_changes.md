@@ -1,25 +1,62 @@
 # Required Changes — Security Audit Pass 4 (Rate Limiting & Abuse Protection)
 
-> Status: **Sections 1–3 IMPLEMENTED 2026-07-15** (typecheck + build green); sections 4–5
-> remain deferred (need infra/accounts or a scaling decision). Also implemented: Pass 6
-> Finding B (magic-byte upload verification). See decisions.md **D96**.
+> Status: **Sections 1–3 IMPLEMENTED 2026-07-15**, then **live-Newman-verified** against a
+> real local server + Neon dev DB. Sections 4–5 remain deferred (need infra/accounts or a
+> scaling decision). See decisions.md **D96** for the full narrative.
 > Context: backend deployment has moved from Hostinger (single Node process, blue-green)
 > to **Railway + GitHub deploys**. Decision: **no Redis** — exact caps on expensive actions
 > are enforced as DB-backed business rules (service layer); in-memory limiters remain only
 > as coarse brute-force/DDoS deterrents where approximate counting is acceptable.
 
-> IMPLEMENTED (sections 1, 2, 3 below):
+> IMPLEMENTED & VERIFIED (sections 1, 2, 3 below):
 > - OTP resend cooldown (otp.service + forgotPassword enumeration-safe swallow)
 > - Booking daily cap (booking.repository.countByUserIdSince + booking.service)
 > - One active order per booking (payment.repository.findActiveByBookingId + payment.service)
-> - Signup per-IP limiter; refresh limiter (cookie-hash keyed); global /api/v1 backstop
+>   — reuse path verified by code review only (no Newman coverage; live-testing it would
+>   require a successful first order, which the sandbox's invalid Razorpay credentials block)
+> - Signup per-IP limiter; refresh limiter (cookie-hash keyed, IPv6-safe fallback via
+>   express-rate-limit's `ipKeyGenerator()` — an unsafe raw-`req.ip` fallback was caught
+>   and fixed during the Newman pass); global /api/v1 backstop
 > - trust proxy comment corrected for Railway (value kept at 1, verify live)
-> - Pass 6 Finding B: objectStartsWithPdfMagic used at all 3 confirm sites; presigned-GET
->   ResponseContentType pinned (Finding A, already applied)
+> - Pass 6 Finding A: presigned-GET `ResponseContentType` pinned to `application/pdf` — kept
 >
-> STILL DEFERRED: section 4 (jtiCache — revisit before replicas) and section 5
-> (CAPTCHA, Cloudflare edge limits, 429 monitoring). Per-email signup limiter dropped
-> as unnecessary (existing findByEmail 409 caps a victim address to one email).
+> **REVERTED — Pass 6 Finding B (magic-byte upload verification):** implemented, then pulled
+> after a live Newman re-run broke document/draft-confirm across 3 previously-green suites
+> (500s). Root cause: it made the confirm handlers read S3 object bytes directly via
+> `GetObjectCommand`, which (a) contradicts this project's own invariant that files never
+> pass through the app — only presigned PUT/GET URLs are issued (HLD §9.2) — and (b) threw
+> unhandled on the dev sandbox's placeholder AWS credentials instead of failing gracefully.
+> If revisited, it needs to run as background/async verification off the request path, not
+> a synchronous read blocking confirm.
+>
+> STILL DEFERRED: section 4 (jtiCache — revisit before replicas), section 5 (CAPTCHA,
+> Cloudflare edge limits, 429 monitoring), and the magic-byte check above (needs redesign).
+> Per-email signup limiter dropped as unnecessary (existing findByEmail 409 caps a victim
+> address to one email).
+
+## Newman verification (2026-07-15, live local server + real Neon dev DB)
+
+Every suite was run in isolation on a freshly-started server (cleared in-memory rate-limit
+counters) to get unambiguous signal:
+
+| Suite | Assertions | Result |
+|---|---|---|
+| Core booking (`run-newman.sh`) | 68 / 68 | ✅ clean |
+| Admin (`run-admin-newman.sh`) | 109 / 109 | ✅ clean |
+| Final draft (`run-finaldraft-newman.sh`) | 53 / 53 | ✅ clean |
+| Representation (`run-representation-newman.sh`) | 30 / 33 | 3 failures |
+| Payments (`run-payments-newman.sh`) | 29 / 45 | 16 failures |
+
+**Every one of the 19 failures (representation + payments) traces to a single, pre-existing,
+environmental cause**, confirmed independently of this diff: the `RAZORPAY_KEY_ID` /
+`RAZORPAY_KEY_SECRET` pair in this sandbox's `server/.env` fails Razorpay's own
+authentication (`BAD_REQUEST_ERROR: Authentication failed`) — reproduced with a raw
+`razorpay` SDK call made outside the application entirely, so it cannot be caused by
+anything in this branch. All non-Razorpay-dependent assertions in both suites (auth checks,
+ownership 404s, state-gate 409s, webhook signature verification, idempotent webhook replay,
+quote-required/rejected validation, stats/list filtering) passed. **Action needed:** re-run
+`run-payments-newman.sh` and `run-representation-newman.sh` in an environment with a valid
+Razorpay **test**-mode key pair before treating this branch as fully verified.
 
 ---
 

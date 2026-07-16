@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { hashToken } from './jwt';
 
 interface RateLimiterOptions {
@@ -46,7 +46,8 @@ export const refreshRateLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req) => {
     const token = req.cookies?.refresh_token;
-    return token ? hashToken(String(token)) : (req.ip ?? 'unknown');
+    // IPv6-safe fallback via express-rate-limit's helper (masks to a subnet) when no cookie.
+    return token ? hashToken(String(token)) : ipKeyGenerator(req.ip ?? 'unknown');
   },
   message: {
     success: false,
