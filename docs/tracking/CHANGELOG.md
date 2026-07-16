@@ -5,6 +5,28 @@
 
 ---
 
+## [2026-07-16] — chore: security-audit Newman verification closed out (D97)
+
+**No code changes — verification only. See D97 and `required_changes.md`.**
+
+- Confirmed the previously-broken Razorpay test credentials (D96) are fixed, independently, via a raw SDK order-creation call outside the app.
+- Full suite re-run: core booking (68/68), admin (109/109), and final-draft (53/53) all clean. Representation and payments suites hit the new `BOOKING_LIMIT` cap (D96) purely from test volume — the shared admin test account made 42 `POST /bookings` calls in 24h across the day's repeated runs — plus the pre-existing `paymentInitiateRateLimiter`. Both are expected side effects of the cap working correctly against test traffic, not regressions.
+- By explicit decision, accepted the independent Razorpay verification + the earlier isolated run's fully-clean non-Razorpay assertions as sufficient, rather than wait for the caps to clear or delete test data. One outstanding action: re-run `run-representation-newman.sh` and `run-payments-newman.sh` once convenient (no code action needed — the caps self-clear) before any production deploy touching payment or booking-creation paths.
+
+## [2026-07-15] — security: six-pass AppSec audit — rate limiting, upload verification, headers, leak hardening
+
+**Branch: `fix/server-performance` (phase 2). Findings and rationale in D96; deferred items tracked in `required_changes.md`. Deployment context corrected Hostinger → Railway.**
+
+- **Rate limiting (no-Redis, DB-backed design)** — exact caps on expensive/irreversible actions are enforced as service-layer DB business rules so they survive Railway deploy churn and replica scaling: per-account **OTP resend cooldown** (60s, `otp.service`), per-user **booking daily cap** (30/24h, `booking.repository.countByUserIdSince`), and **one active Razorpay order per booking** (`payment.repository.findActiveByBookingId`). In-memory `express-rate-limit` remains only as a coarse deterrent: new **signup per-IP limiter** (5/hr — the endpoint was previously unlimited and sends two emails/call), **refresh limiter** (60/hr, keyed by refresh-cookie hash so it survives a wrong `trust proxy`), and a **global `/api/v1` backstop** (300/min, registered after the webhook mount so Razorpay retries stay exempt; deviates from backend.md §4.3 by explicit decision — Railway has no edge rate limiting).
+- **`forgotPassword`** now swallows `OTP_COOLDOWN` so its response is identical for registered/unregistered emails (no enumeration oracle introduced by the cooldown).
+- **File-upload content verification** — presigned-GET now pins `ResponseContentType: application/pdf` (a mislabeled object can never be sniffed/rendered as HTML/SVG in a viewer's browser — closes a stored-XSS-to-admin path while keeping inline draft viewing). A confirm-time magic-byte check was implemented and then **reverted** after live testing (see below) — it read S3 object bytes directly from the confirm handlers, which contradicts this project's own invariant that files never pass through the app (HLD §9.2); needs an async/background redesign if revisited.
+- **Info-leak hardening** — frontend now sends `X-Frame-Options`, `X-Content-Type-Options`, HSTS, `Referrer-Policy` and hides `X-Powered-By` (`next.config.ts`); 500 responses carry a `requestId` for server-log correlation without exposing internals; JSON-LD output is `<`-escaped against script-injection.
+- **Secrets/deps** — verified no `.env` ever committed and no real keys in git history (no rotation required); Newman test passwords made env-overridable; stray `COOKIE_DOMAIN` removed from `server/.env.example`; next 16.2.7→16.2.10 and react/-dom 19.2.4→19.2.7 patch bumps (client build re-verified).
+- **`trust proxy`** comment corrected Hostinger → Railway (value kept at 1; verify `req.ip` once live, raise to 2 if Cloudflare is fronted).
+- **Live Newman verification (2026-07-15)** against a real local server + Neon dev DB surfaced and fixed two real bugs before they shipped: (1) the confirm-path magic-byte check above, reverted; (2) the refresh limiter's `keyGenerator` used a raw `req.ip` fallback that `express-rate-limit` flags as IPv6-unsafe — fixed via the library's `ipKeyGenerator()` helper. After both fixes: core booking suite 68/68 assertions, admin suite 109/109, final-draft suite 53/53 — all clean. Representation (30/33) and payments (29/45) suites have failures that all trace to one pre-existing, unrelated cause: the sandbox's Razorpay test credentials fail authentication (confirmed via a raw SDK call outside the app) — re-run those two suites with valid Razorpay test keys before treating this branch as fully verified.
+- Validated with `npx tsc --noEmit` (clean) and `npm run build` on both client and server (green).
+- **Deferred (not implemented, tracked in `required_changes.md`)**: CAPTCHA/Turnstile, Cloudflare-in-front for edge limits, 429 monitoring/alerting, the `jtiCache` single-process assumption (revisit before enabling Railway replicas), and the magic-byte upload check (needs async redesign). A frontend CSP was also left as a follow-up.
+
 ## [2026-07-11] — perf: server hot-path optimizations (trust proxy, compression, caches)
 
 **Branch: `fix/server-performance` (phase 2). Implements the P1–P5 findings of the Express/Prisma performance audit. Behavior-preserving except two user-approved short cache windows. See D95.**

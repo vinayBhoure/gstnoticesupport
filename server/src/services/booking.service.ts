@@ -12,8 +12,18 @@ import {
 } from '../dto/booking.dto';
 import type { CreateBookingInput } from '../schemas/booking.schema';
 
+// Per-user daily creation cap. Booking create emails the user-supplied contact + admin,
+// so an account could email-bomb via repeated bookings. Enforced against the DB so it holds
+// across Railway deploys/replicas (audit Pass 4).
+const BOOKING_DAILY_LIMIT = 30;
+
 export const bookingService = {
   async create(userId: string, input: CreateBookingInput): Promise<BookingDetailDTO> {
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if ((await bookingRepository.countByUserIdSince(userId, dayAgo)) >= BOOKING_DAILY_LIMIT) {
+      throw new ApiError(429, 'BOOKING_LIMIT', 'Daily booking limit reached. Please try again tomorrow.');
+    }
+
     const booking = await bookingRepository.create({ userId, ...input });
 
     // Best-effort — email failure must never block the booking creation.
