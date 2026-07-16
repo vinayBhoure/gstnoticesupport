@@ -104,7 +104,7 @@ desktop.ini
 .cache/
 tmp/
 temp/
-.graphify-out
+graphify-out
 
 # ────────────────────────────────────────────────────────────────
 # Local tooling & working artefacts (not source)
