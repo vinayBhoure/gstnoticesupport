@@ -41,7 +41,7 @@ for pair in "ADMIN_EMAIL:$ADMIN_EMAIL" "ADMIN_PASSWORD:$ADMIN_PASSWORD"; do
 done
 
 # The regular-user password used both to hash the fixture user and to log in during the RBAC folder.
-TEST_USER_PASSWORD="AdminSuiteUser#12345"
+TEST_USER_PASSWORD="${TEST_USER_PASSWORD:-AdminSuiteUser#12345}"
 
 echo "→ Minting admin fixtures (test user + 8 state-pinned bookings)…"
 FIXTURE_OUT="$(cd ../../server && TEST_USER_PASSWORD="$TEST_USER_PASSWORD" npx --no-install tsx scripts/setup-admin-fixtures.mjs)"

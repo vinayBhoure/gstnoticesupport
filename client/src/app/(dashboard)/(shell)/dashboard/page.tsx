@@ -45,9 +45,17 @@ function sortDraftFirst(bookings: BookingSummaryDTO[]): BookingSummaryDTO[] {
 }
 
 export default async function DashboardPage() {
-  const user = await requireUser();
+  // Started before the auth check resolves — bookingApi.list only needs the
+  // raw cookie header, not the resolved user, so there's no reason to wait.
+  // The extra .catch keeps an unauthenticated request from surfacing as an
+  // unhandled rejection if requireUser() redirects first; the real result
+  // (or a real error) is still awaited below once we know the user is valid.
   const cookieHeader = (await cookies()).toString();
-  const bookings = await bookingApi.list(cookieHeader);
+  const bookingsPromise = bookingApi.list(cookieHeader);
+  bookingsPromise.catch(() => {});
+
+  const user = await requireUser();
+  const bookings = await bookingsPromise;
 
   const { greeting, date } = greetingParts();
   const firstName = user.name.split(/\s+/)[0];

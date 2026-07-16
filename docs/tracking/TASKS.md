@@ -273,6 +273,45 @@
 | ⬚ | Live Razorpay smoke test — real ₹ payment transitions booking to `filing` end-to-end | Requires live-mode KYC approval |
 | ⬚ | Production Razorpay key starts with `rzp_live_` — deploying with test key is a critical error | |
 
+### Post-Launch — Client Performance Audit (2026-07-11, `fix/client-performance-audit`)
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | Cache `/public` assets immutably + enable AVIF + longer image-optimizer TTL | `next.config.ts headers()`; was `max-age=0` on video/logo vs. 1yr-immutable on `/_next/static` |
+| ✅ | Hero video compressed 11.18 MB → 1.65 MB (1080p → 720p) + poster frame | replaces unposterred autoplay (blank box on load) |
+| ✅ | Logo source shrunk 908 KB → 51 KB (1254px → 256px) | delivered bytes were already optimizer-correct; this was a source-weight/decode-CPU/repo-size fix |
+| ✅ | react-calendly code-split out of the root layout, scoped to `(public)` routes only | was shipping ~16 KB gzip on 100% of routes incl. admin/dashboard/404 |
+| ✅ | Dashboard bookings fetch now starts concurrently with the auth check | was serial; only needs the cookie header, not the resolved user |
+| ✅ | Shared IntersectionObservers in `useInView` (was 1 observer per animated element) | ~28 on homepage alone; public API unchanged, zero call-site changes |
+| ✅ | Build-time bundle-size guardrail (`postbuild`) — fails the build on oversized `/public` assets or JS chunks | client-only substitute for the "GitHub Actions CI/CD" line above — this repo has no `.github/workflows` at all; runs on every `next build` including the Hostinger deploy path |
+| ✅ | Resolved 11 pre-existing lint errors surfaced during the audit (unescaped entities, unsafe ref reads during render, setState-in-effect) | none introduced by the audit work; fixed since the branch already touched 2 of the 5 files |
+| ⬚ | Logged-in dashboard render path QA (bookings-fetch parallelization) | needs a live `server/` API; `server/.env` not present in the dev sandbox this was built in |
+| ⬚ | Manual scroll-through QA of reveal animations (shared-observer refactor) | `/`, `/pricing`, one service page — no browser automation available in the dev sandbox |
+| ⬚ | Cloudflare edge cache review — confirm `Accept` header forwarding for AVIF negotiation + edge respects the new origin `Cache-Control` | ops/config, not code |
+| ⬚ | Move large static media (hero video) off the Hostinger Node origin to a CDN-fronted object store | long-term, needs an infra decision |
+
+### Post-Launch — Server Performance Optimization (2026-07-11, `fix/server-performance`)
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | `trust proxy = 1` so `req.ip` is the real client behind Hostinger's proxy | fixes express-rate-limit bucketing all users under the proxy IP + D65 login-alert IP (D95) |
+| ✅ | `compression()` middleware — gzip responses at the origin | no CDN in front to compress (D95) |
+| ✅ | Short-TTL (5s) negative cache for jti blacklist lookups in `authenticate` | removes ~1 NeonDB round-trip per authed request; logout invalidates same-process immediately (`lib/jtiCache.ts`) |
+| ✅ | Cache admin dashboard stats aggregates for 30s (`adminService.getStats`) | snapshots stay internally consistent; D79 Newman suite unaffected |
+| ✅ | Document Neon pooled endpoint + `connection_limit`/`pool_timeout` in `.env.example` | local `.env` updated; verified host already on `-pooler` (D95) |
+| ⬚ | Apply `connection_limit=5&pool_timeout=10` to the Hostinger backend env + restart | ops/config — mirror the local `.env` change on the deployed app |
+| ⬚ | Verify Hostinger's proxy actually forwards `X-Forwarded-For` (confirm `req.ip` ≠ internal IP) | if empty, needs a Hostinger-side proxy config before `trust proxy` helps |
+| ⬚ | Stand up Cloudflare (free tier) in front of both domains, then revisit `trust proxy` (→ 2 / CF IP list) | biggest remaining infra lever; recorded in D95 |
+
+### Security Audit Follow-ups (D96 — deferred items from `required_changes.md`)
+| Status | Phase·Layer·Priority | Task | Notes |
+|---|---|---|---|
+| 🔄 | P2·server·P2 | Re-run `run-representation-newman.sh` + `run-payments-newman.sh` end-to-end for a full clean confirmation | 3/5 suites already 100% clean (D97); these two hit the new `BOOKING_LIMIT` cap from same-day test volume, not a bug — re-run once the 24h window clears, before any prod deploy touching payment/booking-creation |
+| ⬚ | P2·server·P1 | Verify `trust proxy` hop count on Railway (log `req.ip` once live) | raise to 2 if Cloudflare is fronted; identity-keyed caps are unaffected either way |
+| ⬚ | P2·both·P2 | CAPTCHA (Cloudflare Turnstile) on signup / forgot-password / contact / callback | needs sitekey+secret; client widget + server `siteverify` guard |
+| ⬚ | P2·infra·P2 | Cloudflare-in-front of Railway for edge rate limiting / WAF | Railway has no configurable edge limits |
+| ⬚ | P2·infra·P3 | 429 monitoring/alerting via Railway log drain (or Sentry) | alert on `RATE_LIMITED` spikes |
+| ⬚ | P2·server·P3 | Revisit `jtiCache` before enabling Railway replicas | revoked session can stay honored ≤ cache TTL on other replicas; shorten TTL or drop cache |
+| ⬚ | P2·server·P3 | Pass 6 Finding B extras: attachment-disposition on admin doc downloads; frontend CSP | CSP needs nonce plumbing (breakage-prone) |
+
 ---
 
 ## Blocked Items (waiting on external input)

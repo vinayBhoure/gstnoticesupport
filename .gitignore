@@ -16,6 +16,7 @@ node_modules/
 .env.test
 .env.*.local
 !.env.example
+env.zip
 
 # ────────────────────────────────────────────────────────────────
 # Next.js (client/)
@@ -41,6 +42,12 @@ server/build/
 # (schema.prisma and migrations are always committed)
 # ────────────────────────────────────────────────────────────────
 server/src/generated/
+
+# ────────────────────────────────────────────────────────────────
+# Deploy runtime state (blue-green) — generated on the server, never committed
+# ────────────────────────────────────────────────────────────────
+nginx/active.conf
+deploy/.active_color
 
 # ────────────────────────────────────────────────────────────────
 # Logs
@@ -97,6 +104,7 @@ desktop.ini
 .cache/
 tmp/
 temp/
+.graphify-out
 
 # ────────────────────────────────────────────────────────────────
 # Local tooling & working artefacts (not source)
@@ -104,3 +112,11 @@ temp/
 .playwright-mcp/
 GRAPHIFY_CLAUDE_CODE.md
 audit.md
+
+# ────────────────────────────────────────────────────────────────
+# graphify (graph.json / GRAPH_REPORT.md / graph.html are committed —
+# manifest.json, cost.json, and cache/ are local re-derivable state)
+# ────────────────────────────────────────────────────────────────
+graphify-out/manifest.json
+graphify-out/cost.json
+graphify-out/cache/

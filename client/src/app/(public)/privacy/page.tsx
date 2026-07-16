@@ -32,7 +32,7 @@ export default function PrivacyPolicyPage() {
 
             <h2>1. Who We Are</h2>
             <p>
-              {ORG.legalName} (<strong>"we", "us", "our"</strong>) is a company incorporated
+              {ORG.legalName} (<strong>&quot;we&quot;, &quot;us&quot;, &quot;our&quot;</strong>) is a company incorporated
               under the Companies Act, 2013, with its registered office at{' '}
               {ORG.address.street}, {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}. We provide GST litigation
               services to individuals and businesses across India through this website and our online

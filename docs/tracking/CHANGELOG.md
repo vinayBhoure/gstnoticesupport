@@ -5,6 +5,57 @@
 
 ---
 
+## [2026-07-16] — chore: security-audit Newman verification closed out (D97)
+
+**No code changes — verification only. See D97 and `required_changes.md`.**
+
+- Confirmed the previously-broken Razorpay test credentials (D96) are fixed, independently, via a raw SDK order-creation call outside the app.
+- Full suite re-run: core booking (68/68), admin (109/109), and final-draft (53/53) all clean. Representation and payments suites hit the new `BOOKING_LIMIT` cap (D96) purely from test volume — the shared admin test account made 42 `POST /bookings` calls in 24h across the day's repeated runs — plus the pre-existing `paymentInitiateRateLimiter`. Both are expected side effects of the cap working correctly against test traffic, not regressions.
+- By explicit decision, accepted the independent Razorpay verification + the earlier isolated run's fully-clean non-Razorpay assertions as sufficient, rather than wait for the caps to clear or delete test data. One outstanding action: re-run `run-representation-newman.sh` and `run-payments-newman.sh` once convenient (no code action needed — the caps self-clear) before any production deploy touching payment or booking-creation paths.
+
+## [2026-07-15] — security: six-pass AppSec audit — rate limiting, upload verification, headers, leak hardening
+
+**Branch: `fix/server-performance` (phase 2). Findings and rationale in D96; deferred items tracked in `required_changes.md`. Deployment context corrected Hostinger → Railway.**
+
+- **Rate limiting (no-Redis, DB-backed design)** — exact caps on expensive/irreversible actions are enforced as service-layer DB business rules so they survive Railway deploy churn and replica scaling: per-account **OTP resend cooldown** (60s, `otp.service`), per-user **booking daily cap** (30/24h, `booking.repository.countByUserIdSince`), and **one active Razorpay order per booking** (`payment.repository.findActiveByBookingId`). In-memory `express-rate-limit` remains only as a coarse deterrent: new **signup per-IP limiter** (5/hr — the endpoint was previously unlimited and sends two emails/call), **refresh limiter** (60/hr, keyed by refresh-cookie hash so it survives a wrong `trust proxy`), and a **global `/api/v1` backstop** (300/min, registered after the webhook mount so Razorpay retries stay exempt; deviates from backend.md §4.3 by explicit decision — Railway has no edge rate limiting).
+- **`forgotPassword`** now swallows `OTP_COOLDOWN` so its response is identical for registered/unregistered emails (no enumeration oracle introduced by the cooldown).
+- **File-upload content verification** — presigned-GET now pins `ResponseContentType: application/pdf` (a mislabeled object can never be sniffed/rendered as HTML/SVG in a viewer's browser — closes a stored-XSS-to-admin path while keeping inline draft viewing). A confirm-time magic-byte check was implemented and then **reverted** after live testing (see below) — it read S3 object bytes directly from the confirm handlers, which contradicts this project's own invariant that files never pass through the app (HLD §9.2); needs an async/background redesign if revisited.
+- **Info-leak hardening** — frontend now sends `X-Frame-Options`, `X-Content-Type-Options`, HSTS, `Referrer-Policy` and hides `X-Powered-By` (`next.config.ts`); 500 responses carry a `requestId` for server-log correlation without exposing internals; JSON-LD output is `<`-escaped against script-injection.
+- **Secrets/deps** — verified no `.env` ever committed and no real keys in git history (no rotation required); Newman test passwords made env-overridable; stray `COOKIE_DOMAIN` removed from `server/.env.example`; next 16.2.7→16.2.10 and react/-dom 19.2.4→19.2.7 patch bumps (client build re-verified).
+- **`trust proxy`** comment corrected Hostinger → Railway (value kept at 1; verify `req.ip` once live, raise to 2 if Cloudflare is fronted).
+- **Live Newman verification (2026-07-15)** against a real local server + Neon dev DB surfaced and fixed two real bugs before they shipped: (1) the confirm-path magic-byte check above, reverted; (2) the refresh limiter's `keyGenerator` used a raw `req.ip` fallback that `express-rate-limit` flags as IPv6-unsafe — fixed via the library's `ipKeyGenerator()` helper. After both fixes: core booking suite 68/68 assertions, admin suite 109/109, final-draft suite 53/53 — all clean. Representation (30/33) and payments (29/45) suites have failures that all trace to one pre-existing, unrelated cause: the sandbox's Razorpay test credentials fail authentication (confirmed via a raw SDK call outside the app) — re-run those two suites with valid Razorpay test keys before treating this branch as fully verified.
+- Validated with `npx tsc --noEmit` (clean) and `npm run build` on both client and server (green).
+- **Deferred (not implemented, tracked in `required_changes.md`)**: CAPTCHA/Turnstile, Cloudflare-in-front for edge limits, 429 monitoring/alerting, the `jtiCache` single-process assumption (revisit before enabling Railway replicas), and the magic-byte upload check (needs async redesign). A frontend CSP was also left as a follow-up.
+
+## [2026-07-11] — perf: server hot-path optimizations (trust proxy, compression, caches)
+
+**Branch: `fix/server-performance` (phase 2). Implements the P1–P5 findings of the Express/Prisma performance audit. Behavior-preserving except two user-approved short cache windows. See D95.**
+
+- **`trust proxy = 1`** (`server/src/index.ts`): the app runs behind Hostinger's reverse proxy with no Cloudflare, so `req.ip` previously resolved to the proxy's internal address — meaning every `express-rate-limit` limiter bucketed *all* users under one IP and the D65 login-alert email logged the wrong IP. Set to exactly one trusted hop (not `true`, which is spoofable).
+- **Response compression** (`compression()` middleware): with no CDN in front, the origin is the only place API payloads get gzipped on the way to the browser.
+- **jti blacklist negative cache** (`server/src/lib/jtiCache.ts`): `authenticate` hit NeonDB on every authed request to check the (near-empty) token blacklist. Now a "not blacklisted" verdict is cached for 5s, removing that round-trip for active sessions. Only negative results are cached, and `blacklistAccessJti()` invalidates the entry so same-process logout / "This wasn't me" is immediate — the ≤5s window only applies across separate processes, and Hostinger runs one.
+- **Admin stats cache** (`adminService.getStats`): the three dashboard aggregate queries are cached for 30s. Snapshots are computed together so they stay internally consistent (`Σ byStatus == totalBookings`); the D79 Admin Newman suite is unaffected.
+- **Neon pooling documented** (`server/.env.example`): require the `-pooler` runtime host and document `connection_limit`/`pool_timeout` so the persistent Hostinger process doesn't exhaust Neon's connection ceiling. Local `.env` updated; the deployed Hostinger env still needs the same params applied + a restart (tracked in TASKS.md).
+- Validated with `npm run typecheck` (clean) and a manual auth smoke test (login → authed request → logout → immediate 401). No changes to payment idempotency, the state machine, webhook raw-body handling, or middleware-order semantics.
+
+## [2026-07-11] — perf: shared scroll-reveal observers + bundle-size CI guardrail
+
+**Branch: `fix/client-performance-audit` (phase 2). Closes audit finding 7 and adds the long-term "CI budget check" recommendation, adapted to this repo's actual toolchain.**
+
+- **`useInView.ts` now shares IntersectionObservers**: the hook previously opened one browser observer per animated element — the homepage alone renders ~28 `AnimateIn`/`CountUp` instances. Refactored to one shared observer per distinct `(threshold, rootMargin)` pair via a module-level registry; public API (`[ref, visible]`, options, defaults) is unchanged, so every call site (`AnimateIn.tsx`, `CountUp.tsx`, homepage, pricing, all 5 service pages) needed zero edits.
+- **New build-time bundle-size guardrail** (`client/scripts/check-bundle-budget.mjs`, wired as `postbuild`): fails `npm run build` if any `public/` asset or `.next/static/chunks/*.js` file exceeds its budget (hero video ≤3MB, other public assets ≤200KB each, largest JS chunk ≤400KB, total chunks ≤2.5MB). This repo has no CI workflows, so the check runs on every local and Hostinger-deploy build instead — it would have caught the original 11MB unposterred hero video before it ever shipped. Negative-tested with a temporary oversized dummy file (never committed).
+
+## [2026-07-11] — perf: client bundle & rendering audit fixes
+
+**Branch: `fix/client-performance-audit`. Implements findings 1–6 of the Next.js performance audit (finding 7, the homepage scroll-reveal refactor, deferred — low impact vs. prototype-parity regression risk).**
+
+- **`/public` assets now cache immutably**: `hero-section.mp4`, `hero-poster.jpg`, and `logo.png` were served with `Cache-Control: max-age=0` (Next's unconfigured default) while hashed `/_next/static` chunks already got a full year — added an explicit `headers()` rule in `next.config.ts`. Also enabled AVIF (alongside WebP) and raised the image-optimizer cache TTL to 31 days.
+- **Hero video compressed 11.18 MB → 1.65 MB** (1080p → 720p H.264, CRF 28) with a new poster frame + `preload="metadata"`, replacing the previous unposterred autoplay that painted a blank box until the full file downloaded.
+- **Logo source shrunk 908 KB → 51 KB** (1254×1254 → 256×256) — the optimizer already delivered correctly-sized bytes to users, but every first request paid a full decode of the oversized source, and it bloated every checkout/deploy.
+- **react-calendly code-split out of the root layout**: it previously shipped (~16 KB gzip) on every route including `/privacy`, `/terms`, the 404 page, and the entire admin/dashboard surface. Moved the listener to `(public)/layout.tsx` via a new `CalendlyListenerLoader`, and `RequestCallbackButton` now defers loading the popup module until the first click.
+- **Dashboard bookings fetch now starts concurrently with the auth check** instead of waiting for it — `bookingApi.list` only needs the raw cookie header, not the resolved user, so the two requests no longer run serially.
+- Verified via production `next build` + `next start` + `curl` header inspection, `.next` chunk-manifest analysis, and route-table diffing against baseline; see the audit artifact for full evidence. Logged-in dashboard render path flagged for staging QA (Express API not reachable in the dev sandbox this was built in).
+
 ## [2026-07-08] — fix: resolve production deploy blockers on the split Hostinger frontend/backend repos
 
 **See D93, ERROR.md #9–#11.**

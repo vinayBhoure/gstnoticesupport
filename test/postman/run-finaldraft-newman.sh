@@ -37,7 +37,7 @@ for pair in "ADMIN_EMAIL:$ADMIN_EMAIL" "ADMIN_PASSWORD:$ADMIN_PASSWORD"; do
   fi
 done
 
-TEST_USER_PASSWORD="FinalDraftUser#12345"
+TEST_USER_PASSWORD="${TEST_USER_PASSWORD:-FinalDraftUser#12345}"
 
 echo "→ Minting final-draft fixtures (draft_ready/filing/complete bookings + test user)…"
 FIXTURE_OUT="$(cd ../../server && TEST_USER_PASSWORD="$TEST_USER_PASSWORD" npx --no-install tsx scripts/setup-final-draft-fixtures.mjs)"
