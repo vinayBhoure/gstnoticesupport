@@ -304,7 +304,7 @@
 ### Security Audit Follow-ups (D96 — deferred items from `required_changes.md`)
 | Status | Phase·Layer·Priority | Task | Notes |
 |---|---|---|---|
-| ⬚ | P2·server·P2 | Re-run Newman suites against a live server after the rate-limit changes | OTP resend 429 <60s; booking cap 429 past 30/day — adjust any test that trips these |
+| 🔄 | P2·server·P2 | Re-run `run-representation-newman.sh` + `run-payments-newman.sh` end-to-end for a full clean confirmation | 3/5 suites already 100% clean (D97); these two hit the new `BOOKING_LIMIT` cap from same-day test volume, not a bug — re-run once the 24h window clears, before any prod deploy touching payment/booking-creation |
 | ⬚ | P2·server·P1 | Verify `trust proxy` hop count on Railway (log `req.ip` once live) | raise to 2 if Cloudflare is fronted; identity-keyed caps are unaffected either way |
 | ⬚ | P2·both·P2 | CAPTCHA (Cloudflare Turnstile) on signup / forgot-password / contact / callback | needs sitekey+secret; client widget + server `siteverify` guard |
 | ⬚ | P2·infra·P2 | Cloudflare-in-front of Railway for edge rate limiting / WAF | Railway has no configurable edge limits |

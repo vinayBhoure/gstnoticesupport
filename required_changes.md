@@ -54,9 +54,38 @@ authentication (`BAD_REQUEST_ERROR: Authentication failed`) — reproduced with 
 `razorpay` SDK call made outside the application entirely, so it cannot be caused by
 anything in this branch. All non-Razorpay-dependent assertions in both suites (auth checks,
 ownership 404s, state-gate 409s, webhook signature verification, idempotent webhook replay,
-quote-required/rejected validation, stats/list filtering) passed. **Action needed:** re-run
-`run-payments-newman.sh` and `run-representation-newman.sh` in an environment with a valid
-Razorpay **test**-mode key pair before treating this branch as fully verified.
+quote-required/rejected validation, stats/list filtering) passed.
+
+### Follow-up (2026-07-16): Razorpay credentials fixed, verification closed with high confidence
+
+The user supplied a working `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` pair. Re-verified
+independently with a raw SDK order-creation call outside the app (`ORDER CREATED OK:
+order_TEBwthOEgMxJQz`) — the credential root cause above is resolved.
+
+Re-running the full suite that day surfaced a **second, unrelated, expected** effect: the
+admin test account had made 42 `POST /bookings` calls within 24h across the day's repeated
+Newman runs, tripping the new `BOOKING_LIMIT` cap (§1.2) — the cap working as designed, not
+a bug. This in turn blocked further live confirmation of the Razorpay-dependent assertions
+in `run-representation-newman.sh` and `run-payments-newman.sh` for the rest of that day
+(cap resets on a rolling 24h window per booking). The pre-existing `paymentInitiateRateLimiter`
+(5/hr, unrelated to this branch) was separately exhausted the same way.
+
+**Decision (user-approved, 2026-07-16):** accept the independent Razorpay SDK verification
+plus the fully-clean earlier isolated run (all non-Razorpay assertions passing in both
+suites) as sufficient evidence, rather than wait ~5h for the booking cap to clear or
+authorize deleting the test-only booking rows to force an immediate clean run. **Full
+green Newman confirmation of `run-payments-newman.sh` and `run-representation-newman.sh`
+end-to-end has not been captured in one single run** — re-run both once convenient (the
+cap self-clears; no code action needed) for a belt-and-suspenders confirmation before a
+production deploy that touches payment or booking-creation code paths.
+
+**Operational note for future test runs:** `run-representation-newman.sh` and
+`run-payments-newman.sh` both create bookings via the real `POST /bookings` API (unlike
+the admin/final-draft suites, which seed bookings via direct Prisma in
+`scripts/setup-*.mjs`, bypassing the cap entirely). Repeated same-day runs against a shared
+admin/test account can trip the 30/24h `BOOKING_LIMIT` cap purely from test volume — this
+is expected, not a regression, and is worth knowing before debugging a sudden 429 in these
+two suites specifically.
 
 ---
 

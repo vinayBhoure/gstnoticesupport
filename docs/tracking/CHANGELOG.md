@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-07-16] — chore: security-audit Newman verification closed out (D97)
+
+**No code changes — verification only. See D97 and `required_changes.md`.**
+
+- Confirmed the previously-broken Razorpay test credentials (D96) are fixed, independently, via a raw SDK order-creation call outside the app.
+- Full suite re-run: core booking (68/68), admin (109/109), and final-draft (53/53) all clean. Representation and payments suites hit the new `BOOKING_LIMIT` cap (D96) purely from test volume — the shared admin test account made 42 `POST /bookings` calls in 24h across the day's repeated runs — plus the pre-existing `paymentInitiateRateLimiter`. Both are expected side effects of the cap working correctly against test traffic, not regressions.
+- By explicit decision, accepted the independent Razorpay verification + the earlier isolated run's fully-clean non-Razorpay assertions as sufficient, rather than wait for the caps to clear or delete test data. One outstanding action: re-run `run-representation-newman.sh` and `run-payments-newman.sh` once convenient (no code action needed — the caps self-clear) before any production deploy touching payment or booking-creation paths.
+
 ## [2026-07-15] — security: six-pass AppSec audit — rate limiting, upload verification, headers, leak hardening
 
 **Branch: `fix/server-performance` (phase 2). Findings and rationale in D96; deferred items tracked in `required_changes.md`. Deployment context corrected Hostinger → Railway.**
