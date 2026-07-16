@@ -120,6 +120,14 @@ export const bookingRepository = {
     });
   },
 
+  // Count bookings a user created since a cutoff — backs the per-user daily creation cap
+  // (audit Pass 4). Uses the existing @@index([userId]) + @@index([createdAt]).
+  async countByUserIdSince(userId: string, since: Date): Promise<number> {
+    return prisma.booking.count({
+      where: { userId, createdAt: { gte: since } },
+    });
+  },
+
   async findByIdForAdmin(id: string): Promise<AdminBookingDetailRow | null> {
     return prisma.booking.findUnique({
       where: { id },

@@ -83,6 +83,10 @@ export async function getDownloadUrl(key: string): Promise<string> {
   const command = new GetObjectCommand({
     Bucket: env.AWS_S3_BUCKET_NAME,
     Key: key,
+    // Pin the response type so a mislabeled object can never be sniffed/rendered as
+    // HTML/SVG in the viewer's browser — it is always served as a PDF. Preserves
+    // inline draft viewing while closing the stored-XSS vector (audit Pass 6 Finding A).
+    ResponseContentType: CONTENT_TYPE_PDF,
   });
   return getSignedUrl(s3Client, command, { expiresIn: DRAFT_URL_EXPIRY_SECONDS });
 }

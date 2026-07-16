@@ -52,6 +52,24 @@ export const paymentService = {
     // admin's per-booking quote for consultation-priced representation. Never from the client.
     const amountPaise = getBookingAmountPaise(booking);
 
+    // One active order per booking: reuse an existing open order on retry / double-click
+    // instead of minting a duplicate Razorpay order + payment_records row (audit Pass 4).
+    const activeOrder = await paymentRepository.findActiveByBookingId(booking.id);
+    if (activeOrder) {
+      return {
+        orderId: activeOrder.razorpayOrderId,
+        amountPaise: activeOrder.amountPaise,
+        currency: 'INR',
+        keyId: env.RAZORPAY_KEY_ID,
+        prefill: {
+          name: booking.contactName,
+          email: booking.contactEmail,
+          contact: booking.contactPhone,
+        },
+        callbackUrl: `${env.CLIENT_URL}/payment/verify?booking_id=${encodeURIComponent(booking.id)}`,
+      };
+    }
+
     let order;
     try {
       order = await createOrder({
