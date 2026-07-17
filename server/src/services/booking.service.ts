@@ -1,4 +1,5 @@
 import { bookingRepository } from '../repositories/booking.repository';
+import { userRepository } from '../repositories/user.repository';
 import { notificationService } from './notification.service';
 import { assertUserCancellable } from './booking-state-machine';
 import { ApiError } from '../utils/ApiError';
@@ -26,14 +27,24 @@ export const bookingService = {
 
     const booking = await bookingRepository.create({ userId, ...input });
 
-    // Best-effort — email failure must never block the booking creation.
-    notificationService
-      .sendBookingCreated({
-        id: booking.id,
-        serviceType: booking.serviceType,
-        contactName: booking.contactName,
-        contactEmail: booking.contactEmail,
-        gstn: booking.gstn,
+    // Best-effort — email failure must never block the booking creation. Notifications
+    // go to the account holder (who may be booking for a client), never the booking's
+    // own contact email — that field is informational only.
+    userRepository
+      .findById(userId)
+      .then((user) => {
+        if (!user) return;
+        return notificationService.sendBookingCreated(
+          { name: user.name, email: user.email },
+          {
+            id: booking.id,
+            serviceType: booking.serviceType,
+            contactName: booking.contactName,
+            contactEmail: booking.contactEmail,
+            organizationName: booking.organizationName,
+            gstn: booking.gstn,
+          },
+        );
       })
       .catch(() => {
         // Intentionally suppressed — emailService already logs internally.
@@ -69,12 +80,20 @@ export const bookingService = {
     const updated = await bookingRepository.updateStatus(id, 'cancelled');
 
     // Best-effort — email failure must never block the cancellation.
-    notificationService
-      .sendBookingCancelled({
-        id: updated.id,
-        serviceType: updated.serviceType,
-        contactName: updated.contactName,
-        contactEmail: updated.contactEmail,
+    userRepository
+      .findById(userId)
+      .then((user) => {
+        if (!user) return;
+        return notificationService.sendBookingCancelled(
+          { name: user.name, email: user.email },
+          {
+            id: updated.id,
+            serviceType: updated.serviceType,
+            contactName: updated.contactName,
+            contactEmail: updated.contactEmail,
+            organizationName: updated.organizationName,
+          },
+        );
       })
       .catch(() => {
         // Intentionally suppressed — emailService already logs internally.
