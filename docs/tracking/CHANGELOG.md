@@ -5,6 +5,36 @@
 
 ---
 
+## [2026-07-17] — feat: mobile number required to access the dashboard (WhatsApp-notification prerequisite)
+
+**Branch: `fix/notification-flow`.**
+
+- **Every dashboard route now blocks access until a phone number is on file.** `(dashboard)/layout.tsx` — the single auth gate for the whole dashboard route group (both the sidebar shell and the chromeless booking-flow wizard) — now redirects to `/complete-profile` whenever `user.phone` is null, right after the existing `requireUser()`/admin check. The `complete-profile` page and its `POST /auth/complete-profile` endpoint are unchanged and reused as-is (D67's one-time-step guard already prevents re-submission once a phone exists).
+- **Login and re-visiting `/login`/`/signup` while authenticated route phone-less users straight to complete-profile** instead of bouncing through the dashboard first: `LoginForm`'s post-login navigation and `redirectIfAuthenticated` (used by both auth pages) now check `user.phone` before deciding the destination.
+- No server, schema, or endpoint changes — this is a client-side routing gate only, reusing 100% existing infrastructure. Presence-only (no OTP/verification step) — confirmed with the user; verification can be added once WhatsApp OTP infrastructure exists.
+- **Why now**: prerequisite for WhatsApp notifications (analysis in progress) — every notification event needs a reachable phone number, and today a user can use the whole platform indefinitely with `phone = null` (only collected at the optional complete-profile step).
+- Verified via `next build`: all 13 public marketing routes remain `○ Static` (unaffected — the gate lives entirely inside `(dashboard)`, not the public route group); `/complete-profile`, all dashboard routes, and auth pages compile and remain `ƒ Dynamic` as before. `tsc --noEmit` clean.
+
+## [2026-07-17] — fix: user-facing lifecycle emails now go to the booking account holder
+
+**Branch: `fix/notification-flow`.**
+
+- **All user-facing booking-lifecycle emails now address the account holder, not `booking.contactEmail`.** A user can book a service for their own business or on behalf of a client; the booking's `contactName`/`contactEmail`/`organizationName`/`gstn` describe the case, they are not a notification address. `sendBookingCreated`, `sendBookingCancelled`, `sendPaymentConfirmed`, `sendStatusInReview`, `sendDraftReady`, `sendDraftUpdated`, `sendFinalDraftReady`, `sendFinalDraftUpdated`, and `sendStatusComplete` now take an explicit `recipient: { name, email }` (the account holder, looked up via `booking.userId`) and send/greet using it.
+- Email bodies gain **"Filed for" (contact name) and, when present, "Organization"** rows so a user who books for multiple clients can tell bookings apart by the booking ID's context — GSTN intentionally omitted from the body.
+- Admin emails are unchanged — they still show the full contact/organization/GSTN details, since that's the case information the admin needs to work the booking.
+- Verified via a stubbed-`emailService` throwaway script (not committed): confirmed the account holder receives the email, `booking.contactEmail` never appears as a recipient, and the body renders both the account holder's name and the client's org/contact name.
+- `tsc --noEmit` clean.
+
+## [2026-07-17] — fix: notification-flow audit gaps (login, document upload, payment receipt)
+
+**Branch: `fix/notification-flow`. Audit findings and this fix traced through `notification.service.ts` and `emails/templates.ts`.**
+
+- **Admin no longer emailed on user login** — `sendLoginAlerts` sent both a user security alert and an admin-informational email on every sign-in; the notification matrix requires user-only. Removed the admin leg and deleted the now-unused `loginAlertAdmin` template. User's "This wasn't me" alert is unchanged.
+- **New: admin is notified on first document upload** — previously no email fired anywhere in the upload path, so the admin had no signal that a booking (manually transitioned `document_upload → in_review`) was ready to review. Added `sendDocumentsUploaded` (admin-only) firing exactly once per booking, on the first confirmed upload (`document.service.ts` checks `booking.documents.length === 0` at confirm time) — not on every file, to avoid up to 8 emails per booking.
+- **Payment confirmation emails now carry a Razorpay reference** — `paymentConfirmedUser`/`paymentConfirmedAdmin` previously showed only amount and booking ID. Added `razorpayPaymentId`, `razorpayOrderId`, and an IST-formatted capture date to both, sourced from the existing capture params in `payment.service.ts#processCaptured` (no schema change).
+- Verified via a stubbed-`emailService` throwaway script (not committed): login sends exactly 1 email (user only), document upload sends exactly 1 email (admin only), payment confirmation sends exactly 2 (user + admin) with receipt fields populated.
+- `tsc --noEmit` clean on `server/`. No ESLint config exists in `server/` (pre-existing gap, tracked separately) — not run.
+
 ## [2026-07-16] — chore: security-audit Newman verification closed out (D97)
 
 **No code changes — verification only. See D97 and `required_changes.md`.**
