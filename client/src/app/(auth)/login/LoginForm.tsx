@@ -35,8 +35,13 @@ export function LoginForm({ returnTo }: LoginFormProps) {
     onSuccess: ({ user }) => {
       // Cross-origin auth requires the browser to receive Set-Cookie directly from
       // the backend, so login runs client-side and we navigate here. Access control
-      // is still enforced server-side by requireUser()/requireAdmin() in the layouts.
-      router.push(returnTo ?? (user.role === 'admin' ? '/admin' : '/dashboard'));
+      // is still enforced server-side by requireUser()/requireAdmin() in the layouts —
+      // the (dashboard) layout re-checks user.phone regardless of this navigation.
+      if (user.role !== 'admin' && !user.phone) {
+        router.push('/complete-profile');
+      } else {
+        router.push(returnTo ?? (user.role === 'admin' ? '/admin' : '/dashboard'));
+      }
       router.refresh();
     },
     onError: (error) => {

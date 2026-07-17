@@ -1,6 +1,7 @@
 import { Prisma, BookingStatus } from '@prisma/client';
 import { bookingRepository } from '../repositories/booking.repository';
 import { documentRepository } from '../repositories/document.repository';
+import { notificationService } from './notification.service';
 import {
   buildDocumentKey,
   getUploadUrl,
@@ -71,6 +72,10 @@ export const documentService = {
       throw new ApiError(409, 'DUPLICATE_KEY', 'This document has already been recorded');
     }
 
+    // Booking was fetched before this document was created, so an empty list here
+    // means this is the first upload for the booking — the one-time admin signal.
+    const isFirstUpload = booking.documents.length === 0;
+
     try {
       const document = await documentRepository.create({
         bookingId,
@@ -78,6 +83,21 @@ export const documentService = {
         fileName: input.fileName,
         s3Key: input.s3Key,
       });
+
+      if (isFirstUpload) {
+        // Best-effort — email failure must never block the upload confirmation.
+        notificationService
+          .sendDocumentsUploaded({
+            id: booking.id,
+            serviceType: booking.serviceType,
+            contactName: booking.contactName,
+            contactEmail: booking.contactEmail,
+          })
+          .catch(() => {
+            // Intentionally suppressed — emailService already logs internally.
+          });
+      }
+
       return toBookingDocumentDTO(document);
     } catch (error) {
       // Unique-constraint race backstop (HLD §10.4 idempotency via unique s3Key).

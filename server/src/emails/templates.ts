@@ -52,6 +52,31 @@ function formatRupees(amountPaise: number): string {
   return `₹${rupees.toLocaleString('en-IN')}`;
 }
 
+// IST date/time for the payment receipt, e.g. "17 Jul 2026, 3:42 pm IST".
+function formatReceiptDate(date: Date): string {
+  const formatted = date.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+  return `${formatted} IST`;
+}
+
+// User-facing lifecycle emails go to the account holder, who may be booking on
+// behalf of a client — these rows identify which booking the email is about
+// (contactName/organizationName are the booking's own case details, informational
+// only, never the recipient). GSTN is intentionally omitted here.
+function clientInfoRows(contactName: string, organizationName?: string | null): string {
+  const orgRow = organizationName
+    ? `<li>Organization: ${escapeHtml(organizationName)}</li>`
+    : '';
+  return `<li>Filed for: ${escapeHtml(contactName)}</li>${orgRow}`;
+}
+
 export function signupOtp(data: { name: string; otp: string }): EmailContent {
   return {
     subject: 'Verify your email — GST Notice Support',
@@ -99,24 +124,6 @@ export function loginAlert(data: {
   };
 }
 
-export function loginAlertAdmin(data: {
-  userEmail: string;
-  ip: string;
-  userAgent: string;
-}): EmailContent {
-  return {
-    subject: 'Account sign-in notification — GST Notice Support',
-    html: layout(`
-      <p>A user signed in:</p>
-      <ul style="color:${MUTED};">
-        <li>User: ${escapeHtml(data.userEmail)}</li>
-        <li>IP address: ${escapeHtml(data.ip)}</li>
-        <li>Device: ${escapeHtml(data.userAgent)}</li>
-      </ul>
-    `),
-  };
-}
-
 export function accountCreatedAdmin(data: { userEmail: string; userId: string }): EmailContent {
   return {
     subject: 'New account created — GST Notice Support',
@@ -138,6 +145,8 @@ export function bookingCreatedUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
   dashboardUrl: string;
 }): EmailContent {
   return {
@@ -148,6 +157,7 @@ export function bookingCreatedUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
       </ul>
       <p style="margin:24px 0;">${button(data.dashboardUrl, 'Upload documents')}</p>
       <p style="color:${MUTED};">You will receive a notification once our team has reviewed your submission.</p>
@@ -182,6 +192,8 @@ export function bookingCancelledUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
 }): EmailContent {
   return {
     subject: 'Booking cancelled — GST Notice Support',
@@ -191,6 +203,7 @@ export function bookingCancelledUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
       </ul>
       <p>If you need further assistance, please contact us via WhatsApp or create a new booking.</p>
     `),
@@ -217,6 +230,34 @@ export function bookingCancelledAdmin(data: {
 }
 
 // ============================================================
+// Document upload notifications (admin only)
+// ============================================================
+
+// Fired once per booking, on the user's first confirmed document upload — not on
+// every file — so the admin gets a single "ready to review" signal instead of up
+// to 8 emails per booking.
+export function documentsUploadedAdmin(data: {
+  bookingId: string;
+  serviceType: string;
+  contactName: string;
+  contactEmail: string;
+  dashboardUrl: string;
+}): EmailContent {
+  return {
+    subject: `Documents uploaded — ${escapeHtml(data.serviceType)} — GST Notice Support`,
+    html: layout(`
+      <p>A user has started uploading documents for their booking:</p>
+      <ul style="color:${MUTED};">
+        <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
+        <li>Service: ${escapeHtml(data.serviceType)}</li>
+        <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+      </ul>
+      <p style="margin:24px 0;">${button(data.dashboardUrl, 'View in admin panel')}</p>
+    `),
+  };
+}
+
+// ============================================================
 // Phase 5 — Payment notifications
 // ============================================================
 
@@ -224,8 +265,13 @@ export function paymentConfirmedUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
   amountPaise: number;
   draftUrl: string;
+  razorpayPaymentId: string;
+  razorpayOrderId: string;
+  paidAt: Date;
 }): EmailContent {
   return {
     subject: 'Payment confirmed — your draft is now available',
@@ -235,6 +281,14 @@ export function paymentConfirmedUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
+      </ul>
+      <p style="margin:20px 0 8px;font-weight:bold;">Payment receipt</p>
+      <ul style="color:${MUTED};">
+        <li>Payment ID: ${escapeHtml(data.razorpayPaymentId)}</li>
+        <li>Order ID: ${escapeHtml(data.razorpayOrderId)}</li>
+        <li>Amount: ${escapeHtml(formatRupees(data.amountPaise))}</li>
+        <li>Date: ${escapeHtml(formatReceiptDate(data.paidAt))}</li>
       </ul>
       <p style="margin:24px 0;">${button(data.draftUrl, 'View your draft')}</p>
       <p style="color:${MUTED};">Our team will proceed with the filing stage and keep you updated.</p>
@@ -248,6 +302,9 @@ export function paymentConfirmedAdmin(data: {
   contactName: string;
   contactEmail: string;
   amountPaise: number;
+  razorpayPaymentId: string;
+  razorpayOrderId: string;
+  paidAt: Date;
 }): EmailContent {
   return {
     subject: `Payment received — ${escapeHtml(data.serviceType)} — GST Notice Support`,
@@ -258,6 +315,9 @@ export function paymentConfirmedAdmin(data: {
         <li>Service: ${escapeHtml(data.serviceType)}</li>
         <li>Amount: ${escapeHtml(formatRupees(data.amountPaise))}</li>
         <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
+        <li>Payment ID: ${escapeHtml(data.razorpayPaymentId)}</li>
+        <li>Order ID: ${escapeHtml(data.razorpayOrderId)}</li>
+        <li>Date: ${escapeHtml(formatReceiptDate(data.paidAt))}</li>
       </ul>
     `),
   };
@@ -307,6 +367,8 @@ export function statusInReviewUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
   dashboardUrl: string;
 }): EmailContent {
   return {
@@ -317,6 +379,7 @@ export function statusInReviewUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
       </ul>
       <p style="margin:24px 0;">${button(data.dashboardUrl, 'View booking')}</p>
     `),
@@ -327,6 +390,8 @@ export function draftReadyUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
   dashboardUrl: string;
 }): EmailContent {
   return {
@@ -337,6 +402,7 @@ export function draftReadyUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
       </ul>
       ${preDepositBlock(data.serviceType)}
       <p style="margin:24px 0;">${button(data.dashboardUrl, 'Review & pay to unlock')}</p>
@@ -348,6 +414,8 @@ export function draftUpdatedUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
   dashboardUrl: string;
 }): EmailContent {
   return {
@@ -358,6 +426,7 @@ export function draftUpdatedUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
       </ul>
       ${preDepositBlock(data.serviceType)}
       <p style="margin:24px 0;">${button(data.dashboardUrl, 'Review & pay to unlock')}</p>
@@ -369,6 +438,8 @@ export function finalDraftReadyUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
   dashboardUrl: string;
 }): EmailContent {
   return {
@@ -379,6 +450,7 @@ export function finalDraftReadyUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
       </ul>
       <p style="margin:24px 0;">${button(data.dashboardUrl, 'View final draft')}</p>
     `),
@@ -389,6 +461,8 @@ export function finalDraftUpdatedUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
   dashboardUrl: string;
 }): EmailContent {
   return {
@@ -399,6 +473,7 @@ export function finalDraftUpdatedUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
       </ul>
       <p style="margin:24px 0;">${button(data.dashboardUrl, 'View final draft')}</p>
     `),
@@ -409,6 +484,8 @@ export function statusCompleteUser(data: {
   name: string;
   bookingId: string;
   serviceType: string;
+  contactName: string;
+  organizationName?: string | null;
   dashboardUrl: string;
 }): EmailContent {
   return {
@@ -419,6 +496,7 @@ export function statusCompleteUser(data: {
       <ul style="color:${MUTED};">
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
+        ${clientInfoRows(data.contactName, data.organizationName)}
       </ul>
       <p style="margin:24px 0;">${button(data.dashboardUrl, 'View booking')}</p>
     `),
