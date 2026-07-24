@@ -24,10 +24,12 @@ export function SignupForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<z.input<typeof signupSchema>, unknown, SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: { termsAccepted: false, allowPromotions: false },
+    mode: 'onChange',
+    delayError: 400,
   });
 
   const mutation = useMutation({
@@ -120,7 +122,7 @@ export function SignupForm() {
         <button
           type="submit"
           className="btn btn-primary btn-block mt-1"
-          disabled={mutation.isPending}
+          disabled={!isValid || mutation.isPending}
           aria-busy={mutation.isPending}
         >
           {mutation.isPending ? 'Creating account…' : 'Create Account'}
