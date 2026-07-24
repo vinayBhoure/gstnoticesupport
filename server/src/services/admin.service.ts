@@ -356,7 +356,7 @@ export const adminService = {
     const document = booking.documents.find((doc) => doc.id === documentId);
     if (!document) throw new ApiError(404, 'NOT_FOUND', 'Document not found');
 
-    const downloadUrl = await getDownloadUrl(document.s3Key);
+    const downloadUrl = await getDownloadUrl(document.s3Key, { downloadFileName: document.fileName });
     return {
       downloadUrl,
       fileName: document.fileName,
