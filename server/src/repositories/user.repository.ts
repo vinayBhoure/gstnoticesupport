@@ -17,6 +17,16 @@ export const userRepository = {
     return prisma.user.findFirst({ where: { email } });
   },
 
+  // `mobile` is the canonical bare-10-digit form. Legacy rows may still hold
+  // +91/91/0-prefixed variants from before strict validation was added, so all
+  // four are matched. orderBy keeps the result deterministic if any duplicates exist.
+  async findByPhone(mobile: string): Promise<User | null> {
+    return prisma.user.findFirst({
+      where: { phone: { in: [mobile, `+91${mobile}`, `91${mobile}`, `0${mobile}`] } },
+      orderBy: { createdAt: 'asc' },
+    });
+  },
+
   async create(data: {
     name: string;
     email: string;

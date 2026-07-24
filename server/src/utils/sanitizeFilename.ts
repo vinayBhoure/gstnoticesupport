@@ -12,3 +12,19 @@ export function sanitizeFilename(filename: string): string {
     .slice(0, 80);
   return cleaned.length > 0 ? cleaned : 'document';
 }
+
+// Sanitizes a filename for the Content-Disposition download header. Unlike
+// sanitizeFilename (S3 key stem), this keeps the name human-readable — spaces
+// and parens survive — while stripping path separators, quotes, and CR/LF
+// (which would otherwise let a stored filename inject extra HTTP headers).
+export function sanitizeDownloadFilename(filename: string): string {
+  const base = filename.split(/[\\/]/).pop() ?? filename;
+  const cleaned = base
+    .normalize('NFKD')
+    .replace(/[^\x20-\x7E]/g, '')
+    .replace(/[^A-Za-z0-9 ._()-]+/g, '-')
+    .trim()
+    .slice(0, 150);
+  const withExt = cleaned.toLowerCase().endsWith('.pdf') ? cleaned : `${cleaned}.pdf`;
+  return withExt.length > 4 ? withExt : 'document.pdf';
+}

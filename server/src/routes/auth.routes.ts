@@ -10,12 +10,14 @@ import {
   otpResendRateLimiter,
   forgotPasswordRateLimiter,
   resetPasswordRateLimiter,
+  phoneCheckRateLimiter,
 } from '../lib/rateLimiter';
 import {
   signupSchema,
   verifyOtpSchema,
   resendOtpSchema,
   completeProfileSchema,
+  checkPhoneSchema,
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -29,6 +31,7 @@ router.post('/signup', signupRateLimiter, validateBody(signupSchema), authContro
 router.post('/verify-otp', otpVerifyRateLimiter, validateBody(verifyOtpSchema), authController.verifyOtp);
 router.post('/resend-otp', otpResendRateLimiter, validateBody(resendOtpSchema), authController.resendOtp);
 router.post('/complete-profile', authenticate, validateBody(completeProfileSchema), authController.completeProfile);
+router.post('/check-phone', authenticate, phoneCheckRateLimiter, validateBody(checkPhoneSchema), authController.checkPhone);
 router.post('/login', loginRateLimiter, validateBody(loginSchema), authController.login);
 router.post('/refresh', refreshRateLimiter, authController.refresh);
 router.post('/logout', authenticate, authController.logout);

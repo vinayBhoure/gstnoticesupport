@@ -73,6 +73,14 @@ export const otpResendRateLimiter = createRateLimiter({
   message: 'Too many code requests. Please try again in an hour.',
 });
 
+// Debounced client-side checks retry a few times per keystroke burst; 30/15min
+// absorbs that while still blunting bulk phone-number enumeration.
+export const phoneCheckRateLimiter = createRateLimiter({
+  windowMs: 15 * MIN,
+  max: 30,
+  message: 'Too many checks. Please try again later.',
+});
+
 export const forgotPasswordRateLimiter = createRateLimiter({
   windowMs: HOUR,
   max: 5,

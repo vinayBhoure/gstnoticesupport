@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { adminApi } from '@/lib/api/admin';
 import { getErrorMessage } from '@/lib/api/client';
 import { formatBookingDate } from '@/lib/constants/booking-status';
+import { triggerFileDownload } from '@/lib/download';
 import type { BookingDocumentDTO } from '@/lib/api/types';
 
 type AdminDocumentListProps = {
@@ -22,7 +23,7 @@ export function AdminDocumentList({ bookingId, documents }: AdminDocumentListPro
     setPendingId(doc.id);
     try {
       const { downloadUrl } = await adminApi.getDocumentDownloadUrl(bookingId, doc.id);
-      window.open(downloadUrl, '_blank', 'noopener');
+      triggerFileDownload(downloadUrl);
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
