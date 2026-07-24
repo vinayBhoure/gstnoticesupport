@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-07-24] — feat: admin direct download, signup/mobile validation gating, login via email or mobile
+
+**Branch: `feature/phase-2/auth-ux-improvements` (from `development`).**
+
+- **Admin document download now downloads directly instead of opening a new tab.** `getDownloadUrl` (`server/src/lib/s3.ts`) accepts an optional `downloadFileName`; when passed, the pre-signed URL sets `ResponseContentDisposition: attachment; filename="..."` (sanitized via new `sanitizeDownloadFilename`). Only `admin.service.ts#getDocumentDownloadUrl` passes it — the user draft flow (`document.service.ts`) is untouched, so the Draft Viewer's inline iframe preview is unaffected. Client: new `client/src/lib/download.ts#triggerFileDownload` (hidden-anchor click) replaces `window.open(...)` in `AdminDocumentList.tsx`.
+- **Signup "Create Account" button is now disabled until the form is valid and terms are accepted.** `SignupForm` switches to `mode: 'onChange'` (`delayError: 400`) and gates the submit button on `formState.isValid`.
+- **Mobile-number registration (complete-profile) now enforces a strict 10-digit Indian mobile format and uniqueness.** `completeProfileSchema`/`user.schema.ts` phone fields switched from a loose `^\+?[0-9]{7,15}$` rule to `^[6-9]\d{9}$` (canonical bare-10-digit storage; the UI's `+91` prefix is unchanged). New `userRepository.findByPhone` (matches legacy `+91`/`91`/`0`-prefixed variants), enforced in both `authService.completeProfile` and `userService.updateProfile` (409 `PHONE_TAKEN`). New authenticated endpoint `POST /auth/check-phone` (30 req/15min limiter) backs a debounced (350ms) availability check in `CompleteProfileForm`, showing "Mobile number is already registered." inline; the phone input strips non-digits and caps at 10.
+- **Login now supports mobile number + password, in addition to email + password.** `loginSchema` accepts exactly one of `email`/`phone` (superRefine); `authService.login` looks up by whichever was provided, reusing the same password/verification/token logic. `LoginForm` adds a "Use mobile number instead" / "Use email instead" toggle below the identifier field; phone mode restricts input to 10 numeric digits.
+- No Prisma migration in this change — see decision D101 (phone uniqueness stays app-level for now).
+- `tsc --noEmit` clean on both `server/` and `client/`. `eslint` clean on `client/` (no config exists in `server/`, pre-existing gap). Not yet merged to `development` — pending user review.
+
 ## [2026-07-17] — feat: mobile number required to access the dashboard (WhatsApp-notification prerequisite)
 
 **Branch: `fix/notification-flow`.**
