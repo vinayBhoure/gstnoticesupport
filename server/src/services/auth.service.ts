@@ -107,13 +107,15 @@ export const authService = {
   },
 
   async login(input: LoginInput, ctx: LoginContext): Promise<AuthResult> {
-    const user = await userRepository.findByEmail(input.email);
+    const user = input.email
+      ? await userRepository.findByEmail(input.email)
+      : await userRepository.findByPhone(input.phone!);
     if (!user) {
-      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect email or password');
+      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect credentials');
     }
     const passwordMatches = await bcrypt.compare(input.password, user.hashedPassword);
     if (!passwordMatches) {
-      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect email or password');
+      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect credentials');
     }
     if (!user.emailVerified) {
       throw new ApiError(403, 'EMAIL_NOT_VERIFIED', 'Please verify your email before signing in');

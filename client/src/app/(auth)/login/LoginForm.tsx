@@ -23,12 +23,15 @@ type LoginFormProps = {
 export function LoginForm({ returnTo }: LoginFormProps) {
   const router = useRouter();
   const [banner, setBanner] = useState<Banner>(null);
+  const [method, setMethod] = useState<'email' | 'phone'>('email');
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema), shouldUnregister: true });
+
+  const identifierReg = register(method);
 
   const mutation = useMutation({
     mutationFn: authApi.login,
@@ -54,7 +57,11 @@ export function LoginForm({ returnTo }: LoginFormProps) {
         return;
       }
       // Generic — never disclose which credential was wrong (security).
-      setBanner({ kind: 'error', message: 'Email or password is incorrect.' });
+      setBanner({
+        kind: 'error',
+        message:
+          method === 'email' ? 'Email or password is incorrect.' : 'Mobile number or password is incorrect.',
+      });
     },
   });
 
@@ -96,14 +103,45 @@ export function LoginForm({ returnTo }: LoginFormProps) {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-        <Input
-          id="email"
-          label="Email Address"
-          type="email"
-          autoComplete="email"
-          error={errors.email?.message}
-          {...register('email')}
-        />
+        <div className="flex flex-col gap-1.5">
+          {method === 'email' ? (
+            <Input
+              id="email"
+              label="Email Address"
+              type="email"
+              autoComplete="email"
+              error={errors.email?.message}
+              {...identifierReg}
+            />
+          ) : (
+            <Input
+              id="phone"
+              label="Mobile Number"
+              type="tel"
+              telPrefix
+              inputMode="numeric"
+              maxLength={10}
+              autoComplete="tel"
+              placeholder="10-digit mobile number"
+              error={errors.phone?.message}
+              {...identifierReg}
+              onChange={(e) => {
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                identifierReg.onChange(e);
+              }}
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setMethod((m) => (m === 'email' ? 'phone' : 'email'));
+              setBanner(null);
+            }}
+            className="self-start text-[13px] font-semibold text-[var(--accent-green)] underline underline-offset-2"
+          >
+            {method === 'email' ? 'Use mobile number instead' : 'Use email instead'}
+          </button>
+        </div>
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-baseline justify-between gap-2">

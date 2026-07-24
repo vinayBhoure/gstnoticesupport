@@ -57,10 +57,23 @@ export const checkPhoneSchema = z.object({
   phone: indianMobileField,
 });
 
-export const loginSchema = z.object({
-  email: emailField,
-  password: z.string().min(1, 'Password is required'),
-});
+// Login accepts exactly one of email or mobile number (toggle in the UI).
+export const loginSchema = z
+  .object({
+    email: emailField.optional(),
+    phone: indianMobileField.optional(),
+    password: z.string().min(1, 'Password is required'),
+  })
+  .superRefine((data, ctx) => {
+    const provided = [data.email, data.phone].filter((v) => v !== undefined).length;
+    if (provided !== 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Provide your email or mobile number',
+        path: [data.phone !== undefined ? 'phone' : 'email'],
+      });
+    }
+  });
 
 export const forgotPasswordSchema = z.object({
   email: emailField,
