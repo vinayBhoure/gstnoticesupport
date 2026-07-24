@@ -19,12 +19,11 @@ const nameField = z
   .min(2, 'Name must be at least 2 characters')
   .max(100, 'Name must be at most 100 characters');
 
-const phoneField = z
+// Stored canonically as bare 10 digits; the UI shows a fixed +91 prefix.
+const indianMobileField = z
   .string()
   .trim()
-  .min(7, 'Phone number is too short')
-  .max(20, 'Phone number is too long')
-  .regex(/^\+?[0-9]{7,15}$/, 'Invalid phone number');
+  .regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number');
 
 const otpField = z.string().regex(/^[0-9]{6}$/, 'OTP must be 6 digits');
 
@@ -51,7 +50,11 @@ export const resendOtpSchema = z.object({
 
 export const completeProfileSchema = z.object({
   name: nameField,
-  phone: phoneField,
+  phone: indianMobileField,
+});
+
+export const checkPhoneSchema = z.object({
+  phone: indianMobileField,
 });
 
 export const loginSchema = z.object({
@@ -83,6 +86,7 @@ export type SignupInput = z.infer<typeof signupSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type ResendOtpInput = z.infer<typeof resendOtpSchema>;
 export type CompleteProfileInput = z.infer<typeof completeProfileSchema>;
+export type CheckPhoneInput = z.infer<typeof checkPhoneSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

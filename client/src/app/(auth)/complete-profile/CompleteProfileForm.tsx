@@ -4,28 +4,46 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
 import { completeProfileSchema, type CompleteProfileInput } from '@/lib/shared-schemas/auth.schema';
 import { AuthCardShell } from '@/components/layout/AuthCardShell';
 import { Input } from '@/components/ui/Input';
 import { authApi } from '@/lib/api/auth';
-import { getErrorMessage } from '@/lib/api/client';
+import { ApiRequestError, getErrorMessage } from '@/lib/api/client';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+
+const PHONE_TAKEN_MESSAGE = 'Mobile number is already registered.';
 
 type CompleteProfileFormProps = { defaultName: string };
 
 export function CompleteProfileForm({ defaultName }: CompleteProfileFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [phone, setPhone] = useState('');
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isValid },
   } = useForm<CompleteProfileInput>({
     resolver: zodResolver(completeProfileSchema),
     defaultValues: { name: defaultName, phone: '' },
+    mode: 'onChange',
+    delayError: 400,
   });
+
+  const debouncedPhone = useDebouncedValue(phone, 350);
+  const isPlausiblePhone = /^[6-9]\d{9}$/.test(debouncedPhone);
+
+  const phoneCheck = useQuery({
+    queryKey: ['phone-availability', debouncedPhone],
+    queryFn: () => authApi.checkPhone({ phone: debouncedPhone }),
+    enabled: isPlausiblePhone,
+    staleTime: 30_000,
+  });
+  const phoneTaken = isPlausiblePhone && phoneCheck.data?.available === false;
 
   const mutation = useMutation({
     mutationFn: authApi.completeProfile,
@@ -33,13 +51,27 @@ export function CompleteProfileForm({ defaultName }: CompleteProfileFormProps) {
       router.push('/dashboard');
       router.refresh();
     },
-    onError: (error) => setServerError(getErrorMessage(error)),
+    onError: (error) => {
+      if (error instanceof ApiRequestError && error.code === 'PHONE_TAKEN') {
+        setError('phone', { message: PHONE_TAKEN_MESSAGE });
+        return;
+      }
+      setServerError(getErrorMessage(error));
+    },
   });
 
   function onSubmit(data: CompleteProfileInput) {
     setServerError(null);
     mutation.mutate(data);
   }
+
+  const phoneReg = register('phone');
+  const submitDisabled =
+    !isValid ||
+    !isPlausiblePhone ||
+    phoneCheck.isFetching ||
+    phoneTaken ||
+    mutation.isPending;
 
   return (
     <AuthCardShell
@@ -71,15 +103,22 @@ export function CompleteProfileForm({ defaultName }: CompleteProfileFormProps) {
           label="Phone Number"
           type="tel"
           telPrefix
+          inputMode="numeric"
+          maxLength={10}
           placeholder="10-digit mobile number"
-          error={errors.phone?.message}
-          {...register('phone')}
+          error={errors.phone?.message ?? (phoneTaken ? PHONE_TAKEN_MESSAGE : undefined)}
+          {...phoneReg}
+          onChange={(e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
+            setPhone(e.target.value);
+            phoneReg.onChange(e);
+          }}
         />
 
         <button
           type="submit"
           className="btn btn-primary btn-block mt-1"
-          disabled={mutation.isPending}
+          disabled={submitDisabled}
           aria-busy={mutation.isPending}
         >
           {mutation.isPending ? 'Saving…' : 'Continue to Dashboard'}

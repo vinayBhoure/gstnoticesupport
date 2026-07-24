@@ -17,6 +17,8 @@ import type {
   ChangePasswordInput,
 } from '../schemas/auth.schema';
 
+type PhoneAvailability = { available: boolean };
+
 const BCRYPT_COST = 12;
 
 type AuthTokens = { accessToken: string; refreshToken: string };
@@ -88,11 +90,20 @@ export const authService = {
     if (user.phone) {
       throw new ApiError(409, 'CONFLICT', 'Profile has already been completed');
     }
+    const phoneOwner = await userRepository.findByPhone(input.phone);
+    if (phoneOwner) {
+      throw new ApiError(409, 'PHONE_TAKEN', 'Mobile number is already registered.');
+    }
     const updated = await userRepository.updateProfile(userId, {
       name: input.name,
       phone: input.phone,
     });
     return toUserDTO(updated);
+  },
+
+  async checkPhoneAvailability(userId: string, phone: string): Promise<PhoneAvailability> {
+    const owner = await userRepository.findByPhone(phone);
+    return { available: !owner || owner.id === userId };
   },
 
   async login(input: LoginInput, ctx: LoginContext): Promise<AuthResult> {
