@@ -9,6 +9,7 @@ import { Check } from 'lucide-react';
 import { updateProfileSchema, type UpdateProfileInput } from '@/lib/shared-schemas/user.schema';
 import { userApi } from '@/lib/api/user';
 import { getErrorMessage } from '@/lib/api/client';
+import { blockNonDigitKeyDown, stripNonDigits } from '@/lib/digit-input';
 
 type AccountSettingsFormProps = {
   name: string;
@@ -31,6 +32,8 @@ export function AccountSettingsForm({ name, email, phone, allowPromotions }: Acc
     resolver: zodResolver(updateProfileSchema),
     defaultValues: { name, phone: phone ?? '', allowPromotions },
   });
+
+  const phoneReg = register('phone', { setValueAs: (v) => (v === '' ? undefined : v) });
 
   const mutation = useMutation({
     mutationFn: (data: UpdateProfileInput) => userApi.updateProfile(data),
@@ -84,10 +87,16 @@ export function AccountSettingsForm({ name, email, phone, allowPromotions }: Acc
           <input
             type="tel"
             className="input"
-            inputMode="tel"
+            inputMode="numeric"
             autoComplete="tel"
+            maxLength={10}
             placeholder="e.g. 9800011122"
-            {...register('phone', { setValueAs: (v) => (v === '' ? undefined : v) })}
+            {...phoneReg}
+            onKeyDown={blockNonDigitKeyDown}
+            onChange={(e) => {
+              e.target.value = stripNonDigits(e.target.value, 10);
+              void phoneReg.onChange(e);
+            }}
           />
           {errors.phone && (
             <span className="text-sm text-[var(--warning-amber)]" role="alert">

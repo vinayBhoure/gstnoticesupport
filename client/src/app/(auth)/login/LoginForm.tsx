@@ -119,16 +119,10 @@ export function LoginForm({ returnTo }: LoginFormProps) {
               label="Mobile Number"
               type="tel"
               telPrefix
-              inputMode="numeric"
-              maxLength={10}
               autoComplete="tel"
               placeholder="10-digit mobile number"
               error={errors.phone?.message}
               {...identifierReg}
-              onChange={(e) => {
-                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                identifierReg.onChange(e);
-              }}
             />
           )}
           <button
@@ -143,9 +137,9 @@ export function LoginForm({ returnTo }: LoginFormProps) {
           </button>
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="field">
           <div className="flex items-baseline justify-between gap-2">
-            <label htmlFor="password" className="text-sm font-medium text-[var(--primary-navy)]">
+            <label htmlFor="password" className="field__label">
               Password
             </label>
             <Link

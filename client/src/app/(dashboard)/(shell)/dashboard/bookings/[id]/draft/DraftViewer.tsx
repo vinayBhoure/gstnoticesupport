@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, AlertTriangle, ArrowLeft, Download, Lock } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Download, Lock } from 'lucide-react';
 
 import { documentApi } from '@/lib/api/document';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 
 type DraftViewerProps = {
   bookingId: string;
@@ -61,21 +62,13 @@ export function DraftViewer({ bookingId, serviceLabel, hasFinalDraft }: DraftVie
 
   return (
     <>
-      <Link href={`/dashboard/bookings/${bookingId}`} className="back-link">
-        <ArrowLeft className="ic" aria-hidden /> Back to Service
-      </Link>
-
-      <nav className="breadcrumb" aria-label="Breadcrumb">
-        <Link href="/dashboard">Dashboard</Link>
-        <span className="sep" aria-hidden>
-          ›
-        </span>
-        <Link href={`/dashboard/bookings/${bookingId}`}>{serviceLabel}</Link>
-        <span className="sep" aria-hidden>
-          ›
-        </span>
-        <span className="current">View Draft</span>
-      </nav>
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: serviceLabel, href: `/dashboard/bookings/${bookingId}` },
+        ]}
+        current="View Draft"
+      />
 
       <div className="page-head">
         <h1>Draft Reply — {serviceLabel}</h1>

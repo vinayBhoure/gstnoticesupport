@@ -117,21 +117,33 @@ h3{font-size:24px;font-weight:600;line-height:1.3;}
 
 /* === Phase 2 === */
 
-/* Auth Card Shell */
+/* Auth Card Shell (resources/ui/Signup.html .auth-card — issue #13) */
 .auth-card{
   width:100%;max-width:440px;margin:0 auto;
   background:#fff;border:1px solid var(--neutral-200);
-  border-radius:var(--r-card);box-shadow:var(--shadow-md);
-  padding:40px 36px;
+  border-radius:var(--r-card);box-shadow:var(--shadow-sm);
+  padding:40px;
 }
-@media(max-width:480px){
-  .auth-card{padding:28px 20px;border-radius:0;border-left:none;border-right:none;}
+@media(max-width:640px){
+  .auth-card{padding:28px 22px;border-radius:12px;}
 }
+/* Auth trust strip — SSL/legal-name row, GSTIN row (D39: absent until set,
+   never a placeholder), policy links row, copyright (resources/ui/Signup.html
+   .trust-strip). */
 .auth-trust-strip{
-  display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;
-  margin-top:20px;font-size:12px;color:var(--neutral-600);
+  width:100%;display:flex;flex-direction:column;align-items:center;
+  gap:8px;margin-top:20px;padding:0 8px;text-align:center;
 }
-.auth-trust-strip span{display:flex;align-items:center;gap:4px;}
+.auth-trust-strip .row{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  gap:8px 18px;font-size:13px;color:var(--neutral-600);line-height:1.5;
+}
+.auth-trust-strip .row .item{display:inline-flex;align-items:center;gap:6px;}
+.auth-trust-strip .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;color:var(--neutral-600);}
+.auth-trust-strip .pols{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:13px;color:var(--neutral-600);}
+.auth-trust-strip .pols a{color:var(--neutral-600);}
+.auth-trust-strip .pols a:hover{color:var(--primary-navy);}
+.auth-trust-strip .copy{font-size:12px;color:var(--neutral-600);margin-top:2px;}
 
 /* OTP input boxes */
 .otp-box{
@@ -242,6 +254,9 @@ h3{font-size:24px;font-weight:600;line-height:1.3;}
 .input-suffix-btn:hover{color:var(--neutral-900);}
 .input-has-prefix{padding-left:52px;}
 .input-has-suffix{padding-right:44px;}
+/* Suppress the browser's own reveal/clear glyphs on password fields — the app
+   renders exactly one Eye/EyeOff toggle via .input-suffix-btn (issue #8). */
+.input::-ms-reveal,.input::-ms-clear{display:none;}
 
 @theme inline {
   --color-primary-navy: var(--primary-navy);
@@ -272,10 +287,10 @@ body{overflow-x:clip;}
 
 /* ---------- NAVBAR ---------- */
 .nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid var(--neutral-200);}
-.nav .row{display:flex;align-items:center;gap:28px;height:76px;transition:height .15s ease;}
-.nav.scrolled .row{height:62px;}
-.brand{display:flex;align-items:center;gap:11px;}
-.brand img{height:40px;width:40px;border-radius:7px;border:1px solid var(--neutral-200);object-fit:cover;}
+.nav .row{display:flex;align-items:center;gap:28px;height:84px;transition:height .15s ease;}
+.nav.scrolled .row{height:72px;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand img{height:64px;width:auto;border-radius:7px;border:1px solid var(--neutral-200);object-fit:contain;}
 .brand .bn{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:var(--primary-navy);letter-spacing:-.01em;}
 .brand .bn span{color:var(--accent-green);}
 .nav .links{display:flex;align-items:center;gap:26px;margin-left:6px;}
@@ -303,7 +318,7 @@ body{overflow-x:clip;}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(86vw,360px);background:#fff;z-index:120;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(10,37,64,.12);}
 .drawer.open{transform:translateX(0);}
 .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--neutral-200);}
-.drawer-head .brand img{height:36px;width:36px;border-radius:7px;border:1px solid var(--neutral-200);}
+.drawer-head .brand img{height:36px;width:auto;border-radius:7px;border:1px solid var(--neutral-200);object-fit:contain;}
 .drawer-head .brand .bn{font-weight:700;font-size:16px;color:var(--primary-navy);}
 .drawer-head .brand .bn span{color:var(--accent-green);}
 .drawer-close{width:44px;height:44px;background:none;border:none;cursor:pointer;color:var(--neutral-900);border-radius:var(--r-btn);display:flex;align-items:center;justify-content:center;}
@@ -931,9 +946,9 @@ body.drawer-open{overflow:hidden;}
    ===================================================== */
 .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--neutral-600);margin-bottom:20px;flex-wrap:wrap;}
 .breadcrumb a{color:var(--neutral-600);font-weight:500;}
-.breadcrumb a:hover{color:var(--primary-navy);}
+.breadcrumb a:hover{color:var(--primary-navy);text-decoration:underline;text-underline-offset:2px;}
 .breadcrumb a:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);border-radius:4px;}
-.breadcrumb .sep{color:var(--neutral-200);}
+.breadcrumb .sep{color:var(--neutral-600);}
 .breadcrumb .current{color:var(--primary-navy);font-weight:600;}
 
 .status-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px;}
@@ -958,6 +973,12 @@ ul.doc-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
 .doc-item .ic{width:18px;height:18px;color:var(--neutral-600);flex:0 0 auto;}
 .doc-item .name{font-size:14px;color:var(--neutral-900);font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .doc-item .size{font-size:13px;color:var(--neutral-600);white-space:nowrap;}
+.doc-delete{
+  display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:none;background:none;
+  border-radius:6px;cursor:pointer;color:var(--neutral-600);flex-shrink:0;transition:background .15s,color .15s;
+}
+.doc-delete:hover{background:#fff;color:var(--warning-amber);}
+.doc-delete:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(217,119,6,.35);}
 .conf-note{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--neutral-600);margin-top:14px;}
 .conf-note .ic{width:15px;height:15px;color:var(--accent-green);flex:0 0 auto;}
 
@@ -1027,11 +1048,6 @@ ul.doc-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
    DRAFT VIEWER
    Verbatim from resources/ui/Draft Viewer.html <style>.
    ===================================================== */
-.back-link{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:var(--neutral-600);min-height:44px;margin-bottom:4px;}
-.back-link:hover{color:var(--primary-navy);}
-.back-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,139,78,.35);border-radius:6px;}
-.back-link .ic{width:16px;height:16px;}
-
 .page-head > h1{font-size:32px;letter-spacing:-.01em;}
 
 .expiry-notice{
@@ -1072,10 +1088,6 @@ ul.doc-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
    Desktop-primary; minimal responsive fallback (<lg).
    ===================================================== */
 .page-head .sub{font-size:15px;color:var(--neutral-600);margin-top:6px;}
-
-/* Green back link (admin detail screens; the draft-viewer .back-link stays neutral) */
-.back-link.adm{color:var(--accent-green);font-weight:600;gap:7px;}
-.back-link.adm:hover{color:var(--accent-green-hover);}
 
 .detail-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 28px;}
 .detail-head h1{font-size:32px;letter-spacing:-.01em;line-height:1.2;}

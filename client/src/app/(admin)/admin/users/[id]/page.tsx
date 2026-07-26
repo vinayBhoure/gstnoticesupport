@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { ArrowLeft, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
 import { ApiRequestError } from '@/lib/api/client';
 import { DeleteUserCard } from '@/components/admin/DeleteUserCard';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { SERVICE_META } from '@/lib/constants/services';
 import type { AdminUserDetailDTO } from '@/lib/api/types';
 
@@ -44,9 +44,13 @@ export default async function AdminUserDetailPage({
 
   return (
     <div style={{ maxWidth: 760, margin: '0 auto' }}>
-      <Link href="/admin/users" className="back-link adm">
-        <ArrowLeft className="ic" aria-hidden /> Back to users
-      </Link>
+      <Breadcrumb
+        items={[
+          { label: 'Admin', href: '/admin' },
+          { label: 'Users', href: '/admin/users' },
+        ]}
+        current={user.name}
+      />
 
       <div className="detail-head" style={{ display: 'block' }}>
         <h1>{user.name}</h1>

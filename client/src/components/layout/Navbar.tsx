@@ -55,7 +55,7 @@ export function Navbar() {
       <header className={`nav${scrolled ? ' scrolled' : ''}`} id="nav">
         <div className="container row">
           <Link className="brand" href="/" aria-label="GST Notice Support home">
-            <Image src="/logo.png" alt="" width={40} height={40} priority />
+            <Image src="/logo-mark.png" alt="" width={95} height={64} priority />
             <span className="bn">GST<span>Notice</span>Support</span>
           </Link>
 
@@ -116,7 +116,7 @@ export function Navbar() {
       >
         <div className="drawer-head">
           <span className="brand">
-            <Image src="/logo.png" alt="" width={36} height={36} />
+            <Image src="/logo-mark.png" alt="" width={53} height={36} />
             <span className="bn">GST<span>Notice</span>Support</span>
           </span>
           <button

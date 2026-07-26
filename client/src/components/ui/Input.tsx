@@ -2,6 +2,7 @@
 
 import { useState, forwardRef, type InputHTMLAttributes } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { blockNonDigitKeyDown, stripNonDigits } from '@/lib/digit-input';
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -23,8 +24,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const describedBy = error && id ? `${id}-error` : undefined;
 
   if (telPrefix) {
+    // Indian mobile numbers only — restrict to digits at the keystroke level
+    // (issue #4) with an onChange strip as a backstop for paste/autofill/IME.
+    const { onChange: telOnChange, onKeyDown: telOnKeyDown, maxLength: telMaxLength, ...restTelProps } = props;
+    const digitLimit = telMaxLength ?? 10;
+
     return (
-      <div className="flex flex-col gap-1.5">
+      <div className="field">
         {label && (
           <label htmlFor={id} className="field__label">
             {label}
@@ -39,11 +45,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             id={id}
             type={resolvedType ?? 'tel'}
             className={`phone-input ${className}`.trim()}
-            inputMode="tel"
+            inputMode="numeric"
+            maxLength={digitLimit}
             autoComplete={props.autoComplete ?? 'tel'}
             aria-invalid={error ? true : undefined}
             aria-describedby={describedBy}
-            {...props}
+            {...restTelProps}
+            onKeyDown={(e) => {
+              blockNonDigitKeyDown(e);
+              telOnKeyDown?.(e);
+            }}
+            onChange={(e) => {
+              e.target.value = stripNonDigits(e.target.value, digitLimit);
+              telOnChange?.(e);
+            }}
           />
         </div>
         {error && (
@@ -65,9 +80,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     .join(' ');
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="field">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-[var(--primary-navy)]">
+        <label htmlFor={id} className="field__label">
           {label}
         </label>
       )}
@@ -90,7 +105,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             onClick={() => setShowPassword((v) => !v)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             aria-pressed={showPassword}
-            tabIndex={-1}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>

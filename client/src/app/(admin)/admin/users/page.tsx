@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { ChevronRight, Users, Search } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
 import { adminUserListQuerySchema } from '@/lib/shared-schemas/admin.schema';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { UserSearch } from '@/components/admin/UserSearch';
 import { Pagination } from '@/components/admin/Pagination';
 import { RowLink } from '@/components/admin/RowLink';
@@ -37,6 +38,8 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: S
 
   return (
     <>
+      <Breadcrumb items={[{ label: 'Admin', href: '/admin' }]} current="Users" />
+
       <div className="page-head" style={{ display: 'block', marginBottom: 24 }}>
         <h1>Users</h1>
         <p className="sub">

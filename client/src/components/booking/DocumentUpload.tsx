@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { UploadCloud, FileText, Check, AlertCircle, X, Lock } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { UploadCloud, FileText, Check, AlertCircle, X, Lock, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   MAX_FILE_SIZE_BYTES,
@@ -10,6 +11,7 @@ import {
 } from '@/lib/shared-schemas/document.schema';
 import { documentApi, uploadToS3WithProgress } from '@/lib/api/document';
 import { getErrorMessage } from '@/lib/api/client';
+import { DeleteDocumentDialog } from './DeleteDocumentDialog';
 import type { BookingDocumentDTO } from '@/lib/api/types';
 
 type SessionUpload = {
@@ -19,6 +21,9 @@ type SessionUpload = {
   progress: number;
   status: 'uploading' | 'done' | 'error';
   error?: string;
+  // Set once confirm-upload succeeds — the real BookingDocument id, needed to
+  // delete this upload (issue #3) rather than just dismissing it locally.
+  documentId?: string;
 };
 
 type DocumentUploadProps = {
@@ -28,10 +33,13 @@ type DocumentUploadProps = {
   // component only shows uploads performed in the current session.
   usedCount: number;
   onUploaded?: (doc: BookingDocumentDTO) => void;
+  // Called after a confirmed upload is deleted from this session's list, so a
+  // parent tracking its own count (BookingActionPanel, NewBookingWizard) stays in sync.
+  onDeleted?: (documentId: string) => void;
 };
 
 // Prototype byte formatting: B / KB / MB (resources/ui/Booking Step 3).
-function fmtSize(bytes: number): string {
+export function fmtSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -41,10 +49,11 @@ function fmtSize(bytes: number): string {
 // direct browser→S3 PUT → confirm-upload. Files never pass through our API.
 // Upload-confirmation icon animation is one of the three allowed motion spots
 // (design.md §5.2) — CSS transitions on .file-icon-wrap.
-export function DocumentUpload({ bookingId, usedCount, onUploaded }: DocumentUploadProps) {
+export function DocumentUpload({ bookingId, usedCount, onUploaded, onDeleted }: DocumentUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploads, setUploads] = useState<SessionUpload[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<SessionUpload | null>(null);
 
   const confirmedCount = usedCount + uploads.filter((u) => u.status === 'done').length;
   const inFlightCount = uploads.filter((u) => u.status === 'uploading').length;
@@ -72,7 +81,7 @@ export function DocumentUpload({ bookingId, usedCount, onUploaded }: DocumentUpl
         patchUpload(localId, { progress: percent }),
       );
       const doc = await documentApi.confirmUpload(bookingId, { s3Key, fileName: file.name });
-      patchUpload(localId, { status: 'done', progress: 100 });
+      patchUpload(localId, { status: 'done', progress: 100, documentId: doc.id });
       onUploaded?.(doc);
     } catch (error) {
       const message = getErrorMessage(error);
@@ -108,6 +117,22 @@ export function DocumentUpload({ bookingId, usedCount, onUploaded }: DocumentUpl
   function dismiss(localId: string): void {
     setUploads((prev) => prev.filter((u) => u.localId !== localId));
   }
+
+  const deleteMutation = useMutation({
+    mutationFn: (documentId: string) => documentApi.remove(bookingId, documentId),
+    onSuccess: () => {
+      if (pendingDelete) {
+        dismiss(pendingDelete.localId);
+        if (pendingDelete.documentId) onDeleted?.(pendingDelete.documentId);
+      }
+      setPendingDelete(null);
+      toast.success('Document deleted.');
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error));
+      setPendingDelete(null);
+    },
+  });
 
   return (
     <div role="region" aria-label="Document upload">
@@ -241,6 +266,16 @@ export function DocumentUpload({ bookingId, usedCount, onUploaded }: DocumentUpl
                     <X size={16} strokeWidth={1.8} aria-hidden />
                   </button>
                 )}
+                {item.status === 'done' && (
+                  <button
+                    type="button"
+                    className="doc-delete"
+                    onClick={() => setPendingDelete(item)}
+                    aria-label={`Delete ${item.fileName}`}
+                  >
+                    <Trash2 size={16} strokeWidth={1.8} aria-hidden />
+                  </button>
+                )}
               </div>
               <div className={`file-progress-wrap${item.status !== 'uploading' ? ' is-hidden' : ''}`}>
                 <div
@@ -256,6 +291,16 @@ export function DocumentUpload({ bookingId, usedCount, onUploaded }: DocumentUpl
           ))}
         </ul>
       )}
+
+      <DeleteDocumentDialog
+        open={pendingDelete !== null}
+        fileName={pendingDelete?.fileName ?? ''}
+        isPending={deleteMutation.isPending}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => {
+          if (pendingDelete?.documentId) deleteMutation.mutate(pendingDelete.documentId);
+        }}
+      />
     </div>
   );
 }

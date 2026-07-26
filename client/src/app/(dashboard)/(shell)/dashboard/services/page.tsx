@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { Plus } from 'lucide-react';
 import { requireUser } from '@/lib/auth/session';
 import { bookingApi } from '@/lib/api/booking';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ServicesListView } from './ServicesListView';
 
 export const metadata: Metadata = {
@@ -21,6 +22,8 @@ export default async function ServicesPage() {
 
   return (
     <>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }]} current="My Services" />
+
       <div className="page-head" style={{ marginBottom: 24 }}>
         <h1>My Services</h1>
         <Link href="/dashboard/bookings/new" className="btn btn-primary">

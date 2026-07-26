@@ -1,10 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { FileText, Search, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 
-import { DocumentUpload } from '@/components/booking/DocumentUpload';
 import { PreDepositNotice } from '@/components/booking/PreDepositNotice';
 import { PayToUnlock } from '@/components/booking/PayToUnlock';
 import { CancelBookingButton } from './CancelBookingButton';
@@ -35,8 +33,6 @@ export function BookingActionPanel({
   hasFinalDraft,
   quotedAmountPaise,
 }: BookingActionPanelProps) {
-  const router = useRouter();
-
   const expertSummary = adminNote ? (
     <>
       <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 14 }}>Expert Summary</h2>
@@ -52,27 +48,27 @@ export function BookingActionPanel({
     >
       {status === 'document_upload' && (
         <div>
+          <div className="panel-icon-row">
+            <FileText className="big-ic" aria-hidden />
+          </div>
           {documentCount > 0 ? (
             <>
-              <div className="panel-icon-row">
-                <FileText className="big-ic" aria-hidden />
-              </div>
               <h2 className="ph">Documents Received</h2>
               <p className="pbody">
                 Our team will begin reviewing your case shortly. We&apos;ll notify you by email.
+                You can still add or remove documents in the Uploaded Documents section before
+                review starts.
               </p>
-              <div className="panel-divider" aria-hidden />
             </>
           ) : (
-            <h2 className="ph" style={{ marginBottom: 18 }}>
-              Upload Your Documents
-            </h2>
+            <>
+              <h2 className="ph">Upload Your Documents</h2>
+              <p className="pbody">
+                Use the Add Document button in the Uploaded Documents section to upload your
+                notice and any supporting files.
+              </p>
+            </>
           )}
-          <DocumentUpload
-            bookingId={bookingId}
-            usedCount={documentCount}
-            onUploaded={() => router.refresh()}
-          />
         </div>
       )}
 
