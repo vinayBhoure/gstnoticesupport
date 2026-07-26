@@ -356,7 +356,7 @@ A multi-step flow with **progress tracking** UI (stepper or similar).
 | Name | ✅ | Re-entered every booking (no pre-fill from profile) |
 | Email | ✅ | Same |
 | Contact Number | ✅ | Same |
-| GST Number | ✅ | The GSTN relevant to *this* case (could be client's GSTN if filing for client) |
+| GST Number | ❌ (amended D104, 2026-07-26 — was ✅) | The GSTN relevant to *this* case (could be client's GSTN if filing for client). Now optional: user-confirmed change so a booking can proceed without one; format validation still applies whenever a value is provided |
 | Organization Name | ✅ | Same |
 | Filing For | ✅ | "Client" or "Self" — stored as DB field, **no flow difference** |
 

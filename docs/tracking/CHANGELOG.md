@@ -5,6 +5,60 @@
 
 ---
 
+## [2026-07-26] — feat: sharper, larger navbar logo
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **The logo in the navigation bar is now larger and clearly visible**, using a newly cropped high-fidelity version of the brand mark instead of the small, off-center, low-detail crop shown before. Aspect ratio is preserved (no stretching); the navigation bar is slightly taller to fit it comfortably, on both desktop and mobile.
+- Only the navigation bar's logo changed — the logo elsewhere in the app (footer, sign-in pages, dashboard sidebar) is unchanged.
+- Verified visually in the browser at desktop size and when scrolled; `tsc --noEmit` and `eslint` clean.
+- See decision D106.
+
+## [2026-07-26] — fix: auth page header now shares the app's common content container
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **Login and Create Account page headers now align with the rest of the site.** The header previously used its own narrower width and different side padding than every other page's Navbar/Footer; it now uses the same shared container, so the logo and the "Back to home" link line up exactly where they would on any other page, at every screen size. One shared component fixes all 6 auth pages.
+- `tsc --noEmit` clean; `eslint` clean; production build verified.
+- See decision D105.
+
+## [2026-07-26] — feat: 12h sessions, optional GSTIN, auth-page spacing fixes, rebuilt legal pages
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **You'll stay signed in for 12 hours instead of ~15 minutes.** Sessions were expiring during normal use because a background token refresh only happens on client-side navigation, not full page loads — raising the token lifetime fixes the experienced problem directly. Logging out still ends your session immediately, regardless of this change.
+- **GSTIN is now optional when booking a service.** You can continue without entering one; if you do provide one, it's still validated for the correct format. Existing bookings and the admin view show "—" when no GSTIN was given.
+- **Login and Create Account page spacing corrected** to match the intended design — outer page padding, and the card's own padding/corner treatment on mobile, were both off from spec.
+- **Terms of Service, Privacy Policy, and Refund Policy pages rebuilt** with a proper legal-document layout: a sticky "On this page" navigation that highlights your current section as you scroll, and clearer section formatting. The actual legal content is unchanged — only the presentation.
+- `tsc --noEmit` clean on `client/` and `server/`; `eslint` clean on `client/`; production build verified — all public marketing routes remain statically generated.
+- See decision D104.
+
+## [2026-07-26] — fix: single Add Document entry point on the booking detail page (follow-up to D102)
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **The booking detail page had two ways to upload a document while a booking was in Document Upload status** — a drag-and-drop zone embedded in the right-hand status panel, and the Add Document button in the Uploaded Documents list. Removed the drag-and-drop zone entirely; **Add Document is now the only way to upload**, and it opens a file picker directly (no separate drop zone, no toggle step).
+- **A just-uploaded document could appear twice** — once in a separate "upload session" list with its own success checkmark, and again in the main Uploaded Documents list. There is now exactly one list; an in-progress upload shows as a plain row in that same list and is replaced by the confirmed entry the moment it's ready.
+- The document list now updates the instant an upload or delete completes, without waiting for the page to reload.
+- Scope confirmed with the user: the new-booking wizard's document upload step (Step 3) is unchanged.
+- `tsc --noEmit` clean on `client/`; `eslint` clean.
+- See decision D103.
+
+## [2026-07-26] — fix: UI/functional issues batch — footer, header, documents, mobile input, breadcrumbs, password toggle
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **Create Account footer** (`AuthCardShell`, shared by all 6 auth pages) now shows SSL/legal-name, an env-backed GSTIN row (`ORG_GSTIN` in `lib/site.ts` — absent, not a placeholder, until set; supersedes D39), Privacy/Terms/Refund Policy links, and copyright, matching `resources/ui/Signup.html`'s 4-row trust strip.
+- **Header/back-button alignment**: `AuthCardShell`'s header spacing corrected to the documented 40px (was 32px); the "Back to home" link gained padding, rounded corners, and keyboard focus styling it previously lacked entirely.
+- **Documents can now be added and deleted** on a booking while it is still in `document_upload` status. New `DELETE /bookings/:id/documents/:docId` endpoint (owner-only, status-gated, S3 object cleaned up best-effort). A confirmation dialog ("Are you sure you want to delete this document? This action cannot be undone.") appears before any delete, on the booking detail page and in the document upload flow (booking wizard Step 3, action panel).
+- **Mobile number fields reject non-numeric input** at the keystroke level (typing and pasting) across signup/complete-profile/login/settings/contact — previously letters and symbols could be entered.
+- **Booking Step 2 layout**: consistent field label styling across the form (previously the phone field used a different style from the other fields), consent checkboxes no longer boxed in an ad-hoc card, inline spacing replaced with a standard utility class.
+- **Continue button on booking Step 2 is now disabled until both confirmation checkboxes are checked** — previously it was always enabled regardless of consent state.
+- **One consistent breadcrumb style app-wide.** New shared `Breadcrumb` component replaces every page's own copy and is now shown on My Services, Payment History, and all 6 admin pages (previously missing there). The separator was nearly invisible against the page background — now clearly visible.
+- **Password field shows exactly one show/hide icon.** Removed a second, browser-native reveal icon that appeared in Edge alongside the app's own eye icon; the toggle is now keyboard-reachable. The Settings page's change-password fields, which previously had no show/hide toggle at all, now have one.
+- `tsc --noEmit` clean on both `client/` and `server/`; `eslint` clean on `client/` (no config exists in `server/`, pre-existing gap, unrelated to this branch).
+- See decision D102 for the full defect-by-defect rationale.
+
 ## [2026-07-24] — feat: admin direct download, signup/mobile validation gating, login via email or mobile
 
 **Branch: `feature/phase-2/auth-ux-improvements` (from `development`).**
