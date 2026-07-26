@@ -64,7 +64,7 @@ export function ResetPasswordForm({ userId }: ResetPasswordFormProps) {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-[var(--primary-navy)] text-center">
+          <span className="text-sm font-medium text-[var(--neutral-900)] text-center">
             Verification code
           </span>
           <OTPInput

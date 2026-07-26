@@ -6,6 +6,7 @@ import {
   buildDocumentKey,
   getUploadUrl,
   getDownloadUrl,
+  deleteObject,
   uploadUrlExpiresAt,
   draftUrlExpiresAt,
 } from '../lib/s3';
@@ -112,6 +113,31 @@ export const documentService = {
     const booking = await bookingRepository.findByIdAndUserId(bookingId, userId);
     if (!booking) throw new ApiError(404, 'NOT_FOUND', 'Booking not found');
     return booking.documents.map(toBookingDocumentDTO);
+  },
+
+  // Users may remove a document only while the booking still accepts uploads
+  // (HLD §19: no mid-service re-upload once review has started). The DB row is
+  // deleted first; the S3 object delete is best-effort so a transient S3 error
+  // can never leave a dangling row the user still sees.
+  async deleteDocument(bookingId: string, documentId: string, userId: string): Promise<void> {
+    const booking = await bookingRepository.findByIdAndUserId(bookingId, userId);
+    if (!booking) throw new ApiError(404, 'NOT_FOUND', 'Booking not found');
+
+    if (booking.status !== BookingStatus.document_upload) {
+      throw new ApiError(409, 'INVALID_STATUS', 'Documents cannot be removed at this stage');
+    }
+
+    const document = await documentRepository.findByIdAndBookingId(documentId, bookingId);
+    if (!document || document.uploadedBy !== 'user') {
+      throw new ApiError(404, 'NOT_FOUND', 'Document not found');
+    }
+
+    await documentRepository.deleteById(documentId);
+
+    deleteObject(document.s3Key).catch(() => {
+      // Intentionally suppressed — an orphaned object is swept by the S3
+      // lifecycle policy; the DB row is already gone, which is what matters.
+    });
   },
 
   // Draft download URL, gated on filing/complete. When no variant is requested, the

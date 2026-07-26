@@ -312,6 +312,25 @@
 | ⬚ | P2·server·P3 | Revisit `jtiCache` before enabling Railway replicas | revoked session can stay honored ≤ cache TTL on other replicas; shorten TTL or drop cache |
 | ⬚ | P2·server·P3 | Pass 6 Finding B extras: attachment-disposition on admin doc downloads; frontend CSP | CSP needs nonce plumbing (breakage-prone) |
 
+### Post-Launch — UI/Functional Fixes Batch (2026-07-26, `fix/phase-2/ui-functional-issues`)
+| Status | Task | Notes |
+|---|---|---|
+| ✅ | Auth footer: GSTIN row (env-backed, supersedes D39), Refund Policy link, copyright | `AuthCardShell` — renders on all 6 auth pages; GSTIN row waits on real `ORG_GSTIN` value (see Blocked Items) |
+| ✅ | Header/back-button spacing corrected against the prototype spec | `AuthCardShell` margin-bottom 32px→40px; "Back to home" link gained padding/radius/focus-visible |
+| ✅ | `DELETE /bookings/:id/documents/:docId` + Add/Delete document UI | Gated on `document_upload` status; confirmation dialog before delete (D102) |
+| ✅ | Mobile number fields restricted to digits at the keystroke level | New `client/src/lib/digit-input.ts`; every phone input site covered |
+| ✅ | Booking Step 2 layout normalized (field labels, checkbox grouping, spacing) | Widened `Input` label fix to match `components.md`'s documented spec app-wide |
+| ✅ | Continue button on booking Step 2 gated on both consent checkboxes | Was previously always enabled |
+| ✅ | Shared `Breadcrumb` component, added to previously breadcrumb-less pages | My Services, Payment History, all 6 admin pages |
+| ✅ | Single password visibility toggle everywhere, keyboard-reachable | Suppressed native `::-ms-reveal`; new `PasswordInput` for Settings' change-password fields |
+| ✅ | Single Add Document entry point on booking detail page, no duplicate list | Removed `BookingActionPanel`'s embedded uploader; `BookingDocumentsPanel` rebuilt with no drag-and-drop (D103) |
+| ✅ | Access token TTL raised 15 min → 12 hours | `ACCESS_TOKEN_TTL_SEC` in `server/src/lib/jwt.ts`; logout still revokes instantly (D104) |
+| ✅ | GSTIN optional at booking time | Migration `make_booking_gstn_optional`; schema/DTO/UI updated end-to-end (D104) |
+| ✅ | Auth page outer padding + `.auth-card` shadow/breakpoint corrected | Two more measured deviations from `resources/ui/Signup.html` beyond D102's header fix (D104) |
+| ✅ | `/terms`, `/privacy`, `/refund` rebuilt with prototype layout (TOC, scroll-spy, article typography) | Real drafted legal content kept; shared `legal.module.css` (D104) |
+| ✅ | Auth page header now uses the app's shared `.container` class | Was a narrower bespoke width with different padding than the rest of the site (D105) |
+| ✅ | Navbar logo enlarged and sharpened (new dedicated crop, `logo-mark.png`) | Navbar-only; other shells' logo untouched (D106) |
+
 ---
 
 ## Blocked Items (waiting on external input)
@@ -320,7 +339,7 @@
 |---|---|---|
 | Resend API key + verified sender domain | EP3 contact email | Client |
 | Calendly account + event URL | EP3 popup | Client |
-| Trust signals: legal name, CIN, GSTIN, address, grievance officer, phone | EP2 Footer, EP5 | Client |
+| Trust signals: legal name, CIN, address, grievance officer, phone (already supplied) — **GSTIN value only** (`ORG_GSTIN` env var; plumbing done 2026-07-26, D102) | EP2 Footer, EP5, auth trust strip | Client |
 | Cloudflare account access | EP5 DNS/SSL | Client |
 | GA4 Measurement ID | EP4 analytics | Client |
 | Google Search Console access | EP4 | Client |

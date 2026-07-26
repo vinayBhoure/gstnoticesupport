@@ -127,7 +127,7 @@ model Booking {
   contactPhone               String        @map("contact_phone") @db.VarChar(20)
   organizationName           String?       @map("organization_name") @db.VarChar(255)
   filingFor                  FilingFor     @map("filing_for")
-  gstn                       String        @db.VarChar(15)
+  gstn                       String?       @db.VarChar(15)
   consentInformationAccurate Boolean       @map("consent_information_accurate")
   consentContactAuthorized   Boolean       @map("consent_contact_authorized")
   draftS3Key                 String?       @map("draft_s3_key") @db.Text

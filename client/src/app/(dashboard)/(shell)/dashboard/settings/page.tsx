@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { requireUser } from '@/lib/auth/session';
 import { bookingApi } from '@/lib/api/booking';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { SettingsNav } from './SettingsNav';
 import { AccountSettingsForm } from './AccountSettingsForm';
 import { ChangePasswordPanel } from './ChangePasswordPanel';
@@ -28,13 +28,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <nav className="breadcrumb" aria-label="Breadcrumb">
-        <Link href="/dashboard">Dashboard</Link>
-        <span className="sep" aria-hidden>
-          ›
-        </span>
-        <span className="current">Settings</span>
-      </nav>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }]} current="Settings" />
 
       <div className="page-head" style={{ display: 'block', marginBottom: 6 }}>
         <h1>Settings</h1>

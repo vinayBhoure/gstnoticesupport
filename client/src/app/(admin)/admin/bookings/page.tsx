@@ -4,6 +4,7 @@ import { ChevronRight, FolderOpen, Search } from 'lucide-react';
 import { adminApi, type AdminBookingListParams } from '@/lib/api/admin';
 import { adminBookingListQuerySchema } from '@/lib/shared-schemas/admin.schema';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { PaymentBadge } from '@/components/admin/PaymentBadge';
 import { BookingControls } from '@/components/admin/BookingControls';
 import { SortHeader } from '@/components/admin/SortHeader';
@@ -50,6 +51,8 @@ export default async function AdminBookingsPage({ searchParams }: { searchParams
 
   return (
     <>
+      <Breadcrumb items={[{ label: 'Admin', href: '/admin' }]} current="Bookings" />
+
       <div className="page-head" style={{ display: 'block', marginBottom: 24 }}>
         <h1>Bookings</h1>
         <p className="sub">

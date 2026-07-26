@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from './env';
 import { sanitizeFilename, sanitizeDownloadFilename } from '../utils/sanitizeFilename';
@@ -104,4 +104,12 @@ export async function getDownloadUrl(key: string, options?: DownloadUrlOptions):
 
 export function draftUrlExpiresAt(): Date {
   return new Date(Date.now() + DRAFT_URL_EXPIRY_SECONDS * 1000);
+}
+
+// Deletes an uploaded document's S3 object. Called only after the DB row is
+// already gone (service layer) — an orphaned object here is swept by the
+// existing S3 lifecycle policy (database.md §3.4), which is safer than a
+// dangling DB row pointing at a deleted object.
+export async function deleteObject(key: string): Promise<void> {
+  await s3Client.send(new DeleteObjectCommand({ Bucket: env.AWS_S3_BUCKET_NAME, Key: key }));
 }

@@ -1,6 +1,9 @@
+import { Fragment } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShieldCheck, ArrowLeft } from 'lucide-react';
+import { ORG } from '@/lib/site';
+import { FOOTER_LABELS, FOOTER_POLICIES } from '@/data/common';
 
 type AuthCardShellProps = {
   title: string;
@@ -15,30 +18,32 @@ type AuthCardShellProps = {
 // no Footer, no entrance animation.
 export function AuthCardShell({ title, subtitle, children, footer }: AuthCardShellProps) {
   return (
-    <main className="min-h-screen flex flex-col bg-[var(--neutral-50)] px-4 py-8 sm:px-6">
-      <header className="w-full max-w-[1080px] mx-auto mb-8 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="GST Notice Support home">
-          <Image
-            src="/logo.png"
-            alt=""
-            width={36}
-            height={36}
-            className="rounded-md border border-[var(--neutral-200)]"
-          />
-          <span className="font-bold text-[var(--primary-navy)]">
-            GST<span className="text-[var(--accent-green)]">Notice</span>Support
-          </span>
-        </Link>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--neutral-600)] hover:text-[var(--primary-navy)]"
-        >
-          <ArrowLeft size={15} aria-hidden="true" />
-          <span className="hidden sm:inline">Back to home</span>
-        </Link>
-      </header>
+    <main className="min-h-screen flex flex-col bg-[var(--neutral-50)] pt-5 pb-8 sm:pt-8 sm:pb-12">
+      <div className="container">
+        <header className="flex items-center justify-between gap-4 mb-6 sm:mb-10">
+          <Link href="/" className="flex items-center gap-2.5" aria-label="GST Notice Support home">
+            <Image
+              src="/logo.png"
+              alt=""
+              width={36}
+              height={36}
+              className="rounded-md border border-[var(--neutral-200)]"
+            />
+            <span className="font-bold text-[var(--primary-navy)]">
+              GST<span className="text-[var(--accent-green)]">Notice</span>Support
+            </span>
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 px-1 py-2 rounded-[var(--r-btn)] text-sm font-medium text-[var(--neutral-600)] hover:text-[var(--primary-navy)] focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgba(11,139,78,0.3)]"
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            <span className="hidden sm:inline">Back to home</span>
+          </Link>
+        </header>
+      </div>
 
-      <div className="flex-1 flex flex-col items-center">
+      <div className="container flex-1 flex flex-col items-center">
         <section className="auth-card" aria-labelledby="auth-heading">
           <div className="flex items-center gap-2.5 mb-6">
             <Image
@@ -70,19 +75,27 @@ export function AuthCardShell({ title, subtitle, children, footer }: AuthCardShe
         </section>
 
         <aside className="auth-trust-strip" aria-label="Legal identity">
-          <span>
-            <ShieldCheck size={14} className="text-[var(--accent-green)]" />
-            SSL Secured · 256-bit encryption
-          </span>
-          <span>GST Notice Support Pvt. Ltd.</span>
-          <span className="flex gap-3">
-            <Link href="/privacy" className="hover:text-[var(--primary-navy)]">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-[var(--primary-navy)]">
-              Terms
-            </Link>
-          </span>
+          <div className="row">
+            <span className="item">
+              <ShieldCheck size={14} className="text-[var(--accent-green)]" />
+              SSL Secured · 256-bit encryption
+            </span>
+            <span className="item">{ORG.legalName}</span>
+          </div>
+          {ORG.gstin && (
+            <div className="row">
+              <span className="mono">GSTIN: {ORG.gstin}</span>
+            </div>
+          )}
+          <div className="pols">
+            {FOOTER_POLICIES.map((policy, index) => (
+              <Fragment key={policy.href}>
+                {index > 0 && <span aria-hidden>·</span>}
+                <Link href={policy.href}>{policy.label}</Link>
+              </Fragment>
+            ))}
+          </div>
+          <div className="copy">{FOOTER_LABELS.copyright}</div>
         </aside>
       </div>
     </main>

@@ -93,7 +93,7 @@ PayRecStatus  : created | authorized | captured | failed
   "contactPhone": "+919876543210",
   "organizationName": "Ravi Enterprises Pvt Ltd",
   "filingFor": "self",
-  "gstn": "29AABCU9603R1ZX",
+  "gstn": "29AABCU9603R1ZX",                 // string | null (optional at booking time — issue #10)
   "consentInformationAccurate": true,
   "consentContactAuthorized": true,
   "adminNote": "Pre-deposit of ₹12,000 applicable. Please arrange before we proceed.",
@@ -560,7 +560,7 @@ Creates a new booking with intake form data. Sets `status = document_upload`, `p
   "contactPhone": "+919876543210",           // string, 7–20 chars, required
   "organizationName": "Ravi Enterprises",    // string, max 255 chars, optional (nullable)
   "filingFor": "self",                       // "self" | "others", required
-  "gstn": "29AABCU9603R1ZX",                 // string, exactly 15 chars, GSTN format regex, required
+  "gstn": "29AABCU9603R1ZX",                 // string, exactly 15 chars, GSTN format regex, optional (issue #10 — empty/omitted stored as null)
   "consentInformationAccurate": true,        // boolean, must be true, required
   "consentContactAuthorized": true           // boolean, must be true, required
 }
@@ -797,6 +797,33 @@ Returns a pre-signed S3 `GET` URL to view the draft PDF. Gate: `booking.status` 
 | 403 | `DRAFT_NOT_ACCESSIBLE` | Status is not `filing` or `complete` |
 | 404 | `NOT_FOUND` | Booking ID does not exist or no draft uploaded |
 | 429 | `RATE_LIMITED` | 15 requests within 1 hour |
+
+---
+
+### 4.5 `DELETE /bookings/:id/documents/:docId`
+> **Auth:** 🔒 User · **Rate limit:** — · Ownership enforced.
+
+Deletes a user-uploaded document (issue #3 — D102). Gate: `booking.status = document_upload` (HLD §19 — no mid-service re-upload once review has started). The DB row is removed first; the S3 object delete is best-effort (a stray object is swept by the existing lifecycle policy — database.md §3.4).
+
+#### Path params
+| Param | Type | Description |
+|-------|------|-------------|
+| `id` | uuid | Booking ID |
+| `docId` | uuid | Document ID |
+
+#### `200 OK`
+```jsonc
+{
+  "success": true,
+  "data": null
+}
+```
+
+#### Errors
+| Status | Code | Condition |
+|--------|------|-----------|
+| 404 | `NOT_FOUND` | Booking not found, wrong owner, document not found, or document was not user-uploaded |
+| 409 | `INVALID_STATUS` | `booking.status` is not `document_upload` |
 
 ---
 

@@ -103,15 +103,12 @@ export function CompleteProfileForm({ defaultName }: CompleteProfileFormProps) {
           label="Phone Number"
           type="tel"
           telPrefix
-          inputMode="numeric"
-          maxLength={10}
           placeholder="10-digit mobile number"
           error={errors.phone?.message ?? (phoneTaken ? PHONE_TAKEN_MESSAGE : undefined)}
           {...phoneReg}
           onChange={(e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
             setPhone(e.target.value);
-            phoneReg.onChange(e);
+            void phoneReg.onChange(e);
           }}
         />
 
