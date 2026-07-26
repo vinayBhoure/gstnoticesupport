@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { randomUUID, createHash } from 'crypto';
 import { env } from './env';
 
-export const ACCESS_TOKEN_TTL_SEC = 15 * 60; // 15 minutes
+export const ACCESS_TOKEN_TTL_SEC = 12 * 60 * 60; // 12 hours (issue #14 — was 15 min)
 export const REFRESH_TOKEN_TTL_SEC = 7 * 24 * 60 * 60; // 7 days
 
 export type AccessTokenPayload = {

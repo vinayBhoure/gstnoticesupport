@@ -4,7 +4,12 @@ import { documentController } from '../controllers/document.controller';
 import { authenticate } from '../middleware/authenticate';
 import { validateBody, validateParams, validateQuery } from '../middleware/validate';
 import { createBookingSchema, bookingIdParamSchema } from '../schemas/booking.schema';
-import { uploadUrlSchema, confirmUploadSchema, draftUrlQuerySchema } from '../schemas/document.schema';
+import {
+  uploadUrlSchema,
+  confirmUploadSchema,
+  draftUrlQuerySchema,
+  documentIdParamSchema,
+} from '../schemas/document.schema';
 import { documentUploadRateLimiter, draftUrlRateLimiter } from '../lib/rateLimiter';
 
 const router = Router();
@@ -37,6 +42,12 @@ router.get(
   authenticate,
   validateParams(bookingIdParamSchema),
   documentController.list,
+);
+router.delete(
+  '/:id/documents/:docId',
+  authenticate,
+  validateParams(documentIdParamSchema),
+  documentController.remove,
 );
 router.get(
   '/:id/draft-url',

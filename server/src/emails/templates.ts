@@ -170,7 +170,7 @@ export function bookingCreatedAdmin(data: {
   serviceType: string;
   contactName: string;
   contactEmail: string;
-  gstn: string;
+  gstn: string | null;
   dashboardUrl: string;
 }): EmailContent {
   return {
@@ -181,7 +181,7 @@ export function bookingCreatedAdmin(data: {
         <li>Booking ID: ${escapeHtml(data.bookingId)}</li>
         <li>Service: ${escapeHtml(data.serviceType)}</li>
         <li>Contact: ${escapeHtml(data.contactName)} (${escapeHtml(data.contactEmail)})</li>
-        <li>GSTN: ${escapeHtml(data.gstn)}</li>
+        <li>GSTN: ${data.gstn ? escapeHtml(data.gstn) : 'Not provided'}</li>
       </ul>
       <p style="margin:24px 0;">${button(data.dashboardUrl, 'View in admin panel')}</p>
     `),

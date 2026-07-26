@@ -60,7 +60,7 @@ export const notificationService = {
       contactName: string;
       contactEmail: string;
       organizationName?: string | null;
-      gstn: string;
+      gstn: string | null;
     },
   ): Promise<void> {
     const dashboardUrl = `${env.CLIENT_URL}/dashboard/bookings/${encodeURIComponent(booking.id)}`;
