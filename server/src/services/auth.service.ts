@@ -98,6 +98,14 @@ export const authService = {
       name: input.name,
       phone: input.phone,
     });
+
+    // The account holder's phone number first exists now, so this is where the
+    // WhatsApp welcome fires (the welcome EMAIL already went out at OTP verification,
+    // before any phone was on file). Best-effort — never blocks profile completion.
+    notificationService
+      .sendWelcomeWhatsApp({ name: updated.name, phone: updated.phone })
+      .catch(() => {});
+
     return toUserDTO(updated);
   },
 
@@ -123,7 +131,7 @@ export const authService = {
 
     const { accessToken, refreshToken, accessJti } = await tokenService.issueAuthTokens(user);
     await notificationService.sendLoginAlerts(
-      { name: user.name, email: user.email },
+      { name: user.name, email: user.email, phone: user.phone },
       { ip: ctx.ip, userAgent: ctx.userAgent, jti: accessJti },
     );
 

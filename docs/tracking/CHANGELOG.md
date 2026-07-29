@@ -5,6 +5,19 @@
 
 ---
 
+## [2026-07-29] — chore: sync WhatsApp branch onto development + live verification pass
+
+**Branch: `feature/phase-2/whatsapp-notifications`, synced onto `development`'s tip (post `fix/phase-2/ui-functional-issues` merge, commit `20703cb`).**
+
+- Reconciled a stash-apply conflict from merging `development`'s 5 new commits (navbar logo, auth header, 12h sessions/optional GSTIN, legal pages, document delete) into the still-uncommitted WhatsApp branch — `CHANGELOG.md` merged manually (both sides' entries kept), a stale overlay that was silently reverting `development`'s DELETE-document/`LoginForm` work was discarded (verified regressive before removal; recoverable from an earlier stash), and the 4 new WhatsApp files were recovered intact.
+- **GSTIN-nullability fix**: the `booking_created_admin` WhatsApp template param now falls back to `'Not provided'` when `booking.gstn` is null, mirroring the email template — GSTIN became optional on `development` (D104) after the WhatsApp send path was originally written against a required field.
+- **Positional-parameter fix**: WhatsApp Manager's dashboard composer only supports numbered variables (`{{1}}, {{2}}, …`), not the named format (`{{name}}`) the send code originally emitted. `whatsapp/templates.ts`'s `body()` helper now serializes parameters by array order (no `parameter_name` field); every template builder's object-literal key order already matched the documented manifest order 1:1, so no builder logic needed to change — only the serialization. `whatsapp-templates.md` §4/§5 corrected to describe positional format.
+- **Live verification against real Meta credentials** (WABA `2911840275822893`): all 22 approved templates reconciled 1:1 against the code (name, language, parameter count, positional format) via the Template API — 0 mismatches. 21/21 real WhatsApp sends succeeded across every notification event, including the pre-deposit template variant routing correctly for `gstat_appeal`. Full negative-test suite (invalid phone, missing template, wrong param count, null recipient, `WHATSAPP_ENABLED=false`) — all fail gracefully, no throws, email always unaffected. Webhook GET/POST tested with real HMAC signatures across `sent`/`delivered`/`read`/`failed` status events, plus tampered-body and missing-signature rejection. A real `POST /auth/login` through the live HTTP stack fired both the WhatsApp and email `login_alert_user` notifications for an actual DB user.
+- **Root cause of the earlier `#100 Invalid parameter` failure wall, found**: unrelated to templates or code — the previously configured access token was invalid for messaging, and separately `WHATSAPP_ADMIN_NUMBER` had been set to the *sender's own number* (WhatsApp rejects self-sends with the same generic error). Both are local `.env` values (gitignored, not part of this commit).
+- **Found, not yet fixed**: `WHATSAPP_VERIFY_TOKEN` appears in plaintext in request logs — the global `requestLogger` logs full URLs, and Meta's GET verification handshake puts the token in the query string. Violates RULES.md §4.1. Tracked as an open item.
+- **Unrelated fix required to unblock live testing**: regenerated the local Prisma client (`npx prisma generate`) — a stale generated client (missing a `tokens_valid_from` column reference) was 500ing every login locally. Migrations were already up to date; this was generated-artifact drift, not a schema/migration change, and touches no committed file.
+- See decision D101 addendum (2026-07-29). `tsc --noEmit` clean.
+
 ## [2026-07-26] — feat: sharper, larger navbar logo
 
 **Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
@@ -69,6 +82,30 @@
 - **Login now supports mobile number + password, in addition to email + password.** `loginSchema` accepts exactly one of `email`/`phone` (superRefine); `authService.login` looks up by whichever was provided, reusing the same password/verification/token logic. `LoginForm` adds a "Use mobile number instead" / "Use email instead" toggle below the identifier field; phone mode restricts input to 10 numeric digits.
 - No Prisma migration in this change — see decision D101 (phone uniqueness stays app-level for now).
 - `tsc --noEmit` clean on both `server/` and `client/`. `eslint` clean on `client/` (no config exists in `server/`, pre-existing gap). Not yet merged to `development` — pending user review.
+
+## [2026-07-18] — feat: WhatsApp Cloud API inbound webhook (verification handshake + event receipt)
+
+**Branch: `feature/phase-2/whatsapp-notifications`. Same feature/decision as the entry below (D101) — does not touch the send path.**
+
+- **New inbound endpoint `GET|POST /api/v1/webhooks/whatsapp`**, mounted in `index.ts` beside the Razorpay webhook — before `express.json()` (POST needs the raw body for signature verification) and before the global rate limiter (Meta's calls must never be throttled).
+- **`GET`** — the Meta verification handshake: matches `hub.mode=subscribe` + `hub.verify_token` against `WHATSAPP_VERIFY_TOKEN` (timing-safe not required here, it's a plain string compare against an owner-chosen secret), echoes the raw `hub.challenge` with HTTP 200 (a deliberate envelope exception — Meta requires the literal string, not JSON). Works whenever `WHATSAPP_VERIFY_TOKEN` is set, **independent of `WHATSAPP_ENABLED`**, so the owner can complete Meta dashboard setup before enabling outbound sends. Else 403.
+- **`POST`** — verifies `X-Hub-Signature-256` (HMAC-SHA256 over the raw body with `WHATSAPP_APP_SECRET`, timing-safe, `sha256=` prefix stripped) via a new `verifyWebhookSignature` export in `lib/whatsapp.ts` (additive only — `sendTemplate` and every existing export are untouched). Invalid/missing/unverifiable signature → 401 (fails closed, including when `WHATSAPP_APP_SECRET` is unset). Valid signature → 200 immediately, then a fire-and-forget **log-only stub**: event type + message ID only (never phone numbers, message content, or tokens), and only while `WHATSAPP_ENABLED=true` — while disabled it still ACKs 200 but skips logging entirely.
+- **No processing**: no DB writes, no delivery-status persistence, no auto-replies. Explicitly deferred per D101.
+- **2 new optional env vars**: `WHATSAPP_APP_SECRET` (Meta App Secret — distinct from the `WHATSAPP_ACCESS_TOKEN` used for sending), `WHATSAPP_VERIFY_TOKEN` (owner-chosen string, pasted into both `.env` and the Meta dashboard). Documented in `server/.env.example` and a new §2 "Webhook setup" in `docs/integrations/whatsapp-templates.md`.
+- Verified via 3 stubbed-request scripts (not committed) covering all 7 rows of the GET/POST behavior matrix (13/13 assertions) — including that the log line contains only `entryType`/`messageId`, never PII. `tsc --noEmit` clean. Confirmed via `git diff` that `lib/email.ts` and the existing Razorpay `webhookController.handle` are untouched.
+
+## [2026-07-18] — feat: WhatsApp notifications alongside every email (Meta Cloud API, shipped dark)
+
+**Branch: `feature/phase-2/whatsapp-notifications`. Overrides KB1 §16 by explicit decision (D101).**
+
+- **Every user-facing lifecycle notification now sends a WhatsApp message in parallel with its email** — via Meta's WhatsApp Cloud API called directly (no third-party BSP). User messages go to the account holder's phone; admin messages go to `WHATSAPP_ADMIN_NUMBER`. Both channels are best-effort and independent: a WhatsApp failure never blocks the email (and vice versa), and neither blocks the caller.
+- **Shipped dark / zero-risk to the email path.** All WhatsApp env vars are optional; sends are a no-op until `WHATSAPP_ENABLED=true` **and** the phone-number-id + access-token are set. With the flag off (the default), the transport returns early and never touches the network — verified. The server boots with nothing configured.
+- **New pieces**: `lib/whatsapp.ts` (transport, mirrors `lib/email.ts` — never throws, logs only event + message-id, never the phone/payload), `lib/phone.ts` (normalizes stored numbers to `+<cc><number>`; bare 10-digit → `+91`; un-normalizable → skipped so the email still sends), `whatsapp/templates.ts` (per-event named-parameter builders; the approved template bodies live in WhatsApp Manager). `notification.service.ts` now dual-dispatches; `recipient` gained `phone` (threaded from `userRepository`/`booking.user` — `findByIdForAdmin` now selects `phone`).
+- **Welcome timing**: the welcome *email* still fires at OTP verification (no phone yet then); the welcome *WhatsApp* fires at **Complete Profile**, the moment a phone first exists.
+- **Pre-deposit** (KB2 §7): Commissioner/GSTAT appeal draft-ready/updated messages auto-select a distinct approved template variant (a WhatsApp body is fixed at approval, so the disclosure can't be an inline conditional as in email).
+- **OTP / password-reset stay email-only** (no phone at signup; one-time codes stay on the verified channel).
+- **Owner deliverable**: `docs/integrations/whatsapp-templates.md` — full Meta setup checklist, env-var table, and the ~22 `utility` templates (name, named params, suggested body, example values) to create and submit for approval. `server/.env.example` documents every new variable.
+- Verified: `tsc --noEmit` clean; a stubbed-transport script (not committed) asserted correct email+WhatsApp recipients per event, pre-deposit variant selection, null-phone skip, phone normalization (17/17), and dark-by-default no-network (2/2).
 
 ## [2026-07-17] — feat: mobile number required to access the dashboard (WhatsApp-notification prerequisite)
 

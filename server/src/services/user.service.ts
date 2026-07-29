@@ -88,7 +88,7 @@ export const userService = {
     await tokenService.blacklistAccessJti(accessJti);
 
     notificationService
-      .sendAccountDeleted({ name: user.name, email: user.email, userId })
+      .sendAccountDeleted({ name: user.name, email: user.email, phone: user.phone, userId })
       .catch(() => {});
   },
 };

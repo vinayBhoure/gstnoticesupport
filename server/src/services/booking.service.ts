@@ -35,7 +35,7 @@ export const bookingService = {
       .then((user) => {
         if (!user) return;
         return notificationService.sendBookingCreated(
-          { name: user.name, email: user.email },
+          { name: user.name, email: user.email, phone: user.phone },
           {
             id: booking.id,
             serviceType: booking.serviceType,
@@ -85,7 +85,7 @@ export const bookingService = {
       .then((user) => {
         if (!user) return;
         return notificationService.sendBookingCancelled(
-          { name: user.name, email: user.email },
+          { name: user.name, email: user.email, phone: user.phone },
           {
             id: updated.id,
             serviceType: updated.serviceType,
