@@ -7,6 +7,7 @@ import type {
   VerifyOtpInput,
   ResendOtpInput,
   CompleteProfileInput,
+  CheckPhoneInput,
   LoginInput,
   ForgotPasswordInput,
   ResetPasswordInput,
@@ -47,6 +48,12 @@ export const authController = {
     const input = req.validated.body as CompleteProfileInput;
     const user = await authService.completeProfile(req.user!.id, input);
     res.status(200).json(envelope({ user }));
+  }),
+
+  checkPhone: asyncHandler(async (req, res) => {
+    const { phone } = req.validated.body as CheckPhoneInput;
+    const result = await authService.checkPhoneAvailability(req.user!.id, phone);
+    res.status(200).json(envelope(result));
   }),
 
   login: asyncHandler(async (req, res) => {

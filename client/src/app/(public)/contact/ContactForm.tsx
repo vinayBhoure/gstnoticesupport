@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { contactSchema, type ContactFormData } from '@/lib/schemas/contact.schema';
+import { blockNonDigitKeyDown, stripNonDigits } from '@/lib/digit-input';
 import styles from './contact.module.css';
 
 export function ContactForm() {
@@ -19,6 +20,8 @@ export function ContactForm() {
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
   });
+
+  const mobileReg = register('mobile');
 
   async function onSubmit(data: ContactFormData) {
     try {
@@ -103,7 +106,12 @@ export function ContactForm() {
           maxLength={10}
           inputMode="numeric"
           aria-describedby={errors.mobile ? 'err-mobile' : undefined}
-          {...register('mobile')}
+          {...mobileReg}
+          onKeyDown={blockNonDigitKeyDown}
+          onChange={(e) => {
+            e.target.value = stripNonDigits(e.target.value, 10);
+            void mobileReg.onChange(e);
+          }}
         />
         {errors.mobile && (
           <p id="err-mobile" className={styles.errMsg} role="alert">

@@ -1,0 +1,55 @@
+/* Shared layout for /terms, /privacy, /refund (issues #11/#12). Ported
+   verbatim from resources/ui's "LEGAL & ARTICLE PAGES" CSS block — byte-
+   identical across Terms of Service.html, Privacy Policy.html, and Refund
+   Policy.html, which is why one shared module backs all three pages instead
+   of three separate page.module.css files (deviation from the D59 per-page
+   convention, recorded in decisions.md).
+   Two token substitutions for names the prototype uses that don't exist in
+   this app's tokens.css: --accent-amber -> --warning-amber, --neutral-300 ->
+   --neutral-600 (crumb separator, needs contrast) / --neutral-200 (decorative dot). */
+
+.legalHero{padding:88px 0 56px;background:var(--neutral-50);border-bottom:1px solid var(--neutral-200);}
+.crumbs{font-size:13px;color:var(--neutral-600);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.crumbs a{color:var(--neutral-600);}
+.crumbs a:hover{color:var(--accent-green);}
+.crumbs .sep{color:var(--neutral-600);}
+.legalHero h1{max-width:24ch;margin:0 0 14px;}
+.meta{font-size:14px;color:var(--neutral-600);display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;}
+.meta .dot{width:3px;height:3px;background:var(--neutral-200);border-radius:50%;}
+.lead{margin-top:22px;font-size:18px;line-height:1.6;color:var(--neutral-900);max-width:62ch;}
+
+.legalWrap{padding:64px 0 96px;}
+.lwGrid{display:grid;grid-template-columns:240px 1fr;gap:64px;align-items:flex-start;}
+
+.toc{position:sticky;top:96px;display:flex;flex-direction:column;gap:2px;padding:18px 14px;background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-card);}
+.toc h6{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--neutral-600);padding:4px 8px 10px;margin:0 0 6px;border-bottom:1px solid var(--neutral-200);}
+.toc a{font-size:14px;color:var(--neutral-900);padding:8px 10px;border-radius:var(--r-btn);line-height:1.4;}
+.toc a:hover{background:#fff;color:var(--accent-green);}
+.toc a.active{background:#fff;color:var(--primary-navy);font-weight:600;}
+
+.article{max-width:72ch;}
+.article section{margin-bottom:48px;scroll-margin-top:96px;}
+.article h2{font-size:28px;margin:0 0 18px;color:var(--primary-navy);}
+.article h3{font-size:18px;margin:24px 0 10px;color:var(--primary-navy);}
+.article p{font-size:16px;line-height:1.7;color:var(--neutral-900);margin:0 0 14px;max-width:65ch;}
+.article ul, .article ol{padding-left:22px;margin:8px 0 16px;display:flex;flex-direction:column;gap:8px;}
+.article ul li, .article ol li{font-size:16px;line-height:1.65;color:var(--neutral-900);}
+.article a{color:var(--accent-green);font-weight:500;}
+.article a:hover{text-decoration:underline;}
+.article .ref{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--neutral-600);background:var(--neutral-50);padding:2px 6px;border-radius:4px;border:1px solid var(--neutral-200);}
+
+.callout{display:flex;gap:14px;padding:18px 20px;background:var(--neutral-50);border-left:3px solid var(--primary-deep-blue);border-radius:0 var(--r-btn) var(--r-btn) 0;margin:18px 0 24px;}
+.callout .ic{flex:0 0 auto;color:var(--primary-deep-blue);margin-top:2px;}
+.callout p{margin:0;font-size:15px;color:var(--neutral-900);}
+.callout.amber{border-left-color:var(--warning-amber);background:#FFFBEB;}
+.callout.amber .ic{color:var(--warning-amber);}
+
+.articleCta{background:var(--neutral-50);border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:28px;margin-top:48px;display:flex;flex-direction:column;gap:14px;align-items:flex-start;}
+.articleCta h3{font-size:20px;margin:0;color:var(--primary-navy);}
+.articleCta p{margin:0;font-size:15px;color:var(--neutral-600);}
+.articleCta .ctaRow{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
+
+@media (max-width:900px){
+  .lwGrid{grid-template-columns:1fr;gap:32px;}
+  .toc{position:static;}
+}

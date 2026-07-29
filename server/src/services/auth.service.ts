@@ -17,6 +17,8 @@ import type {
   ChangePasswordInput,
 } from '../schemas/auth.schema';
 
+type PhoneAvailability = { available: boolean };
+
 const BCRYPT_COST = 12;
 
 type AuthTokens = { accessToken: string; refreshToken: string };
@@ -88,21 +90,40 @@ export const authService = {
     if (user.phone) {
       throw new ApiError(409, 'CONFLICT', 'Profile has already been completed');
     }
+    const phoneOwner = await userRepository.findByPhone(input.phone);
+    if (phoneOwner) {
+      throw new ApiError(409, 'PHONE_TAKEN', 'Mobile number is already registered.');
+    }
     const updated = await userRepository.updateProfile(userId, {
       name: input.name,
       phone: input.phone,
     });
+
+    // The account holder's phone number first exists now, so this is where the
+    // WhatsApp welcome fires (the welcome EMAIL already went out at OTP verification,
+    // before any phone was on file). Best-effort — never blocks profile completion.
+    notificationService
+      .sendWelcomeWhatsApp({ name: updated.name, phone: updated.phone })
+      .catch(() => {});
+
     return toUserDTO(updated);
   },
 
+  async checkPhoneAvailability(userId: string, phone: string): Promise<PhoneAvailability> {
+    const owner = await userRepository.findByPhone(phone);
+    return { available: !owner || owner.id === userId };
+  },
+
   async login(input: LoginInput, ctx: LoginContext): Promise<AuthResult> {
-    const user = await userRepository.findByEmail(input.email);
+    const user = input.email
+      ? await userRepository.findByEmail(input.email)
+      : await userRepository.findByPhone(input.phone!);
     if (!user) {
-      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect email or password');
+      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect credentials');
     }
     const passwordMatches = await bcrypt.compare(input.password, user.hashedPassword);
     if (!passwordMatches) {
-      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect email or password');
+      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect credentials');
     }
     if (!user.emailVerified) {
       throw new ApiError(403, 'EMAIL_NOT_VERIFIED', 'Please verify your email before signing in');
@@ -110,7 +131,7 @@ export const authService = {
 
     const { accessToken, refreshToken, accessJti } = await tokenService.issueAuthTokens(user);
     await notificationService.sendLoginAlerts(
-      { name: user.name, email: user.email },
+      { name: user.name, email: user.email, phone: user.phone },
       { ip: ctx.ip, userAgent: ctx.userAgent, jti: accessJti },
     );
 

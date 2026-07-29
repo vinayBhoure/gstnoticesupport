@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { ArrowLeft, User, Files, StickyNote } from 'lucide-react';
+import { User, Files, StickyNote } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
 import { ApiRequestError } from '@/lib/api/client';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { PaymentBadge } from '@/components/admin/PaymentBadge';
 import { AdminDocumentList } from '@/components/admin/AdminDocumentList';
 import { AdminNoteEditor } from '@/components/admin/AdminNoteEditor';
@@ -41,14 +41,20 @@ export default async function AdminBookingDetailPage({
     throw error;
   }
 
+  const serviceLabel = SERVICE_META[booking.serviceType].label;
+
   return (
     <>
-      <Link href="/admin/bookings" className="back-link adm">
-        <ArrowLeft className="ic" aria-hidden /> Back to bookings
-      </Link>
+      <Breadcrumb
+        items={[
+          { label: 'Admin', href: '/admin' },
+          { label: 'Bookings', href: '/admin/bookings' },
+        ]}
+        current={serviceLabel}
+      />
 
       <div className="detail-head">
-        <h1>{SERVICE_META[booking.serviceType].label}</h1>
+        <h1>{serviceLabel}</h1>
         <span className="ref">{bookingRef(booking.id)}</span>
         <StatusBadge status={booking.status} />
         <PaymentBadge status={booking.paymentStatus} withPrefix />
@@ -77,7 +83,7 @@ export default async function AdminBookingDetailPage({
               </div>
               <div>
                 <dt>GST Number</dt>
-                <dd className="mono">{booking.gstn}</dd>
+                <dd className={booking.gstn ? 'mono' : 'muted'}>{booking.gstn ?? '—'}</dd>
               </div>
               <div>
                 <dt>Organization</dt>

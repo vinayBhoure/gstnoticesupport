@@ -14,6 +14,10 @@ export const ORG = {
   phone: process.env.ORG_PHONE ?? '+919343297622',
   email: process.env.ORG_EMAIL ?? 'support@gstnoticesupport.in',
   grievanceOfficer: process.env.ORG_GRIEVANCE_OFFICER ?? 'Customer Support',
+  // GSTIN has no dummy fallback — absent (not a placeholder) until the
+  // company's real GSTIN is set (decisions.md D39/D10x). The auth trust strip
+  // renders this row only when the value is present.
+  gstin: process.env.ORG_GSTIN || undefined,
   address: {
     street: process.env.ORG_ADDRESS_STREET ?? 'Dashmesh Dear, The brain train academy, opp. Gurudwara, Premnagar, Madan Mahal',
     locality: process.env.ORG_ADDRESS_LOCALITY ?? 'Jabalpur',

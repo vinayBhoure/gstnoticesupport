@@ -8,6 +8,7 @@ import { CheckCircle, AlertCircle } from 'lucide-react';
 import { changePasswordSchema, type ChangePasswordInput } from '@/lib/shared-schemas/auth.schema';
 import { authApi } from '@/lib/api/auth';
 import { getErrorMessage, getErrorCode } from '@/lib/api/client';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 
 type Banner = { kind: 'success' | 'error'; message: string } | null;
 
@@ -61,12 +62,7 @@ export function ChangePasswordPanel() {
           <div className="desc">Confirm your identity before setting a new one.</div>
         </div>
         <div className="fld">
-          <input
-            type="password"
-            className="input"
-            autoComplete="current-password"
-            {...register('currentPassword')}
-          />
+          <PasswordInput autoComplete="current-password" {...register('currentPassword')} />
           {errors.currentPassword && (
             <span className="text-sm text-[var(--warning-amber)]" role="alert">
               {errors.currentPassword.message}
@@ -83,12 +79,7 @@ export function ChangePasswordPanel() {
           </div>
         </div>
         <div className="fld">
-          <input
-            type="password"
-            className="input"
-            autoComplete="new-password"
-            {...register('newPassword')}
-          />
+          <PasswordInput autoComplete="new-password" {...register('newPassword')} />
           {errors.newPassword && (
             <span className="text-sm text-[var(--warning-amber)]" role="alert">
               {errors.newPassword.message}
@@ -103,9 +94,7 @@ export function ChangePasswordPanel() {
           <div className="desc">Re-enter the new password.</div>
         </div>
         <div className="fld">
-          <input
-            type="password"
-            className="input"
+          <PasswordInput
             autoComplete="new-password"
             value={confirmValue}
             onChange={(e) => {

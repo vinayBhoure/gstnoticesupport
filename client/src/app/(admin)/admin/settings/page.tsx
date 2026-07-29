@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Building2 } from 'lucide-react';
 import { ChangePasswordForm } from '@/components/admin/ChangePasswordForm';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ORG, SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
@@ -15,6 +16,8 @@ export default function AdminSettingsPage() {
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto' }}>
+      <Breadcrumb items={[{ label: 'Admin', href: '/admin' }]} current="Settings" />
+
       <div className="page-head" style={{ display: 'block', marginBottom: 32 }}>
         <h1>Settings</h1>
       </div>

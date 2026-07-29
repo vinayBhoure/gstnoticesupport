@@ -43,6 +43,13 @@ export const draftUrlQuerySchema = z.object({
   variant: z.enum(DRAFT_VARIANTS).optional(),
 });
 
+// Path params for DELETE /bookings/:id/documents/:docId.
+export const documentIdParamSchema = z.object({
+  id: z.string().uuid('Invalid booking ID format'),
+  docId: z.string().uuid('Invalid document ID format'),
+});
+
 export type UploadUrlInput = z.infer<typeof uploadUrlSchema>;
 export type ConfirmUploadInput = z.infer<typeof confirmUploadSchema>;
 export type DraftUrlQuery = z.infer<typeof draftUrlQuerySchema>;
+export type DocumentIdParam = z.infer<typeof documentIdParamSchema>;

@@ -1,10 +1,12 @@
 import { Prisma, BookingStatus } from '@prisma/client';
 import { bookingRepository } from '../repositories/booking.repository';
 import { documentRepository } from '../repositories/document.repository';
+import { notificationService } from './notification.service';
 import {
   buildDocumentKey,
   getUploadUrl,
   getDownloadUrl,
+  deleteObject,
   uploadUrlExpiresAt,
   draftUrlExpiresAt,
 } from '../lib/s3';
@@ -71,6 +73,10 @@ export const documentService = {
       throw new ApiError(409, 'DUPLICATE_KEY', 'This document has already been recorded');
     }
 
+    // Booking was fetched before this document was created, so an empty list here
+    // means this is the first upload for the booking — the one-time admin signal.
+    const isFirstUpload = booking.documents.length === 0;
+
     try {
       const document = await documentRepository.create({
         bookingId,
@@ -78,6 +84,21 @@ export const documentService = {
         fileName: input.fileName,
         s3Key: input.s3Key,
       });
+
+      if (isFirstUpload) {
+        // Best-effort — email failure must never block the upload confirmation.
+        notificationService
+          .sendDocumentsUploaded({
+            id: booking.id,
+            serviceType: booking.serviceType,
+            contactName: booking.contactName,
+            contactEmail: booking.contactEmail,
+          })
+          .catch(() => {
+            // Intentionally suppressed — emailService already logs internally.
+          });
+      }
+
       return toBookingDocumentDTO(document);
     } catch (error) {
       // Unique-constraint race backstop (HLD §10.4 idempotency via unique s3Key).
@@ -92,6 +113,31 @@ export const documentService = {
     const booking = await bookingRepository.findByIdAndUserId(bookingId, userId);
     if (!booking) throw new ApiError(404, 'NOT_FOUND', 'Booking not found');
     return booking.documents.map(toBookingDocumentDTO);
+  },
+
+  // Users may remove a document only while the booking still accepts uploads
+  // (HLD §19: no mid-service re-upload once review has started). The DB row is
+  // deleted first; the S3 object delete is best-effort so a transient S3 error
+  // can never leave a dangling row the user still sees.
+  async deleteDocument(bookingId: string, documentId: string, userId: string): Promise<void> {
+    const booking = await bookingRepository.findByIdAndUserId(bookingId, userId);
+    if (!booking) throw new ApiError(404, 'NOT_FOUND', 'Booking not found');
+
+    if (booking.status !== BookingStatus.document_upload) {
+      throw new ApiError(409, 'INVALID_STATUS', 'Documents cannot be removed at this stage');
+    }
+
+    const document = await documentRepository.findByIdAndBookingId(documentId, bookingId);
+    if (!document || document.uploadedBy !== 'user') {
+      throw new ApiError(404, 'NOT_FOUND', 'Document not found');
+    }
+
+    await documentRepository.deleteById(documentId);
+
+    deleteObject(document.s3Key).catch(() => {
+      // Intentionally suppressed — an orphaned object is swept by the S3
+      // lifecycle policy; the DB row is already gone, which is what matters.
+    });
   },
 
   // Draft download URL, gated on filing/complete. When no variant is requested, the

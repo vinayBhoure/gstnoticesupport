@@ -1,8 +1,8 @@
 import { randomBytes } from 'node:crypto';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from './env';
-import { sanitizeFilename } from '../utils/sanitizeFilename';
+import { sanitizeFilename, sanitizeDownloadFilename } from '../utils/sanitizeFilename';
 
 // Locked: Mumbai region, private bucket, SSE-S3 (HLD §9). Files never pass
 // through Express — the browser PUTs/GETs S3 directly via these signed URLs.
@@ -78,8 +78,16 @@ export function uploadUrlExpiresAt(): Date {
   return new Date(Date.now() + UPLOAD_URL_EXPIRY_SECONDS * 1000);
 }
 
-// Pre-signed GET for draft viewing. Generated fresh per request, never stored.
-export async function getDownloadUrl(key: string): Promise<string> {
+type DownloadUrlOptions = {
+  // When set, the response is forced to download as an attachment under this
+  // filename instead of rendering inline. Only pass this for true downloads
+  // (e.g. admin document download) — omit it for inline draft viewing.
+  downloadFileName?: string;
+};
+
+// Pre-signed GET for draft viewing / document download. Generated fresh per
+// request, never stored.
+export async function getDownloadUrl(key: string, options?: DownloadUrlOptions): Promise<string> {
   const command = new GetObjectCommand({
     Bucket: env.AWS_S3_BUCKET_NAME,
     Key: key,
@@ -87,10 +95,21 @@ export async function getDownloadUrl(key: string): Promise<string> {
     // HTML/SVG in the viewer's browser — it is always served as a PDF. Preserves
     // inline draft viewing while closing the stored-XSS vector (audit Pass 6 Finding A).
     ResponseContentType: CONTENT_TYPE_PDF,
+    ...(options?.downloadFileName && {
+      ResponseContentDisposition: `attachment; filename="${sanitizeDownloadFilename(options.downloadFileName)}"`,
+    }),
   });
   return getSignedUrl(s3Client, command, { expiresIn: DRAFT_URL_EXPIRY_SECONDS });
 }
 
 export function draftUrlExpiresAt(): Date {
   return new Date(Date.now() + DRAFT_URL_EXPIRY_SECONDS * 1000);
+}
+
+// Deletes an uploaded document's S3 object. Called only after the DB row is
+// already gone (service layer) — an orphaned object here is swept by the
+// existing S3 lifecycle policy (database.md §3.4), which is safer than a
+// dangling DB row pointing at a deleted object.
+export async function deleteObject(key: string): Promise<void> {
+  await s3Client.send(new DeleteObjectCommand({ Bucket: env.AWS_S3_BUCKET_NAME, Key: key }));
 }

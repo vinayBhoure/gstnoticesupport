@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Check } from 'lucide-react';
 import { requireUser } from '@/lib/auth/session';
 import { SERVICE_META } from '@/lib/constants/services';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import type { ServiceType } from '@/lib/api/types';
 
 export const metadata: Metadata = {
@@ -41,13 +42,7 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <nav className="breadcrumb" aria-label="Breadcrumb">
-        <Link href="/dashboard">Dashboard</Link>
-        <span className="sep" aria-hidden>
-          ›
-        </span>
-        <span className="current">My Profile</span>
-      </nav>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }]} current="My Profile" />
 
       <div className="page-head" style={{ display: 'block', marginBottom: 24 }}>
         <h1>My Profile</h1>

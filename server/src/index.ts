@@ -47,6 +47,18 @@ app.post(
   webhookController.handle,
 );
 
+// WhatsApp Cloud API webhook — same placement rule as Razorpay above: registered
+// before express.json() so POST's HMAC-SHA256 signature verification runs over the
+// raw buffer, and before the global rate limiter so Meta's verification handshake and
+// event deliveries are never throttled. GET (verification handshake) needs no body
+// parsing — it only reads query params.
+app.get('/api/v1/webhooks/whatsapp', webhookController.handleWhatsAppVerify);
+app.post(
+  '/api/v1/webhooks/whatsapp',
+  express.raw({ type: 'application/json' }),
+  webhookController.handleWhatsAppEvent,
+);
+
 // JSON body parsing for all other routes
 app.use(express.json());
 

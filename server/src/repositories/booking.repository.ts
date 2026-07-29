@@ -20,7 +20,7 @@ export type AdminBookingListRow = Booking & {
 };
 
 export type AdminBookingDetailRow = Booking & {
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; phone: string | null };
   documents: BookingDocument[];
   paymentRecords: PaymentRecord[];
 };
@@ -132,7 +132,7 @@ export const bookingRepository = {
     return prisma.booking.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true, email: true, phone: true } },
         documents: { orderBy: { uploadedAt: 'asc' } },
         paymentRecords: { orderBy: { createdAt: 'desc' } },
       },

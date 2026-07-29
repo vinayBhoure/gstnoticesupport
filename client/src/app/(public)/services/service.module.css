@@ -5,7 +5,7 @@
 .crumb{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--neutral-600);margin-bottom:28px;}
 .crumb a{color:var(--neutral-600);transition:color .15s;}
 .crumb a:hover{color:var(--accent-green);}
-.sep{color:var(--neutral-200);}
+.sep{color:var(--neutral-600);}
 .crumb [aria-current="page"]{color:var(--primary-navy);font-weight:600;}
 .pageHero h1{max-width:22ch;margin:0 auto 20px;}
 .sub{font-size:20px;line-height:1.55;color:var(--neutral-600);max-width:58ch;margin:0 auto 32px;}
