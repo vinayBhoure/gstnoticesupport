@@ -131,7 +131,11 @@ export const adminService = {
 
     // Recipient is the account holder (booking.user), never booking.contactEmail —
     // informational-only case details, not a notification address.
-    const recipient = { name: booking.user.name, email: booking.user.email };
+    const recipient = {
+      name: booking.user.name,
+      email: booking.user.email,
+      phone: booking.user.phone,
+    };
     const emailBooking = {
       id: booking.id,
       serviceType: booking.serviceType,
@@ -204,7 +208,7 @@ export const adminService = {
       input.quotedAmountPaise,
     );
 
-    const recipient = { name: booking.user.name, email: booking.user.email };
+    const recipient = { name: booking.user.name, email: booking.user.email, phone: booking.user.phone };
     const emailBooking = {
       id: booking.id,
       serviceType: booking.serviceType,
@@ -275,7 +279,7 @@ export const adminService = {
     const isFirstFinalDraft = booking.finalDraftS3Key === null;
     await bookingRepository.setFinalDraft(id, input.s3Key);
 
-    const recipient = { name: booking.user.name, email: booking.user.email };
+    const recipient = { name: booking.user.name, email: booking.user.email, phone: booking.user.phone };
     const emailBooking = {
       id: booking.id,
       serviceType: booking.serviceType,

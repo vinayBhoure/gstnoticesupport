@@ -39,6 +39,29 @@ const envSchema = z.object({
   RAZORPAY_KEY_ID: z.string().min(1, 'RAZORPAY_KEY_ID is required'),
   RAZORPAY_KEY_SECRET: z.string().min(1, 'RAZORPAY_KEY_SECRET is required'),
   RAZORPAY_WEBHOOK_SECRET: z.string().min(1, 'RAZORPAY_WEBHOOK_SECRET is required'),
+
+  // WhatsApp Cloud API (Meta Graph API) — WhatsApp notifications alongside email.
+  // Every var is optional so the server boots with nothing configured; sends are a
+  // no-op until WHATSAPP_ENABLED='true' AND the phone-number-id + access-token are set.
+  // Overrides the KB1 §16 "no WhatsApp automation" constraint by explicit decision (D101).
+  // NOTE: z.coerce.boolean() would treat the string 'false' as true — use an explicit enum.
+  WHATSAPP_ENABLED: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
+  WHATSAPP_API_VERSION: z.string().default('v23.0'),
+  WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+  WHATSAPP_ACCESS_TOKEN: z.string().optional(),
+  WHATSAPP_TEMPLATE_LANG: z.string().default('en'),
+  // Where admin WhatsApp notifications are delivered (E.164, e.g. +9198XXXXXXXX).
+  // No fallback — admin WhatsApp sends are skipped when this is unset.
+  WHATSAPP_ADMIN_NUMBER: z.string().optional(),
+
+  // WhatsApp Cloud API inbound webhook (Meta → this server). Distinct credentials from
+  // the outbound send path above: the Meta App Secret (not the System User access
+  // token) signs webhook payloads, and the verify token is an owner-chosen string
+  // pasted into both here and the Meta dashboard's Callback URL config. Both optional —
+  // the GET verification handshake 403s and POST signature checks fail closed (401)
+  // when unset, so the webhook is inert until deliberately configured.
+  WHATSAPP_APP_SECRET: z.string().optional(),
+  WHATSAPP_VERIFY_TOKEN: z.string().optional(),
 });
 
 const result = envSchema.safeParse(process.env);
