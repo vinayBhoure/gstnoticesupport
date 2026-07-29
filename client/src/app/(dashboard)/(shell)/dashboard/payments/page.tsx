@@ -6,6 +6,7 @@ import { requireUser } from '@/lib/auth/session';
 import { userApi } from '@/lib/api/user';
 import { paymentHistoryQuerySchema } from '@/lib/shared-schemas/user.schema';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Pagination } from '@/components/admin/Pagination';
 import { SERVICE_META } from '@/lib/constants/services';
 import { formatBookingDate, bookingRef } from '@/lib/constants/booking-status';
@@ -43,6 +44,8 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
+      <Breadcrumb items={[{ label: 'Dashboard', href: '/dashboard' }]} current="Payment History" />
+
       <div className="page-head" style={{ marginBottom: 32 }}>
         <h1>Payment History</h1>
         <Link href="/dashboard/bookings/new" className="btn btn-primary">

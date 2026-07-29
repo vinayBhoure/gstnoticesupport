@@ -21,6 +21,9 @@ export const documentApi = {
       .get<{ documents: BookingDocumentDTO[] }>(`/bookings/${bookingId}/documents`, { cookie })
       .then((r) => r.documents),
 
+  remove: (bookingId: string, documentId: string): Promise<null> =>
+    apiClient.delete<null>(`/bookings/${bookingId}/documents/${documentId}`),
+
   // variant: 'final' | 'original'. Omitted → server returns the final draft if one
   // exists, else the original.
   getDraftUrl: (

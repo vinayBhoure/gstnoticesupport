@@ -46,10 +46,17 @@ export const createBookingSchema = z.object({
   filingFor: z.enum(FILING_FOR_VALUES, {
     error: 'filingFor must be "self" or "others"',
   }),
+  // Optional (issue #10) — empty string is treated as "not provided", not a
+  // validation failure. When a value is present, the existing format checks
+  // (15 chars, canonical GSTIN pattern) still apply unchanged.
   gstn: z
     .string()
-    .length(15, 'GSTN must be exactly 15 characters')
-    .regex(GSTN_REGEX, 'Invalid GSTN format'),
+    .trim()
+    .optional()
+    .transform((v) => (v === '' ? undefined : v))
+    .refine((v) => v === undefined || (v.length === 15 && GSTN_REGEX.test(v)), {
+      message: 'Invalid GSTN format',
+    }),
   consentInformationAccurate: z.boolean().refine((v) => v === true, {
     message: 'You must confirm that the information is accurate',
   }),

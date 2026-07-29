@@ -5,6 +5,7 @@ import type {
   VerifyOtpInput,
   ResendOtpInput,
   CompleteProfileInput,
+  CheckPhoneInput,
   LoginInput,
   ForgotPasswordInput,
   ResetPasswordInput,
@@ -12,6 +13,7 @@ import type {
 } from '@/lib/shared-schemas/auth.schema';
 
 type UserResponse = { user: UserObject };
+type PhoneAvailability = { available: boolean };
 
 // All payload types are inferred from the shared server Zod schemas
 // (RULES.md §3.2 — never recreate schemas in the frontend).
@@ -27,6 +29,9 @@ export const authApi = {
 
   completeProfile: (payload: CompleteProfileInput): Promise<UserResponse> =>
     apiClient.post<UserResponse>('/auth/complete-profile', payload),
+
+  checkPhone: (payload: CheckPhoneInput): Promise<PhoneAvailability> =>
+    apiClient.post<PhoneAvailability>('/auth/check-phone', payload),
 
   login: (payload: LoginInput): Promise<UserResponse> =>
     apiClient.post<UserResponse>('/auth/login', payload),

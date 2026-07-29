@@ -41,6 +41,12 @@ export const userService = {
     if (!user) {
       throw new ApiError(404, 'NOT_FOUND', 'Account not found');
     }
+    if (input.phone !== undefined) {
+      const phoneOwner = await userRepository.findByPhone(input.phone);
+      if (phoneOwner && phoneOwner.id !== userId) {
+        throw new ApiError(409, 'PHONE_TAKEN', 'Mobile number is already registered.');
+      }
+    }
     const updated = await userRepository.updateProfile(userId, {
       name: input.name,
       phone: input.phone,
@@ -82,7 +88,7 @@ export const userService = {
     await tokenService.blacklistAccessJti(accessJti);
 
     notificationService
-      .sendAccountDeleted({ name: user.name, email: user.email, userId })
+      .sendAccountDeleted({ name: user.name, email: user.email, phone: user.phone, userId })
       .catch(() => {});
   },
 };

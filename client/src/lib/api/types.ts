@@ -88,7 +88,7 @@ export type BookingDetailDTO = {
   contactPhone: string;
   organizationName: string | null;
   filingFor: FilingFor;
-  gstn: string;
+  gstn: string | null;
   consentInformationAccurate: boolean;
   consentContactAuthorized: boolean;
   adminNote: string | null;

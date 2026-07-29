@@ -2,6 +2,7 @@ import { PaymentSource, BookingStatus } from '@prisma/client';
 import type { Booking } from '@prisma/client';
 import { paymentRepository } from '../repositories/payment.repository';
 import { bookingRepository } from '../repositories/booking.repository';
+import { userRepository } from '../repositories/user.repository';
 import { notificationService } from './notification.service';
 import { assertPayable } from './booking-state-machine';
 import { ApiError } from '../utils/ApiError';
@@ -144,13 +145,26 @@ export const paymentService = {
       return { status: 'already_processed', booking: record.booking };
     }
 
-    notificationService
-      .sendPaymentConfirmed({
-        id: booking.id,
-        serviceType: booking.serviceType,
-        contactName: booking.contactName,
-        contactEmail: booking.contactEmail,
-        amountPaise: record.amountPaise,
+    // Recipient is the account holder (booking.userId), never booking.contactEmail —
+    // a user may pay on behalf of a client whose contact details are informational only.
+    userRepository
+      .findById(booking.userId)
+      .then((user) => {
+        if (!user) return;
+        return notificationService.sendPaymentConfirmed(
+          { name: user.name, email: user.email, phone: user.phone },
+          {
+            id: booking.id,
+            serviceType: booking.serviceType,
+            contactName: booking.contactName,
+            contactEmail: booking.contactEmail,
+            organizationName: booking.organizationName,
+            amountPaise: record.amountPaise,
+            razorpayPaymentId: params.paymentId,
+            razorpayOrderId: params.orderId,
+            paidAt: new Date(),
+          },
+        );
       })
       .catch(() => {});
 

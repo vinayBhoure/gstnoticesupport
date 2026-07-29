@@ -67,7 +67,7 @@ A two-zone GST litigation services platform: public marketing site + authenticat
 | `status` enum on payment_records | `created`, `authorized`, `captured`, `failed` (no `refunded`) | Mirrors Razorpay states the platform actually encounters |
 | Booking status enum | `document_upload`, `in_review`, `draft_ready`, `filing`, `complete`, `cancelled` | Locked in HLD |
 | OTP | 6-digit numeric, 10 min validity, max 3 requests/hour, hashed before storage | Standard for India market |
-| JWT access token | 15 min expiry | Industry standard for trust-sensitive platform |
+| JWT access token | 12 hour expiry (was 15 min — D104: 15-min TTL was causing users to be logged out mid-session since SSR navigations never attempt a silent refresh) | Balances session continuity against exposure window; logout still revokes instantly via the jti blacklist regardless of TTL length |
 | JWT refresh token | 7 days, stored server-side in DB | Required for revocation |
 | JWT payload | `sub` (user.id), `role`, `email`, `iat`, `exp` | Minimum needed for auth + authorization |
 | Sessions | Multiple concurrent sessions allowed | Simplifies model; no device confirmation |
@@ -145,7 +145,7 @@ Detailed schema (column types, constraints, indexes) will be finalized in a foll
 `id`, `name`, `email` (unique), `hashed_password`, `role` (`user`/`admin`), `email_verified`, `terms_accepted`, `allow_promotions`, `interested_services` (enum array), `created_at`, `updated_at`
 
 ### `bookings`
-`id`, `user_id` (FK), `service_type` (enum), `status` (enum), `payment_status` (enum), `contact_name`, `contact_email`, `contact_phone`, `organization_name` (nullable), `filing_for` (enum: `self`/`others`), `gstn`, `consent_information_accurate`, `consent_contact_authorized`, `draft_s3_key` (nullable), `admin_note` (nullable), `created_at`, `updated_at`
+`id`, `user_id` (FK), `service_type` (enum), `status` (enum), `payment_status` (enum), `contact_name`, `contact_email`, `contact_phone`, `organization_name` (nullable), `filing_for` (enum: `self`/`others`), `gstn` (nullable — D104, was `NOT NULL`), `consent_information_accurate`, `consent_contact_authorized`, `draft_s3_key` (nullable), `admin_note` (nullable), `created_at`, `updated_at`
 
 ### `booking_documents`
 `id`, `booking_id` (FK), `uploaded_by` (enum: `user`/`admin`), `file_name`, `s3_key` (unique), `uploaded_at`
@@ -308,7 +308,7 @@ Deferred from Phase 2:
 - `booking_documents` has no `user_id`.
 - Booking state machine and transitions.
 - Razorpay Orders flow + 3-layer reliability architecture.
-- 15 min / 7 day JWT durations.
+- 12 hour / 7 day JWT durations (D104 amends the original 15-min access token TTL).
 - Rate limit matrix in §6; state is in-memory (`express-rate-limit`), no DB table.
 - File constraints: PDF / 5MB / 8 files.
 - `complete-profile` collects name + phone only (D67, 2026-06-16).
@@ -340,7 +340,7 @@ Deferred from Phase 2:
 16. New device confirmation flow dropped; multiple concurrent sessions allowed.
 17. Blacklist scoped to logout + "This wasn't me" link only.
 18. Login security alert (Pattern A) retained for both user and admin.
-19. Access token 15 min, refresh token 7 days.
+19. Access token 15 min, refresh token 7 days. **Amended by D104 (2026-07-26): access token raised to 12 hours** — the 15-min TTL was logging users out mid-session since Server Component navigations never attempt a silent refresh; refresh token duration is unchanged.
 20. Rate limit matrix locked (§6).
 21. Filenames sanitized before S3 key construction.
 22. HLD payment decisions inherited as-is; LLD fills gaps only.

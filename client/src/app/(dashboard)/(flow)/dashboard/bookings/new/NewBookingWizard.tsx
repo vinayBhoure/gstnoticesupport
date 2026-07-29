@@ -81,6 +81,9 @@ export function NewBookingWizard() {
 
   const serviceType = useWatch({ control, name: 'serviceType' }) as ServiceType | undefined;
   const filingFor = useWatch({ control, name: 'filingFor' }) ?? 'self';
+  const consentInformationAccurate = useWatch({ control, name: 'consentInformationAccurate' });
+  const consentContactAuthorized = useWatch({ control, name: 'consentContactAuthorized' });
+  const consentsConfirmed = Boolean(consentInformationAccurate) && Boolean(consentContactAuthorized);
 
   const createMutation = useMutation({
     mutationFn: bookingApi.create,
@@ -244,7 +247,7 @@ export function NewBookingWizard() {
               />
               <Input
                 id="gstn"
-                label="GSTIN"
+                label="GSTIN (optional)"
                 className="input--mono"
                 placeholder="e.g. 29ABCDE1234F1Z5"
                 maxLength={15}
@@ -279,7 +282,7 @@ export function NewBookingWizard() {
                 />
               </div>
 
-              <div className="card flex flex-col gap-3 p-4">
+              <div className="flex flex-col gap-3">
                 <Checkbox
                   id="consentInformationAccurate"
                   label="I confirm the information provided is accurate."
@@ -297,7 +300,7 @@ export function NewBookingWizard() {
               <PreDepositNotice serviceType={serviceType} />
             </form>
 
-            <p className="privacy-note" style={{ marginTop: 32 }}>
+            <p className="privacy-note mt-8">
               <Lock size={15} strokeWidth={1.5} aria-hidden />
               Your details are used only for preparing your GST response. We never share them.
             </p>
@@ -317,6 +320,7 @@ export function NewBookingWizard() {
               bookingId={createdBooking.id}
               usedCount={0}
               onUploaded={() => setUploadedCount((c) => c + 1)}
+              onDeleted={() => setUploadedCount((c) => Math.max(0, c - 1))}
             />
 
             <div
@@ -341,12 +345,14 @@ export function NewBookingWizard() {
                     <span className="summary-row__label">Name</span>
                     <span className="summary-row__value">{createdBooking.contactName}</span>
                   </div>
-                  <div className="summary-row">
-                    <span className="summary-row__label">GSTIN</span>
-                    <span className="summary-row__value summary-row__value--mono">
-                      {createdBooking.gstn}
-                    </span>
-                  </div>
+                  {createdBooking.gstn && (
+                    <div className="summary-row">
+                      <span className="summary-row__label">GSTIN</span>
+                      <span className="summary-row__value summary-row__value--mono">
+                        {createdBooking.gstn}
+                      </span>
+                    </div>
+                  )}
                   {requiresPreDeposit(createdBooking.serviceType) && (
                     <div className="summary-row">
                       <span className="summary-row__label">Pre-deposit</span>
@@ -429,8 +435,13 @@ export function NewBookingWizard() {
               type="submit"
               form="booking-form"
               className="btn-continue"
-              disabled={createMutation.isPending}
-              aria-label="Continue to step 3, Documents"
+              disabled={createMutation.isPending || !consentsConfirmed}
+              aria-disabled={!consentsConfirmed}
+              aria-label={
+                consentsConfirmed
+                  ? 'Continue to step 3, Documents'
+                  : 'Confirm both checkboxes to continue to step 3, Documents'
+              }
             >
               {createMutation.isPending ? (
                 <span className="spinner" aria-hidden />

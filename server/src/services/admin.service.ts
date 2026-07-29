@@ -129,16 +129,24 @@ export const adminService = {
     assertTransition(booking.status, input.status);
     await bookingRepository.updateStatus(id, input.status);
 
+    // Recipient is the account holder (booking.user), never booking.contactEmail —
+    // informational-only case details, not a notification address.
     const recipient = {
+      name: booking.user.name,
+      email: booking.user.email,
+      phone: booking.user.phone,
+    };
+    const emailBooking = {
       id: booking.id,
       serviceType: booking.serviceType,
       contactName: booking.contactName,
       contactEmail: booking.contactEmail,
+      organizationName: booking.organizationName,
     };
     if (input.status === BookingStatus.in_review) {
-      notificationService.sendStatusInReview(recipient).catch(() => {});
+      notificationService.sendStatusInReview(recipient, emailBooking).catch(() => {});
     } else if (input.status === BookingStatus.complete) {
-      notificationService.sendStatusComplete(recipient).catch(() => {});
+      notificationService.sendStatusComplete(recipient, emailBooking).catch(() => {});
     }
 
     return adminService.getBooking(id);
@@ -200,16 +208,17 @@ export const adminService = {
       input.quotedAmountPaise,
     );
 
-    const recipient = {
+    const recipient = { name: booking.user.name, email: booking.user.email, phone: booking.user.phone };
+    const emailBooking = {
       id: booking.id,
       serviceType: booking.serviceType,
       contactName: booking.contactName,
-      contactEmail: booking.contactEmail,
+      organizationName: booking.organizationName,
     };
     if (isFirstDraft) {
-      notificationService.sendDraftReady(recipient).catch(() => {});
+      notificationService.sendDraftReady(recipient, emailBooking).catch(() => {});
     } else {
-      notificationService.sendDraftUpdated(recipient).catch(() => {});
+      notificationService.sendDraftUpdated(recipient, emailBooking).catch(() => {});
     }
 
     return adminService.getBooking(id);
@@ -270,16 +279,17 @@ export const adminService = {
     const isFirstFinalDraft = booking.finalDraftS3Key === null;
     await bookingRepository.setFinalDraft(id, input.s3Key);
 
-    const recipient = {
+    const recipient = { name: booking.user.name, email: booking.user.email, phone: booking.user.phone };
+    const emailBooking = {
       id: booking.id,
       serviceType: booking.serviceType,
       contactName: booking.contactName,
-      contactEmail: booking.contactEmail,
+      organizationName: booking.organizationName,
     };
     if (isFirstFinalDraft) {
-      notificationService.sendFinalDraftReady(recipient).catch(() => {});
+      notificationService.sendFinalDraftReady(recipient, emailBooking).catch(() => {});
     } else {
-      notificationService.sendFinalDraftUpdated(recipient).catch(() => {});
+      notificationService.sendFinalDraftUpdated(recipient, emailBooking).catch(() => {});
     }
 
     return adminService.getBooking(id);
@@ -350,7 +360,7 @@ export const adminService = {
     const document = booking.documents.find((doc) => doc.id === documentId);
     if (!document) throw new ApiError(404, 'NOT_FOUND', 'Document not found');
 
-    const downloadUrl = await getDownloadUrl(document.s3Key);
+    const downloadUrl = await getDownloadUrl(document.s3Key, { downloadFileName: document.fileName });
     return {
       downloadUrl,
       fileName: document.fileName,

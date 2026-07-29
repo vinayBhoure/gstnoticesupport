@@ -5,6 +5,138 @@
 
 ---
 
+## [2026-07-29] — chore: sync WhatsApp branch onto development + live verification pass
+
+**Branch: `feature/phase-2/whatsapp-notifications`, synced onto `development`'s tip (post `fix/phase-2/ui-functional-issues` merge, commit `20703cb`).**
+
+- Reconciled a stash-apply conflict from merging `development`'s 5 new commits (navbar logo, auth header, 12h sessions/optional GSTIN, legal pages, document delete) into the still-uncommitted WhatsApp branch — `CHANGELOG.md` merged manually (both sides' entries kept), a stale overlay that was silently reverting `development`'s DELETE-document/`LoginForm` work was discarded (verified regressive before removal; recoverable from an earlier stash), and the 4 new WhatsApp files were recovered intact.
+- **GSTIN-nullability fix**: the `booking_created_admin` WhatsApp template param now falls back to `'Not provided'` when `booking.gstn` is null, mirroring the email template — GSTIN became optional on `development` (D104) after the WhatsApp send path was originally written against a required field.
+- **Positional-parameter fix**: WhatsApp Manager's dashboard composer only supports numbered variables (`{{1}}, {{2}}, …`), not the named format (`{{name}}`) the send code originally emitted. `whatsapp/templates.ts`'s `body()` helper now serializes parameters by array order (no `parameter_name` field); every template builder's object-literal key order already matched the documented manifest order 1:1, so no builder logic needed to change — only the serialization. `whatsapp-templates.md` §4/§5 corrected to describe positional format.
+- **Live verification against real Meta credentials** (WABA `2911840275822893`): all 22 approved templates reconciled 1:1 against the code (name, language, parameter count, positional format) via the Template API — 0 mismatches. 21/21 real WhatsApp sends succeeded across every notification event, including the pre-deposit template variant routing correctly for `gstat_appeal`. Full negative-test suite (invalid phone, missing template, wrong param count, null recipient, `WHATSAPP_ENABLED=false`) — all fail gracefully, no throws, email always unaffected. Webhook GET/POST tested with real HMAC signatures across `sent`/`delivered`/`read`/`failed` status events, plus tampered-body and missing-signature rejection. A real `POST /auth/login` through the live HTTP stack fired both the WhatsApp and email `login_alert_user` notifications for an actual DB user.
+- **Root cause of the earlier `#100 Invalid parameter` failure wall, found**: unrelated to templates or code — the previously configured access token was invalid for messaging, and separately `WHATSAPP_ADMIN_NUMBER` had been set to the *sender's own number* (WhatsApp rejects self-sends with the same generic error). Both are local `.env` values (gitignored, not part of this commit).
+- **Found, not yet fixed**: `WHATSAPP_VERIFY_TOKEN` appears in plaintext in request logs — the global `requestLogger` logs full URLs, and Meta's GET verification handshake puts the token in the query string. Violates RULES.md §4.1. Tracked as an open item.
+- **Unrelated fix required to unblock live testing**: regenerated the local Prisma client (`npx prisma generate`) — a stale generated client (missing a `tokens_valid_from` column reference) was 500ing every login locally. Migrations were already up to date; this was generated-artifact drift, not a schema/migration change, and touches no committed file.
+- See decision D101 addendum (2026-07-29). `tsc --noEmit` clean.
+
+## [2026-07-26] — feat: sharper, larger navbar logo
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **The logo in the navigation bar is now larger and clearly visible**, using a newly cropped high-fidelity version of the brand mark instead of the small, off-center, low-detail crop shown before. Aspect ratio is preserved (no stretching); the navigation bar is slightly taller to fit it comfortably, on both desktop and mobile.
+- Only the navigation bar's logo changed — the logo elsewhere in the app (footer, sign-in pages, dashboard sidebar) is unchanged.
+- Verified visually in the browser at desktop size and when scrolled; `tsc --noEmit` and `eslint` clean.
+- See decision D106.
+
+## [2026-07-26] — fix: auth page header now shares the app's common content container
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **Login and Create Account page headers now align with the rest of the site.** The header previously used its own narrower width and different side padding than every other page's Navbar/Footer; it now uses the same shared container, so the logo and the "Back to home" link line up exactly where they would on any other page, at every screen size. One shared component fixes all 6 auth pages.
+- `tsc --noEmit` clean; `eslint` clean; production build verified.
+- See decision D105.
+
+## [2026-07-26] — feat: 12h sessions, optional GSTIN, auth-page spacing fixes, rebuilt legal pages
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **You'll stay signed in for 12 hours instead of ~15 minutes.** Sessions were expiring during normal use because a background token refresh only happens on client-side navigation, not full page loads — raising the token lifetime fixes the experienced problem directly. Logging out still ends your session immediately, regardless of this change.
+- **GSTIN is now optional when booking a service.** You can continue without entering one; if you do provide one, it's still validated for the correct format. Existing bookings and the admin view show "—" when no GSTIN was given.
+- **Login and Create Account page spacing corrected** to match the intended design — outer page padding, and the card's own padding/corner treatment on mobile, were both off from spec.
+- **Terms of Service, Privacy Policy, and Refund Policy pages rebuilt** with a proper legal-document layout: a sticky "On this page" navigation that highlights your current section as you scroll, and clearer section formatting. The actual legal content is unchanged — only the presentation.
+- `tsc --noEmit` clean on `client/` and `server/`; `eslint` clean on `client/`; production build verified — all public marketing routes remain statically generated.
+- See decision D104.
+
+## [2026-07-26] — fix: single Add Document entry point on the booking detail page (follow-up to D102)
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **The booking detail page had two ways to upload a document while a booking was in Document Upload status** — a drag-and-drop zone embedded in the right-hand status panel, and the Add Document button in the Uploaded Documents list. Removed the drag-and-drop zone entirely; **Add Document is now the only way to upload**, and it opens a file picker directly (no separate drop zone, no toggle step).
+- **A just-uploaded document could appear twice** — once in a separate "upload session" list with its own success checkmark, and again in the main Uploaded Documents list. There is now exactly one list; an in-progress upload shows as a plain row in that same list and is replaced by the confirmed entry the moment it's ready.
+- The document list now updates the instant an upload or delete completes, without waiting for the page to reload.
+- Scope confirmed with the user: the new-booking wizard's document upload step (Step 3) is unchanged.
+- `tsc --noEmit` clean on `client/`; `eslint` clean.
+- See decision D103.
+
+## [2026-07-26] — fix: UI/functional issues batch — footer, header, documents, mobile input, breadcrumbs, password toggle
+
+**Branch: `fix/phase-2/ui-functional-issues` (from `development`).**
+
+- **Create Account footer** (`AuthCardShell`, shared by all 6 auth pages) now shows SSL/legal-name, an env-backed GSTIN row (`ORG_GSTIN` in `lib/site.ts` — absent, not a placeholder, until set; supersedes D39), Privacy/Terms/Refund Policy links, and copyright, matching `resources/ui/Signup.html`'s 4-row trust strip.
+- **Header/back-button alignment**: `AuthCardShell`'s header spacing corrected to the documented 40px (was 32px); the "Back to home" link gained padding, rounded corners, and keyboard focus styling it previously lacked entirely.
+- **Documents can now be added and deleted** on a booking while it is still in `document_upload` status. New `DELETE /bookings/:id/documents/:docId` endpoint (owner-only, status-gated, S3 object cleaned up best-effort). A confirmation dialog ("Are you sure you want to delete this document? This action cannot be undone.") appears before any delete, on the booking detail page and in the document upload flow (booking wizard Step 3, action panel).
+- **Mobile number fields reject non-numeric input** at the keystroke level (typing and pasting) across signup/complete-profile/login/settings/contact — previously letters and symbols could be entered.
+- **Booking Step 2 layout**: consistent field label styling across the form (previously the phone field used a different style from the other fields), consent checkboxes no longer boxed in an ad-hoc card, inline spacing replaced with a standard utility class.
+- **Continue button on booking Step 2 is now disabled until both confirmation checkboxes are checked** — previously it was always enabled regardless of consent state.
+- **One consistent breadcrumb style app-wide.** New shared `Breadcrumb` component replaces every page's own copy and is now shown on My Services, Payment History, and all 6 admin pages (previously missing there). The separator was nearly invisible against the page background — now clearly visible.
+- **Password field shows exactly one show/hide icon.** Removed a second, browser-native reveal icon that appeared in Edge alongside the app's own eye icon; the toggle is now keyboard-reachable. The Settings page's change-password fields, which previously had no show/hide toggle at all, now have one.
+- `tsc --noEmit` clean on both `client/` and `server/`; `eslint` clean on `client/` (no config exists in `server/`, pre-existing gap, unrelated to this branch).
+- See decision D102 for the full defect-by-defect rationale.
+
+## [2026-07-24] — feat: admin direct download, signup/mobile validation gating, login via email or mobile
+
+**Branch: `feature/phase-2/auth-ux-improvements` (from `development`).**
+
+- **Admin document download now downloads directly instead of opening a new tab.** `getDownloadUrl` (`server/src/lib/s3.ts`) accepts an optional `downloadFileName`; when passed, the pre-signed URL sets `ResponseContentDisposition: attachment; filename="..."` (sanitized via new `sanitizeDownloadFilename`). Only `admin.service.ts#getDocumentDownloadUrl` passes it — the user draft flow (`document.service.ts`) is untouched, so the Draft Viewer's inline iframe preview is unaffected. Client: new `client/src/lib/download.ts#triggerFileDownload` (hidden-anchor click) replaces `window.open(...)` in `AdminDocumentList.tsx`.
+- **Signup "Create Account" button is now disabled until the form is valid and terms are accepted.** `SignupForm` switches to `mode: 'onChange'` (`delayError: 400`) and gates the submit button on `formState.isValid`.
+- **Mobile-number registration (complete-profile) now enforces a strict 10-digit Indian mobile format and uniqueness.** `completeProfileSchema`/`user.schema.ts` phone fields switched from a loose `^\+?[0-9]{7,15}$` rule to `^[6-9]\d{9}$` (canonical bare-10-digit storage; the UI's `+91` prefix is unchanged). New `userRepository.findByPhone` (matches legacy `+91`/`91`/`0`-prefixed variants), enforced in both `authService.completeProfile` and `userService.updateProfile` (409 `PHONE_TAKEN`). New authenticated endpoint `POST /auth/check-phone` (30 req/15min limiter) backs a debounced (350ms) availability check in `CompleteProfileForm`, showing "Mobile number is already registered." inline; the phone input strips non-digits and caps at 10.
+- **Login now supports mobile number + password, in addition to email + password.** `loginSchema` accepts exactly one of `email`/`phone` (superRefine); `authService.login` looks up by whichever was provided, reusing the same password/verification/token logic. `LoginForm` adds a "Use mobile number instead" / "Use email instead" toggle below the identifier field; phone mode restricts input to 10 numeric digits.
+- No Prisma migration in this change — see decision D101 (phone uniqueness stays app-level for now).
+- `tsc --noEmit` clean on both `server/` and `client/`. `eslint` clean on `client/` (no config exists in `server/`, pre-existing gap). Not yet merged to `development` — pending user review.
+
+## [2026-07-18] — feat: WhatsApp Cloud API inbound webhook (verification handshake + event receipt)
+
+**Branch: `feature/phase-2/whatsapp-notifications`. Same feature/decision as the entry below (D101) — does not touch the send path.**
+
+- **New inbound endpoint `GET|POST /api/v1/webhooks/whatsapp`**, mounted in `index.ts` beside the Razorpay webhook — before `express.json()` (POST needs the raw body for signature verification) and before the global rate limiter (Meta's calls must never be throttled).
+- **`GET`** — the Meta verification handshake: matches `hub.mode=subscribe` + `hub.verify_token` against `WHATSAPP_VERIFY_TOKEN` (timing-safe not required here, it's a plain string compare against an owner-chosen secret), echoes the raw `hub.challenge` with HTTP 200 (a deliberate envelope exception — Meta requires the literal string, not JSON). Works whenever `WHATSAPP_VERIFY_TOKEN` is set, **independent of `WHATSAPP_ENABLED`**, so the owner can complete Meta dashboard setup before enabling outbound sends. Else 403.
+- **`POST`** — verifies `X-Hub-Signature-256` (HMAC-SHA256 over the raw body with `WHATSAPP_APP_SECRET`, timing-safe, `sha256=` prefix stripped) via a new `verifyWebhookSignature` export in `lib/whatsapp.ts` (additive only — `sendTemplate` and every existing export are untouched). Invalid/missing/unverifiable signature → 401 (fails closed, including when `WHATSAPP_APP_SECRET` is unset). Valid signature → 200 immediately, then a fire-and-forget **log-only stub**: event type + message ID only (never phone numbers, message content, or tokens), and only while `WHATSAPP_ENABLED=true` — while disabled it still ACKs 200 but skips logging entirely.
+- **No processing**: no DB writes, no delivery-status persistence, no auto-replies. Explicitly deferred per D101.
+- **2 new optional env vars**: `WHATSAPP_APP_SECRET` (Meta App Secret — distinct from the `WHATSAPP_ACCESS_TOKEN` used for sending), `WHATSAPP_VERIFY_TOKEN` (owner-chosen string, pasted into both `.env` and the Meta dashboard). Documented in `server/.env.example` and a new §2 "Webhook setup" in `docs/integrations/whatsapp-templates.md`.
+- Verified via 3 stubbed-request scripts (not committed) covering all 7 rows of the GET/POST behavior matrix (13/13 assertions) — including that the log line contains only `entryType`/`messageId`, never PII. `tsc --noEmit` clean. Confirmed via `git diff` that `lib/email.ts` and the existing Razorpay `webhookController.handle` are untouched.
+
+## [2026-07-18] — feat: WhatsApp notifications alongside every email (Meta Cloud API, shipped dark)
+
+**Branch: `feature/phase-2/whatsapp-notifications`. Overrides KB1 §16 by explicit decision (D101).**
+
+- **Every user-facing lifecycle notification now sends a WhatsApp message in parallel with its email** — via Meta's WhatsApp Cloud API called directly (no third-party BSP). User messages go to the account holder's phone; admin messages go to `WHATSAPP_ADMIN_NUMBER`. Both channels are best-effort and independent: a WhatsApp failure never blocks the email (and vice versa), and neither blocks the caller.
+- **Shipped dark / zero-risk to the email path.** All WhatsApp env vars are optional; sends are a no-op until `WHATSAPP_ENABLED=true` **and** the phone-number-id + access-token are set. With the flag off (the default), the transport returns early and never touches the network — verified. The server boots with nothing configured.
+- **New pieces**: `lib/whatsapp.ts` (transport, mirrors `lib/email.ts` — never throws, logs only event + message-id, never the phone/payload), `lib/phone.ts` (normalizes stored numbers to `+<cc><number>`; bare 10-digit → `+91`; un-normalizable → skipped so the email still sends), `whatsapp/templates.ts` (per-event named-parameter builders; the approved template bodies live in WhatsApp Manager). `notification.service.ts` now dual-dispatches; `recipient` gained `phone` (threaded from `userRepository`/`booking.user` — `findByIdForAdmin` now selects `phone`).
+- **Welcome timing**: the welcome *email* still fires at OTP verification (no phone yet then); the welcome *WhatsApp* fires at **Complete Profile**, the moment a phone first exists.
+- **Pre-deposit** (KB2 §7): Commissioner/GSTAT appeal draft-ready/updated messages auto-select a distinct approved template variant (a WhatsApp body is fixed at approval, so the disclosure can't be an inline conditional as in email).
+- **OTP / password-reset stay email-only** (no phone at signup; one-time codes stay on the verified channel).
+- **Owner deliverable**: `docs/integrations/whatsapp-templates.md` — full Meta setup checklist, env-var table, and the ~22 `utility` templates (name, named params, suggested body, example values) to create and submit for approval. `server/.env.example` documents every new variable.
+- Verified: `tsc --noEmit` clean; a stubbed-transport script (not committed) asserted correct email+WhatsApp recipients per event, pre-deposit variant selection, null-phone skip, phone normalization (17/17), and dark-by-default no-network (2/2).
+
+## [2026-07-17] — feat: mobile number required to access the dashboard (WhatsApp-notification prerequisite)
+
+**Branch: `fix/notification-flow`.**
+
+- **Every dashboard route now blocks access until a phone number is on file.** `(dashboard)/layout.tsx` — the single auth gate for the whole dashboard route group (both the sidebar shell and the chromeless booking-flow wizard) — now redirects to `/complete-profile` whenever `user.phone` is null, right after the existing `requireUser()`/admin check. The `complete-profile` page and its `POST /auth/complete-profile` endpoint are unchanged and reused as-is (D67's one-time-step guard already prevents re-submission once a phone exists).
+- **Login and re-visiting `/login`/`/signup` while authenticated route phone-less users straight to complete-profile** instead of bouncing through the dashboard first: `LoginForm`'s post-login navigation and `redirectIfAuthenticated` (used by both auth pages) now check `user.phone` before deciding the destination.
+- No server, schema, or endpoint changes — this is a client-side routing gate only, reusing 100% existing infrastructure. Presence-only (no OTP/verification step) — confirmed with the user; verification can be added once WhatsApp OTP infrastructure exists.
+- **Why now**: prerequisite for WhatsApp notifications (analysis in progress) — every notification event needs a reachable phone number, and today a user can use the whole platform indefinitely with `phone = null` (only collected at the optional complete-profile step).
+- Verified via `next build`: all 13 public marketing routes remain `○ Static` (unaffected — the gate lives entirely inside `(dashboard)`, not the public route group); `/complete-profile`, all dashboard routes, and auth pages compile and remain `ƒ Dynamic` as before. `tsc --noEmit` clean.
+
+## [2026-07-17] — fix: user-facing lifecycle emails now go to the booking account holder
+
+**Branch: `fix/notification-flow`.**
+
+- **All user-facing booking-lifecycle emails now address the account holder, not `booking.contactEmail`.** A user can book a service for their own business or on behalf of a client; the booking's `contactName`/`contactEmail`/`organizationName`/`gstn` describe the case, they are not a notification address. `sendBookingCreated`, `sendBookingCancelled`, `sendPaymentConfirmed`, `sendStatusInReview`, `sendDraftReady`, `sendDraftUpdated`, `sendFinalDraftReady`, `sendFinalDraftUpdated`, and `sendStatusComplete` now take an explicit `recipient: { name, email }` (the account holder, looked up via `booking.userId`) and send/greet using it.
+- Email bodies gain **"Filed for" (contact name) and, when present, "Organization"** rows so a user who books for multiple clients can tell bookings apart by the booking ID's context — GSTN intentionally omitted from the body.
+- Admin emails are unchanged — they still show the full contact/organization/GSTN details, since that's the case information the admin needs to work the booking.
+- Verified via a stubbed-`emailService` throwaway script (not committed): confirmed the account holder receives the email, `booking.contactEmail` never appears as a recipient, and the body renders both the account holder's name and the client's org/contact name.
+- `tsc --noEmit` clean.
+
+## [2026-07-17] — fix: notification-flow audit gaps (login, document upload, payment receipt)
+
+**Branch: `fix/notification-flow`. Audit findings and this fix traced through `notification.service.ts` and `emails/templates.ts`.**
+
+- **Admin no longer emailed on user login** — `sendLoginAlerts` sent both a user security alert and an admin-informational email on every sign-in; the notification matrix requires user-only. Removed the admin leg and deleted the now-unused `loginAlertAdmin` template. User's "This wasn't me" alert is unchanged.
+- **New: admin is notified on first document upload** — previously no email fired anywhere in the upload path, so the admin had no signal that a booking (manually transitioned `document_upload → in_review`) was ready to review. Added `sendDocumentsUploaded` (admin-only) firing exactly once per booking, on the first confirmed upload (`document.service.ts` checks `booking.documents.length === 0` at confirm time) — not on every file, to avoid up to 8 emails per booking.
+- **Payment confirmation emails now carry a Razorpay reference** — `paymentConfirmedUser`/`paymentConfirmedAdmin` previously showed only amount and booking ID. Added `razorpayPaymentId`, `razorpayOrderId`, and an IST-formatted capture date to both, sourced from the existing capture params in `payment.service.ts#processCaptured` (no schema change).
+- Verified via a stubbed-`emailService` throwaway script (not committed): login sends exactly 1 email (user only), document upload sends exactly 1 email (admin only), payment confirmation sends exactly 2 (user + admin) with receipt fields populated.
+- `tsc --noEmit` clean on `server/`. No ESLint config exists in `server/` (pre-existing gap, tracked separately) — not run.
+
 ## [2026-07-16] — chore: security-audit Newman verification closed out (D97)
 
 **No code changes — verification only. See D97 and `required_changes.md`.**

@@ -2,7 +2,12 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { envelope } from '../utils/envelope';
 import { documentService } from '../services/document.service';
 import type { BookingIdParam } from '../schemas/booking.schema';
-import type { UploadUrlInput, ConfirmUploadInput, DraftUrlQuery } from '../schemas/document.schema';
+import type {
+  UploadUrlInput,
+  ConfirmUploadInput,
+  DraftUrlQuery,
+  DocumentIdParam,
+} from '../schemas/document.schema';
 
 export const documentController = {
   // POST /bookings/:id/upload-url → 200
@@ -34,5 +39,12 @@ export const documentController = {
     const query = req.validated.query as DraftUrlQuery;
     const result = await documentService.getDraftUrl(id, req.user!.id, query);
     res.status(200).json(envelope(result));
+  }),
+
+  // DELETE /bookings/:id/documents/:docId → 200
+  remove: asyncHandler(async (req, res) => {
+    const { id, docId } = req.validated.params as DocumentIdParam;
+    await documentService.deleteDocument(id, docId, req.user!.id);
+    res.status(200).json(envelope(null));
   }),
 };
