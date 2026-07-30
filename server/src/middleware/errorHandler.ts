@@ -10,6 +10,7 @@ export function errorHandler(err: Error, req: Request, res: Response, _next: Nex
         code: err.code,
         message: err.message,
         ...(err.details ? { details: err.details } : {}),
+        ...(err.meta ? { meta: err.meta } : {}),
       },
     });
     return;

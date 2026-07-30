@@ -8,13 +8,16 @@ import { useMutation } from '@tanstack/react-query';
 import { MailCheck } from 'lucide-react';
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/shared-schemas/auth.schema';
 import { AuthCardShell } from '@/components/layout/AuthCardShell';
+import { AuthBanner } from '@/components/ui/AuthBanner';
 import { Input } from '@/components/ui/Input';
 import { authApi } from '@/lib/api/auth';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '@/lib/api/client';
+import { isTransportError } from '@/lib/api/error-messages';
 
 export function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
@@ -24,16 +27,26 @@ export function ForgotPasswordForm() {
 
   const mutation = useMutation({
     mutationFn: authApi.forgotPassword,
-    // Backend returns a neutral response whether or not the email exists.
-    onSuccess: () => setSent(true),
-    onError: (error) => toast.error(getErrorMessage(error)),
+    onSuccess: () => {
+      setSent(true);
+      toast.success('Password reset OTP sent successfully.');
+    },
+    onError: (error) => {
+      if (isTransportError(error)) {
+        toast.error(getErrorMessage(error));
+        return;
+      }
+      // Unlike login, this endpoint does say when no account matches, so the user can
+      // correct a typo instead of waiting for a code that will never arrive.
+      setServerError(getErrorMessage(error));
+    },
   });
 
   if (sent) {
     return (
       <AuthCardShell
         title="Check your email"
-        subtitle="If an account exists for that address, we've sent a password reset code and link."
+        subtitle="We've sent a password reset code and link to your inbox."
         footer={
           <Link href="/login" className="font-semibold text-[var(--accent-green)] underline underline-offset-2">
             Back to log in
@@ -60,7 +73,18 @@ export function ForgotPasswordForm() {
         </Link>
       }
     >
-      <form onSubmit={handleSubmit((d) => mutation.mutate(d))} noValidate className="flex flex-col gap-5">
+      {serverError && <AuthBanner>{serverError}</AuthBanner>}
+
+      <form
+        onSubmit={handleSubmit((d) => {
+          if (mutation.isPending) return;
+          setServerError(null);
+          mutation.mutate(d);
+        })}
+        onChange={() => setServerError(null)}
+        noValidate
+        className="flex flex-col gap-5"
+      >
         <Input
           id="email"
           label="Email Address"

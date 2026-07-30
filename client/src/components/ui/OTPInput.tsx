@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
 
 const OTP_LENGTH = 6;
 
@@ -9,12 +9,26 @@ type OTPInputProps = {
   onChange: (value: string) => void;
   error?: string;
   disabled?: boolean;
+  autoFocus?: boolean;
 };
 
 // Six single-digit boxes with paste distribution and arrow/backspace navigation
 // (components.md → OTP Input). The whole group carries one accessible label.
-export function OTPInput({ value, onChange, error, disabled = false }: OTPInputProps) {
+export function OTPInput({
+  value,
+  onChange,
+  error,
+  disabled = false,
+  autoFocus = false,
+}: OTPInputProps) {
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Mount-only: entering the code is the sole purpose of the OTP screens, so the caret
+  // belongs in box 1. Re-focusing on every render would fight the typing navigation.
+  useEffect(() => {
+    if (autoFocus && !disabled) inputsRef.current[0]?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only focus
+  }, []);
 
   const digits = value.padEnd(OTP_LENGTH, ' ').split('').slice(0, OTP_LENGTH);
 

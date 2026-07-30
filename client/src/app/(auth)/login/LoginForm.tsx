@@ -6,12 +6,15 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { AlertTriangle, Mail } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { loginSchema, type LoginInput } from '@/lib/shared-schemas/auth.schema';
 import { AuthCardShell } from '@/components/layout/AuthCardShell';
+import { AuthBanner } from '@/components/ui/AuthBanner';
 import { Input } from '@/components/ui/Input';
 import { authApi } from '@/lib/api/auth';
-import { ApiRequestError } from '@/lib/api/client';
+import { getErrorCode, getErrorMessage, getErrorMeta } from '@/lib/api/client';
+import { isTransportError } from '@/lib/api/error-messages';
+import { storeMaskedEmail } from '@/lib/auth/verify-otp-hint';
 
 type Banner = { kind: 'error' | 'info'; message: string } | null;
 
@@ -48,24 +51,32 @@ export function LoginForm({ returnTo }: LoginFormProps) {
       router.refresh();
     },
     onError: (error) => {
-      if (error instanceof ApiRequestError && error.code === 'EMAIL_NOT_VERIFIED') {
-        setBanner({
-          kind: 'info',
-          message:
-            "Your email isn't verified yet. Please use the 6-digit code we emailed you when you signed up.",
-        });
+      // An unverified account is a recoverable state, not a failure: the server has already
+      // sent a fresh code, so carry the userId it returned straight into /verify-otp.
+      if (getErrorCode(error) === 'EMAIL_NOT_VERIFIED') {
+        const userId = getErrorMeta(error, 'userId');
+        const maskedEmail = getErrorMeta(error, 'maskedEmail');
+        if (userId) {
+          if (maskedEmail) storeMaskedEmail(maskedEmail);
+          toast.success(getErrorMessage(error));
+          router.push(`/verify-otp?userId=${encodeURIComponent(userId)}`);
+          return;
+        }
+      }
+
+      if (isTransportError(error)) {
+        toast.error(getErrorMessage(error));
         return;
       }
-      // Generic — never disclose which credential was wrong (security).
-      setBanner({
-        kind: 'error',
-        message:
-          method === 'email' ? 'Email or password is incorrect.' : 'Mobile number or password is incorrect.',
-      });
+
+      // Server copy is already uniform for a bad identifier and a bad password — it must
+      // never disclose which one was wrong (HLD §14.2).
+      setBanner({ kind: 'error', message: getErrorMessage(error) });
     },
   });
 
   function onSubmit(data: LoginInput) {
+    if (mutation.isPending) return; // guards a double-click racing past the disabled button
     setBanner(null);
     mutation.mutate(data);
   }
@@ -83,26 +94,15 @@ export function LoginForm({ returnTo }: LoginFormProps) {
         </>
       }
     >
-      {banner && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          className={`mb-5 flex items-start gap-3 rounded-[var(--r-btn)] border p-3.5 text-sm ${
-            banner.kind === 'error'
-              ? 'border-[#F0D9B5] bg-[#FFF8EF]'
-              : 'border-[var(--neutral-200)] bg-[var(--neutral-50)]'
-          }`}
-        >
-          {banner.kind === 'error' ? (
-            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-[var(--warning-amber)]" />
-          ) : (
-            <Mail size={18} className="mt-0.5 shrink-0 text-[var(--primary-deep-blue)]" />
-          )}
-          <span className="text-[var(--neutral-900)]">{banner.message}</span>
-        </div>
-      )}
+      {banner && <AuthBanner kind={banner.kind}>{banner.message}</AuthBanner>}
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
+      {/* Editing any field clears a stale failure message (spec §5). */}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        onChange={() => setBanner(null)}
+        noValidate
+        className="flex flex-col gap-5"
+      >
         <div className="flex flex-col gap-1.5">
           {method === 'email' ? (
             <Input

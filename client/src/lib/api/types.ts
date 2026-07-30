@@ -24,6 +24,9 @@ export type ApiErrorBody = {
     code: string;
     message: string;
     details?: { field: string; message: string }[];
+    // Machine-readable extras the client acts on — e.g. the userId carried by
+    // EMAIL_NOT_VERIFIED so login can route into /verify-otp (server ApiError.meta).
+    meta?: Record<string, string | number | boolean>;
   };
 };
 
@@ -46,6 +49,14 @@ export type UserObject = {
 
 export type SignupResponseData = {
   userId: string;
+  maskedEmail: string;
+};
+
+// POST /auth/reset-password — an unverified account gets no session, so `user` is null
+// and the client sends it to login instead of the dashboard.
+export type ResetPasswordResponseData = {
+  emailVerified: boolean;
+  user: UserObject | null;
 };
 
 // ── Booking domain enums (mirror server/prisma/schema.prisma) ──

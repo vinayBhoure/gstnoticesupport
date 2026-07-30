@@ -12,26 +12,13 @@ import {
 import { authApi } from '@/lib/api/auth';
 import { getErrorMessage, getErrorCode } from '@/lib/api/client';
 import { Input } from '@/components/ui/Input';
-
-// Strength meter per resources/ui/Admin Settings.html (visual aid only —
-// the shared Zod schema is the actual gate).
-const STRENGTH_COLORS = [
-  'var(--warning-amber)',
-  'var(--warning-amber)',
-  'var(--primary-deep-blue)',
-  'var(--accent-green)',
-];
-const STRENGTH_LABELS = ['Weak', 'Fair', 'Good', 'Strong'];
-
-function strength(pw: string): number {
-  if (!pw) return 0;
-  let s = 0;
-  if (pw.length >= 8) s++;
-  if (pw.length >= 12) s++;
-  if (/[A-Z]/.test(pw) && /[0-9]/.test(pw)) s++;
-  if (/[^A-Za-z0-9]/.test(pw)) s++;
-  return Math.min(4, s);
-}
+// Strength meter per resources/ui/Admin Settings.html (visual aid only — the shared Zod
+// schema is the actual gate). Shared with the signup and reset-password screens.
+import {
+  STRENGTH_COLORS,
+  STRENGTH_LABELS,
+  passwordStrength as strength,
+} from '@/lib/password-strength';
 
 type Banner = { kind: 'success' | 'error'; message: string } | null;
 

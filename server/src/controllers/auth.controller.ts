@@ -38,10 +38,8 @@ export const authController = {
 
   resendOtp: asyncHandler(async (req, res) => {
     const input = req.validated.body as ResendOtpInput;
-    await authService.resendOtp(input.userId);
-    res
-      .status(200)
-      .json(envelope(null, 'A new verification code has been sent to your email.'));
+    await authService.resendOtp(input);
+    res.status(200).json(envelope(null, 'A new verification OTP has been sent.'));
   }),
 
   completeProfile: asyncHandler(async (req, res) => {
@@ -84,22 +82,25 @@ export const authController = {
   forgotPassword: asyncHandler(async (req, res) => {
     const input = req.validated.body as ForgotPasswordInput;
     await authService.forgotPassword(input.email);
-    res
-      .status(200)
-      .json(envelope(null, 'If an account with that email exists, a reset code has been sent.'));
+    res.status(200).json(envelope(null, 'Password reset OTP sent successfully.'));
   }),
 
   resetPassword: asyncHandler(async (req, res) => {
     const input = req.validated.body as ResetPasswordInput;
-    const { user, tokens } = await authService.resetPassword(input);
-    setAuthCookies(res, tokens);
-    res.status(200).json(envelope({ user }, 'Password updated successfully.'));
+    const { emailVerified, user, tokens } = await authService.resetPassword(input);
+    // No session for an unverified account — the client routes it to login instead.
+    if (tokens) setAuthCookies(res, tokens);
+    res
+      .status(200)
+      .json(envelope({ emailVerified, user }, 'Password updated successfully.'));
   }),
 
   changePassword: asyncHandler(async (req, res) => {
     const input = req.validated.body as ChangePasswordInput;
-    await authService.changePassword(req.user!.id, input);
-    res.status(200).json(envelope(null, 'Password updated.'));
+    // Every session was just revoked, including this one — re-issue so the caller stays in.
+    const tokens = await authService.changePassword(req.user!.id, input);
+    setAuthCookies(res, tokens);
+    res.status(200).json(envelope(null, 'Password updated successfully.'));
   }),
 
   invalidate: asyncHandler(async (req, res) => {

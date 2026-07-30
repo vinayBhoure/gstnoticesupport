@@ -10,6 +10,8 @@ export type AccessTokenPayload = {
   role: string;
   email: string;
   jti: string;
+  // Issued-at in whole seconds; compared against User.sessionsValidFrom in authenticate.ts.
+  iat: number;
 };
 
 export type RefreshTokenPayload = {
@@ -44,16 +46,17 @@ export function verifyAccessToken(token: string): AccessTokenPayload | null {
   try {
     const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET);
     if (typeof decoded === 'string') return null;
-    const { sub, jti, role, email } = decoded;
+    const { sub, jti, role, email, iat } = decoded;
     if (
       typeof sub !== 'string' ||
       typeof jti !== 'string' ||
       typeof role !== 'string' ||
-      typeof email !== 'string'
+      typeof email !== 'string' ||
+      typeof iat !== 'number'
     ) {
       return null;
     }
-    return { sub, role, email, jti };
+    return { sub, role, email, jti, iat };
   } catch {
     return null;
   }
