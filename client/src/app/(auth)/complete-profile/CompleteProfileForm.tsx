@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { AlertTriangle } from 'lucide-react';
 import { completeProfileSchema, type CompleteProfileInput } from '@/lib/shared-schemas/auth.schema';
 import { AuthCardShell } from '@/components/layout/AuthCardShell';
+import { AuthBanner } from '@/components/ui/AuthBanner';
 import { Input } from '@/components/ui/Input';
 import { authApi } from '@/lib/api/auth';
 import { ApiRequestError, getErrorMessage } from '@/lib/api/client';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
-const PHONE_TAKEN_MESSAGE = 'Mobile number is already registered.';
+const PHONE_TAKEN_MESSAGE = 'An account already exists with this mobile number. Please log in.';
 
 type CompleteProfileFormProps = { defaultName: string };
 
@@ -78,16 +78,7 @@ export function CompleteProfileForm({ defaultName }: CompleteProfileFormProps) {
       title="Complete your profile"
       subtitle="We use these details to keep you updated on your GST notice response."
     >
-      {serverError && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          className="mb-5 flex items-start gap-3 rounded-[var(--r-btn)] border border-[#F0D9B5] bg-[#FFF8EF] p-3.5 text-sm text-[var(--neutral-900)]"
-        >
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-[var(--warning-amber)]" />
-          <span>{serverError}</span>
-        </div>
-      )}
+      {serverError && <AuthBanner>{serverError}</AuthBanner>}
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
         <Input

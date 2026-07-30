@@ -199,7 +199,13 @@
 | ✅ | Auth invalidate page (`/auth/invalidate`) — fully SSR; success/expired/invalid states | "This wasn't me" link; no JSON leak to client |
 | ✅ | Dashboard skeleton (`/dashboard`) — SSR, `requireUser()` gate; `LogoutButton` client leaf | Placeholder pending EP11 App Shell |
 | ✅ | `(dashboard)/layout.tsx` — `requireUser()` auth gate | Full AppShell deferred to EP11 |
-| 🔄 | Live E2E validation — full auth flow against running server (signup → OTP → complete-profile → dashboard → logout → login → forgot/reset) | Pending: requires `server/.env` + Resend live |
+| ✅ | Live E2E validation — full auth flow against running server (signup → OTP → complete-profile → dashboard → logout → login → forgot/reset) | Done 2026-07-30 (D107) — `server/scripts/verify-auth-flow.ts`, 34/34 against a live server + real DB; seeds OTPs directly so no Resend delivery is needed. Browser pass on the abandoned-signup recovery |
+| ✅ | Unverified-account recovery — login re-issues the code and routes to `/verify-otp`; signup distinguishes verified vs unverified duplicates | D107 |
+| ✅ | OTP purpose separation (`email_verification` / `password_reset`) — a reset code can no longer verify an email | D107, migration `add_otp_purpose_and_sessions_valid_from` |
+| ✅ | `sessions_valid_from` — password reset/change invalidates every other device immediately | D107 |
+| ✅ | Reset-password Confirm Password field, live password checklist, strength meter | D107 |
+| ✅ | OTP screens: 10:00 expiry countdown, 60s resend cooldown, 3-resend cap, autofocus, masked email | D107 — 60s (not the prototype's 30s) to match the server cooldown |
+| ⬚ | Normalise legacy `User.phone` values, then add the `@unique` constraint | Still open from D101; unchanged by D107 |
 | ✅ | Backend fix: `notification.service.ts` invalidation link → `CLIENT_URL/auth/invalidate?ref=...` (currently points to API URL) | Done EP11 — D75 |
 
 ### EP11 — User Dashboard & Booking Flow Frontend (frontend, backend_plan Phases 3 + 4)

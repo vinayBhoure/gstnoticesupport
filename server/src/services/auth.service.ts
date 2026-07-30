@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { OtpPurpose } from '@prisma/client';
 import { userRepository } from '../repositories/user.repository';
 import { otpService } from './otp.service';
 import { tokenService } from './token.service';
@@ -7,10 +8,13 @@ import { verifyRefreshToken, hashToken } from '../lib/jwt';
 import { refreshTokenRepository } from '../repositories/refresh-token.repository';
 import { tokenBlacklistRepository } from '../repositories/token-blacklist.repository';
 import { ApiError } from '../utils/ApiError';
+import { setCachedCutoff } from '../lib/sessionCutoffCache';
+import { maskEmail } from '../utils/mask';
 import { toUserDTO, type UserDTO } from '../dto/user.dto';
 import type {
   SignupInput,
   VerifyOtpInput,
+  ResendOtpInput,
   CompleteProfileInput,
   LoginInput,
   ResetPasswordInput,
@@ -24,12 +28,41 @@ const BCRYPT_COST = 12;
 type AuthTokens = { accessToken: string; refreshToken: string };
 type AuthResult = { user: UserDTO; tokens: AuthTokens };
 type LoginContext = { ip: string; userAgent: string };
+type SignupResult = { userId: string; maskedEmail: string };
+// An unverified user may reset their password, but must not be signed in by doing so —
+// they are sent to login, which re-issues a verification code.
+type ResetResult = { emailVerified: boolean; user: UserDTO | null; tokens: AuthTokens | null };
+
+// Stamps the instant before which every access token for this user is refused.
+// JWT `iat` is expressed in whole seconds, so the cut-off is floored to the same resolution —
+// a millisecond value would reject the token minted moments later in this same request.
+// The cache is written through so the revocation is effective immediately, not after its TTL.
+async function applySessionCutoff(userId: string) {
+  const cutoff = new Date(Math.floor(Date.now() / 1000) * 1000);
+  const updated = await userRepository.updateSessionsValidFrom(userId, cutoff);
+  setCachedCutoff(userId, updated.sessionsValidFrom);
+  return updated;
+}
 
 export const authService = {
-  async signup(input: SignupInput): Promise<{ userId: string }> {
+  async signup(input: SignupInput): Promise<SignupResult> {
     const existing = await userRepository.findByEmail(input.email);
+    // Signup is the one place account existence is disclosed — the user cannot resolve a
+    // duplicate without being told. Login stays uniformly opaque (HLD §14.2).
+    if (existing?.emailVerified) {
+      throw new ApiError(
+        409,
+        'EMAIL_TAKEN',
+        'An account already exists with this email. Please log in.',
+      );
+    }
+    // Abandoned signup: never create a second row. Login re-issues the code (see login()).
     if (existing) {
-      throw new ApiError(409, 'CONFLICT', 'An account with this email already exists');
+      throw new ApiError(
+        409,
+        'ACCOUNT_UNVERIFIED',
+        'An account already exists. Please log in to verify your email.',
+      );
     }
 
     const hashedPassword = await bcrypt.hash(input.password, BCRYPT_COST);
@@ -42,11 +75,11 @@ export const authService = {
       allowPromotions: input.allowPromotions,
     });
 
-    const otp = await otpService.issue(user.id);
+    const otp = await otpService.issue(user.id, OtpPurpose.email_verification);
     await notificationService.sendSignupOtp(user.email, { name: user.name, otp });
     await notificationService.sendAccountCreatedAdmin({ userEmail: user.email, userId: user.id });
 
-    return { userId: user.id };
+    return { userId: user.id, maskedEmail: maskEmail(user.email) };
   },
 
   async verifyOtp(input: VerifyOtpInput): Promise<AuthResult> {
@@ -55,10 +88,10 @@ export const authService = {
       throw new ApiError(404, 'NOT_FOUND', 'Account not found');
     }
     if (user.emailVerified) {
-      throw new ApiError(409, 'CONFLICT', 'Email is already verified');
+      throw new ApiError(409, 'ALREADY_VERIFIED', 'Your email is already verified.');
     }
 
-    await otpService.verify(user.id, input.otp);
+    await otpService.verify(user.id, input.otp, OtpPurpose.email_verification);
     const verified = await userRepository.updateEmailVerified(user.id, true);
 
     notificationService
@@ -69,15 +102,27 @@ export const authService = {
     return { user: toUserDTO(verified), tokens: { accessToken, refreshToken } };
   },
 
-  async resendOtp(userId: string): Promise<void> {
-    const user = await userRepository.findById(userId);
+  async resendOtp(input: ResendOtpInput): Promise<void> {
+    const user = await userRepository.findById(input.userId);
     if (!user) {
       throw new ApiError(404, 'NOT_FOUND', 'Account not found');
     }
-    if (user.emailVerified) {
-      throw new ApiError(409, 'CONFLICT', 'Email is already verified');
+
+    if (input.purpose === 'password_reset') {
+      const otp = await otpService.issue(user.id, OtpPurpose.password_reset);
+      await notificationService.sendPasswordResetOtp(user.email, {
+        name: user.name,
+        otp,
+        userId: user.id,
+      });
+      return;
     }
-    const otp = await otpService.issue(user.id);
+
+    // Verification codes are pointless once the address is confirmed; a reset code is not.
+    if (user.emailVerified) {
+      throw new ApiError(409, 'ALREADY_VERIFIED', 'Your email is already verified.');
+    }
+    const otp = await otpService.issue(user.id, OtpPurpose.email_verification);
     await notificationService.sendSignupOtp(user.email, { name: user.name, otp });
   },
 
@@ -92,7 +137,13 @@ export const authService = {
     }
     const phoneOwner = await userRepository.findByPhone(input.phone);
     if (phoneOwner) {
-      throw new ApiError(409, 'PHONE_TAKEN', 'Mobile number is already registered.');
+      // Signup-time wording. PATCH /user/profile keeps a neutral message — the caller is
+      // already signed in there, so "please log in" would make no sense.
+      throw new ApiError(
+        409,
+        'PHONE_TAKEN',
+        'An account already exists with this mobile number. Please log in.',
+      );
     }
     const updated = await userRepository.updateProfile(userId, {
       name: input.name,
@@ -118,15 +169,41 @@ export const authService = {
     const user = input.email
       ? await userRepository.findByEmail(input.email)
       : await userRepository.findByPhone(input.phone!);
+    // Identical failure for an unknown identifier and a wrong password — the response must
+    // never disclose whether the account exists (HLD §14.2).
     if (!user) {
-      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect credentials');
+      throw new ApiError(
+        401,
+        'INVALID_CREDENTIALS',
+        'Incorrect email/mobile number or password.',
+      );
     }
     const passwordMatches = await bcrypt.compare(input.password, user.hashedPassword);
     if (!passwordMatches) {
-      throw new ApiError(401, 'INVALID_CREDENTIALS', 'Incorrect credentials');
+      throw new ApiError(
+        401,
+        'INVALID_CREDENTIALS',
+        'Incorrect email/mobile number or password.',
+      );
     }
+
+    // Password is proven, so this account is genuinely the caller's: recover an abandoned
+    // signup by re-issuing the code and handing the client what /verify-otp needs.
     if (!user.emailVerified) {
-      throw new ApiError(403, 'EMAIL_NOT_VERIFIED', 'Please verify your email before signing in');
+      try {
+        const otp = await otpService.issue(user.id, OtpPurpose.email_verification);
+        await notificationService.sendSignupOtp(user.email, { name: user.name, otp });
+      } catch (err) {
+        // A code sent moments ago is still valid — the cooldown must not block the redirect.
+        if (!(err instanceof ApiError && err.code === 'OTP_COOLDOWN')) throw err;
+      }
+      throw new ApiError(
+        403,
+        'EMAIL_NOT_VERIFIED',
+        'Email not verified. A new verification OTP has been sent to your email.',
+        undefined,
+        { userId: user.id, maskedEmail: maskEmail(user.email) },
+      );
     }
 
     const { accessToken, refreshToken, accessJti } = await tokenService.issueAuthTokens(user);
@@ -164,19 +241,15 @@ export const authService = {
     }
   },
 
+  // Reports an unknown address explicitly, so a user who mistypes their email is not left
+  // waiting for a code that will never arrive. This is a deliberate, product-owner-approved
+  // enumeration trade-off that supersedes the silent behaviour of D96(a); login stays opaque.
   async forgotPassword(email: string): Promise<void> {
     const user = await userRepository.findByEmail(email);
-    // Always succeed silently — never reveal whether the email is registered.
-    if (!user) return;
-    let otp: string;
-    try {
-      otp = await otpService.issue(user.id);
-    } catch (err) {
-      // A reset code was already sent within the cooldown window. Stay silent so the
-      // response is identical whether or not the email exists (no enumeration oracle).
-      if (err instanceof ApiError && err.code === 'OTP_COOLDOWN') return;
-      throw err;
+    if (!user) {
+      throw new ApiError(404, 'NOT_FOUND', 'No account found with the provided email.');
     }
+    const otp = await otpService.issue(user.id, OtpPurpose.password_reset);
     await notificationService.sendPasswordResetOtp(user.email, {
       name: user.name,
       otp,
@@ -184,25 +257,38 @@ export const authService = {
     });
   },
 
-  async resetPassword(input: ResetPasswordInput): Promise<AuthResult> {
+  async resetPassword(input: ResetPasswordInput): Promise<ResetResult> {
     const user = await userRepository.findById(input.userId);
     if (!user) {
       throw new ApiError(404, 'NOT_FOUND', 'Account not found');
     }
-    await otpService.verify(user.id, input.otp);
+    await otpService.verify(user.id, input.otp, OtpPurpose.password_reset);
 
     const hashedPassword = await bcrypt.hash(input.newPassword, BCRYPT_COST);
-    const updated = await userRepository.updatePassword(user.id, hashedPassword);
-    await tokenService.revokeAllRefreshTokens(user.id); // invalidate existing sessions
+    await userRepository.updatePassword(user.id, hashedPassword);
+    // Both halves are needed: revoking refresh tokens stops renewal, and the cut-off kills
+    // access tokens already in flight that would otherwise live for their full 12h.
+    await tokenService.revokeAllRefreshTokens(user.id);
+    const updated = await applySessionCutoff(user.id);
+
+    // An unverified account must not gain a session from a reset — it goes back to login,
+    // which re-issues a verification code.
+    if (!updated.emailVerified) {
+      return { emailVerified: false, user: null, tokens: null };
+    }
 
     const { accessToken, refreshToken } = await tokenService.issueAuthTokens(updated);
-    return { user: toUserDTO(updated), tokens: { accessToken, refreshToken } };
+    return {
+      emailVerified: true,
+      user: toUserDTO(updated),
+      tokens: { accessToken, refreshToken },
+    };
   },
 
-  // Authenticated password change (Admin Settings, and any signed-in user).
-  // The current session stays valid; other refresh tokens are revoked so a
-  // stolen session elsewhere cannot outlive the password change.
-  async changePassword(userId: string, input: ChangePasswordInput): Promise<void> {
+  // Authenticated password change (Admin Settings, and any signed-in user). Every session is
+  // dropped, then this device is immediately re-issued one — so the caller stays signed in
+  // while a stolen session elsewhere cannot outlive the change.
+  async changePassword(userId: string, input: ChangePasswordInput): Promise<AuthTokens> {
     const user = await userRepository.findById(userId);
     if (!user) {
       throw new ApiError(404, 'NOT_FOUND', 'Account not found');
@@ -216,6 +302,10 @@ export const authService = {
     const hashedPassword = await bcrypt.hash(input.newPassword, BCRYPT_COST);
     await userRepository.updatePassword(userId, hashedPassword);
     await tokenService.revokeAllRefreshTokens(userId);
+    const updated = await applySessionCutoff(userId);
+
+    const { accessToken, refreshToken } = await tokenService.issueAuthTokens(updated);
+    return { accessToken, refreshToken };
   },
 
   // Blacklists the access-token jti from the login "This wasn't me" link.

@@ -245,10 +245,11 @@ async function runTests() {
     });
     logTest(
       7,
-      'Conflict: duplicate email',
-      '409 CONFLICT',
+      'Conflict: duplicate email (unverified account)',
+      '409 ACCOUNT_UNVERIFIED',
       `${res.statusCode} ${res.body?.error?.code || 'N/A'}`,
-      res.statusCode === 409 && res.body?.error?.code === 'CONFLICT'
+      res.statusCode === 409 && res.body?.error?.code === 'ACCOUNT_UNVERIFIED',
+      'The seed account has not verified yet; a verified duplicate returns EMAIL_TAKEN'
     );
 
     // ==================== SECTION 2: VERIFY OTP ====================
@@ -332,10 +333,14 @@ async function runTests() {
     });
     logTest(
       13,
-      'Login: Email not verified',
-      '403 EMAIL_NOT_VERIFIED',
-      `${res.statusCode} ${res.body?.error?.code || 'N/A'}`,
-      res.statusCode === 403 && res.body?.error?.code === 'EMAIL_NOT_VERIFIED'
+      'Login: Email not verified returns userId for /verify-otp',
+      '403 EMAIL_NOT_VERIFIED + meta.userId',
+      `${res.statusCode} ${res.body?.error?.code || 'N/A'} meta.userId=${res.body?.error?.meta?.userId ? 'yes' : 'no'}`,
+      res.statusCode === 403 &&
+        res.body?.error?.code === 'EMAIL_NOT_VERIFIED' &&
+        res.body?.error?.meta?.userId === testState.userId &&
+        typeof res.body?.error?.meta?.maskedEmail === 'string',
+      'A new code is re-sent and the client is handed what /verify-otp needs'
     );
 
     // 4.3 - Non-existent email
@@ -361,23 +366,22 @@ async function runTests() {
     logTest(
       15,
       'Forgot Password: Valid email',
-      '200 (no enumeration)',
+      '200',
       `${res.statusCode}`,
-      res.statusCode === 200,
-      'Should always return 200 whether email exists or not'
+      res.statusCode === 200
     );
 
-    // 5.2 - Non-existent email (still 200)
+    // 5.2 - Non-existent email is reported, unlike login (deliberate: lets a user fix a typo)
     res = await makeRequest('POST', `${API_BASE}/auth/forgot-password`, {
       email: 'nonexistent@example.com',
     });
     logTest(
       16,
-      'Forgot Password: Non-existent email (still 200)',
-      '200 (silent)',
-      `${res.statusCode}`,
-      res.statusCode === 200,
-      'Should return 200 to prevent email enumeration'
+      'Forgot Password: Non-existent email',
+      '404 NOT_FOUND',
+      `${res.statusCode} ${res.body?.error?.code || 'N/A'}`,
+      res.statusCode === 404 && res.body?.error?.code === 'NOT_FOUND',
+      'Forgot-password discloses a missing account; login must never do so'
     );
 
     // ==================== SECTION 6: GET /AUTH/ME (No Auth) ====================
@@ -460,6 +464,7 @@ async function runTests() {
       userId: testState.userId,
       otp: '999999',
       newPassword: 'NewPass@123',
+      confirmPassword: 'NewPass@123',
     });
     logTest(
       23,
@@ -474,6 +479,7 @@ async function runTests() {
       userId: '00000000-0000-0000-0000-000000000000',
       otp: testState.otpCode,
       newPassword: 'NewPass@123',
+      confirmPassword: 'NewPass@123',
     });
     logTest(
       24,
@@ -481,6 +487,21 @@ async function runTests() {
       '404 NOT_FOUND',
       `${res.statusCode} ${res.body?.error?.code || 'N/A'}`,
       res.statusCode === 404 && res.body?.error?.code === 'NOT_FOUND'
+    );
+
+    // 10.3 - Mismatched confirmation is rejected by the shared schema
+    res = await makeRequest('POST', `${API_BASE}/auth/reset-password`, {
+      userId: testState.userId,
+      otp: '123456',
+      newPassword: 'NewPass@123',
+      confirmPassword: 'DifferentPass@123',
+    });
+    logTest(
+      '24b',
+      'Reset Password: Passwords do not match',
+      '400 VALIDATION_ERROR',
+      `${res.statusCode} ${res.body?.error?.code || 'N/A'}`,
+      res.statusCode === 400 && res.body?.error?.code === 'VALIDATION_ERROR'
     );
 
     // ==================== SECTION 11: COMPLETE PROFILE (No Auth) ====================

@@ -1,14 +1,19 @@
 import { prisma } from '../lib/prisma';
-import type { OtpStore } from '@prisma/client';
+import type { OtpStore, OtpPurpose } from '@prisma/client';
 
 export const otpRepository = {
-  async create(data: { userId: string; hashedOtp: string; expiresAt: Date }): Promise<OtpStore> {
+  async create(data: {
+    userId: string;
+    purpose: OtpPurpose;
+    hashedOtp: string;
+    expiresAt: Date;
+  }): Promise<OtpStore> {
     return prisma.otpStore.create({ data });
   },
 
-  async findByUserId(userId: string): Promise<OtpStore | null> {
+  async findByUserIdAndPurpose(userId: string, purpose: OtpPurpose): Promise<OtpStore | null> {
     return prisma.otpStore.findFirst({
-      where: { userId },
+      where: { userId, purpose },
       orderBy: { createdAt: 'desc' },
     });
   },
@@ -20,8 +25,8 @@ export const otpRepository = {
     });
   },
 
-  async deleteByUserId(userId: string): Promise<void> {
-    await prisma.otpStore.deleteMany({ where: { userId } });
+  async deleteByUserIdAndPurpose(userId: string, purpose: OtpPurpose): Promise<void> {
+    await prisma.otpStore.deleteMany({ where: { userId, purpose } });
   },
 
   async deleteExpired(): Promise<void> {

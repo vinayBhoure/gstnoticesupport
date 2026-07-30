@@ -58,7 +58,7 @@ export const refreshRateLimiter = rateLimit({
 export const loginRateLimiter = createRateLimiter({
   windowMs: 15 * MIN,
   max: 5,
-  message: 'Too many login attempts. Please try again in 15 minutes.',
+  message: 'Too many login attempts. Please try again in a few minutes.',
 });
 
 export const otpVerifyRateLimiter = createRateLimiter({

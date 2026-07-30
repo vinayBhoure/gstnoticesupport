@@ -8,11 +8,15 @@ export class ApiRequestError extends Error {
     message: string,
     public readonly details?: { field: string; message: string }[],
     public readonly status?: number,
+    public readonly meta?: Record<string, string | number | boolean>,
   ) {
     super(message);
     this.name = 'ApiRequestError';
   }
 }
+
+const NETWORK_ERROR_MESSAGE = 'Unable to connect. Please check your internet connection.';
+const SERVER_ERROR_MESSAGE = 'Something went wrong. Please try again later.';
 
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown;
@@ -48,12 +52,19 @@ async function requestEnvelope<T>(
     ...(extraHeaders as Record<string, string>),
   };
 
-  const response = await fetch(`${BASE_URL}/api/v1${path}`, {
-    credentials: 'include',
-    headers,
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-    ...rest,
-  });
+  // A dead backend or offline client rejects here with a bare TypeError ("Failed to fetch"),
+  // which is not something to show a user. Normalize it into the envelope error shape.
+  let response: Response;
+  try {
+    response = await fetch(`${BASE_URL}/api/v1${path}`, {
+      credentials: 'include',
+      headers,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...rest,
+    });
+  } catch {
+    throw new ApiRequestError('NETWORK_ERROR', NETWORK_ERROR_MESSAGE);
+  }
 
   // Browser-side: an expired 15-min access token returns 401. Refresh once and retry.
   // Never loop on the auth endpoints themselves.
@@ -71,7 +82,14 @@ async function requestEnvelope<T>(
     if (refreshed) return requestEnvelope<T>(path, { ...options, _retry: true });
   }
 
-  const json = (await response.json()) as ApiResponse<T>;
+  // A proxy/gateway failure can return HTML or an empty body with a 5xx — parsing it
+  // would throw a SyntaxError that reads as a client bug rather than a server outage.
+  let json: ApiResponse<T>;
+  try {
+    json = (await response.json()) as ApiResponse<T>;
+  } catch {
+    throw new ApiRequestError('INTERNAL_ERROR', SERVER_ERROR_MESSAGE, undefined, response.status);
+  }
 
   if (!json.success) {
     const err = json as ApiErrorBody;
@@ -80,6 +98,7 @@ async function requestEnvelope<T>(
       err.error.message,
       err.error.details,
       response.status,
+      err.error.meta,
     );
   }
 
@@ -125,9 +144,19 @@ export const apiClient = {
 };
 
 export function getErrorMessage(error: unknown): string {
-  if (error instanceof ApiRequestError) return error.message;
-  if (error instanceof Error) return error.message;
-  return 'An unexpected error occurred';
+  if (error instanceof ApiRequestError) {
+    // The server's INTERNAL_ERROR text is deliberately opaque; say something actionable.
+    return error.code === 'INTERNAL_ERROR' ? SERVER_ERROR_MESSAGE : error.message;
+  }
+  // Anything else is a client-side fault — never surface a raw JS message to a user.
+  return SERVER_ERROR_MESSAGE;
+}
+
+// Reads a string field from ApiError.meta (e.g. the userId on EMAIL_NOT_VERIFIED).
+export function getErrorMeta(error: unknown, key: string): string | null {
+  if (!(error instanceof ApiRequestError)) return null;
+  const value = error.meta?.[key];
+  return typeof value === 'string' ? value : null;
 }
 
 export function getErrorCode(error: unknown): string | null {

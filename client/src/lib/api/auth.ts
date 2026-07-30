@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { UserObject, SignupResponseData } from './types';
+import type { UserObject, SignupResponseData, ResetPasswordResponseData } from './types';
 import type {
   SignupInput,
   VerifyOtpInput,
@@ -43,8 +43,8 @@ export const authApi = {
   forgotPassword: (payload: ForgotPasswordInput): Promise<null> =>
     apiClient.post<null>('/auth/forgot-password', payload),
 
-  resetPassword: (payload: ResetPasswordInput): Promise<UserResponse> =>
-    apiClient.post<UserResponse>('/auth/reset-password', payload),
+  resetPassword: (payload: ResetPasswordInput): Promise<ResetPasswordResponseData> =>
+    apiClient.post<ResetPasswordResponseData>('/auth/reset-password', payload),
 
   changePassword: (payload: ChangePasswordInput): Promise<null> =>
     apiClient.post<null>('/auth/change-password', payload),

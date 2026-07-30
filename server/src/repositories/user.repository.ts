@@ -63,6 +63,16 @@ export const userRepository = {
     });
   },
 
+  // Cut-off instant for access tokens; see authenticate.ts. Callers must pass a stamp
+  // floored to the second — JWT `iat` has second resolution, so a millisecond value
+  // would invalidate the token issued in the same request.
+  async updateSessionsValidFrom(id: string, validFrom: Date): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data: { sessionsValidFrom: validFrom, updatedAt: new Date() },
+    });
+  },
+
   async softDelete(id: string): Promise<User> {
     // database.md §3.1 — never call prisma.user.delete()
     return prisma.user.update({

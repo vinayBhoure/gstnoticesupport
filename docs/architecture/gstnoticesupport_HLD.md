@@ -361,15 +361,15 @@ The platform uses stateless JWT authentication delivered via HTTP-only cookies. 
 
 ### 8.2 Signup Flow
 
-The user enters name, email, and password on the signup page. The backend creates a User record with `emailVerified = false`, hashes the password with bcrypt, generates a 6-digit numeric OTP, stores the OTP with a 10-minute expiry, and sends the OTP to the user's email via Resend. The user enters the OTP on the verification page. On successful verification, `emailVerified` is set to `true`, the JWT cookie is issued, and the user is prompted to complete their profile with phone number and services interested.
+The user enters name, email, and password on the signup page. If the email already belongs to a **verified** account, signup is rejected (`EMAIL_TAKEN`) and the user is pointed to login. If it belongs to an **unverified** account (an abandoned prior signup), signup is also rejected (`ACCOUNT_UNVERIFIED`, no second account is created) — the user recovers via login, which re-issues a fresh code (§8.3). Otherwise the backend creates a User record with `emailVerified = false`, hashes the password with bcrypt, generates a 6-digit numeric OTP scoped to the `email_verification` purpose, stores it with a 10-minute expiry, and sends it to the user's email via Resend. The user enters the OTP on the verification page. On successful verification, `emailVerified` is set to `true`, the JWT cookie is issued, and the user is prompted to complete their profile with phone number and name.
 
 ### 8.3 Login Flow
 
-The user enters email and password. The backend looks up the user by email, verifies the password with bcrypt, checks that `emailVerified` is true, signs the JWT, and sets the cookie. The user is redirected to the dashboard.
+The user enters email or mobile number, and password. The backend looks up the user and verifies the password with bcrypt. **An unknown identifier and a correct-identifier-wrong-password both return the identical `INVALID_CREDENTIALS` response** — login never discloses whether an account exists. If the password is correct but `emailVerified` is `false`, the backend re-issues a verification OTP and returns `EMAIL_NOT_VERIFIED` with the user's id and masked email in the response, so the client can redirect straight into the verification screen instead of leaving the user stuck. Otherwise the backend signs the JWT, sets the cookie, and the user is redirected to the dashboard.
 
 ### 8.4 Forgot Password Flow
 
-The user enters their email. The backend generates a 6-digit OTP, stores it with a 10-minute expiry, and emails it via Resend. The user enters the OTP and a new password. The backend verifies the OTP, hashes the new password, updates the user record, and signs a fresh JWT.
+The user enters their email. Unlike login, this endpoint **does** disclose an unregistered email (`NOT_FOUND`) — a deliberate exception to the no-enumeration rule, so a mistyped address is caught immediately rather than leaving the user waiting for a code that never arrives. For a registered email, the backend generates a 6-digit OTP scoped to the `password_reset` purpose, stores it with a 10-minute expiry, and emails it via Resend. The user enters the OTP, a new password, and a confirmation of it. The backend verifies the OTP, hashes the new password, updates the user record, and revokes every existing session for the account (both stored refresh tokens and any access token already in a browser). A fresh JWT is issued to the requesting device **only if the account is verified** — an unverified account is sent to login instead, which re-issues a verification code.
 
 ### 8.5 Role Model
 

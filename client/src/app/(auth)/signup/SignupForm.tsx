@@ -3,21 +3,27 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { AlertTriangle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import type { z } from 'zod';
 import { signupSchema, type SignupInput } from '@/lib/shared-schemas/auth.schema';
 import { AuthCardShell } from '@/components/layout/AuthCardShell';
+import { AuthBanner } from '@/components/ui/AuthBanner';
 import { Input } from '@/components/ui/Input';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { PasswordChecklist } from '@/components/ui/PasswordChecklist';
 import { authApi } from '@/lib/api/auth';
-import { getErrorMessage } from '@/lib/api/client';
+import { getErrorCode, getErrorMessage } from '@/lib/api/client';
+import { isTransportError } from '@/lib/api/error-messages';
+import { storeMaskedEmail } from '@/lib/auth/verify-otp-hint';
 
 export function SignupForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  // A duplicate account is resolved by logging in, so the banner offers that route.
+  const [showLoginLink, setShowLoginLink] = useState(false);
 
   // Three generics: form values use the schema INPUT type (allowPromotions optional
   // via .default), while the submit handler receives the transformed OUTPUT type.
@@ -25,6 +31,7 @@ export function SignupForm() {
     register,
     handleSubmit,
     formState: { errors, isValid },
+    control,
   } = useForm<z.input<typeof signupSchema>, unknown, SignupInput>({
     resolver: zodResolver(signupSchema),
     defaultValues: { termsAccepted: false, allowPromotions: false },
@@ -32,16 +39,29 @@ export function SignupForm() {
     delayError: 400,
   });
 
+  const password = useWatch({ control, name: 'password' }) ?? '';
+
   const mutation = useMutation({
     mutationFn: authApi.signup,
     onSuccess: (data) => {
+      storeMaskedEmail(data.maskedEmail);
       router.push(`/verify-otp?userId=${encodeURIComponent(data.userId)}`);
     },
-    onError: (error) => setServerError(getErrorMessage(error)),
+    onError: (error) => {
+      if (isTransportError(error)) {
+        toast.error(getErrorMessage(error));
+        return;
+      }
+      const code = getErrorCode(error);
+      setShowLoginLink(code === 'EMAIL_TAKEN' || code === 'ACCOUNT_UNVERIFIED');
+      setServerError(getErrorMessage(error));
+    },
   });
 
   function onSubmit(data: SignupInput) {
+    if (mutation.isPending) return;
     setServerError(null);
+    setShowLoginLink(false);
     mutation.mutate(data);
   }
 
@@ -59,17 +79,28 @@ export function SignupForm() {
       }
     >
       {serverError && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          className="mb-5 flex items-start gap-3 rounded-[var(--r-btn)] border border-[#F0D9B5] bg-[#FFF8EF] p-3.5 text-sm text-[var(--neutral-900)]"
-        >
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-[var(--warning-amber)]" />
-          <span>{serverError}</span>
-        </div>
+        <AuthBanner>
+          {serverError}
+          {showLoginLink && (
+            <>
+              {' '}
+              <Link
+                href="/login"
+                className="font-semibold text-[var(--accent-green)] underline underline-offset-2"
+              >
+                Go to log in
+              </Link>
+            </>
+          )}
+        </AuthBanner>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        onChange={() => setServerError(null)}
+        noValidate
+        className="flex flex-col gap-5"
+      >
         <Input
           id="name"
           label="Full Name"
@@ -86,14 +117,17 @@ export function SignupForm() {
           error={errors.email?.message}
           {...register('email')}
         />
-        <Input
-          id="password"
-          label="Password"
-          type="password"
-          autoComplete="new-password"
-          error={errors.password?.message}
-          {...register('password')}
-        />
+        <div className="flex flex-col gap-2">
+          <Input
+            id="password"
+            label="Password"
+            type="password"
+            autoComplete="new-password"
+            error={errors.password?.message}
+            {...register('password')}
+          />
+          <PasswordChecklist password={password} />
+        </div>
 
         <Checkbox
           id="termsAccepted"

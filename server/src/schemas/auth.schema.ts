@@ -6,12 +6,14 @@ const emailField = z
   .email('Invalid email format')
   .transform((v) => v.toLowerCase());
 
+// Messages are surfaced verbatim by the live password checklist on signup/reset.
 const passwordField = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
-  .regex(/[A-Z]/, 'Password must contain an uppercase letter')
-  .regex(/[0-9]/, 'Password must contain a digit')
-  .regex(/[^A-Za-z0-9]/, 'Password must contain a special character');
+  .min(8, 'Password must contain at least 8 characters')
+  .regex(/[A-Z]/, 'Password must include one uppercase letter')
+  .regex(/[a-z]/, 'Password must include one lowercase letter')
+  .regex(/[0-9]/, 'Password must include one number')
+  .regex(/[^A-Za-z0-9]/, 'Password must include one special character');
 
 const nameField = z
   .string()
@@ -44,8 +46,11 @@ export const verifyOtpSchema = z.object({
   otp: otpField,
 });
 
+// `purpose` lets the reset screen re-request its own code without a second endpoint.
+// Defaults to email_verification so existing signup clients keep working unchanged.
 export const resendOtpSchema = z.object({
   userId: userIdField,
+  purpose: z.enum(['email_verification', 'password_reset']).optional().default('email_verification'),
 });
 
 export const completeProfileSchema = z.object({
@@ -57,12 +62,27 @@ export const checkPhoneSchema = z.object({
   phone: indianMobileField,
 });
 
+// Login identifiers carry their own "required" message so a blank field reads as missing
+// rather than malformed — the signup emailField would report "Invalid email format" for ''.
+const loginEmailField = z
+  .string()
+  .trim()
+  .min(1, 'Email/mobile number is required.')
+  .email('Invalid email format')
+  .transform((v) => v.toLowerCase());
+
+const loginPhoneField = z
+  .string()
+  .trim()
+  .min(1, 'Email/mobile number is required.')
+  .regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number');
+
 // Login accepts exactly one of email or mobile number (toggle in the UI).
 export const loginSchema = z
   .object({
-    email: emailField.optional(),
-    phone: indianMobileField.optional(),
-    password: z.string().min(1, 'Password is required'),
+    email: loginEmailField.optional(),
+    phone: loginPhoneField.optional(),
+    password: z.string().min(1, 'Password is required.'),
   })
   .superRefine((data, ctx) => {
     const provided = [data.email, data.phone].filter((v) => v !== undefined).length;
@@ -79,11 +99,17 @@ export const forgotPasswordSchema = z.object({
   email: emailField,
 });
 
-export const resetPasswordSchema = z.object({
-  userId: userIdField,
-  otp: otpField,
-  newPassword: passwordField,
-});
+export const resetPasswordSchema = z
+  .object({
+    userId: userIdField,
+    otp: otpField,
+    newPassword: passwordField,
+    confirmPassword: z.string().min(1, 'Please confirm your new password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export const invalidateQuerySchema = z.object({
   ref: z.string().uuid('Invalid session reference format'),

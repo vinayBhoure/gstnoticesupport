@@ -5,6 +5,25 @@
 
 ---
 
+## [2026-07-30] — feat: unverified accounts can recover, and auth messaging matches the spec
+
+**Branch: `feature/phase-2/auth-flow-hardening` (from `development`).**
+
+- **If you signed up but closed the site before entering your emailed code, you are no longer stuck.** Log in as normal: we send you a fresh verification code, take you straight to the Verify Email screen, and tell you so — instead of the previous dead end where you could neither log in nor sign up again.
+- **Signing up with an address that already has an account now says which situation you're in** — "An account already exists with this email. Please log in." if it's verified, or "An account already exists. Please log in to verify your email." if it isn't — each with a direct link to log in. No duplicate account is ever created.
+- **Login failures no longer hint at whether an account exists.** A wrong password and an unknown email/mobile now give exactly the same message: "Incorrect email/mobile number or password."
+- **Forgot Password now tells you when no account matches the email**, so a typo is obvious immediately rather than leaving you waiting for a code that was never going to arrive.
+- **The Set a New Password screen gained a Confirm New Password field**, plus a live checklist that ticks off each password rule as you type and a strength meter. Submit stays disabled until everything passes and both passwords match.
+- **Both code-entry screens now show a `10:00` countdown to expiry**, turn amber in the last 90 seconds, disable themselves once expired, and offer Resend on a 60-second timer (up to three times). The first box is focused automatically, and pasting a full 6-digit code still fills every box.
+- **The Verify Email screen now shows which address the code went to**, masked (`ab***@example.com`).
+- **Changing or resetting your password now signs out every other device immediately** — previously another device could stay signed in for up to 12 hours. The device you're using stays signed in. After resetting, a verified account lands on the dashboard; an unverified one goes to login to pick up a fresh verification code.
+- **A password-reset code can no longer be used to verify an email address**, and requesting one type of code no longer silently cancels a pending code of the other type.
+- **Deleted accounts now lose access immediately.** Verifying a request already required a valid session; it now also confirms the account still exists, so a soft-deleted user's other open sessions stop working at once instead of lasting until the token expired.
+- **Passwords must now contain a lowercase letter** (existing passwords are unaffected — this applies only when setting a new one).
+- **Connection and server problems now say something useful** — "Unable to connect. Please check your internet connection." / "Something went wrong. Please try again later." — instead of a raw browser error.
+- Verified end-to-end: 34/34 live API checks (`server/scripts/verify-auth-flow.ts`) against a running server and real database, plus a browser walk-through of the recovery flow. `tsc --noEmit`, `eslint`, and `next build` all clean; bundle budget passing.
+- See decision D107. Migration: `add_otp_purpose_and_sessions_valid_from`.
+
 ## [2026-07-29] — chore: sync WhatsApp branch onto development + live verification pass
 
 **Branch: `feature/phase-2/whatsapp-notifications`, synced onto `development`'s tip (post `fix/phase-2/ui-functional-issues` merge, commit `20703cb`).**

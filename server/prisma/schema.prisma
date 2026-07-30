@@ -24,6 +24,15 @@ enum UserRole {
   @@map("user_role_enum")
 }
 
+// Scopes an OTP to the flow that issued it, so a password-reset code can never be
+// replayed against /auth/verify-otp and the two flows do not evict each other's code.
+enum OtpPurpose {
+  email_verification
+  password_reset
+
+  @@map("otp_purpose_enum")
+}
+
 enum ServiceType {
   asmt_10
   scn
@@ -101,6 +110,10 @@ model User {
   termsAccepted      Boolean       @default(false) @map("terms_accepted")
   allowPromotions    Boolean       @default(false) @map("allow_promotions")
   interestedServices ServiceType[] @default([]) @map("interested_services")
+  // Access tokens issued before this instant are rejected by authenticate.ts. Stamped on
+  // password reset/change so every other device loses its session immediately, instead of
+  // surviving until its 12h access token expires (revoking refresh tokens alone is not enough).
+  sessionsValidFrom  DateTime?     @map("sessions_valid_from") @db.Timestamptz(6)
   // database.md §3 — users are soft-deleted; never call prisma.user.delete()
   deletedAt          DateTime?     @map("deleted_at") @db.Timestamptz(6)
   createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -200,17 +213,18 @@ model PaymentRecord {
 // =============================================================================
 
 model OtpStore {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  hashedOtp    String   @map("hashed_otp") @db.VarChar(255)
-  expiresAt    DateTime @map("expires_at") @db.Timestamptz(6)
+  id           String     @id @default(uuid()) @db.Uuid
+  userId       String     @map("user_id") @db.Uuid
+  purpose      OtpPurpose @default(email_verification)
+  hashedOtp    String     @map("hashed_otp") @db.VarChar(255)
+  expiresAt    DateTime   @map("expires_at") @db.Timestamptz(6)
   // Capped at 5 attempts per LLD §6 rate-limit matrix
-  attemptCount Int      @default(0) @map("attempt_count") @db.SmallInt
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  attemptCount Int        @default(0) @map("attempt_count") @db.SmallInt
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+  @@index([userId, purpose])
   @@index([expiresAt])
   @@map("otp_store")
 }

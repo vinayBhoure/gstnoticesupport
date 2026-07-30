@@ -133,12 +133,16 @@ PayRecStatus  : created | authorized | captured | failed
 | Code | HTTP | Meaning |
 |------|------|---------|
 | `VALIDATION_ERROR` | 400 | Zod schema failed; `details` array present |
-| `UNAUTHORIZED` | 401 | Missing, expired, or blacklisted token |
+| `UNAUTHORIZED` | 401 | Missing, expired, or blacklisted token, or a token issued before the account's `sessions_valid_from` cut-off |
 | `FORBIDDEN` | 403 | Authenticated but not permitted (wrong role / wrong owner) |
 | `NOT_FOUND` | 404 | Resource does not exist |
 | `CONFLICT` | 409 | Duplicate unique constraint or invalid state transition |
 | `RATE_LIMITED` | 429 | Too many requests within the window |
 | `INTERNAL_ERROR` | 500 | Unhandled server error |
+
+An error object may carry an optional `meta` object alongside `code`/`message` — machine-readable values the client acts on (e.g. the `userId` on `EMAIL_NOT_VERIFIED`). It never contains secrets or unmasked PII.
+
+`NETWORK_ERROR` is **client-synthesised**, not a server code: `client/src/lib/api/client.ts` raises it when `fetch` itself rejects (offline, backend unreachable), so transport failures reach the UI in the same envelope shape as everything else.
 
 ---
 
@@ -156,7 +160,7 @@ Creates a new user account with `emailVerified = false`. Sends a 6-digit OTP to 
 {
   "name": "Ravi Kumar",           // string, 2–100 chars, required
   "email": "ravi@example.com",    // valid email, lowercased, required
-  "password": "MyPass@123",       // string, min 8 chars, 1 uppercase, 1 digit, 1 special char, required
+  "password": "MyPass@123",       // string, min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char, required
   "termsAccepted": true,          // boolean, must be true, required
   "allowPromotions": false        // boolean, optional, defaults to false
 }
@@ -167,7 +171,7 @@ Creates a new user account with `emailVerified = false`. Sends a 6-digit OTP to 
 {
   "success": true,
   "message": "Account created. Please check your email for a 6-digit verification code.",
-  "data": { "userId": "uuid" }
+  "data": { "userId": "uuid", "maskedEmail": "ra***@example.com" }
 }
 ```
 
@@ -175,7 +179,8 @@ Creates a new user account with `emailVerified = false`. Sends a 6-digit OTP to 
 | Status | Code | Condition |
 |--------|------|-----------|
 | 400 | `VALIDATION_ERROR` | Invalid/missing fields; `termsAccepted` is false |
-| 409 | `CONFLICT` | Email already registered |
+| 409 | `EMAIL_TAKEN` | Email registered to a **verified** account |
+| 409 | `ACCOUNT_UNVERIFIED` | Email registered to an **unverified** account — no second account is created; the user recovers via `POST /auth/login`, which re-issues the code (D107) |
 
 ---
 
@@ -207,22 +212,24 @@ Sets `Set-Cookie: access_token` (15 min) and `Set-Cookie: refresh_token` (7 days
 |--------|------|-----------|
 | 400 | `VALIDATION_ERROR` | Invalid format |
 | 400 | `OTP_EXPIRED` | OTP TTL (10 min) has passed |
-| 400 | `OTP_INVALID` | Wrong code |
+| 400 | `OTP_INVALID` | Wrong code, **or** a code issued for the `password_reset` purpose — a reset code can never verify an email (D107). `error.meta.attemptsLeft` carries the remaining tries |
 | 400 | `OTP_MAX_ATTEMPTS` | 5 failed attempts reached |
 | 404 | `NOT_FOUND` | `userId` does not exist |
-| 409 | `CONFLICT` | Email already verified |
+| 409 | `ALREADY_VERIFIED` | Email already verified — "Your email is already verified." The client treats this as success and redirects |
 
 ---
 
 ### 1.3 `POST /auth/resend-otp`
 > **Auth:** Public · **Rate limit:** 3 requests / 1 hr per IP
 
-Generates a new OTP and re-sends the verification email. Invalidates the previous OTP.
+Generates a new OTP and re-sends the email. Invalidates the previous OTP **of the same purpose** only (D107).
 
 #### Request body
 ```jsonc
 {
-  "userId": "uuid"    // required
+  "userId": "uuid",                  // required
+  "purpose": "email_verification"    // "email_verification" | "password_reset", optional,
+                                     // defaults to "email_verification"
 }
 ```
 
@@ -230,7 +237,7 @@ Generates a new OTP and re-sends the verification email. Invalidates the previou
 ```jsonc
 {
   "success": true,
-  "message": "A new verification code has been sent to your email."
+  "message": "A new verification OTP has been sent."
 }
 ```
 
@@ -238,7 +245,8 @@ Generates a new OTP and re-sends the verification email. Invalidates the previou
 | Status | Code | Condition |
 |--------|------|-----------|
 | 404 | `NOT_FOUND` | `userId` does not exist |
-| 409 | `CONFLICT` | Email already verified |
+| 409 | `ALREADY_VERIFIED` | Email already verified (`email_verification` purpose only — a reset code is still valid for a verified account) |
+| 429 | `OTP_COOLDOWN` | Another code for this purpose was issued within the last 60s |
 | 429 | `RATE_LIMITED` | 3 OTP requests within 1 hour |
 
 ---
@@ -298,9 +306,21 @@ Sets `Set-Cookie: access_token` (15 min) and `Set-Cookie: refresh_token` (7 days
 | Status | Code | Condition |
 |--------|------|-----------|
 | 400 | `VALIDATION_ERROR` | Invalid format |
-| 401 | `INVALID_CREDENTIALS` | Wrong email or password |
-| 403 | `EMAIL_NOT_VERIFIED` | Account exists but OTP not completed |
+| 401 | `INVALID_CREDENTIALS` | Wrong password **or** no such account — the message is identical in both cases and must stay that way (HLD §14.2, D107) |
+| 403 | `EMAIL_NOT_VERIFIED` | Password correct but OTP not completed. A fresh verification code is sent, and `error.meta` carries `{ userId, maskedEmail }` so the client can redirect to `/verify-otp` (D107) |
 | 429 | `RATE_LIMITED` | 5 failed attempts within 15 min |
+
+The `EMAIL_NOT_VERIFIED` body is the only auth error carrying `meta`:
+```jsonc
+{
+  "success": false,
+  "error": {
+    "code": "EMAIL_NOT_VERIFIED",
+    "message": "Email not verified. A new verification OTP has been sent to your email.",
+    "meta": { "userId": "uuid", "maskedEmail": "ra***@example.com" }
+  }
+}
+```
 
 ---
 
@@ -350,7 +370,9 @@ Sets `Set-Cookie: access_token; Max-Age=0` and `Set-Cookie: refresh_token; Max-A
 ### 1.8 `POST /auth/forgot-password`
 > **Auth:** Public · **Rate limit:** 5 requests / 1 hr per IP
 
-Generates an OTP and sends password-reset email. Silently succeeds even if email is not registered (to prevent user enumeration).
+Generates a `password_reset` OTP and sends the password-reset email.
+
+**Reports an unregistered email** (`404`), unlike login. This is a deliberate, product-owner-approved enumeration trade-off (D107) that supersedes the previous silent-success behaviour from D96(a) — a user who mistypes their address must not be left waiting for a code that will never arrive. **Login must remain opaque regardless.**
 
 #### Request body
 ```jsonc
@@ -363,7 +385,7 @@ Generates an OTP and sends password-reset email. Silently succeeds even if email
 ```jsonc
 {
   "success": true,
-  "message": "If an account with that email exists, a reset code has been sent."
+  "message": "Password reset OTP sent successfully."
 }
 ```
 
@@ -371,6 +393,8 @@ Generates an OTP and sends password-reset email. Silently succeeds even if email
 | Status | Code | Condition |
 |--------|------|-----------|
 | 400 | `VALIDATION_ERROR` | Invalid email format |
+| 404 | `NOT_FOUND` | No account with that email — "No account found with the provided email." |
+| 429 | `OTP_COOLDOWN` | A reset code was issued within the last 60s |
 | 429 | `RATE_LIMITED` | 5 requests within 1 hour |
 
 ---
@@ -378,32 +402,41 @@ Generates an OTP and sends password-reset email. Silently succeeds even if email
 ### 1.9 `POST /auth/reset-password`
 > **Auth:** Public · **Rate limit:** 5 attempts / 10 min per IP
 
-Verifies the password-reset OTP and sets a new password. Issues fresh `access_token` + `refresh_token` cookies.
+Verifies the `password_reset` OTP and sets a new password.
+
+**Revokes every existing session** — all refresh tokens are deleted *and* `User.sessions_valid_from` is stamped, so access tokens already issued to other devices stop working immediately rather than surviving their 12h TTL (D107).
+
+**A fresh cookie pair is issued only to a verified account.** An unverified account gets no session; the client sends it to `/login`, which re-issues a verification code.
 
 #### Request body
 ```jsonc
 {
   "userId": "uuid",
-  "otp": "384710",              // string, exactly 6 digits, required
-  "newPassword": "NewPass@456"  // same complexity rules as signup, required
+  "otp": "384710",                  // string, exactly 6 digits, required
+  "newPassword": "NewPass@456",     // same complexity rules as signup, required
+  "confirmPassword": "NewPass@456"  // required, must equal newPassword
 }
 ```
 
 #### `200 OK`
-Sets new cookie pair.
+Sets a new cookie pair **only when `emailVerified` is `true`**.
 ```jsonc
 {
   "success": true,
   "message": "Password updated successfully.",
-  "data": { "user": { /* UserObject */ } }
+  "data": {
+    "emailVerified": true,
+    "user": { /* UserObject, or null when emailVerified is false */ }
+  }
 }
 ```
 
 #### Errors
 | Status | Code | Condition |
 |--------|------|-----------|
+| 400 | `VALIDATION_ERROR` | `newPassword` fails the policy, or `confirmPassword` does not match ("Passwords do not match") |
 | 400 | `OTP_EXPIRED` | OTP TTL passed |
-| 400 | `OTP_INVALID` | Wrong code |
+| 400 | `OTP_INVALID` | Wrong code, or a code issued for a different purpose |
 | 400 | `OTP_MAX_ATTEMPTS` | 5 attempts reached |
 | 404 | `NOT_FOUND` | `userId` not found |
 
