@@ -12,7 +12,6 @@ import {
   CreditCard,
   Settings,
   LifeBuoy,
-  Menu,
   ChevronDown,
   LogOut,
   User,
@@ -37,23 +36,20 @@ function initials(name: string): string {
 export function DashboardShell({ userName, children }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
   const [lastPathname, setLastPathname] = useState(pathname);
   const acctRef = useRef<HTMLDivElement>(null);
 
-  // Close the drawer and account menu on navigation (adjust-state-during-render
+  // Close the account menu on navigation (adjust-state-during-render
   // pattern — no effect needed).
   if (lastPathname !== pathname) {
     setLastPathname(pathname);
-    setDrawerOpen(false);
     setAcctOpen(false);
   }
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        setDrawerOpen(false);
         setAcctOpen(false);
       }
     }
@@ -93,7 +89,10 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
         Skip to content
       </a>
 
-      <aside className={`sidebar${drawerOpen ? ' open' : ''}`} id="sidebar" aria-label="Primary">
+      {/* Desktop-only: mobile/tablet navigation is the bottom tab bar, per the
+          design system — never both at once. display:none (not translate) so the
+          hidden links are also removed from the keyboard tab order. */}
+      <aside className="sidebar sidebar-desktop" id="sidebar" aria-label="Primary">
         <Link href="/dashboard" className="sbrand" aria-label="GST Notice Support dashboard home">
           <Image src="/logo.png" alt="" width={30} height={30} />
           <span className="bn">
@@ -142,24 +141,8 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
         </div>
       </aside>
 
-      <div
-        className={`app-scrim${drawerOpen ? ' open' : ''}`}
-        hidden={!drawerOpen}
-        onClick={() => setDrawerOpen(false)}
-      />
-
       <div className="main">
         <header className="topbar">
-          <button
-            type="button"
-            className="sburger"
-            aria-label="Open navigation"
-            aria-controls="sidebar"
-            aria-expanded={drawerOpen}
-            onClick={() => setDrawerOpen((open) => !open)}
-          >
-            <Menu size={22} aria-hidden />
-          </button>
           <Link
             href="/dashboard"
             className="mobile-brand"

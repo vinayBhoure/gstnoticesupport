@@ -635,6 +635,10 @@ body.drawer-open{overflow:hidden;}
 @media (max-width:1023px){
   .app .sidebar{transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-md);}
   .app .sidebar.open{transform:translateX(0);}
+  /* User shell only: sidebar is desktop-only — mobile/tablet nav is the bottom
+     tab bar alone, never both. display:none (not just translate) so hidden
+     links leave the keyboard tab order. Admin keeps the drawer (no tab bar). */
+  .app .sidebar.sidebar-desktop{display:none;}
   .app .main{margin-left:0;}
   .topbar{padding:0 16px;}
   .sburger{display:inline-flex;}
