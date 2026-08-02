@@ -25,4 +25,22 @@ export const ORG = {
     postalCode: process.env.ORG_ADDRESS_POSTAL ?? '482001',
     country: process.env.ORG_ADDRESS_COUNTRY ?? 'IN',
   },
+  // Branch offices, shown alongside the head office (ORG.address) on customer-facing
+  // pages (Footer, Contact). Registered-office references (Terms, Privacy, About,
+  // admin Settings) intentionally use ORG.address only — a company has one registered
+  // office under the Companies Act, 2013.
+  branches: [
+    {
+      label: 'Branch Office',
+      locality: process.env.ORG_BRANCH_PUNE_LOCALITY ?? 'Pune City East',
+      region: process.env.ORG_BRANCH_PUNE_REGION ?? 'Maharashtra',
+      postalCode: process.env.ORG_BRANCH_PUNE_POSTAL ?? '411033',
+    },
+    {
+      label: 'Branch Office',
+      locality: process.env.ORG_BRANCH_BHOPAL_LOCALITY ?? 'Bhopal',
+      region: process.env.ORG_BRANCH_BHOPAL_REGION ?? 'Madhya Pradesh',
+      postalCode: process.env.ORG_BRANCH_BHOPAL_POSTAL ?? '462016',
+    },
+  ],
 } as const;

@@ -97,12 +97,18 @@ export default function ContactPage() {
                   <div className={styles.channelBody}>
                     <span className={styles.channelLabel}>{contactContent.address.label}</span>
                     <address className={styles.addrText}>
+                      <strong>{contactContent.address.headOfficeLabel}</strong><br />
                       {ORG.address.street}<br />
-                      {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}<br />
-                      {contactContent.address.country}
+                      {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}
                     </address>
+                    {ORG.branches.map((branch) => (
+                      <address className={styles.addrText} style={{ marginTop: '10px' }} key={branch.locality}>
+                        <strong>{contactContent.address.branchOfficeLabel}</strong><br />
+                        {branch.locality}, {branch.region} {branch.postalCode}
+                      </address>
+                    ))}
                     <span className={styles.channelHours} style={{ display: 'block', marginTop: '6px' }}>
-                      {contactContent.address.note}
+                      {contactContent.address.country} · {contactContent.address.note}
                     </span>
                   </div>
                 </div>

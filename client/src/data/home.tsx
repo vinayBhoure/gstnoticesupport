@@ -29,7 +29,7 @@ export const homeHero = {
     'for Representation Before Authority.',
     'for Search Cases.',
   ],
-  sub: 'Our team is backed with experienced Chartered Accountants (CAs), Company Secretaries (CSs), and Advocates specializes in preparing replies to GST notices, filing appeals, and representing clients before GST authorities across India.',
+  sub: 'We are a team of experienced professionals specializing in Goods and Services Tax (GST) advisory and litigation support. Our practice covers the preparation of replies to GST notices, filing of appeals before appellate authorities, and representation of clients before GST officers across India.',
   bookLabel: 'Book Service',
   callbackLabel: 'Request a Callback',
   reassurance: [

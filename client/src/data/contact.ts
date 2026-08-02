@@ -25,7 +25,9 @@ export const contactContent = {
     hours: 'We respond within 24 hours on working days',
   },
   address: {
-    label: 'Office Address',
+    label: 'Our Offices',
+    headOfficeLabel: 'Head Office',
+    branchOfficeLabel: 'Branch Office',
     country: 'India',
     note: 'Services delivered remotely — no in-person visit required',
   },

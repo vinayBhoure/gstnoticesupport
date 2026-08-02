@@ -17,9 +17,14 @@ export function Footer() {
             </div>
             <div>{ORG.legalName}</div>
             <div className="addr">
-              {ORG.address.street},<br />
-              {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode}
+              {/* {ORG.address.street},<br /> */}
+              {ORG.address.locality}, {ORG.address.region} {ORG.address.postalCode} (Head Office)
             </div>
+            {ORG.branches.map((branch) => (
+              <div className="addr" key={branch.locality} style={{ marginTop: '4px' }}>
+                {branch.locality}, {branch.region} {branch.postalCode} (Branch)
+              </div>
+            ))}
           </div>
 
           {/* Services */}
