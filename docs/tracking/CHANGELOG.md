@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-08-02] — fix: mobile/tablet dashboard nav, profile dropdown, and Service Detail overflow
+
+**Branch: `feature/phase-2/mobile-tablet-layout` (from `development`).**
+
+- **The user dashboard no longer shows both a sidebar drawer and the bottom tab bar on mobile/tablet.** Below 1024px, the hamburger, slide-in sidebar drawer, and its scrim are gone entirely — navigation is the bottom tab bar only, matching the design system (desktop: sidebar only; mobile/tablet: bottom nav only). The admin surface is unchanged — it has no tab bar, so it keeps its drawer.
+- **"Help & Support" is now in the profile dropdown** on both the user and admin account menus, directly below Settings with a divider on each side, above Log out — the only way to reach it on mobile now that the sidebar (and its old footer link) is gone there.
+- **Fixed a horizontal-scroll bug on the Service Detail page (and a related one on My Profile)** at mobile and tablet widths: a long email address, GSTIN, organisation name, or full name in the Case Information / Identity panels could force the whole page to overflow sideways instead of wrapping. Long values now wrap onto multiple lines and the page stays within the viewport at every width from 320px up.
+- Verified in a real browser against a running server + database: no horizontal overflow at 320/360/375/414/480/640/768/820/912/1024/1280/1440px; sidebar/tab-bar toggle correctly at the 1024px breakpoint; profile dropdown order confirmed on both the user and admin surfaces; desktop two-column Service Detail layout unaffected. `tsc --noEmit`, `eslint`, and `next build` all clean; bundle budget passing.
+
 ## [2026-08-02] — feat: Help & Support dashboard page replaces the Contact page redirect
 
 **Branch: `feature/phase-2/help-support` (from `development`).**
