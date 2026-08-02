@@ -90,6 +90,8 @@ export function AdminShell({ userName, children }: AdminShellProps) {
     return item.exact ? pathname === item.href : pathname.startsWith(item.href);
   }
 
+  const isHelp = pathname.startsWith('/admin/help');
+
   return (
     <div className="app">
       <a href="#main" className="skip-link">
@@ -118,7 +120,7 @@ export function AdminShell({ userName, children }: AdminShellProps) {
           ))}
         </nav>
         <div className="side-foot">
-          <Link href="/contact" className="side-help">
+          <Link href="/admin/help" className="side-help" aria-current={isHelp ? 'page' : undefined}>
             <LifeBuoy className="ic" aria-hidden />
             Help &amp; Support
           </Link>

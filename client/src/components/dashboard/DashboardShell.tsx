@@ -85,6 +85,7 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
   const isServices = pathname.startsWith('/dashboard/services');
   const isPayments = pathname.startsWith('/dashboard/payments');
   const isSettings = pathname.startsWith('/dashboard/settings');
+  const isHelp = pathname.startsWith('/dashboard/help');
 
   return (
     <div className="app">
@@ -134,7 +135,7 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
           </Link>
         </nav>
         <div className="side-foot">
-          <Link href="/contact" className="side-help">
+          <Link href="/dashboard/help" className="side-help" aria-current={isHelp ? 'page' : undefined}>
             <LifeBuoy className="ic" aria-hidden />
             Help &amp; Support
           </Link>
