@@ -224,6 +224,7 @@
 | ✅ | Settings page — Account (name/mobile/marketing), Security (change password), Danger zone (close account); Phase-2 scope only (D84) | `PATCH /user/profile` + `POST /auth/change-password` + `DELETE /user`; 2FA/sessions/billing/export/language omitted per HLD §19 |
 | ✅ | Mobile bottom tab bar added to `DashboardShell` (Dashboard/Services/Payments/Settings); sidebar + drawer links wired (D80h closed) | <lg only; all four target pages now exist |
 | ✅ | My Profile page — read-only view (avatar/name/member-since, email/phone/services/promotions/terms) | Edit now available on Settings page (EP15) |
+| ✅ | Help & Support page — `/dashboard/help` + `/admin/help`, shared `HelpSupportForm`; sidebar link no longer redirects to public Contact page | `POST /api/support` (Next.js Route Handler); reuses Contact's Resend flow; identity from session, not request body; sends support-inbox email + user confirmation email; `SUPPORT_TO_EMAIL` env var |
 
 ### EP12 — Payment Integration (backend_plan Phase 5)
 | Status | Task | Notes |
