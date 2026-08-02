@@ -167,6 +167,8 @@ h3{font-size:24px;font-weight:600;line-height:1.3;}
 .panel-head .ph-sub{font-size:13px;color:var(--neutral-600);margin-top:3px;}
 .panel-body{padding:24px;}
 .avatar-block{display:flex;align-items:center;gap:18px;}
+/* Long names must wrap instead of being clipped by the panel's overflow:hidden. */
+.avatar-block > div{min-width:0;overflow-wrap:anywhere;}
 .av-lg{width:72px;height:72px;border-radius:50%;background:var(--primary-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;flex:0 0 auto;}
 .form-row{display:flex;gap:18px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--neutral-200);}
 .form-row:last-child{border-bottom:none;padding-bottom:0;}
@@ -963,13 +965,18 @@ body.drawer-open{overflow:hidden;}
 .booking-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--neutral-200);}
 
 .two-col{display:grid;grid-template-columns:60fr 40fr;gap:24px;align-items:start;}
+/* Grid items default to min-width:auto, so one long unbreakable value (email,
+   GSTIN, filename) forces the whole column past the viewport on mobile. */
+.two-col > *{min-width:0;}
 
 .detail-card{background:#fff;border:1px solid var(--neutral-200);border-radius:var(--r-card);padding:24px;margin-bottom:20px;}
 .detail-card h2{font-size:18px;font-weight:600;margin-bottom:18px;}
 
-dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:10px 20px;}
+dl.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:10px 20px;}
 .kv dt{font-size:14px;font-weight:500;color:var(--neutral-600);white-space:nowrap;}
-.kv dd{font-size:14px;color:var(--neutral-900);word-break:break-word;}
+/* overflow-wrap:anywhere (unlike word-break:break-word) also shrinks the
+   intrinsic min-content width, so long values can never widen the track. */
+.kv dd{font-size:14px;color:var(--neutral-900);overflow-wrap:anywhere;}
 .kv dd.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;}
 
 ul.doc-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
