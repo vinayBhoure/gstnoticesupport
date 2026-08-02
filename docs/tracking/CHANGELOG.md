@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-08-02] — feat: Help & Support dashboard page replaces the Contact page redirect
+
+**Branch: `feature/phase-2/help-support` (from `development`).**
+
+- **"Help & Support" in the sidebar no longer sends you to the public Contact page.** It now opens a dashboard page with a Message Title and Message field, on both the user dashboard (`/dashboard/help`) and the admin surface (`/admin/help`) — same form, same behaviour on both.
+- **Submitting sends your name, email, mobile number, title, and message to our support team**, using your logged-in account details — nothing is retyped. It reuses the same Resend email flow as the Contact page, sending to a separate support inbox (`SUPPORT_TO_EMAIL`).
+- **You get a confirmation email immediately after a successful submission**, letting you know your query was received and the team will be in touch.
+- **The form only clears after a successful send.** If the request fails (including hitting the request limit), your title and message stay exactly as typed and an error toast explains what happened.
+- Verified end-to-end against a running server + database: unauthenticated request rejected (401), invalid input rejected (400) with field messages, rate limiting rejected the 3rd+ request in an hour (429, values retained, error toast), and a full successful submission delivered both emails (confirmed via the Resend API) and cleared the form with a success toast — checked in a real browser on both `/dashboard/help` and `/admin/help`. `tsc --noEmit`, `eslint`, and `next build` all clean; bundle budget passing.
+
 ## [2026-07-30] — feat: unverified accounts can recover, and auth messaging matches the spec
 
 **Branch: `feature/phase-2/auth-flow-hardening` (from `development`).**
