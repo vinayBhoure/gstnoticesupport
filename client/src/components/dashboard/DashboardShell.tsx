@@ -181,6 +181,11 @@ export function DashboardShell({ userName, children }: DashboardShellProps) {
                 Settings
               </Link>
               <div className="divider" aria-hidden />
+              <Link href="/dashboard/help" role="menuitem">
+                <LifeBuoy className="ic" aria-hidden />
+                Help &amp; Support
+              </Link>
+              <div className="divider" aria-hidden />
               <button
                 type="button"
                 role="menuitem"
